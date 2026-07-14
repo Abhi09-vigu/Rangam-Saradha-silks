@@ -21,3 +21,7 @@ media/categories/*
 !media/categories/.gitkeep
 media/menu/*
 !media/menu/.gitkeep
+media/products/*
+!media/products/.gitkeep
+media/offers/*
+!media/offers/.gitkeep
