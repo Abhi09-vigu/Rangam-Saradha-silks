@@ -72,7 +72,10 @@ class CustomMiddleware:
             return self.get_response(request)
 
         # Check if maintenance mode is enabled in WebsiteSettings
-        setting = WebsiteSetting.objects.first()
+        try:
+            setting = WebsiteSetting.objects.first()
+        except Exception:
+            setting = None
         if setting and setting.maintenance_mode:
             return render(request, 'home/maintenance.html', status=503)
 
