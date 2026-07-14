@@ -4,7 +4,7 @@ aiocmd==0.1.2
 aioconsole==0.8.2
 aiodns==4.0.0
 aiofiles==25.1.0
-aiohappyeyeballs==2.7.1
+aiohappyeyeballs==2.7.0
 aiohttp==3.14.1
 aiohttp_socks==0.11.0
 aiomultiprocess==0.9.0
@@ -145,6 +145,7 @@ fonttools==4.62.1
 fqdn==1.5.1
 frozenlist==1.8.0
 fuzzywuzzy==0.18.0
+GDAL @ file:///build/reproducible-path/gdal-3.13.1%2Bdfsg/build-py3.13/swig/python
 gevent==25.9.1
 gevent-websocket==0.10.1
 ghp-import==2.1.0
@@ -740,8 +741,3 @@ zope.event==6.0
 zope.interface==8.5
 zopfli==0.4.3
 zstandard==0.25.0
-gunicorn==23.0.0
-whitenoise==6.9.0
-psycopg[binary]==3.3.4
-dj-database-url==2.3.0
-
