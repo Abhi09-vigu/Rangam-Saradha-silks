@@ -8,6 +8,12 @@ class CustomAdminSite(AdminSite):
     site_title = "Merchant Control Center"
     index_title = "Dashboard Statistics"
 
+    def logout(self, request, extra_context=None):
+        from django.contrib.auth import logout
+        from django.shortcuts import redirect
+        logout(request)
+        return redirect('admin:login')
+
     def index(self, request, extra_context=None):
         from shop.models import Order, Product, Category, Coupon
         from accounts.models import CustomUser

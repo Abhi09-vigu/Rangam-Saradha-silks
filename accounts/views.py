@@ -71,10 +71,7 @@ def verify_otp(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        if request.user.is_staff and not request.GET.get('next'):
-            return redirect('/admin/')
-        elif not request.user.is_staff:
-            return redirect('home:index')
+        return redirect('home:index')
     
     if request.method == 'POST':
         username_or_email = request.POST.get('username')
