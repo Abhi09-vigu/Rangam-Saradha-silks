@@ -30,13 +30,16 @@ class SeparateSessionMiddleware(SessionMiddleware):
                 response['Location'] = '/admin/'
 
         if empty:
-            if cookie_name in request.COOKIES:
-                response.delete_cookie(
-                    cookie_name,
-                    path=settings.SESSION_COOKIE_PATH,
-                    domain=settings.SESSION_COOKIE_DOMAIN,
-                    samesite=settings.SESSION_COOKIE_SAMESITE,
-                )
+            response.set_cookie(
+                cookie_name,
+                '',
+                max_age=0,
+                path=settings.SESSION_COOKIE_PATH,
+                domain=settings.SESSION_COOKIE_DOMAIN,
+                secure=settings.SESSION_COOKIE_SECURE or None,
+                httponly=settings.SESSION_COOKIE_HTTPONLY or None,
+                samesite=settings.SESSION_COOKIE_SAMESITE,
+            )
             return response
 
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
