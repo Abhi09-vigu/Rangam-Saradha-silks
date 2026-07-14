@@ -1,0 +1,24 @@
+databases:
+  - name: rangam_saradha_silk_db
+    databaseName: rangam_saradha_silk
+    user: rangam_saradha_silk_user
+    plan: free
+
+services:
+  - type: web
+    name: rangam-saradha-silk
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn rangam_saradha_silk.wsgi:application"
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rangam_saradha_silk_db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
