@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from .decorators import customer_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -16,8 +17,11 @@ from .forms import (
 )
 
 def register_view(request):
-    if request.user.is_authenticated and not request.user.is_staff:
-        return redirect('home:index')
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            logout(request)
+        else:
+            return redirect('home:index')
     
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -71,7 +75,10 @@ def verify_otp(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('home:index')
+        if request.user.is_staff or request.user.is_superuser:
+            logout(request)
+        else:
+            return redirect('home:index')
     
     if request.method == 'POST':
         username_or_email = request.POST.get('username')
@@ -89,10 +96,16 @@ def login_view(request):
                 pass
                 
         if user:
+            if user.is_staff or user.is_superuser:
+                messages.error(request, "Admin accounts must login through the Admin Panel.")
+                return redirect('accounts:login')
+                
             if user.is_active:
                 login(request, user)
                 messages.success(request, f"Welcome back, {user.username}!")
-                next_url = request.GET.get('next', 'home:index')
+                next_url = request.GET.get('next')
+                if not next_url or next_url.startswith('/admin'):
+                    next_url = 'home:index'
                 return redirect(next_url)
             else:
                 messages.error(request, "Account is disabled. Please verify your OTP.")
@@ -108,12 +121,9 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect('home:index')
 
-@login_required
+@customer_required
 def profile_view(request):
     user = request.user
-    if user.is_staff:
-        messages.warning(request, "Please log in with a customer account to view profile.")
-        return redirect('/accounts/login/?next=/accounts/profile/')
         
     if request.method == 'POST':
         form = UserProfileForm(request.POST, instance=user)
@@ -134,7 +144,7 @@ def profile_view(request):
         'addresses': user.addresses.all(),
     })
 
-@login_required
+@customer_required
 def address_create(request):
     if request.method == 'POST':
         form = AddressForm(request.POST)
@@ -148,7 +158,7 @@ def address_create(request):
         form = AddressForm()
     return render(request, 'accounts/address_form.html', {'form': form, 'title': 'Add Address'})
 
-@login_required
+@customer_required
 def address_edit(request, pk):
     address = get_object_or_404(Address, pk=pk, user=request.user)
     if request.method == 'POST':
@@ -161,19 +171,19 @@ def address_edit(request, pk):
         form = AddressForm(instance=address)
     return render(request, 'accounts/address_form.html', {'form': form, 'title': 'Edit Address'})
 
-@login_required
+@customer_required
 def address_delete(request, pk):
     address = get_object_or_404(Address, pk=pk, user=request.user)
     address.delete()
     messages.success(request, "Address deleted successfully.")
     return redirect('accounts:profile')
 
-@login_required
+@customer_required
 def wishlist_view(request):
     items = Wishlist.objects.filter(user=request.user).select_related('product')
     return render(request, 'accounts/wishlist.html', {'wishlist_items': items})
 
-@login_required
+@customer_required
 def toggle_wishlist(request, product_id):
     # Lazy import
     from shop.models import Product
@@ -272,7 +282,7 @@ def reset_password(request):
         form = ResetPasswordForm()
     return render(request, 'accounts/reset_password.html', {'form': form})
 
-@login_required
+@customer_required
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)

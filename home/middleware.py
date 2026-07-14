@@ -78,9 +78,21 @@ class CustomMiddleware:
                 return redirect('accounts:login')
             return self.get_response(request)
             
-        # Bypass maintenance check for logged-in staff users on the frontend
-        if request.user.is_authenticated and request.user.is_staff:
-            return self.get_response(request)
+        # Bypass maintenance check for logged-in staff users (inspecting admin session cookie)
+        admin_session_key = request.COOKIES.get('admin_sessionid')
+        if admin_session_key:
+            from django.contrib.sessions.backends.db import SessionStore
+            from django.contrib.auth import get_user_model
+            try:
+                session = SessionStore(session_key=admin_session_key)
+                user_id = session.get('_auth_user_id')
+                if user_id:
+                    User = get_user_model()
+                    admin_user = User.objects.get(pk=user_id)
+                    if admin_user.is_staff:
+                        return self.get_response(request)
+            except Exception:
+                pass
 
         # Check if maintenance mode is enabled in WebsiteSettings
         try:

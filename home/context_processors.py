@@ -43,28 +43,10 @@ def global_context(request):
             cart_count += item.quantity
             cart_total += item.get_total_price()
             
-    # Check if user is logged in as staff in the admin session
-    is_admin_logged_in = False
-    admin_session_key = request.COOKIES.get('admin_sessionid')
-    if admin_session_key:
-        from django.contrib.sessions.backends.db import SessionStore
-        from django.contrib.auth import get_user_model
-        try:
-            session = SessionStore(session_key=admin_session_key)
-            user_id = session.get('_auth_user_id')
-            if user_id:
-                User = get_user_model()
-                admin_user = User.objects.get(pk=user_id)
-                if admin_user.is_staff:
-                    is_admin_logged_in = True
-        except Exception:
-            pass
-
     return {
         'site_settings': settings_obj,
         'contact_info': contact_obj,
         'nav_categories': categories,
         'cart_count': cart_count,
         'cart_total': cart_total,
-        'is_admin_logged_in': is_admin_logged_in,
     }

@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from accounts.decorators import customer_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
@@ -238,11 +239,8 @@ def remove_coupon(request):
         messages.success(request, "Coupon removed.")
     return redirect('shop:cart_detail')
 
-@login_required
+@customer_required
 def checkout(request):
-    if request.user.is_staff:
-        messages.warning(request, "Please log in with a customer account to checkout.")
-        return redirect('/accounts/login/?next=/shop/checkout/')
         
     cart = _get_or_create_cart(request)
     if not cart.items.exists():
@@ -287,7 +285,7 @@ def checkout(request):
     }
     return render(request, 'shop/checkout.html', context)
 
-@login_required
+@customer_required
 def order_create(request):
     if request.method == 'POST':
         cart = _get_or_create_cart(request)
@@ -380,12 +378,12 @@ def order_create(request):
         
     return redirect('shop:checkout')
 
-@login_required
+@customer_required
 def order_detail(request, order_number):
     order = get_object_or_404(Order.objects.prefetch_related('items__product'), order_number=order_number, user=request.user)
     return render(request, 'shop/order_detail.html', {'order': order})
 
-@login_required
+@customer_required
 def add_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == 'POST':
