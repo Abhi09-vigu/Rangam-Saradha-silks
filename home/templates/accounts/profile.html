@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}My Profile - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        <h1 class="font-heading display-5 mb-5 text-center">My Account Dashboard</h1>
+        
+        <div class="row g-5">
+            <!-- Navigation Tabs -->
+            <div class="col-md-3">
+                <div class="list-group list-group-flush shadow-sm rounded-4 border-0 overflow-hidden" id="profileTabs" role="tablist">
+                    <button class="list-group-item list-group-item-action active py-3 px-4 border-0" id="profile-details-tab" data-bs-toggle="pill" data-bs-target="#profile-details" type="button" role="tab">
+                        <i class="bi bi-person-bounding-box me-2"></i>Profile Details
+                    </button>
+                    <button class="list-group-item list-group-item-action py-3 px-4 border-0" id="order-history-tab" data-bs-toggle="pill" data-bs-target="#order-history" type="button" role="tab">
+                        <i class="bi bi-receipt me-2"></i>My Orders
+                    </button>
+                    <button class="list-group-item list-group-item-action py-3 px-4 border-0" id="saved-addresses-tab" data-bs-toggle="pill" data-bs-target="#saved-addresses" type="button" role="tab">
+                        <i class="bi bi-geo-alt me-2"></i>Address Book
+                    </button>
+                    <a href="{% url 'accounts:change_password' %}" class="list-group-item list-group-item-action py-3 px-4 border-0">
+                        <i class="bi bi-shield-lock me-2"></i>Security Settings
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Tab Contents -->
+            <div class="col-md-9">
+                <div class="tab-content" id="profileTabsContent">
+                    
+                    <!-- Profile Details -->
+                    <div class="tab-pane fade show active" id="profile-details" role="tabpanel">
+                        <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
+                            <h4 class="font-heading fs-5 mb-4 pb-2 border-bottom">Edit Profile Details</h4>
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    {% for field in form %}
+                                    <div class="col-md-6">
+                                        <label for="{{ field.id_for_label }}" class="form-label text-muted fs-7">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% for error in field.errors %}
+                                        <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-4">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Order History -->
+                    <div class="tab-pane fade" id="order-history" role="tabpanel">
+                        <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
+                            <h4 class="font-heading fs-5 mb-4 pb-2 border-bottom">My Order History</h4>
+                            
+                            {% if orders %}
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr class="table-light">
+                                            <th>Order #</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in orders %}
+                                        <tr>
+                                            <td class="fw-semibold text-dark fs-7">#{{ order.order_number }}</td>
+                                            <td class="text-muted fs-7">{{ order.created_at|date:"d M Y" }}</td>
+                                            <td class="fw-bold fs-7">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</td>
+                                            <td>
+                                                <span class="badge rounded-pill bg-warning text-dark fs-8">
+                                                    {{ order.get_order_status_display }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'shop:order_detail' order.order_number %}" class="btn btn-sm btn-outline-primary px-3 rounded-pill">View Details</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">You haven't placed any orders yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Saved Addresses -->
+                    <div class="tab-pane fade" id="saved-addresses" role="tabpanel">
+                        <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
+                            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                                <h4 class="font-heading fs-5 mb-0">Delivery Address Book</h4>
+                                <a href="{% url 'accounts:address_add' %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-plus-circle me-1"></i>Add New</a>
+                            </div>
+                            
+                            {% if addresses %}
+                            <div class="row g-4">
+                                {% for addr in addresses %}
+                                <div class="col-md-6">
+                                    <div class="card border p-3" style="border-radius: 12px; {% if addr.is_default %}border-color: var(--secondary-gold) !important; background-color: var(--section-bg);{% endif %}">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="fw-bold text-dark fs-7">{{ addr.full_name }}</span>
+                                            <span class="badge bg-secondary fs-8">{{ addr.get_address_type_display }}</span>
+                                        </div>
+                                        <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}</p>
+                                        {% if addr.address_line_2 %}
+                                        <p class="text-muted fs-7 mb-1">{{ addr.address_line_2 }}</p>
+                                        {% endif %}
+                                        <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                                        <p class="text-muted fs-7 mb-3">Phone: {{ addr.phone_number }}</p>
+                                        
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'accounts:address_edit' addr.id %}" class="btn btn-sm btn-light fs-8 px-3 rounded-pill">Edit</a>
+                                            <a href="{% url 'accounts:address_delete' addr.id %}" class="btn btn-sm btn-outline-danger fs-8 px-3 rounded-pill" onclick="return confirm('Are you sure you want to delete this address?');">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">No delivery addresses saved yet. Please add an address.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

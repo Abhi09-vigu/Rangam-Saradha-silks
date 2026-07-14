@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block meta_title %}Frequently Asked Questions - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        <div class="section-heading-wrapper text-center">
+            <span class="section-subtitle">Got Questions?</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if faqs %}
+                <div class="accordion accordion-flush shadow-sm" id="faqAccordion" style="border-radius: 16px; overflow: hidden;">
+                    {% for faq in faqs %}
+                    <div class="accordion-item border-bottom">
+                        <h2 class="accordion-header" id="heading-{{ faq.id }}">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} fw-semibold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% endif %}" aria-controls="collapse-{{ faq.id }}">
+                                {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ faq.id }}" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted py-4">
+                                {{ faq.answer }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted">No FAQs available at the moment. Please contact customer support.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

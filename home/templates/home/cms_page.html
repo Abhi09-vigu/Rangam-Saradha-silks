@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}{{ page.meta_title|default:page.title }} - {{ site_settings.website_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description }}{% endblock %}
+{% block meta_keywords %}{{ page.meta_keywords }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury bg-light py-5">
+    <div class="container text-center">
+        <h1 class="font-heading display-4 text-dark mb-0">{{ page.title }}</h1>
+    </div>
+</section>
+
+<section class="section-luxury">
+    <div class="container">
+        {% if page.slug == 'about-us' %}
+        <!-- Row 1: Brand Legacy Story -->
+        <div class="row g-5 align-items-center mb-5 pb-5">
+            <div class="col-lg-7">
+                <article class="cms-content text-dark fs-6" style="line-height: 1.8;">
+                    {{ about_section_1|safe }}
+                </article>
+            </div>
+            <div class="col-lg-5">
+                <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
+                    <img src="{% static 'images/about_side.jpg' %}" alt="Rangam Saradha Silk Sarees Artistry" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
+                        <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Legacy Woven Since 1995</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Row 2: What We Offer -->
+        <div class="row g-5 align-items-center mt-5">
+            <div class="col-lg-5 order-2 order-lg-1">
+                <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
+                    <img src="{% static 'images/about_offer.jpg' %}" alt="Our Handcrafted Collections" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
+                        <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Exquisite Boutique Craftsmanship</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 order-1 order-lg-2">
+                <article class="cms-content text-dark fs-6" style="line-height: 1.8;">
+                    {{ about_section_2|safe }}
+                </article>
+            </div>
+        </div>
+        {% else %}
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <article class="cms-content text-dark">
+                    <!-- Renders dynamic HTML content safely -->
+                    {{ page.content|safe }}
+                </article>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

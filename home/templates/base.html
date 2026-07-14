@@ -1,0 +1,236 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Dynamic SEO -->
+    <title>{% block meta_title %}{{ site_settings.website_name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site_settings.meta_description|default:'Premium silk sarees from Rangam Saradha Silk Sarees.' }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ site_settings.meta_keywords|default:'Silk Sarees, Kanchipuram Sarees, Traditional Saree' }}{% endblock %}">
+    
+    <!-- Favicon -->
+    {% if site_settings.favicon %}
+    <link rel="icon" type="image/png" href="{{ site_settings.favicon.url }}">
+    {% else %}
+    <link rel="icon" type="image/png" href="{% static 'images/favicon-placeholder.png' %}">
+    {% endif %}
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    
+    <!-- Dynamic Color Styles from Admin Settings -->
+    <style>
+        :root {
+            {% if site_settings.primary_color %}
+            --primary: {{ site_settings.primary_color }};
+            {% endif %}
+            {% if site_settings.secondary_color %}
+            --secondary-gold: {{ site_settings.secondary_color }};
+            {% endif %}
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-premium sticky-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home:index' %}">
+                {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" style="max-height: 60px;">
+                {% else %}
+                <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }}" style="max-height: 60px;">
+                {% endif %}
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:index' %}">Home</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu border-0 shadow-sm">
+                            <li><a class="dropdown-item" href="{% url 'shop:catalog' %}">All Collections</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for cat in nav_categories %}
+                            <li><a class="dropdown-item" href="{% url 'shop:catalog' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+                            {% empty %}
+                            <li><a class="dropdown-item href='#">No categories yet</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:catalog' %}">Shop All</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:cms_page' slug='about-us' %}">About Us</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:contact' %}">Contact Us</a>
+                    </li>
+                </ul>
+                
+                <!-- Search, User, Wishlist, Cart Icons -->
+                <div class="navbar-icons d-flex align-items-center">
+                    <!-- Search Bar Toggle -->
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#searchModal" title="Search">
+                        <i class="bi bi-search"></i>
+                    </a>
+                    
+                    <!-- Wishlist -->
+                    <a href="{% url 'accounts:wishlist' %}" title="Wishlist">
+                        <i class="bi bi-heart"></i>
+                    </a>
+                    
+                    <!-- Cart -->
+                    <a href="{% url 'shop:cart_detail' %}" class="position-relative" title="Shopping Cart">
+                        <i class="bi bi-bag"></i>
+                        <span class="badge-count">{{ cart_count }}</span>
+                    </a>
+                    
+                    <!-- Account Dropdown -->
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <div class="dropdown d-inline">
+                        <a class="dropdown-toggle no-arrow ms-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:wishlist' %}">My Wishlist</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}#orders">Order History</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">Logout</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" title="Login / Register" class="ms-3">
+                        <i class="bi bi-person"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Message Alerts -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show border-0 shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% block content %}
+    {% endblock %}
+
+    <!-- Search Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-body p-4">
+                    <form action="{% url 'shop:catalog' %}" method="GET" class="d-flex align-items-center">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search for pure silk sarees..." aria-label="Search" style="box-shadow: none;" required>
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-luxury pt-5 pb-3">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Branding column -->
+                <div class="col-md-4">
+                    <div class="mb-4">
+                        {% if site_settings.logo %}
+                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" style="max-height: 75px;">
+                        {% else %}
+                        <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }}" style="max-height: 75px; border-radius: 8px;">
+                        {% endif %}
+                    </div>
+                    <p class="mb-4">{{ site_settings.meta_description|default:"Experience the epitome of Indian heritage and traditional luxury with our handwoven pure silk sarees." }}</p>
+                    <div class="footer-social-icons">
+                        {% if contact_info.facebook_url %}<a href="{{ contact_info.facebook_url }}"><i class="bi bi-facebook"></i></a>{% endif %}
+                        {% if contact_info.instagram_url %}<a href="{{ contact_info.instagram_url }}"><i class="bi bi-instagram"></i></a>{% endif %}
+                        {% if contact_info.youtube_url %}<a href="{{ contact_info.youtube_url }}"><i class="bi bi-youtube"></i></a>{% endif %}
+                        {% if contact_info.twitter_url %}<a href="{{ contact_info.twitter_url }}"><i class="bi bi-twitter-x"></i></a>{% endif %}
+                        {% if contact_info.pinterest_url %}<a href="{{ contact_info.pinterest_url }}"><i class="bi bi-pinterest"></i></a>{% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick links -->
+                <div class="col-md-2">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home:index' %}" class="d-block py-1">Home</a></li>
+                        <li><a href="{% url 'shop:catalog' %}" class="d-block py-1">Shop All</a></li>
+                        <li><a href="{% url 'home:faq' %}" class="d-block py-1">FAQs</a></li>
+                        <li><a href="{% url 'home:contact' %}" class="d-block py-1">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <!-- CMS pages links -->
+                <div class="col-md-3">
+                    <h5>Policies & Info</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/page/about-us/" class="d-block py-1">About Our Brand</a></li>
+                        <li><a href="/page/privacy-policy/" class="d-block py-1">Privacy Policy</a></li>
+                        <li><a href="/page/terms-conditions/" class="d-block py-1">Terms & Conditions</a></li>
+                        <li><a href="/page/refund-policy/" class="d-block py-1">Refund & Return Policy</a></li>
+                        <li><a href="/page/shipping-policy/" class="d-block py-1">Shipping & Delivery</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact info -->
+                <div class="col-md-3">
+                    <h5>Contact Info</h5>
+                    <p class="mb-2"><i class="bi bi-geo-alt me-2 text-white"></i>{{ contact_info.address }}</p>
+                    <p class="mb-2"><i class="bi bi-telephone me-2 text-white"></i>{{ contact_info.phone }}</p>
+                    <p class="mb-2"><i class="bi bi-envelope me-2 text-white"></i>{{ contact_info.email }}</p>
+                    <p class="mb-2"><i class="bi bi-clock me-2 text-white"></i>{{ contact_info.working_hours }}</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom mt-5 pt-3 text-center text-muted">
+                <p class="mb-0">&copy; 2026 {{ site_settings.website_name }}. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

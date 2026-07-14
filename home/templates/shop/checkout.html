@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Checkout - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        <h1 class="font-heading display-5 mb-5 text-center">Shipping & Checkout</h1>
+
+        <form action="{% url 'shop:order_create' %}" method="POST">
+            {% csrf_token %}
+            <div class="row g-5">
+                <!-- Delivery Details Column -->
+                <div class="col-lg-7">
+                    
+                    <!-- Saved Address List -->
+                    <div class="card border border-light p-4 mb-4" style="border-radius: 16px; background-color: var(--section-bg);">
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                            <h4 class="font-heading fs-5 mb-0">Delivery Address</h4>
+                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="btn btn-sm btn-outline-primary rounded-pill">Add New</a>
+                        </div>
+
+                        {% if addresses %}
+                        <div class="row g-3">
+                            {% for addr in addresses %}
+                            <div class="col-md-12">
+                                <div class="card border-light p-3 position-relative" style="border-radius: 12px;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="address_id" id="addr-{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} required>
+                                        <label class="form-check-label w-100" for="addr-{{ addr.id }}">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <span class="fw-semibold text-dark">{{ addr.full_name }}</span>
+                                                    <span class="badge bg-secondary ms-2">{{ addr.address_type }}</span>
+                                                    {% if addr.is_default %}<span class="badge bg-success ms-2">Default</span>{% endif %}
+                                                </div>
+                                            </div>
+                                            <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}, {{ addr.address_line_2|default:"" }}</p>
+                                            <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                                            <p class="text-muted fs-7 mb-0">Phone: {{ addr.phone_number }}</p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-3">No saved addresses found. Please add a delivery address to complete your checkout.</p>
+                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="btn btn-primary">Add Address Now</a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Payment Options -->
+                    <div class="card border border-light p-4" style="border-radius: 16px; background-color: var(--section-bg);">
+                        <h4 class="font-heading fs-5 mb-4 pb-2 border-bottom">Payment Method</h4>
+                        
+                        <div class="form-check p-3 border rounded-3 mb-3 bg-white">
+                            <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="pay-cod" value="COD" checked>
+                            <label class="form-check-label text-dark fw-semibold" for="pay-cod">
+                                Cash On Delivery (COD)
+                                <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay with cash upon delivery of your saree.</p>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check p-3 border rounded-3 bg-white opacity-75">
+                            <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="pay-online" value="ONLINE" disabled>
+                            <label class="form-check-label text-muted fw-semibold" for="pay-online">
+                                Online Card / UPI Payment
+                                <span class="badge bg-warning text-dark ms-2">Offline / Maintenance</span>
+                                <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay securely online using credit/debit cards, Net Banking or UPI (Temporarily disabled).</p>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Order Summary Column -->
+                <div class="col-lg-5">
+                    <div class="summary-card shadow-sm border border-light bg-light">
+                        <h4 class="font-heading fs-5 mb-4 text-center pb-2 border-bottom">Order Details</h4>
+                        
+                        <!-- Mini items list -->
+                        <div class="mb-4" style="max-height: 240px; overflow-y: auto;">
+                            {% for item in cart.items.all %}
+                            <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom border-light">
+                                <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0" style="width: 50px; height: 65px; border-radius: 6px;">
+                                    {% if item.product.images.all %}
+                                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree" class="w-100 h-100" style="object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-semibold fs-7 mb-0 text-dark">{{ item.product.name }}</h6>
+                                    <span class="text-muted fs-8">Qty: {{ item.quantity }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</span>
+                                </div>
+                                <span class="fw-bold fs-7 text-dark">{{ site_settings.currency }}{{ item.get_total_price|floatformat:2 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Calculation List -->
+                        <div class="d-flex justify-content-between mb-2 fs-7">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ subtotal|floatformat:2 }}</span>
+                        </div>
+
+                        {% if discount > 0 %}
+                        <div class="d-flex justify-content-between mb-2 fs-7 text-success">
+                            <span>Coupon Discount:</span>
+                            <span>-{{ site_settings.currency }}{{ discount|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if tax > 0 %}
+                        <div class="d-flex justify-content-between mb-2 fs-7">
+                            <span class="text-muted">GST/Tax ({{ site_settings.tax_percentage }}%):</span>
+                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ tax|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mb-4 fs-7 pb-2 border-bottom">
+                            <span class="text-muted">Shipping Charges:</span>
+                            <span class="fw-semibold text-dark">
+                                {% if shipping == 0 %}
+                                <span class="text-success fw-bold">FREE</span>
+                                {% else %}
+                                {{ site_settings.currency }}{{ shipping|floatformat:2 }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4 fs-5 fw-bold text-dark">
+                            <span>Grand Total:</span>
+                            <span class="text-primary">{{ site_settings.currency }}{{ grand_total|floatformat:2 }}</span>
+                        </div>
+
+                        {% if addresses %}
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Place Order (COD)</button>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary w-100 py-3 rounded-pill disabled" disabled>Please Add Address first</button>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

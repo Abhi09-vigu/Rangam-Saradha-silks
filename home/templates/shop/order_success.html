@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Order Successful - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        
+        <!-- Success Message -->
+        <div class="text-center mb-5">
+            <div class="d-inline-flex justify-content-center align-items-center bg-success text-white rounded-circle mb-4" style="width: 80px; height: 80px;">
+                <i class="bi bi-check-lg display-4"></i>
+            </div>
+            <h1 class="font-heading display-4 text-success">Order Placed Successfully!</h1>
+            <p class="text-muted fs-5">Thank you for shopping with us. Your order #<span class="fw-bold text-dark">{{ order.order_number }}</span> is being processed.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Invoice layout -->
+                <div class="card border border-light p-4 p-md-5 shadow-sm bg-white" style="border-radius: 20px;">
+                    
+                    <!-- Invoice Header -->
+                    <div class="row g-4 pb-4 mb-4 border-bottom">
+                        <div class="col-md-6">
+                            <h3 class="font-heading text-primary text-uppercase">{{ site_settings.website_name }}</h3>
+                            <p class="text-muted fs-7 mb-0">{{ contact_info.address }}</p>
+                            <p class="text-muted fs-7 mb-0">Phone: {{ contact_info.phone }} | Email: {{ contact_info.email }}</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h4 class="font-heading mb-2">INVOICE</h4>
+                            <p class="text-muted fs-7 mb-1">Invoice Number: <span class="fw-semibold text-dark">{{ order.order_number }}</span></p>
+                            <p class="text-muted fs-7 mb-1">Order Date: <span class="fw-semibold text-dark">{{ order.created_at|date:"d M Y, h:i A" }}</span></p>
+                            <p class="text-muted fs-7 mb-0">Payment Method: <span class="fw-semibold text-dark">{{ order.get_payment_method_display }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Billing/Shipping details -->
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">Shipped To</h5>
+                            <h6 class="fw-bold mb-1 text-dark">{{ order.full_name }}</h6>
+                            <p class="text-muted fs-7 mb-1">{{ order.address_line_1 }}</p>
+                            {% if order.address_line_2 %}
+                            <p class="text-muted fs-7 mb-1">{{ order.address_line_2 }}</p>
+                            {% endif %}
+                            <p class="text-muted fs-7 mb-1">{{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                            {% if order.landmark %}
+                            <p class="text-muted fs-7 mb-1">Landmark: {{ order.landmark }}</p>
+                            {% endif %}
+                            <p class="text-muted fs-7 mb-0">Phone: {{ order.phone_number }}</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">Order Status</h5>
+                            <span class="badge bg-warning text-dark fs-7 px-3 py-2 rounded-pill">{{ order.get_order_status_display }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="table-responsive mb-4">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr class="table-light">
+                                    <th scope="col" class="fs-7 text-uppercase text-muted" style="width: 50%;">Saree Details</th>
+                                    <th scope="col" class="text-center fs-7 text-uppercase text-muted">Price</th>
+                                    <th scope="col" class="text-center fs-7 text-uppercase text-muted">Qty</th>
+                                    <th scope="col" class="text-end fs-7 text-uppercase text-muted">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <h6 class="fw-semibold mb-1">{{ item.product.name }}</h6>
+                                        <p class="text-muted fs-8 mb-0">SKU: {{ item.product.sku }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</p>
+                                    </td>
+                                    <td class="text-center fs-7">{{ site_settings.currency }}{{ item.price|floatformat:2 }}</td>
+                                    <td class="text-center fs-7">{{ item.quantity }}</td>
+                                    <td class="text-end fw-bold fs-7">{{ site_settings.currency }}{{ item.get_total_price|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Calculations Summary -->
+                    <div class="row justify-content-end g-4">
+                        <div class="col-md-5">
+                            <div class="d-flex justify-content-between mb-2 fs-7">
+                                <span class="text-muted">Subtotal:</span>
+                                <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ order.subtotal|floatformat:2 }}</span>
+                            </div>
+                            
+                            {% if order.discount_amount > 0 %}
+                            <div class="d-flex justify-content-between mb-2 fs-7 text-success">
+                                <span>Discount:</span>
+                                <span>-{{ site_settings.currency }}{{ order.discount_amount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if order.tax_amount > 0 %}
+                            <div class="d-flex justify-content-between mb-2 fs-7">
+                                <span class="text-muted">GST/Tax:</span>
+                                <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ order.tax_amount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between mb-3 fs-7 pb-2 border-bottom border-light">
+                                <span class="text-muted">Shipping Cost:</span>
+                                <span class="fw-semibold text-dark">
+                                    {% if order.shipping_cost == 0 %}
+                                    <span class="text-success fw-bold">FREE</span>
+                                    {% else %}
+                                    {{ site_settings.currency }}{{ order.shipping_cost|floatformat:2 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+                                <span>Grand Total:</span>
+                                <span class="text-primary">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Button options -->
+                    <div class="d-flex justify-content-center gap-2 mt-5 border-top pt-4">
+                        <button onclick="window.print();" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-2"></i>Print Invoice</button>
+                        <a href="{% url 'shop:catalog' %}" class="btn btn-primary px-4">Continue Shopping</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

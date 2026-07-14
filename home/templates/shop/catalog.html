@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Saree Catalog - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury bg-light py-5">
+    <div class="container text-center">
+        <h1 class="font-heading display-4 text-dark mb-0">Our Handloom Catalog</h1>
+        <p class="text-muted mt-2">Explore our premium selection of traditional silk sarees</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 16px;">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <h4 class="font-heading fs-5 mb-0">Filters</h4>
+                        <a href="{% url 'shop:catalog' %}" class="text-decoration-none text-primary fs-7 fw-semibold">Clear All</a>
+                    </div>
+                    
+                    <form action="{% url 'shop:catalog' %}" method="GET">
+                        <!-- Keep search query if active -->
+                        {% if current_filters.q %}
+                        <input type="hidden" name="q" value="{{ current_filters.q }}">
+                        {% endif %}
+                        
+                        <!-- Categories -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Category</h5>
+                            {% for cat in categories %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if current_filters.category == cat.slug %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label text-dark fs-7" for="cat-{{ cat.id }}">
+                                    {{ cat.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Occasions -->
+                        {% if occasions %}
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Occasion</h5>
+                            <select name="occasion" class="form-select fs-7" onchange="this.form.submit()">
+                                <option value="">Select Occasion</option>
+                                {% for o in occasions %}
+                                <option value="{{ o }}" {% if current_filters.occasion == o %}selected{% endif %}>{{ o }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <!-- Fabrics -->
+                        {% if fabrics %}
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Fabric</h5>
+                            <select name="fabric" class="form-select fs-7" onchange="this.form.submit()">
+                                <option value="">Select Fabric</option>
+                                {% for f in fabrics %}
+                                <option value="{{ f }}" {% if current_filters.fabric == f %}selected{% endif %}>{{ f }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <!-- Colors -->
+                        {% if colors %}
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Color</h5>
+                            <select name="color" class="form-select fs-7" onchange="this.form.submit()">
+                                <option value="">Select Color</option>
+                                {% for c in colors %}
+                                <option value="{{ c }}" {% if current_filters.color == c %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Price Range</h5>
+                            <div class="d-flex gap-2">
+                                <input type="number" name="min_price" class="form-control fs-7" placeholder="Min" value="{{ current_filters.min_price }}">
+                                <input type="number" name="max_price" class="form-control fs-7" placeholder="Max" value="{{ current_filters.max_price }}">
+                            </div>
+                            <button class="btn btn-outline-primary w-100 fs-7 mt-2" type="submit">Apply Price</button>
+                        </div>
+
+                        <!-- Special Filters -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Status</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="stock" value="in_stock" id="filter-stock" {% if current_filters.stock == 'in_stock' %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label text-dark fs-7" for="filter-stock">
+                                    In Stock Only
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="discount" value="yes" id="filter-discount" {% if current_filters.discount == 'yes' %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label text-dark fs-7" for="filter-discount">
+                                    On Discount
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-lg-9">
+                <!-- Sorting & Stats Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 gap-2">
+                    <span class="text-muted fs-7">{{ products|length }} Sarees found</span>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="sortBy" class="text-muted fs-7 text-nowrap mb-0">Sort By:</label>
+                        <select id="sortBy" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;" onchange="location = this.value;">
+                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
+                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
+                        </select>
+                    </div>
+                </div>
+
+                {% if products %}
+                <div class="row g-4">
+                    {% for product in products %}
+                    <div class="col-6 col-md-4">
+                        {% include 'shop/components/product_card.html' with product=product %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inboxes text-muted display-4 mb-3"></i>
+                    <h3 class="font-heading">No Sarees Found</h3>
+                    <p class="text-muted">Try adjusting your filters or search query.</p>
+                    <a href="{% url 'shop:catalog' %}" class="btn btn-primary mt-3">Reset Catalog</a>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+<div class="product-card">
+    <!-- Wishlist toggle -->
+    <a href="{% url 'accounts:toggle_wishlist' product.id %}" class="product-wishlist-btn" title="Add to Wishlist">
+        <i class="bi bi-heart-fill"></i>
+    </a>
+    
+    <!-- Badges -->
+    {% if badge_type == "featured" %}
+    <span class="product-badge badge-featured">Featured</span>
+    {% elif badge_type == "new" or product.is_new_arrival %}
+    <span class="product-badge badge-new">New</span>
+    {% elif product.discount_percentage > 0 %}
+    <span class="product-badge bg-success text-white">{{ product.discount_percentage }}% Off</span>
+    {% endif %}
+
+    <a href="{% url 'shop:product_detail' product.slug %}" class="d-block text-decoration-none">
+        <div class="product-image-wrapper">
+            {% if product.images.all %}
+            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree">
+            {% endif %}
+        </div>
+    </a>
+
+    <div class="product-info">
+        <div class="product-category">
+            {% if product.categories.all %}
+            {{ product.categories.first.name }}
+            {% else %}
+            Silk Saree
+            {% endif %}
+        </div>
+        <h3 class="product-title">
+            <a href="{% url 'shop:product_detail' product.slug %}">{{ product.name }}</a>
+        </h3>
+        
+        <div class="product-price-wrapper">
+            <span class="price-current">{{ site_settings.currency }}{{ product.offer_price|floatformat:2 }}</span>
+            {% if product.discount_percentage > 0 %}
+            <span class="price-original text-muted">{{ site_settings.currency }}{{ product.price|floatformat:2 }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

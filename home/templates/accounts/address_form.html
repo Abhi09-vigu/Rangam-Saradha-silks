@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}{{ title }} - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
+                    <h2 class="font-heading mb-4 text-center">{{ title }}</h2>
+                    
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            {% for field in form %}
+                            <div class="col-md-{% if field.name == 'full_name' or field.name == 'address_line_1' or field.name == 'address_line_2' %}12{% else %}6{% endif %}">
+                                {% if field.name == 'is_default' %}
+                                <div class="form-check mt-4">
+                                    {{ field }}
+                                    <label class="form-check-label text-muted fs-7" for="{{ field.id_for_label }}">
+                                        Set as Default Delivery Address
+                                    </label>
+                                </div>
+                                {% else %}
+                                <label for="{{ field.id_for_label }}" class="form-label text-muted fs-7">{{ field.label }}</label>
+                                {{ field }}
+                                {% endif %}
+                                {% for error in field.errors %}
+                                <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Address</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
