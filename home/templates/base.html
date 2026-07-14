@@ -110,17 +110,21 @@
                     </a>
                     
                     <!-- Account Dropdown -->
-                    {% if user.is_authenticated and not user.is_staff %}
+                    {% if user.is_authenticated %}
                     <div class="dropdown d-inline">
                         <a class="dropdown-toggle no-arrow ms-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item fw-bold text-primary" href="/admin/"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                            {% else %}
                             <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">My Profile</a></li>
                             <li><a class="dropdown-item" href="{% url 'accounts:wishlist' %}">My Wishlist</a></li>
                             <li><a class="dropdown-item" href="{% url 'accounts:profile' %}#orders">Order History</a></li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>
                     {% else %}
