@@ -22,3 +22,6 @@ media/products/*
 !media/products/.gitkeep
 media/offers/*
 !media/offers/.gitkeep
+
+
+.env

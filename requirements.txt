@@ -7,3 +7,4 @@ dj-database-url==3.1.2
 psycopg[binary]==3.3.4
 django-phonenumber-field==7.3.0
 phonenumbers==9.0.34
+django-mongodb-backend~=5.2.0

@@ -33,9 +33,9 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'rangam_saradha_silk.apps.MongoAdminConfig',
+    'rangam_saradha_silk.apps.MongoAuthConfig',
+    'rangam_saradha_silk.apps.MongoContentTypesConfig',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -81,13 +81,32 @@ WSGI_APPLICATION = 'rangam_saradha_silk.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+MONGODB_URL = os.environ.get('MONGODB_URL')
+if MONGODB_URL:
+    MONGODB_URL = MONGODB_URL.strip().strip('"').strip("'")
+
+if MONGODB_URL:
+    from urllib.parse import urlparse
+    parsed = urlparse(MONGODB_URL)
+    db_name = parsed.path.strip('/')
+    if not db_name:
+        db_name = os.environ.get('MONGODB_DB_NAME', 'rangam_saradha_silk')
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_mongodb_backend',
+            'HOST': MONGODB_URL,
+            'NAME': db_name,
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_mongodb_backend',
+            'HOST': 'mongodb://localhost:27017/',
+            'NAME': 'rangam_saradha_silk',
+        }
+    }
 
 
 # Password validation
@@ -141,10 +160,13 @@ STORAGES = {
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MIGRATION_MODULES = {
+    'admin': 'mongo_migrations.admin',
+    'auth': 'mongo_migrations.auth',
+    'contenttypes': 'mongo_migrations.contenttypes',
+}
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
