@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Database
+db.sqlite3
+*.sqlite3
 
 # Environments
 .venv/
@@ -10,18 +13,7 @@ venv/
 ENV/
 env/
 
-# Static files
+# Project Folders
+media/
 staticfiles/
-
-# Media files
-media/categories/*
-!media/categories/.gitkeep
-media/menu/*
-!media/menu/.gitkeep
-media/products/*
-!media/products/.gitkeep
-media/offers/*
-!media/offers/.gitkeep
-
-
 .env

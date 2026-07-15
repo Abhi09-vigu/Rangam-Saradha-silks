@@ -25,7 +25,7 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-56^ha@k4drry6#ffrft$1^y!i6(j)hnd21*gv)4jijzkkxo0#$')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
@@ -33,12 +33,14 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 # Application definition
 
 INSTALLED_APPS = [
-    'rangam_saradha_silk.apps.MongoAdminConfig',
-    'rangam_saradha_silk.apps.MongoAuthConfig',
-    'rangam_saradha_silk.apps.MongoContentTypesConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'phonenumber_field',
     'accounts.apps.AccountsConfig',
     'shop.apps.ShopConfig',
@@ -78,35 +80,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rangam_saradha_silk.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-MONGODB_URL = os.environ.get('MONGODB_URL')
-if MONGODB_URL:
-    MONGODB_URL = MONGODB_URL.strip().strip('"').strip("'")
-
-if MONGODB_URL:
-    from urllib.parse import urlparse
-    parsed = urlparse(MONGODB_URL)
-    db_name = parsed.path.strip('/')
-    if not db_name:
-        db_name = os.environ.get('MONGODB_DB_NAME', 'rangam_saradha_silk')
-    
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django_mongodb_backend',
-            'HOST': MONGODB_URL,
-            'NAME': db_name,
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django_mongodb_backend',
-            'HOST': 'mongodb://localhost:27017/',
-            'NAME': 'rangam_saradha_silk',
-        }
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
+}
 
 
 # Password validation
@@ -148,9 +127,17 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise storage configuration
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+}
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -160,13 +147,7 @@ STORAGES = {
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
-
-MIGRATION_MODULES = {
-    'admin': 'mongo_migrations.admin',
-    'auth': 'mongo_migrations.auth',
-    'contenttypes': 'mongo_migrations.contenttypes',
-}
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 

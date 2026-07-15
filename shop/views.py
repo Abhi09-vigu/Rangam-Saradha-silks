@@ -98,8 +98,14 @@ def catalog(request):
     fabrics = [f for f in fabrics if f]
     occasions = [o for o in occasions if o]
 
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'products': products,
+        'products': page_obj,
         'categories': categories,
         'collections': collections,
         'colors': colors,
@@ -136,6 +142,7 @@ def product_detail(request, slug):
 
 def cart_detail(request):
     cart = _get_or_create_cart(request)
+    cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
     settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
     
     subtotal = sum(item.get_total_price() for item in cart.items.all())
@@ -243,6 +250,7 @@ def remove_coupon(request):
 def checkout(request):
         
     cart = _get_or_create_cart(request)
+    cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
     if not cart.items.exists():
         messages.error(request, "Your cart is empty.")
         return redirect('shop:cart_detail')
