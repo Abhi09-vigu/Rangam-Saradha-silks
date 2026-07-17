@@ -83,3 +83,47 @@ def contact_view(request):
         return redirect('home:contact')
         
     return render(request, 'home/contact.html')
+
+def debug_db_view(request):
+    if request.GET.get('key') != 'saradha123':
+        from django.http import HttpResponse
+        return HttpResponse("Unauthorized", status=401)
+        
+    from django.core.management import call_command
+    from django.http import HttpResponse
+    
+    action = request.GET.get('action')
+    log = ""
+    if action == 'seed':
+        try:
+            call_command('loaddata', 'db_seed.json')
+            log = "Database seeded successfully!"
+        except Exception as e:
+            log = f"Failed to seed: {str(e)}"
+            
+    pages = list(CMSPage.objects.values('id', 'title', 'slug'))
+    categories = list(Category.objects.values('id', 'name', 'slug'))
+    products = list(Product.objects.values('id', 'name', 'slug'))
+    
+    html = f"""
+    <html>
+    <body>
+        <h1>Debug Database Dashboard</h1>
+        <p><strong>Status:</strong> {log}</p>
+        <form method="GET">
+            <input type="hidden" name="key" value="saradha123">
+            <button type="submit" name="action" value="seed">Run loaddata db_seed.json</button>
+        </form>
+        
+        <h2>CMS Pages ({len(pages)})</h2>
+        <pre>{pages}</pre>
+        
+        <h2>Categories ({len(categories)})</h2>
+        <pre>{categories}</pre>
+        
+        <h2>Products ({len(products)})</h2>
+        <pre>{products}</pre>
+    </body>
+    </html>
+    """
+    return HttpResponse(html)
