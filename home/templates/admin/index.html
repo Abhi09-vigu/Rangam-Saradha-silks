@@ -13,26 +13,37 @@
 <style>
     #content {
         padding: 30px !important;
-        background-color: #f4f6f9;
+        background-color: #fdfbf7 !important; /* Soft luxury cream background */
+        color: #2d1810;
     }
+    
     .dashboard-title {
-        font-family: Georgia, serif;
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
         color: #AF0446;
         font-weight: 700;
-        margin-bottom: 2rem;
+        letter-spacing: 0.5px;
     }
+
+    /* Stat Cards Styling */
     .card-stat {
-        border: none;
+        border: 1px solid #f2e9dc;
         border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 20px rgba(175, 4, 70, 0.03);
         padding: 1.5rem;
-        background-color: white;
-        transition: transform 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
+
     .card-stat:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(175, 4, 70, 0.08);
+        border-color: #AE6F21;
     }
+
+    /* Icon Wrappers */
     .card-stat .icon-wrapper {
         width: 48px;
         height: 48px;
@@ -41,29 +52,241 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
+
+    /* Card Themes (Alternating Maroon & Gold) */
+    .card-maroon {
+        background-color: #fffafd !important;
+    }
+    .card-maroon .icon-wrapper {
+        background-color: #fce4ec !important;
+        color: #AF0446 !important;
+    }
+    
+    .card-gold {
+        background-color: #fffcf8 !important;
+    }
+    .card-gold .icon-wrapper {
+        background-color: #fdf0df !important;
+        color: #AE6F21 !important;
+    }
+
+    /* Tables Styling */
     .table-custom {
         background: white;
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-        border: none;
+        border: 1px solid #f0e6d6 !important;
     }
+
     .table-custom th {
-        background-color: #fcf8f8;
-        border-bottom: 2px solid #ececec;
-        font-weight: 600;
+        background-color: #fffcf8 !important;
+        border-bottom: 2px solid #f0e6d6 !important;
+        color: #AF0446 !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        padding: 12px 16px !important;
     }
-    .badge-status {
-        font-size: 0.75rem;
-        padding: 0.35em 0.8em;
-        border-radius: 50rem;
+
+    .table-custom td {
+        padding: 14px 16px !important;
+        font-size: 13px;
+        border-bottom: 1px solid #f2e9dc !important;
+    }
+
+    .table-custom tr:hover td {
+        background-color: #fffdf9 !important;
+    }
+
+    /* Card Panels */
+    .dashboard-panel {
+        background: #ffffff;
+        border: 1px solid #f0e6d6;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        padding: 1.8rem;
+    }
+
+    .panel-header-maroon {
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
+        color: #AF0446;
+        font-weight: 700;
+    }
+
+    .panel-header-gold {
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
+        color: #AE6F21;
+        font-weight: 700;
+    }
+
+    /* User Circular Avatar */
+    .avatar-wrapper {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #AE6F21 0%, #AF0446 100%);
+        color: #ffffff !important;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(175, 4, 70, 0.15);
+    }
+
+    /* Alert Items */
+    .alert-item {
+        background-color: #fffdfd !important;
+        border-left: 4px solid #AF0446 !important;
+        border: 1px solid #fce8ee;
+        border-left-width: 4px;
+        border-radius: 8px;
+        padding: 12px 16px !important;
+        transition: all 0.2s ease;
+    }
+    
+    .alert-item:hover {
+        transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(175, 4, 70, 0.05);
+    }
+
+    /* App Catalogs */
+    .app-catalog-card {
+        border: 1px solid #f0e6d6 !important;
+        border-radius: 12px !important;
+        background: white !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01) !important;
+    }
+
+    .app-catalog-header {
+        background-color: #fffcf8 !important;
+        border-bottom: 1px solid #f0e6d6 !important;
+        padding: 14px 20px !important;
+    }
+
+    .app-catalog-header h5 {
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
+        color: #AF0446;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .app-catalog-table td {
+        padding: 12px 20px !important;
+        border-bottom: 1px solid #f5ede2 !important;
+    }
+
+    .app-catalog-table tr:hover td {
+        background-color: #fffdfa !important;
+    }
+
+    /* Dark Mode Compatibility CSS */
+    @media (prefers-color-scheme: dark) {
+        #content {
+            background-color: #140d0f !important;
+            color: #f5ebe6 !important;
+        }
+
+        .dashboard-title {
+            color: #ff9ebb !important;
+        }
+
+        .card-stat {
+            background-color: #1c1114 !important;
+            border-color: #3d1b24 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .card-stat:hover {
+            border-color: #AE6F21 !important;
+        }
+
+        .card-maroon, .card-gold {
+            background-color: #1c1114 !important;
+        }
+
+        .card-maroon .icon-wrapper {
+            background-color: #3d1622 !important;
+            color: #ff85a9 !important;
+        }
+
+        .card-gold .icon-wrapper {
+            background-color: #3a2211 !important;
+            color: #f2b46d !important;
+        }
+
+        .card-stat h3 {
+            color: #ffffff !important;
+        }
+
+        .card-stat span {
+            color: #d2c5bf !important;
+        }
+
+        .dashboard-panel, .app-catalog-card {
+            background-color: #1c1114 !important;
+            border-color: #3d1b24 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .panel-header-maroon {
+            color: #ff85a9 !important;
+        }
+
+        .panel-header-gold {
+            color: #f2b46d !important;
+        }
+
+        .table-custom {
+            background-color: #1a0f12 !important;
+            border-color: #3d1b24 !important;
+        }
+
+        .table-custom th, .app-catalog-header {
+            background-color: #260d15 !important;
+            border-bottom: 2px solid #3d1b24 !important;
+            color: #ff85a9 !important;
+        }
+
+        .table-custom td, .app-catalog-table td {
+            color: #e2d3cd !important;
+            border-bottom: 1px solid #3d1b24 !important;
+            background: transparent !important;
+        }
+
+        .table-custom tr:hover td, .app-catalog-table tr:hover td {
+            background-color: #2b171e !important;
+        }
+
+        .alert-item {
+            background-color: #221217 !important;
+            border-color: #3d1b24 !important;
+        }
+
+        .alert-item .text-dark {
+            color: #f5ebe6 !important;
+        }
+
+        .text-dark {
+            color: #f5ebe6 !important;
+        }
+
+        .text-muted {
+            color: #d2c5bf !important;
+        }
+
+        .app-catalog-header {
+            border-bottom: 1px solid #3d1b24 !important;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid p-0 text-dark">
+<div class="container-fluid p-0">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="dashboard-title m-0">Merchant Control Dashboard</h1>
@@ -74,79 +297,91 @@
     <div class="row g-4 mb-5">
         <!-- Revenue Today -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-maroon">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-danger-subtle text-danger">
+                    <div class="icon-wrapper">
                         <i class="bi bi-currency-rupee"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Today's Revenue</span>
-                <h3 class="fw-bold text-dark mt-1">₹{{ revenue_today|floatformat:0 }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Today's Revenue</span>
+                    <h3 class="fw-bold mt-1">₹{{ revenue_today|floatformat:0 }}</h3>
+                </div>
             </div>
         </div>
 
         <!-- Orders Today -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-gold">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-primary-subtle text-primary">
+                    <div class="icon-wrapper">
                         <i class="bi bi-cart-check"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Orders Today</span>
-                <h3 class="fw-bold text-dark mt-1">{{ orders_today_count }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Orders Today</span>
+                    <h3 class="fw-bold mt-1">{{ orders_today_count }}</h3>
+                </div>
             </div>
         </div>
 
         <!-- Products -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-maroon">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-warning-subtle text-warning">
+                    <div class="icon-wrapper">
                         <i class="bi bi-box-seam"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Total Products</span>
-                <h3 class="fw-bold text-dark mt-1">{{ total_products }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Total Products</span>
+                    <h3 class="fw-bold mt-1">{{ total_products }}</h3>
+                </div>
             </div>
         </div>
 
         <!-- Customers -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-gold">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-success-subtle text-success">
+                    <div class="icon-wrapper">
                         <i class="bi bi-people"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Customers</span>
-                <h3 class="fw-bold text-dark mt-1">{{ total_customers }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Customers</span>
+                    <h3 class="fw-bold mt-1">{{ total_customers }}</h3>
+                </div>
             </div>
         </div>
 
         <!-- Categories -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-maroon">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-info-subtle text-info">
+                    <div class="icon-wrapper">
                         <i class="bi bi-tags"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Categories</span>
-                <h3 class="fw-bold text-dark mt-1">{{ total_categories }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Categories</span>
+                    <h3 class="fw-bold mt-1">{{ total_categories }}</h3>
+                </div>
             </div>
         </div>
 
         <!-- Coupons -->
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card-stat">
+            <div class="card-stat card-gold">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="icon-wrapper bg-secondary-subtle text-secondary">
+                    <div class="icon-wrapper">
                         <i class="bi bi-ticket-perforated"></i>
                     </div>
                 </div>
-                <span class="text-muted fs-7 d-block">Active Coupons</span>
-                <h3 class="fw-bold text-dark mt-1">{{ total_coupons }}</h3>
+                <div>
+                    <span class="text-muted fs-7 d-block">Active Coupons</span>
+                    <h3 class="fw-bold mt-1">{{ total_coupons }}</h3>
+                </div>
             </div>
         </div>
     </div>
@@ -155,27 +390,29 @@
     <div class="row g-4 mb-5">
         <!-- Sales Chart -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 16px; height: 100%;">
-                <h4 class="font-heading fs-5 mb-4 text-primary">Sales Trend (Last 7 Days)</h4>
+            <div class="dashboard-panel" style="height: 100%;">
+                <h4 class="panel-header-maroon fs-5 mb-4">Sales Trend (Last 7 Days)</h4>
                 <canvas id="salesChart" style="max-height: 280px;"></canvas>
             </div>
         </div>
 
         <!-- Low Stock Alerts -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 16px; height: 100%;">
-                <h4 class="font-heading fs-5 mb-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Inventory Alerts</h4>
+            <div class="dashboard-panel" style="height: 100%;">
+                <h4 class="panel-header-maroon fs-5 mb-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Inventory Alerts</h4>
                 <p class="text-muted fs-7 mb-4">The following products are running low on stock (<= 5 units remaining):</p>
                 
                 {% if low_stock_products %}
                 <div class="d-flex flex-column gap-3">
                     {% for prod in low_stock_products %}
-                    <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border-start border-3 border-danger">
-                        <div>
-                            <span class="fw-semibold text-dark fs-7 d-block">{{ prod.name }}</span>
-                            <span class="text-muted fs-8">SKU: {{ prod.sku }}</span>
+                    <div class="alert-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-semibold text-dark fs-7 d-block">{{ prod.name }}</span>
+                                <span class="text-muted fs-8">SKU: {{ prod.sku }}</span>
+                            </div>
+                            <span class="badge bg-danger rounded-pill px-2 py-1 fs-8" style="background-color: #AF0446 !important;">{{ prod.stock }} left</span>
                         </div>
-                        <span class="badge bg-danger rounded-pill px-2 py-1 fs-8">{{ prod.stock }} left</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -193,8 +430,8 @@
     <div class="row g-4 mb-5">
         <!-- Recent Orders -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 16px;">
-                <h4 class="font-heading fs-5 mb-4 text-primary">Latest Orders</h4>
+            <div class="dashboard-panel">
+                <h4 class="panel-header-maroon fs-5 mb-4">Latest Orders</h4>
                 
                 {% if recent_orders %}
                 <div class="table-responsive">
@@ -216,7 +453,15 @@
                                 <td class="fs-7">{{ ord.get_payment_method_display }}</td>
                                 <td class="fw-bold fs-7">₹{{ ord.grand_total|floatformat:2 }}</td>
                                 <td>
-                                    <span class="badge badge-status {% if ord.order_status == 'DELIVERED' %}bg-success-subtle text-success{% elif ord.order_status == 'CANCELLED' %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning{% endif %}">
+                                    <!-- Soft custom color scheme mapping for recent orders status list -->
+                                    <span class="badge" style="font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 600; 
+                                        {% if ord.order_status == 'DELIVERED' %}
+                                            background-color: #dcfce7; color: #16a34a;
+                                        {% elif ord.order_status == 'CANCELLED' %}
+                                            background-color: #fee2e2; color: #dc2626;
+                                        {% else %}
+                                            background-color: #fef3c7; color: #d97706;
+                                        {% endif %}">
                                         {{ ord.get_order_status_display }}
                                     </span>
                                 </td>
@@ -233,15 +478,15 @@
 
         <!-- Recent Customers -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 16px;">
-                <h4 class="font-heading fs-5 mb-4 text-primary">Recent Customers</h4>
+            <div class="dashboard-panel">
+                <h4 class="panel-header-maroon fs-5 mb-4">Recent Customers</h4>
                 
                 {% if recent_customers %}
                 <div class="d-flex flex-column gap-3">
                     {% for cust in recent_customers %}
                     <div class="d-flex align-items-center gap-3">
-                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold text-uppercase fs-7" style="width: 40px; height: 40px;">
-                            {{ cust.username|slice:":2" }}
+                        <div class="avatar-wrapper">
+                            {{ cust.username|slice:":2"|upper }}
                         </div>
                         <div>
                             <span class="fw-bold text-dark fs-7 d-block">{{ cust.username }}</span>
@@ -258,35 +503,35 @@
     </div>
 
     <!-- Django Admin App catalog -->
-    <div class="mt-4 pt-4 border-top">
-        <h4 class="font-heading fs-5 mb-4 text-secondary">Database Management (Standard Tables)</h4>
+    <div class="mt-4 pt-4 border-top border-2" style="border-color: #f0e6d6 !important;">
+        <h4 class="panel-header-gold fs-5 mb-4">Database Management (Standard Tables)</h4>
         <!-- App list block -->
         <div id="content-main" class="w-100">
             {% if app_list %}
                 {% for app in app_list %}
-                    <div class="card border-0 shadow-sm mb-3 bg-white" style="border-radius: 12px;">
-                        <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                            <h5 class="m-0 fs-6 fw-bold text-dark">{{ app.name }}</h5>
+                    <div class="card app-catalog-card mb-3">
+                        <div class="app-catalog-header d-flex justify-content-between align-items-center">
+                            <h5>{{ app.name }}</h5>
                             <a href="{{ app.app_url }}" class="text-decoration-none text-muted fs-8">Manage App</a>
                         </div>
                         <div class="card-body p-0">
-                            <table class="table mb-0 align-middle">
+                            <table class="table app-catalog-table mb-0 align-middle">
                                 <tbody>
                                     {% for model in app.models %}
                                         <tr>
-                                            <td style="padding: 1rem 1.5rem;" class="fs-7">
+                                            <td class="fs-7">
                                                 {% if model.admin_url %}
-                                                    <a href="{{ model.admin_url }}" class="text-decoration-none text-dark fw-semibold">{{ model.name }}</a>
+                                                    <a href="{{ model.admin_url }}" class="text-decoration-none text-dark fw-semibold" style="transition: color 0.2s ease;">{{ model.name }}</a>
                                                 {% else %}
                                                     {{ model.name }}
                                                 {% endif %}
                                             </td>
-                                            <td class="text-end" style="padding: 1rem 1.5rem;">
+                                            <td class="text-end">
                                                 {% if model.add_url %}
-                                                    <a href="{{ model.add_url }}" class="btn btn-sm btn-outline-primary rounded-pill me-2 px-3 py-1 fs-8"><i class="bi bi-plus me-1"></i>Add</a>
+                                                    <a href="{{ model.add_url }}" class="btn btn-sm px-3 py-1 fs-8 me-2" style="background: transparent !important; color: #AF0446 !important; border: 1px solid #AF0446 !important; box-shadow: none !important;"><i class="bi bi-plus me-1"></i>Add</a>
                                                 {% endif %}
                                                 {% if model.admin_url %}
-                                                    <a href="{{ model.admin_url }}" class="btn btn-sm btn-light border-0 rounded-pill px-3 py-1 fs-8">Change</a>
+                                                    <a href="{{ model.admin_url }}" class="btn btn-sm px-3 py-1 fs-8" style="background: #AE6F21 !important; border-color: #AE6F21 !important; color: white !important; box-shadow: none !important;">Change</a>
                                                 {% endif %}
                                             </td>
                                         </tr>
@@ -306,6 +551,12 @@
 <script>
     // Sales Chart configuration
     const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Create rich maroon gradient background for chart line
+    const chartGradient = ctx.createLinearGradient(0, 0, 0, 260);
+    chartGradient.addColorStop(0, 'rgba(175, 4, 70, 0.25)');
+    chartGradient.addColorStop(1, 'rgba(175, 4, 70, 0.00)');
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -314,12 +565,16 @@
                 label: 'Daily Revenue (INR)',
                 data: {{ sales_data|safe }},
                 borderColor: '#AF0446',
-                backgroundColor: 'rgba(175, 4, 70, 0.05)',
+                backgroundColor: chartGradient,
                 borderWidth: 3,
                 fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#AF0446',
-                pointRadius: 5
+                tension: 0.35,
+                pointBackgroundColor: '#AE6F21',
+                pointBorderColor: '#AF0446',
+                pointHoverBackgroundColor: '#AF0446',
+                pointHoverBorderColor: '#fff',
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
@@ -334,12 +589,24 @@
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: '#f0f0f0'
+                        color: '#f3e8eb'
+                    },
+                    ticks: {
+                        font: {
+                            family: "'Inter', sans-serif",
+                            size: 11
+                        }
                     }
                 },
                 x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: "'Inter', sans-serif",
+                            size: 11
+                        }
                     }
                 }
             }

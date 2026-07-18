@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.contrib.admin.sites import AdminSite
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Order, OrderItem, Product, ProductImage, Category
-from .admin import OrderAdmin, OrderItemInline
+from .admin import OrderAdmin, OrderItemInline, ProductAdmin
 
 @override_settings(
     STORAGES={
@@ -109,13 +109,15 @@ class OrderAdminTest(TestCase):
         """
         badge = self.order_admin.order_status_badge(self.order)
         self.assertIn("Pending", badge)
-        self.assertIn("#fef3c7", badge)  # Yellow
+        self.assertIn("#fff8eb", badge)  # Gold/warm yellow
+        self.assertIn("#AE6F21", badge)
 
         self.order.order_status = "CONFIRMED"
         self.order.save()
         badge = self.order_admin.order_status_badge(self.order)
         self.assertIn("Confirmed", badge)
-        self.assertIn("#dbeafe", badge)  # Blue
+        self.assertIn("#faf5e6", badge)  # Gold/Bronze
+        self.assertIn("#8c5d1c", badge)
 
     def test_payment_status_badge(self):
         """
@@ -123,10 +125,52 @@ class OrderAdminTest(TestCase):
         """
         badge = self.order_admin.payment_status_badge(self.order)
         self.assertIn("Pending", badge)
-        self.assertIn("#fef3c7", badge)
+        self.assertIn("#fff8eb", badge)
 
         self.order.payment_status = "PAID"
         self.order.save()
         badge = self.order_admin.payment_status_badge(self.order)
         self.assertIn("Paid", badge)
-        self.assertIn("#dcfce7", badge)
+        self.assertIn("#f1faf5", badge)  # Green
+        self.assertIn("#1b8a53", badge)
+
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": "django.core.files.storage.InMemoryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+)
+class ProductAdminTest(TestCase):
+    def setUp(self):
+        self.site = AdminSite()
+        self.product_admin = ProductAdmin(Product, self.site)
+        self.product = Product.objects.create(
+            name="Silk Saree",
+            slug="silk-saree",
+            sku="SS-001",
+            price=3500.00,
+            stock=10
+        )
+
+    def test_product_image_thumbnail_no_image(self):
+        """
+        Verify that a product without any image returns 'No Image'.
+        """
+        self.assertEqual(self.product_admin.product_image_thumbnail(self.product), "No Image")
+
+    def test_product_image_thumbnail_with_image(self):
+        """
+        Verify that a clickable 60x60 thumbnail of the product is rendered.
+        """
+        ProductImage.objects.create(
+            product=self.product,
+            image=SimpleUploadedFile("saree_test.jpg", b"image_content", content_type="image/jpeg")
+        )
+        thumbnail_html = self.product_admin.product_image_thumbnail(self.product)
+        self.assertIn("img", thumbnail_html)
+        self.assertIn("saree_test.jpg", thumbnail_html)
+        self.assertIn('target="_blank"', thumbnail_html)

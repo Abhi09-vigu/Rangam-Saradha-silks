@@ -8,12 +8,34 @@ class ProductImageInline(admin.TabularInline):
     extra = 1
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
+    list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
     list_filter = ['is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories', 'collection']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline]
     ordering = ['-created_at']
+
+    def get_queryset(self, request):
+        """
+        Optimize queryset to prefetch images to avoid N+1 queries.
+        """
+        return super().get_queryset(request).prefetch_related('images')
+
+    def product_image_thumbnail(self, obj):
+        """
+        Display a clickable 60x60 thumbnail of the product image.
+        """
+        images = list(obj.images.all())
+        if not images or not images[0].image:
+            return "No Image"
+        first_image = images[0]
+        return format_html(
+            '<a href="{0}" target="_blank">'
+            '<img src="{0}" width="60" height="60" style="object-fit: cover; border-radius: 4px; display: block; max-width: 100%;" alt="Thumbnail">'
+            '</a>',
+            first_image.image.url
+        )
+    product_image_thumbnail.short_description = "Image"
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'display_order', 'is_active']
@@ -175,21 +197,22 @@ class OrderAdmin(admin.ModelAdmin):
         """
         status = obj.order_status
         colors = {
-            'PENDING': {'bg': '#fef3c7', 'fg': '#d97706'},           # Yellow
-            'CONFIRMED': {'bg': '#dbeafe', 'fg': '#2563eb'},         # Blue
-            'PACKED': {'bg': '#f3e8ff', 'fg': '#7c3aed'},            # Purple
-            'SHIPPED': {'bg': '#ffedd5', 'fg': '#ea580c'},           # Orange
-            'OUT_FOR_DELIVERY': {'bg': '#e0f2fe', 'fg': '#0369a1'},  # Teal/Cyan
-            'DELIVERED': {'bg': '#dcfce7', 'fg': '#16a34a'},         # Green
-            'CANCELLED': {'bg': '#fee2e2', 'fg': '#dc2626'},         # Red
-            'RETURNED': {'bg': '#ffe4e6', 'fg': '#be123c'},          # Dark Red
-            'REFUNDED': {'bg': '#f3f4f6', 'fg': '#4b5563'},          # Gray
+            'PENDING': {'bg': '#fff8eb', 'fg': '#AE6F21', 'border': '#fce8cd'},
+            'CONFIRMED': {'bg': '#faf5e6', 'fg': '#8c5d1c', 'border': '#eedda6'},
+            'PACKED': {'bg': '#fff0f5', 'fg': '#AF0446', 'border': '#fcd2df'},
+            'SHIPPED': {'bg': '#fff5eb', 'fg': '#d96e14', 'border': '#fcdbbf'},
+            'OUT_FOR_DELIVERY': {'bg': '#eefbfa', 'fg': '#0b7c8a', 'border': '#beeae6'},
+            'DELIVERED': {'bg': '#f1faf5', 'fg': '#1b8a53', 'border': '#c7eed9'},
+            'CANCELLED': {'bg': '#fdf3f4', 'fg': '#AF0446', 'border': '#fbd3d6'},
+            'RETURNED': {'bg': '#fdf2f2', 'fg': '#9e1c24', 'border': '#fbd2d2'},
+            'REFUNDED': {'bg': '#f8f9fa', 'fg': '#5f666c', 'border': '#e2e5e8'},
         }
-        color = colors.get(status, {'bg': '#f3f4f6', 'fg': '#4b5563'})
+        color = colors.get(status, {'bg': '#f8f9fa', 'fg': '#5f666c', 'border': '#e2e5e8'})
         return format_html(
-            '<span style="background-color: {}; color: {}; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; text-align: center;">{}</span>',
+            '<span style="background-color: {}; color: {}; border: 1px solid {}; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; text-align: center;">{}</span>',
             color['bg'],
             color['fg'],
+            color['border'],
             obj.get_order_status_display()
         )
     order_status_badge.short_description = "Order Status"
@@ -201,16 +224,17 @@ class OrderAdmin(admin.ModelAdmin):
         """
         status = obj.payment_status
         colors = {
-            'PENDING': {'bg': '#fef3c7', 'fg': '#d97706'},           # Yellow
-            'PAID': {'bg': '#dcfce7', 'fg': '#16a34a'},              # Green
-            'FAILED': {'bg': '#fee2e2', 'fg': '#dc2626'},            # Red
-            'REFUNDED': {'bg': '#f3f4f6', 'fg': '#4b5563'},          # Gray
+            'PENDING': {'bg': '#fff8eb', 'fg': '#AE6F21', 'border': '#fce8cd'},
+            'PAID': {'bg': '#f1faf5', 'fg': '#1b8a53', 'border': '#c7eed9'},
+            'FAILED': {'bg': '#fdf3f4', 'fg': '#AF0446', 'border': '#fbd3d6'},
+            'REFUNDED': {'bg': '#f8f9fa', 'fg': '#5f666c', 'border': '#e2e5e8'},
         }
-        color = colors.get(status, {'bg': '#f3f4f6', 'fg': '#4b5563'})
+        color = colors.get(status, {'bg': '#f8f9fa', 'fg': '#5f666c', 'border': '#e2e5e8'})
         return format_html(
-            '<span style="background-color: {}; color: {}; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; text-align: center;">{}</span>',
+            '<span style="background-color: {}; color: {}; border: 1px solid {}; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; text-align: center;">{}</span>',
             color['bg'],
             color['fg'],
+            color['border'],
             obj.get_payment_status_display()
         )
     payment_status_badge.short_description = "Payment Status"
