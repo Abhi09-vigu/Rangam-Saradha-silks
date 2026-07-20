@@ -66,3 +66,38 @@ class ResetPasswordForm(forms.Form):
         if new_password and confirm_password and new_password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
         return cleaned_data
+
+class PhoneLoginForm(forms.Form):
+    phone_number = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '10-digit mobile number',
+            'type': 'tel',
+            'pattern': '[6-9][0-9]{9}',
+            'required': 'true'
+        })
+    )
+
+    def clean_phone_number(self):
+        raw_number = self.cleaned_data.get('phone_number')
+        # Remove any spaces, dashes, or parentheses
+        cleaned_number = ''.join(c for c in raw_number if c.isdigit())
+        if len(cleaned_number) == 10:
+            full_number = f"+91{cleaned_number}"
+        elif len(cleaned_number) == 12 and cleaned_number.startswith('91'):
+            full_number = f"+{cleaned_number}"
+        else:
+            raise forms.ValidationError("Please enter a valid 10-digit Indian mobile number.")
+        
+        # Now parse it using phonenumbers to verify
+        import phonenumbers
+        try:
+            parsed = phonenumbers.parse(full_number, None)
+            if not phonenumbers.is_valid_number(parsed):
+                raise forms.ValidationError("Invalid phone number format.")
+        except Exception:
+            raise forms.ValidationError("Invalid phone number format.")
+            
+        return full_number
+

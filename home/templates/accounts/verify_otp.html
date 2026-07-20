@@ -3,31 +3,150 @@
 
 {% block meta_title %}Verify OTP - {{ site_settings.website_name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .otp-input-container input {
+        letter-spacing: 0.5rem;
+        font-size: 1.75rem;
+        height: 3.5rem;
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .otp-input-container input:focus {
+        border-color: var(--primary, #6b1d2f);
+        box-shadow: 0 0 0 0.25rem rgba(107, 29, 47, 0.25);
+    }
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="section-luxury">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-5">
                 <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
-                    <h2 class="font-heading mb-3 text-center">Verify Account</h2>
-                    <p class="text-muted fs-7 text-center mb-4">Please enter the 6-digit verification code sent to your registered phone number / email address.</p>
+                    <h2 class="font-heading mb-3 text-center">Verify OTP</h2>
                     
-                    <form action="" method="POST">
+                    {% if is_phone_login %}
+                    <p class="text-muted fs-7 text-center mb-4">
+                        Please enter the 6-digit verification code sent to your mobile number:<br>
+                        <strong class="text-dark">{{ phone_number }}</strong>
+                    </p>
+                    {% else %}
+                    <p class="text-muted fs-7 text-center mb-4">
+                        Please enter the 6-digit verification code sent to your registered account:<br>
+                        <strong class="text-dark">{{ username }}</strong>
+                    </p>
+                    {% endif %}
+                    
+                    <form action="" method="POST" id="verify-form">
                         {% csrf_token %}
                         {% for field in form %}
-                        <div class="mb-4">
+                        <div class="mb-4 otp-input-container text-center">
                             {{ field }}
                             {% for error in field.errors %}
-                            <div class="text-danger fs-8 text-center mt-1">{{ error }}</div>
+                            <div class="text-danger fs-8 text-center mt-2 fw-semibold">{{ error }}</div>
                             {% endfor %}
                         </div>
                         {% endfor %}
                         
-                        <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Verify Code</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
+                            Verify Code
+                        </button>
                     </form>
+
+                    {% if is_phone_login %}
+                    <form action="{% url 'accounts:resend_otp' %}" method="POST" id="resend-form" class="text-center mt-4">
+                        {% csrf_token %}
+                        <button type="submit" id="resend-btn" class="btn btn-link text-decoration-none text-primary fs-7 fw-semibold p-0" disabled>
+                            Resend Code in <span id="countdown">30</span>s
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'accounts:login' %}" class="fs-8 text-muted text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Back to Login
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Verification form loading state
+        const verifyForm = document.getElementById("verify-form");
+        if (verifyForm) {
+            verifyForm.addEventListener("submit", function() {
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Verifying...`;
+                }
+            });
+        }
+        
+        // Cooldown timer for Resend OTP button
+        {% if is_phone_login %}
+        const countdownEl = document.getElementById("countdown");
+        const resendBtn = document.getElementById("resend-btn");
+        let seconds = 30;
+        
+        // Handle persistent timer via localStorage
+        const savedTime = localStorage.getItem("otp_cooldown_expiry");
+        const now = Date.now();
+        
+        if (savedTime && parseInt(savedTime) > now) {
+            seconds = Math.ceil((parseInt(savedTime) - now) / 1000);
+        } else {
+            localStorage.setItem("otp_cooldown_expiry", now + seconds * 1000);
+        }
+        
+        function updateTimer() {
+            if (seconds > 0) {
+                if (countdownEl) countdownEl.textContent = seconds;
+                if (resendBtn) {
+                    resendBtn.disabled = true;
+                    resendBtn.classList.remove("text-primary");
+                    resendBtn.classList.add("text-muted");
+                    resendBtn.innerHTML = `Resend Code in <span id="countdown">${seconds}</span>s`;
+                }
+                seconds--;
+                setTimeout(updateTimer, 1000);
+            } else {
+                if (resendBtn) {
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove("text-muted");
+                    resendBtn.classList.add("text-primary");
+                    resendBtn.innerHTML = `<i class="bi bi-arrow-clockwise"></i> Resend Verification Code`;
+                }
+                localStorage.removeItem("otp_cooldown_expiry");
+            }
+        }
+        
+        updateTimer();
+        
+        // Trigger loading state and reset countdown on resend submission
+        const resendForm = document.getElementById("resend-form");
+        if (resendForm) {
+            resendForm.addEventListener("submit", function() {
+                if (resendBtn) {
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Resending...`;
+                }
+                localStorage.setItem("otp_cooldown_expiry", Date.now() + 30 * 1000);
+            });
+        }
+        {% endif %}
+    });
+</script>
 {% endblock %}
