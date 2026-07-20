@@ -24,13 +24,15 @@ class CustomUserChangeForm(UserChangeForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'phone_number')
+        fields = ('first_name', 'last_name', 'email', 'phone_number', 'profile_picture')
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+
 
 class AddressForm(forms.ModelForm):
     class Meta:

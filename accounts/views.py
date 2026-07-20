@@ -390,13 +390,14 @@ def profile_view(request):
     user = request.user
         
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile updated successfully.")
             return redirect('accounts:profile')
     else:
         form = UserProfileForm(instance=user)
+
     
     # Lazy import of Order to avoid circular imports
     from shop.models import Order

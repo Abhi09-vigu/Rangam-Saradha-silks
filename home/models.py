@@ -8,7 +8,7 @@ class WebsiteSetting(models.Model):
     primary_color = models.CharField(max_length=7, default="#AF0446", help_text="HEX Color code (e.g. #AF0446)")
     secondary_color = models.CharField(max_length=7, default="#AE6F21", help_text="HEX Color code (e.g. #AE6F21)")
     currency = models.CharField(max_length=10, default="₹")
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage (e.g., 5.00 for 5% GST)")
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=5.00, help_text="Tax percentage (e.g., 5.00 for 5% GST)")
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
     maintenance_mode = models.BooleanField(default=False)

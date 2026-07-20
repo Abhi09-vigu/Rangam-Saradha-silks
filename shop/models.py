@@ -222,8 +222,10 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cod_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     grand_total = models.DecimalField(max_digits=10, decimal_places=2)
+
     
     coupon_used = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     

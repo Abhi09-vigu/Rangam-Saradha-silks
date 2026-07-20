@@ -3,13 +3,33 @@ from django.utils.html import format_html
 from django.db.models import Prefetch
 from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem
 
+class StockStatusFilter(admin.SimpleListFilter):
+    title = 'Stock Status'
+    parameter_name = 'stock_status'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('in_stock', 'In Stock (6+)'),
+            ('low_stock', 'Low Stock (1-5)'),
+            ('out_of_stock', 'Out of Stock (0)'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'in_stock':
+            return queryset.filter(stock__gte=6)
+        elif self.value() == 'low_stock':
+            return queryset.filter(stock__range=(1, 5))
+        elif self.value() == 'out_of_stock':
+            return queryset.filter(stock=0)
+        return queryset
+
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
-    list_filter = ['is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories', 'collection']
+    list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'stock_status', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
+    list_filter = [StockStatusFilter, 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories', 'collection']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline]
@@ -36,6 +56,24 @@ class ProductAdmin(admin.ModelAdmin):
             first_image.image.url
         )
     product_image_thumbnail.short_description = "Image"
+
+    def stock_status(self, obj):
+        if obj.stock == 0:
+            color = '#AF0446' # Red
+            text = 'Out of Stock'
+        elif 1 <= obj.stock <= 5:
+            color = '#AE6F21' # Orange
+            text = f'Low Stock ({obj.stock} left)'
+        else:
+            color = '#1b8a53' # Green
+            text = 'In Stock'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            text
+        )
+    stock_status.short_description = "Stock Status"
+
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'display_order', 'is_active']
@@ -133,7 +171,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['order_status', 'payment_status', 'payment_method', 'created_at']
     search_fields = ['order_number', 'full_name', 'phone_number', 'items__product__name']
     inlines = [OrderItemInline]
-    readonly_fields = ['order_number', 'subtotal', 'shipping_cost', 'tax_amount', 'discount_amount', 'grand_total', 'coupon_used']
+    readonly_fields = ['order_number', 'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge', 'discount_amount', 'grand_total', 'coupon_used']
     ordering = ['-created_at']
 
     def get_queryset(self, request):

@@ -174,3 +174,51 @@ class ProductAdminTest(TestCase):
         self.assertIn("img", thumbnail_html)
         self.assertIn("saree_test.jpg", thumbnail_html)
         self.assertIn('target="_blank"', thumbnail_html)
+
+class StockManagementAndTotalsTest(TestCase):
+    def setUp(self):
+        from home.models import WebsiteSetting
+        # Setup settings
+        self.settings_obj = WebsiteSetting.objects.create(
+            website_name="Rangam Saradha Silk Sarees",
+            tax_percentage=5.00,
+            shipping_charge=50.00,
+            free_shipping_limit=1000.00
+        )
+        self.product = Product.objects.create(
+            name="Deep Maroon Saree",
+            slug="deep-maroon-saree",
+            sku="DMS-001",
+            price=1000.00,
+            discount_percentage=0,
+            stock=3,
+            is_active=True
+        )
+
+    def test_admin_stock_status(self):
+        from .admin import ProductAdmin
+        from django.contrib.admin.sites import AdminSite
+        site = AdminSite()
+        product_admin = ProductAdmin(Product, site)
+        
+        # Test 10 stock -> In Stock
+        self.product.stock = 10
+        self.product.save()
+        status_html = product_admin.stock_status(self.product)
+        self.assertIn("In Stock", status_html)
+        self.assertIn("#1b8a53", status_html) # Green
+        
+        # Test 3 stock -> Low Stock
+        self.product.stock = 3
+        self.product.save()
+        status_html = product_admin.stock_status(self.product)
+        self.assertIn("Low Stock", status_html)
+        self.assertIn("#AE6F21", status_html) # Orange
+        
+        # Test 0 stock -> Out of Stock
+        self.product.stock = 0
+        self.product.save()
+        status_html = product_admin.stock_status(self.product)
+        self.assertIn("Out of Stock", status_html)
+        self.assertIn("#AF0446", status_html) # Red
+

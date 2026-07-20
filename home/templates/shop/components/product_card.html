@@ -31,6 +31,16 @@
             Silk Saree
             {% endif %}
         </div>
+        <div class="product-stock-badge mt-1 mb-2">
+            {% if product.stock == 0 %}
+            <span class="badge bg-danger text-white" style="font-size: 0.7rem; padding: 3px 6px;">Out of Stock</span>
+            {% elif product.stock <= 5 %}
+            <span class="badge bg-warning text-dark" style="font-size: 0.7rem; padding: 3px 6px;">Only {{ product.stock }} left</span>
+            {% else %}
+            <span class="badge bg-success text-white" style="font-size: 0.7rem; padding: 3px 6px;">In Stock</span>
+            {% endif %}
+        </div>
+
         <h3 class="product-title">
             <a href="{% url 'shop:product_detail' product.slug %}">{{ product.name }}</a>
         </h3>

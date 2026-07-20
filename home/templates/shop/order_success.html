@@ -106,6 +106,14 @@
                             </div>
                             {% endif %}
 
+                            {% if order.cod_charge > 0 %}
+                            <div class="d-flex justify-content-between mb-2 fs-7">
+                                <span class="text-muted">COD Charge:</span>
+                                <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ order.cod_charge|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+
+
                             <div class="d-flex justify-content-between mb-3 fs-7 pb-2 border-bottom border-light">
                                 <span class="text-muted">Shipping Cost:</span>
                                 <span class="fw-semibold text-dark">

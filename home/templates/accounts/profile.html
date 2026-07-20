@@ -35,23 +35,68 @@
                     <div class="tab-pane fade show active" id="profile-details" role="tabpanel">
                         <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
                             <h4 class="font-heading fs-5 mb-4 pb-2 border-bottom">Edit Profile Details</h4>
-                            <form action="" method="POST">
+                            <form action="" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div class="row g-3">
-                                    {% for field in form %}
-                                    <div class="col-md-6">
-                                        <label for="{{ field.id_for_label }}" class="form-label text-muted fs-7">{{ field.label }}</label>
-                                        {{ field }}
-                                        {% for error in field.errors %}
-                                        <div class="text-danger fs-8 mt-1">{{ error }}</div>
-                                        {% endfor %}
+                                <div class="row g-4">
+                                    <!-- Avatar Upload Column -->
+                                    <div class="col-md-4 text-center border-end border-light">
+                                        <div class="mb-3 position-relative d-inline-block">
+                                            {% if user.profile_picture %}
+                                                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle shadow-sm border border-light" style="width: 140px; height: 140px; object-fit: cover; border-width: 4px !important;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto shadow-sm border border-light" style="width: 140px; height: 140px; border-width: 4px !important;">
+                                                    <i class="bi bi-person text-muted display-4"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-2 px-2">
+                                            <label for="{{ form.profile_picture.id_for_label }}" class="form-label text-muted fs-7 d-block">Profile Photo</label>
+                                            {{ form.profile_picture }}
+                                            {% for error in form.profile_picture.errors %}
+                                            <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
                                     </div>
-                                    {% endfor %}
+                                    
+                                    <!-- Details Input Fields -->
+                                    <div class="col-md-8">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="{{ form.first_name.id_for_label }}" class="form-label text-muted fs-7">First Name</label>
+                                                {{ form.first_name }}
+                                                {% for error in form.first_name.errors %}
+                                                <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.last_name.id_for_label }}" class="form-label text-muted fs-7">Last Name</label>
+                                                {{ form.last_name }}
+                                                {% for error in form.last_name.errors %}
+                                                <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.email.id_for_label }}" class="form-label text-muted fs-7">Email Address</label>
+                                                {{ form.email }}
+                                                {% for error in form.email.errors %}
+                                                <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.phone_number.id_for_label }}" class="form-label text-muted fs-7">Phone Number</label>
+                                                {{ form.phone_number }}
+                                                {% for error in form.phone_number.errors %}
+                                                <div class="text-danger fs-8 mt-1">{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-4 py-2 px-4 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Save Changes</button>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-4">Save Changes</button>
                             </form>
                         </div>
                     </div>
+
                     
                     <!-- Order History -->
                     <div class="tab-pane fade" id="order-history" role="tabpanel">

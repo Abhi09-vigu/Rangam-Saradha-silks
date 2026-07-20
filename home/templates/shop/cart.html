@@ -44,12 +44,16 @@
                                 <td class="text-center">
                                     <form action="{% url 'shop:cart_update' item.id %}" method="POST" class="d-inline-block">
                                         {% csrf_token %}
-                                        <div class="input-group input-group-sm" style="max-width: 100px; margin: 0 auto;">
+                                        <div class="input-group input-group-sm mb-1" style="max-width: 100px; margin: 0 auto;">
                                             <input type="number" name="quantity" class="form-control text-center" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="this.form.submit()" style="box-shadow: none;" required>
                                             <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-arrow-clockwise"></i></button>
                                         </div>
+                                        {% if item.product.stock <= 5 %}
+                                        <small class="text-danger d-block text-center mt-1" style="font-size: 0.75rem;">Only {{ item.product.stock }} items available.</small>
+                                        {% endif %}
                                     </form>
                                 </td>
+
                                 <td class="text-end fw-bold text-dark fs-7">
                                     {{ site_settings.currency }}{{ item.get_total_price|floatformat:2 }}
                                 </td>

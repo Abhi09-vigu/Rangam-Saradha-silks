@@ -187,20 +187,25 @@ def cart_detail(request):
 def cart_add(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
     quantity = int(request.POST.get('quantity', 1))
+    buy_now = request.POST.get('buy_now') == 'true'
     
-    if product.stock < quantity:
-        messages.error(request, "Insufficient stock available.")
+    cart = _get_or_create_cart(request)
+    cart_item = CartItem.objects.filter(cart=cart, product=product).first()
+    current_in_cart = cart_item.quantity if cart_item else 0
+    
+    if product.stock < (current_in_cart + quantity):
+        messages.error(request, f"Cannot add more items. Only {product.stock} available and you have {current_in_cart} in cart.")
         return redirect(request.META.get('HTTP_REFERER', 'shop:catalog'))
         
-    cart = _get_or_create_cart(request)
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    if not created:
-        cart_item.quantity += quantity
+    if not cart_item:
+        cart_item = CartItem.objects.create(cart=cart, product=product, quantity=quantity)
     else:
-        cart_item.quantity = quantity
-    cart_item.save()
+        cart_item.quantity += quantity
+        cart_item.save()
     
     messages.success(request, f"Added {product.name} to your Cart.")
+    if buy_now:
+        return redirect('shop:checkout')
     return redirect('shop:cart_detail')
 
 def cart_update(request, item_id):
@@ -208,13 +213,14 @@ def cart_update(request, item_id):
     quantity = int(request.POST.get('quantity', 1))
     
     if cart_item.product.stock < quantity:
-        messages.error(request, "Insufficient stock available.")
+        messages.error(request, f"Only {cart_item.product.stock} items available.")
     else:
         cart_item.quantity = quantity
         cart_item.save()
         messages.success(request, "Cart updated.")
         
     return redirect('shop:cart_detail')
+
 
 def cart_remove(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
@@ -279,7 +285,9 @@ def checkout(request):
     if subtotal - discount >= settings_obj.free_shipping_limit:
         shipping = 0
         
-    grand_total = subtotal - discount + tax + shipping
+    # By default, checkout payment method is COD
+    cod_charge = Decimal('49.00')
+    grand_total = subtotal - discount + tax + shipping + cod_charge
 
     context = {
         'cart': cart,
@@ -289,12 +297,14 @@ def checkout(request):
         'discount': discount,
         'tax': tax,
         'shipping': shipping,
+        'cod_charge': cod_charge,
         'grand_total': grand_total,
     }
     return render(request, 'shop/checkout.html', context)
 
 @customer_required
 def order_create(request):
+    from django.db import transaction
     if request.method == 'POST':
         cart = _get_or_create_cart(request)
         if not cart.items.exists():
@@ -308,83 +318,109 @@ def order_create(request):
             
         address = get_object_or_404(Address, id=address_id, user=request.user)
         payment_method = request.POST.get('payment_method', 'COD')
+        cod_charge = Decimal('49.00') if payment_method == 'COD' else Decimal('0.00')
         
-        # Calculate pricing
-        settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
-        subtotal = sum(item.get_total_price() for item in cart.items.all())
-        
-        # Coupon
-        coupon_code = request.session.get('coupon_code')
-        coupon = None
-        discount = 0
-        if coupon_code:
-            try:
-                coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-                if coupon.is_valid(subtotal):
-                    discount = coupon.calculate_discount(subtotal)
-            except Coupon.DoesNotExist:
-                pass
+        try:
+            with transaction.atomic():
+                # Lock products using select_for_update to avoid race conditions/overselling
+                cart_items = list(cart.items.all())
+                product_ids = [item.product_id for item in cart_items]
                 
-        tax_percent = settings_obj.tax_percentage
-        tax = (subtotal - discount) * (tax_percent / Decimal('100'))
-        
-        shipping = settings_obj.shipping_charge
-        if subtotal - discount >= settings_obj.free_shipping_limit:
-            shipping = 0
+                locked_products = {
+                    p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
+                }
+                
+                # Validate stock for all items
+                for item in cart_items:
+                    product = locked_products.get(item.product_id)
+                    if not product or not product.is_active:
+                        raise ValueError(f"Product '{item.product.name}' is no longer active.")
+                    if product.stock < item.quantity:
+                        raise ValueError(f"Product '{product.name}' has insufficient stock. Only {product.stock} left.")
+                
+                # Calculate pricing
+                settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+                subtotal = sum(item.get_total_price() for item in cart_items)
+                
+                # Coupon
+                coupon_code = request.session.get('coupon_code')
+                coupon = None
+                discount = 0
+                if coupon_code:
+                    try:
+                        coupon = Coupon.objects.get(code=coupon_code, is_active=True)
+                        if coupon.is_valid(subtotal):
+                            discount = coupon.calculate_discount(subtotal)
+                    except Coupon.DoesNotExist:
+                        pass
+                        
+                tax_percent = settings_obj.tax_percentage
+                tax = (subtotal - discount) * (tax_percent / Decimal('100'))
+                
+                shipping = settings_obj.shipping_charge
+                if subtotal - discount >= settings_obj.free_shipping_limit:
+                    shipping = 0
+                    
+                grand_total = subtotal - discount + tax + shipping + cod_charge
+                
+                # Generate Order Number
+                order_number = f"RS-{uuid.uuid4().hex[:8].upper()}"
+                
+                # Create Order
+                order = Order.objects.create(
+                    user=request.user,
+                    order_number=order_number,
+                    full_name=address.full_name,
+                    phone_number=str(address.phone_number),
+                    email=request.user.email,
+                    address_line_1=address.address_line_1,
+                    address_line_2=address.address_line_2,
+                    city=address.city,
+                    state=address.state,
+                    pincode=address.pincode,
+                    landmark=address.landmark,
+                    payment_method=payment_method,
+                    payment_status='PENDING' if payment_method == 'COD' else 'PAID',
+                    order_status='PENDING',
+                    subtotal=subtotal,
+                    shipping_cost=shipping,
+                    tax_amount=tax,
+                    cod_charge=cod_charge,
+                    discount_amount=discount,
+                    grand_total=grand_total,
+                    coupon_used=coupon
+                )
+                
+                # Move CartItems to OrderItems and decrement stock
+                for item in cart_items:
+                    product = locked_products.get(item.product_id)
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=item.quantity,
+                        price=product.offer_price
+                    )
+                    product.stock -= item.quantity
+                    product.save()
+                    
+                # Update Coupon usage
+                if coupon:
+                    coupon.used_count += 1
+                    coupon.save()
+                    del request.session['coupon_code']
+                    
+                # Clear Cart
+                cart.items.all().delete()
+                
+                messages.success(request, f"Order #{order_number} placed successfully!")
+                return render(request, 'shop/order_success.html', {'order': order})
+                
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('shop:cart_detail')
             
-        grand_total = subtotal - discount + tax + shipping
-        
-        # Generate Order Number
-        order_number = f"RS-{uuid.uuid4().hex[:8].upper()}"
-        
-        # Create Order
-        order = Order.objects.create(
-            user=request.user,
-            order_number=order_number,
-            full_name=address.full_name,
-            phone_number=str(address.phone_number),
-            email=request.user.email,
-            address_line_1=address.address_line_1,
-            address_line_2=address.address_line_2,
-            city=address.city,
-            state=address.state,
-            pincode=address.pincode,
-            landmark=address.landmark,
-            payment_method=payment_method,
-            payment_status='PENDING' if payment_method == 'COD' else 'PAID', # stub paid for online placeholder
-            order_status='PENDING',
-            subtotal=subtotal,
-            shipping_cost=shipping,
-            tax_amount=tax,
-            discount_amount=discount,
-            grand_total=grand_total,
-            coupon_used=coupon
-        )
-        
-        # Move CartItems to OrderItems and decrement stock
-        for item in cart.items.all():
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.offer_price
-            )
-            item.product.stock -= item.quantity
-            item.product.save()
-            
-        # Update Coupon usage
-        if coupon:
-            coupon.used_count += 1
-            coupon.save()
-            del request.session['coupon_code']
-            
-        # Clear Cart
-        cart.items.all().delete()
-        
-        messages.success(request, f"Order #{order_number} placed successfully!")
-        return render(request, 'shop/order_success.html', {'order': order})
-        
     return redirect('shop:checkout')
+
 
 @customer_required
 def order_detail(request, order_number):
