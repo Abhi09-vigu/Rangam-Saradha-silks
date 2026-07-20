@@ -222,3 +222,91 @@ class StockManagementAndTotalsTest(TestCase):
         self.assertIn("Out of Stock", status_html)
         self.assertIn("#AF0446", status_html) # Red
 
+class OrderEmailSignalsTest(TestCase):
+    def setUp(self):
+        from home.models import WebsiteSetting
+        # Setup settings
+        self.settings_obj = WebsiteSetting.objects.create(
+            website_name="Rangam Saradha Silk Sarees",
+            tax_percentage=5.00,
+            shipping_charge=50.00,
+            free_shipping_limit=1000.00
+        )
+        
+        # Create categories and products
+        self.category = Category.objects.create(name="Saree", slug="saree")
+        self.product = Product.objects.create(
+            name="Deep Maroon Saree",
+            slug="deep-maroon-saree",
+            sku="DMS-001",
+            price=1000.00,
+            stock=10,
+            is_active=True
+        )
+
+    def test_order_creation_triggers_confirmation_email(self):
+        from django.core import mail
+        import time
+        # Clear outbox before test
+        mail.outbox = []
+        
+        # Create an Order
+        order = Order.objects.create(
+            order_number="ORD-TEST-101",
+            full_name="Abhi Vigu",
+            phone_number="9876543210",
+            email="abhi@example.com",
+            address_line_1="123 Silk Street",
+            city="Kanchipuram",
+            state="Tamil Nadu",
+            pincode="631501",
+            payment_method="COD",
+            payment_status="PENDING",
+            order_status="PENDING",
+            subtotal=1000.00,
+            grand_total=1050.00
+        )
+        
+        # Give thread 0.1s to finish sending
+        time.sleep(0.1)
+        
+        # Verify confirmation email was queued
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Thank you for your order!", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, ["abhi@example.com"])
+
+    def test_order_status_update_triggers_status_email(self):
+        from django.core import mail
+        import time
+        # Create order first
+        order = Order.objects.create(
+            order_number="ORD-TEST-102",
+            full_name="Abhi Vigu",
+            phone_number="9876543210",
+            email="abhi@example.com",
+            address_line_1="123 Silk Street",
+            city="Kanchipuram",
+            state="Tamil Nadu",
+            pincode="631501",
+            payment_method="COD",
+            payment_status="PENDING",
+            order_status="PENDING",
+            subtotal=1000.00,
+            grand_total=1050.00
+        )
+        
+        time.sleep(0.1)
+        mail.outbox = [] # Clear outbox after creation email
+        
+        # Update order status
+        order.order_status = "SHIPPED"
+        order.save()
+        
+        time.sleep(0.1)
+        
+        # Verify status update email was queued
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Status Update: Shipped", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, ["abhi@example.com"])
+
+

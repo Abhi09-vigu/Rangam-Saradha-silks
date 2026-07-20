@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Rangam Saradha Silks</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header {
+            background-color: #AF0446; /* Deep Maroon */
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .intro-text {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .order-meta-box {
+            background-color: #fafafa;
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+        .order-meta-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-meta-box td {
+            padding: 5px 0;
+            font-size: 13px;
+            color: #555555;
+        }
+        .order-meta-box td.label {
+            font-weight: bold;
+            width: 120px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        .items-table th {
+            border-bottom: 2px solid #eeeeee;
+            padding: 10px 5px;
+            text-align: left;
+            font-size: 12px;
+            color: #999999;
+            text-transform: uppercase;
+        }
+        .items-table td {
+            border-bottom: 1px solid #eeeeee;
+            padding: 12px 5px;
+            font-size: 14px;
+            color: #333333;
+        }
+        .items-table td.qty {
+            text-align: center;
+        }
+        .items-table td.price {
+            text-align: right;
+            font-weight: bold;
+        }
+        .summary-table {
+            width: 50%;
+            margin-left: auto;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .summary-table td {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #666666;
+        }
+        .summary-table td.price {
+            text-align: right;
+            color: #333333;
+            font-weight: bold;
+        }
+        .summary-table tr.total td {
+            border-top: 2px solid #eeeeee;
+            padding-top: 10px;
+            font-size: 16px;
+            color: #AF0446;
+            font-weight: bold;
+        }
+        .address-section {
+            border-top: 1px solid #eeeeee;
+            padding-top: 25px;
+            margin-bottom: 25px;
+        }
+        .address-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #AF0446;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .address-text {
+            font-size: 13px;
+            color: #666666;
+            line-height: 1.5;
+        }
+        .footer {
+            background-color: #222222;
+            padding: 25px;
+            text-align: center;
+            color: #999999;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #AE6F21; /* Gold/Bronze */
+            text-decoration: none;
+        }
+        .btn-track {
+            display: inline-block;
+            background-color: #AF0446;
+            color: #ffffff !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Rangam Saradha Silks</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">Dear {{ order.full_name }},</div>
+            <div class="intro-text">
+                Thank you for shopping with Rangam Saradha Silks! Your order has been placed successfully. We are preparing your handwoven pure silk saree for dispatch. You can track your order status by clicking the button below or logging into your Account Dashboard.
+            </div>
+            
+            <!-- Order Metadata -->
+            <div class="order-meta-box">
+                <table>
+                    <tr>
+                        <td class="label">Order ID:</td>
+                        <td>#{{ order.order_number }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Order Date:</td>
+                        <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Payment Method:</td>
+                        <td>{{ order.get_payment_method_display }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Items Table -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product Details</th>
+                        <th class="qty" style="width: 60px;">Qty</th>
+                        <th class="price" style="width: 100px;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold; color: #333333;">{{ item.product.name }}</div>
+                            <div style="font-size: 11px; color: #888888;">Fabric: {{ item.product.fabric|default:"Pure Silk Saree" }}</div>
+                        </td>
+                        <td class="qty">{{ item.quantity }}</td>
+                        <td class="price">{{ site_settings.currency }}{{ item.price|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Totals Summary -->
+            <table class="summary-table">
+                <tr>
+                    <td>Subtotal:</td>
+                    <td class="price">{{ site_settings.currency }}{{ order.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% if order.discount_amount > 0 %}
+                <tr style="color: #28a745;">
+                    <td>Discount:</td>
+                    <td class="price" style="color: #28a745;">-{{ site_settings.currency }}{{ order.discount_amount|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>GST/Tax:</td>
+                    <td class="price">{{ site_settings.currency }}{{ order.tax_amount|floatformat:2 }}</td>
+                </tr>
+                {% if order.cod_charge > 0 %}
+                <tr>
+                    <td>COD Charge:</td>
+                    <td class="price">{{ site_settings.currency }}{{ order.cod_charge|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Shipping:</td>
+                    <td class="price">
+                        {% if order.shipping_cost == 0 %}
+                        Free
+                        {% else %}
+                        {{ site_settings.currency }}{{ order.shipping_cost|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr class="total">
+                    <td>Grand Total:</td>
+                    <td class="price">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</td>
+                </tr>
+            </table>
+            
+            <!-- Shipping Address -->
+            <div class="address-section">
+                <div class="address-title">Delivery Shipping Address</div>
+                <div class="address-text">
+                    <strong>{{ order.full_name }}</strong><br>
+                    {{ order.address_line_1 }}<br>
+                    {% if order.address_line_2 %}
+                    {{ order.address_line_2 }}<br>
+                    {% endif %}
+                    {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+                    {% if order.landmark %}
+                    Landmark: {{ order.landmark }}<br>
+                    {% endif %}
+                    Phone: {{ order.phone_number }}
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{ site_url }}{% url 'accounts:profile' %}" class="btn-track">Track My Order</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2026 Rangam Saradha Silks. All Rights Reserved.</p>
+            <p>Need support? Visit our <a href="{{ site_url }}">website</a> or email us at support@rangamsaradhanasilks.com.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status Update - Rangam Saradha Silks</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header {
+            background-color: #AF0446; /* Deep Maroon */
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .status-alert {
+            background-color: #fff8eb;
+            border-left: 4px solid #AE6F21;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #AF0446;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        .intro-text {
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .items-box {
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+        .items-box-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #999999;
+            text-transform: uppercase;
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .order-meta-box {
+            background-color: #fafafa;
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+        .order-meta-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-meta-box td {
+            padding: 5px 0;
+            font-size: 13px;
+            color: #555555;
+        }
+        .order-meta-box td.label {
+            font-weight: bold;
+            width: 120px;
+        }
+        .footer {
+            background-color: #222222;
+            padding: 25px;
+            text-align: center;
+            color: #999999;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #AE6F21;
+            text-decoration: none;
+        }
+        .btn-track {
+            display: inline-block;
+            background-color: #AF0446;
+            color: #ffffff !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Rangam Saradha Silks</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">Dear {{ order.full_name }},</div>
+            
+            <div class="status-alert">
+                <div style="font-size: 15px; font-weight: bold; color: #AE6F21;">Order Status Update</div>
+                <div class="status-badge">{{ status_display }}</div>
+            </div>
+            
+            <div class="intro-text">
+                {{ status_message }}
+            </div>
+            
+            <!-- Order Metadata -->
+            <div class="order-meta-box">
+                <table>
+                    <tr>
+                        <td class="label">Order ID:</td>
+                        <td>#{{ order.order_number }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Previous Status:</td>
+                        <td style="text-decoration: line-through;">{{ original_status_display }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">New Status:</td>
+                        <td style="font-weight: bold; color: #AF0446;">{{ status_display }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Grand Total:</td>
+                        <td style="font-weight: bold;">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Items Box -->
+            <div class="items-box">
+                <div class="items-box-title">Order Items Overview</div>
+                {% for item in items %}
+                <div style="margin-bottom: 10px; font-size: 14px; color: #333333; display: flex; justify-content: space-between;">
+                    <span>{{ item.product.name }} <strong>x {{ item.quantity }}</strong></span>
+                    <span style="font-weight: bold;">{{ site_settings.currency }}{{ item.price|floatformat:2 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{ site_url }}{% url 'accounts:profile' %}" class="btn-track">Track My Order Status</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2026 Rangam Saradha Silks. All Rights Reserved.</p>
+            <p>Need support? Visit our <a href="{{ site_url }}">website</a> or email us at support@rangamsaradhanasilks.com.</p>
+        </div>
+    </div>
+</body>
+</html>
