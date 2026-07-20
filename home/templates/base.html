@@ -112,8 +112,12 @@
                     <!-- Account Dropdown -->
                     {% if user.is_authenticated %}
                     <div class="dropdown d-inline">
-                        <a class="dropdown-toggle no-arrow ms-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                        <a class="dropdown-toggle no-arrow ms-3 d-inline-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle shadow-sm border border-light" style="width: 32px; height: 32px; object-fit: cover;">
+                            {% else %}
+                                <i class="bi bi-person-circle" style="font-size: 1.25rem;"></i>
+                            {% endif %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
                             <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">My Account</a></li>
@@ -123,6 +127,7 @@
                             <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>
+
                     {% else %}
                     <a href="{% url 'accounts:login' %}" title="Login / Register" class="ms-3">
                         <i class="bi bi-person"></i>
