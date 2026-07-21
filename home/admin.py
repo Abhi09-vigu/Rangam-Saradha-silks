@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission
+from django.db import models
+from django.forms import Textarea
+from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange
 
 class SingletonAdmin(admin.ModelAdmin):
     # Prevents adding new items if one already exists
@@ -17,6 +19,22 @@ class WebsiteSettingAdmin(SingletonAdmin):
 
 class ContactInfoAdmin(SingletonAdmin):
     list_display = ['phone', 'email', 'working_hours']
+    fields = [
+        'phone',
+        'email',
+        'facebook_url',
+        'instagram_url',
+        'youtube_url',
+        'twitter_url',
+        'pinterest_url',
+        'whatsapp_number',
+        'address',
+        'working_hours',
+        'google_map_iframe',
+    ]
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(attrs={'rows': 3, 'style': 'height: 80px; width: 100%; max-width: 600px;'})},
+    }
 
 class HeroSliderAdmin(admin.ModelAdmin):
     list_display = ['title', 'display_order', 'is_active']
@@ -55,6 +73,11 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+class BudgetRangeAdmin(admin.ModelAdmin):
+    list_display = ['title', 'min_price', 'max_price', 'display_order', 'is_active']
+    list_editable = ['display_order', 'is_active']
+    search_fields = ['title']
+
 from rangam_saradha_silk.admin import custom_admin_site
 
 custom_admin_site.register(WebsiteSetting, WebsiteSettingAdmin)
@@ -66,3 +89,4 @@ custom_admin_site.register(CMSPage, CMSPageAdmin)
 custom_admin_site.register(FAQ, FAQAdmin)
 custom_admin_site.register(InstagramPost, InstagramPostAdmin)
 custom_admin_site.register(ContactSubmission, ContactSubmissionAdmin)
+custom_admin_site.register(BudgetRange, BudgetRangeAdmin)

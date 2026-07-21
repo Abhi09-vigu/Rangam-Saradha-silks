@@ -29,7 +29,7 @@ class ContactInfo(models.Model):
     phone = models.CharField(max_length=20, default="+91 98765 43210")
     email = models.EmailField(default="contact@rangamsaradhasilk.com")
     address = models.TextField(default="123 Silk Street, Kanchipuram, Tamil Nadu, India")
-    google_map_iframe = models.TextField(blank=True, null=True, help_text="Paste full <iframe> embed tag from Google Maps")
+    google_map_iframe = models.TextField(blank=True, null=True, help_text="Paste the full iframe embed code from Google Maps")
     working_hours = models.CharField(max_length=100, default="Mon - Sat: 9:00 AM - 8:00 PM")
     
     # Social Media
@@ -38,6 +38,22 @@ class ContactInfo(models.Model):
     youtube_url = models.URLField(blank=True, null=True)
     twitter_url = models.URLField(blank=True, null=True)
     pinterest_url = models.URLField(blank=True, null=True)
+    whatsapp_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="WhatsApp number with country code, without spaces or symbols (e.g. 919876543210 or 9876543210)",
+    )
+
+    @property
+    def whatsapp_url(self):
+        if self.whatsapp_number:
+            cleaned = "".join(char for char in str(self.whatsapp_number) if char.isdigit())
+            if len(cleaned) == 10:
+                cleaned = "91" + cleaned
+            if cleaned:
+                return f"https://wa.me/{cleaned}?text=Hello%20Rangam%20Saradha%20Silks"
+        return None
 
     class Meta:
         verbose_name = "Contact Info"
@@ -142,3 +158,19 @@ class ContactSubmission(models.Model):
 
     def __str__(self):
         return f"Message from {self.name} - {self.subject}"
+
+
+class BudgetRange(models.Model):
+    title = models.CharField(max_length=100, help_text="e.g. Under ₹2000, ₹2000 - ₹4000")
+    min_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Minimum price filter value. Leave blank for no minimum.")
+    max_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Maximum price filter value. Leave blank for no maximum.")
+    display_order = models.IntegerField(default=0, help_text="Order in which it will be displayed.")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'id']
+        verbose_name = "Budget Range"
+        verbose_name_plural = "Budget Ranges"
+
+    def __str__(self):
+        return self.title

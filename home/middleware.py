@@ -70,12 +70,6 @@ class CustomMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        try:
-            setting_val = WebsiteSetting.objects.first().maintenance_mode
-        except Exception:
-            setting_val = "Error"
-        print(f"[DEBUG_REQ] Path: {request.path}, User: {request.user}, Staff: {getattr(request.user, 'is_staff', False)}, MaintenanceMode: {setting_val}")
-
         # Prevent customer users from accessing Django admin
         if request.path.startswith('/admin/'):
             if request.user.is_authenticated and not request.user.is_staff:

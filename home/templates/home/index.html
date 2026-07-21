@@ -131,6 +131,32 @@
     </div>
 </section>
 
+<!-- Shop by Budget Section -->
+{% if budget_ranges %}
+<section class="section-luxury bg-white py-5">
+    <div class="container">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle text-uppercase tracking-wider">Browse By Value</span>
+            <h2 class="section-title font-heading fw-bold">Find Your Piece</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
+        </div>
+        <div class="row g-4">
+            {% for range in budget_ranges %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a href="{% url 'shop:catalog' %}?{% if range.min_price %}min_price={{ range.min_price|floatformat:0 }}{% endif %}{% if range.min_price and range.max_price %}&{% endif %}{% if range.max_price %}max_price={{ range.max_price|floatformat:0 }}{% endif %}" class="budget-card text-center p-4 d-block text-decoration-none">
+                    <div class="budget-card-content">
+                        <span class="budget-card-currency">₹</span>
+                        <h3 class="budget-card-title font-heading">{{ range.title }}</h3>
+                        <span class="budget-card-explore">Explore Collection <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Testimonials Section -->
 {% if testimonials %}
 <section class="section-luxury">

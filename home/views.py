@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission
+from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange
 from shop.models import Category, Product
 
 def index(request):
     sliders = HeroSlider.objects.filter(is_active=True).order_by('display_order')
     categories = Category.objects.filter(is_active=True).order_by('display_order')[:6]
+    budget_ranges = BudgetRange.objects.filter(is_active=True).order_by('display_order')
     
     # Dynamic Homepage Product Sections
     featured_products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images', 'categories')[:4]
@@ -33,6 +34,7 @@ def index(request):
     context = {
         'sliders': sliders,
         'categories': categories,
+        'budget_ranges': budget_ranges,
         'featured_products': featured_products,
         'trending_products': trending_products,
         'new_arrivals': new_arrivals,

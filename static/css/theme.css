@@ -478,3 +478,244 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     border-radius: 12px;
     padding: 1.5rem;
 }
+
+/* Floating Social Media Sidebar & WhatsApp Button */
+@keyframes slideInSocialSidebar {
+    from {
+        opacity: 0;
+        right: -44px;
+    }
+    to {
+        opacity: 1;
+        right: 0;
+    }
+}
+
+@keyframes whatsappEntrance {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.social-sidebar {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Stacks rectangular boxes directly with no gaps */
+    align-items: flex-end;
+    opacity: 0;
+    animation: slideInSocialSidebar 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s forwards;
+}
+
+.social-sidebar-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: #ffffff !important;
+    font-size: 18px;
+    text-decoration: none !important;
+    border-radius: 0; /* Purely rectangular/square boxes */
+    box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.social-sidebar-item:hover {
+    transform: translateX(-8px); /* Slides left on hover */
+    box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.25);
+    color: #ffffff !important;
+}
+
+/* Individual Social Media Platform Brand Colors */
+.social-sidebar-item.facebook {
+    background-color: #1877F2;
+}
+.social-sidebar-item.instagram {
+    background: linear-gradient(135deg, #AE6F21 0%, #8A561A 100%); /* Gold Accent to Gold Dark bronze style */
+}
+.social-sidebar-item.youtube {
+    background-color: #FF0000;
+}
+
+/* Floating WhatsApp Chat Button */
+.whatsapp-float-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: #ffffff !important;
+    border-radius: 50%; /* Purely circular button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    text-decoration: none !important;
+    z-index: 9999;
+    opacity: 0;
+    animation: whatsappEntrance 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.6s forwards, pulse-whatsapp 2s infinite 1.4s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.whatsapp-float-btn:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5);
+    animation: none; /* Stops pulsing on hover */
+}
+
+/* WhatsApp Custom Tooltip */
+.whatsapp-tooltip {
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    background-color: #21030e; /* Dark elegant header color */
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9998; /* Stays below button */
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+/* Tooltip Arrow pointing to the right */
+.whatsapp-tooltip::after {
+    content: "";
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #21030e;
+}
+
+.whatsapp-float-btn:hover .whatsapp-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) scale(1);
+}
+
+/* WhatsApp Circular Pulsing Glow Animation */
+@keyframes pulse-whatsapp {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .social-sidebar {
+        animation: slideInSocialSidebar 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s forwards;
+    }
+    .social-sidebar-item {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .social-sidebar-item:hover {
+        transform: translateX(-4px);
+    }
+    .whatsapp-float-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 26px;
+    }
+    .whatsapp-tooltip {
+        display: none !important;
+    }
+}
+
+/* Find Your Piece / Shop By Budget Styles */
+.gold-accent-line {
+    width: 50px;
+    height: 1px;
+    background-color: #AE6F21; /* Gold Accent */
+    margin-top: 12px;
+}
+
+.budget-card {
+    background-color: #ffffff;
+    border: 1px solid #e5d5c0; /* Light gold/bronze border */
+    padding: 35px 20px;
+    border-radius: 0; /* Square elegant borders */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+}
+
+.budget-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.budget-card-currency {
+    font-size: 28px;
+    color: #AE6F21; /* Gold Accent */
+    font-weight: 300;
+    margin-bottom: 8px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    transition: transform 0.3s ease;
+}
+
+.budget-card-title {
+    font-size: 16px;
+    color: #21030e; /* Dark rich brown */
+    font-weight: 500;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.budget-card-explore {
+    font-size: 11px;
+    color: #8c0338; /* Maroon subtext */
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+/* Hover State */
+.budget-card:hover {
+    border-color: #AF0446; /* Maroon Border on hover */
+    transform: translateY(-6px); /* Slight lift */
+    box-shadow: 0 10px 25px rgba(175, 4, 70, 0.08); /* Soft maroon tint shadow */
+}
+
+.budget-card:hover .budget-card-explore {
+    opacity: 1;
+    color: #AF0446;
+}
+
+.budget-card:hover .budget-card-currency {
+    transform: scale(1.1);
+}
