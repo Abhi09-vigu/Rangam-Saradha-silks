@@ -978,3 +978,104 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     background: rgba(33, 3, 14, 0.65); /* Luxury dark tint overlay */
     z-index: 1;
 }
+
+/* Product Marquee Sliders */
+.product-marquee-container {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    padding: 15px 0;
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.product-marquee-container::-webkit-scrollbar {
+    display: none;
+}
+
+.product-marquee-track-ltr {
+    display: flex;
+    width: max-content;
+    align-items: stretch;
+    animation: scroll-ltr 38s linear infinite;
+    padding: 15px 0; /* Padding to prevent card hover shadows from being clipped */
+}
+
+.product-marquee-track-rtl {
+    display: flex;
+    width: max-content;
+    align-items: stretch;
+    animation: scroll-rtl 38s linear infinite;
+    padding: 15px 0; /* Padding to prevent card hover shadows from being clipped */
+}
+
+.product-marquee-track-ltr:hover,
+.product-marquee-track-rtl:hover,
+.product-marquee-track-ltr.paused,
+.product-marquee-track-rtl.paused {
+    animation-play-state: paused;
+}
+
+.product-marquee-item {
+    width: 290px;
+    flex-shrink: 0;
+    margin-right: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-marquee-item > * {
+    flex-grow: 1;
+    height: 100%;
+}
+
+@keyframes scroll-ltr {
+    0% {
+        transform: translateX(-33.33333%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes scroll-rtl {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-33.33333%);
+    }
+}
+
+/* Responsive sizes for marquee products */
+@media (max-width: 992px) {
+    .product-marquee-item {
+        width: 250px;
+        margin-right: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-marquee-item {
+        width: 210px;
+        margin-right: 16px;
+    }
+    .product-marquee-track-ltr,
+    .product-marquee-track-rtl {
+        animation-duration: 32s; /* Slightly faster on smaller viewports to look consistent */
+    }
+}
+
+@media (max-width: 480px) {
+    .product-marquee-item {
+        width: 180px;
+        margin-right: 12px;
+    }
+    .product-marquee-track-ltr,
+    .product-marquee-track-rtl {
+        animation-duration: 28s;
+    }
+}
+

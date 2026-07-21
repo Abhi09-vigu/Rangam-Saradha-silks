@@ -125,7 +125,37 @@
 
 <!-- New Arrivals Section -->
 {% if new_arrivals %}
-<section class="section-luxury bg-luxury py-5">
+<section class="section-luxury bg-luxury py-5 overflow-hidden">
+    {% if new_arrivals|length > 4 %}
+    <div class="container-fluid px-0">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle">💎 Exquisite New Weaves</span>
+            <h2 class="section-title">New Arrivals</h2>
+        </div>
+        <div class="product-marquee-container">
+            <div class="product-marquee-track-ltr">
+                <!-- Set 1 -->
+                {% for product in new_arrivals %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                </div>
+                {% endfor %}
+                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                {% for product in new_arrivals %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                </div>
+                {% endfor %}
+                <!-- Set 3 (Duplicated for Wide Screens) -->
+                {% for product in new_arrivals %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">💎 Exquisite New Weaves</span>
@@ -139,12 +169,43 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 </section>
 {% endif %}
 
 <!-- Best Sellers Section -->
 {% if best_sellers %}
-<section class="section-luxury bg-white py-5">
+<section class="section-luxury bg-white py-5 overflow-hidden">
+    {% if best_sellers|length > 4 %}
+    <div class="container-fluid px-0">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
+            <h2 class="section-title">Best Sellers</h2>
+        </div>
+        <div class="product-marquee-container">
+            <div class="product-marquee-track-rtl">
+                <!-- Set 1 -->
+                {% for product in best_sellers %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                </div>
+                {% endfor %}
+                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                {% for product in best_sellers %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                </div>
+                {% endfor %}
+                <!-- Set 3 (Duplicated for Wide Screens) -->
+                {% for product in best_sellers %}
+                <div class="product-marquee-item">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
@@ -154,6 +215,38 @@
             {% for product in best_sellers %}
             <div class="col">
                 {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+
+<!-- Find Your Piece (Shop By Budget) Section -->
+{% if budget_ranges %}
+<section class="section-luxury bg-luxury py-5">
+    <div class="container">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle">Browse By Value</span>
+            <h2 class="section-title">Find Your Piece</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            {% for range in budget_ranges %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <a href="{% url 'shop:catalog' %}?{% if range.min_price %}min_price={{ range.min_price|floatformat:0 }}{% endif %}{% if range.min_price and range.max_price %}&{% endif %}{% if range.max_price %}max_price={{ range.max_price|floatformat:0 }}{% endif %}" class="text-decoration-none">
+                    <div class="budget-card">
+                        <div class="budget-card-content text-center">
+                            <div class="budget-card-currency">₹</div>
+                            <div class="budget-card-title">{{ range.title }}</div>
+                            <div class="budget-card-explore">
+                                Explore <i class="bi bi-arrow-right ms-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
             {% endfor %}
         </div>
@@ -278,4 +371,18 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Pause marquee sliders on mobile touch interaction
+    document.querySelectorAll('.product-marquee-track-ltr, .product-marquee-track-rtl').forEach(track => {
+        track.addEventListener('touchstart', () => {
+            track.classList.add('paused');
+        }, { passive: true });
+        track.addEventListener('touchend', () => {
+            track.classList.remove('paused');
+        }, { passive: true });
+    });
+</script>
 {% endblock %}

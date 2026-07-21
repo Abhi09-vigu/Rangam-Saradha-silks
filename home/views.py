@@ -11,8 +11,8 @@ def index(request):
     # Dynamic Homepage Product Sections
     featured_products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images', 'categories')[:4]
     trending_products = Product.objects.filter(is_active=True, is_trending=True).prefetch_related('images', 'categories')[:4]
-    new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).prefetch_related('images', 'categories')[:4]
-    best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:4]
+    new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).prefetch_related('images', 'categories')[:12]
+    best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:12]
     today_deals = Product.objects.filter(is_active=True, is_today_deal=True).prefetch_related('images', 'categories')[:12]
     
     # Featured Collections and Why Choose Us
