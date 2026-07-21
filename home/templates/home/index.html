@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{% endblock %}
+
 {% block meta_title %}Home - {{ site_settings.website_name }}{% endblock %}
 
 {% block content %}
@@ -68,23 +72,51 @@
 
 <!-- Categories Section -->
 {% if categories %}
-<section class="section-luxury">
-    <div class="container">
-        <div class="section-heading-wrapper text-center">
+<section class="section-luxury py-5 overflow-hidden">
+    <div class="container-fluid px-0">
+        <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">Discover Collections</span>
             <h2 class="section-title">Shop by Category</h2>
         </div>
-        <div class="row g-4 justify-content-center">
-            {% for cat in categories %}
-            <div class="col-6 col-sm-4 col-md-2">
-                <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
-                    <div class="category-circle-image">
-                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
-                    </div>
-                    <h3>{{ cat.name }}</h3>
-                </a>
+        
+        <div class="category-carousel-container">
+            <div class="category-carousel-track">
+                <!-- Set 1 -->
+                {% for cat in categories %}
+                <div class="category-carousel-item">
+                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <div class="category-circle-image">
+                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                        </div>
+                        <h3>{{ cat.name }}</h3>
+                    </a>
+                </div>
+                {% endfor %}
+                
+                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                {% for cat in categories %}
+                <div class="category-carousel-item">
+                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <div class="category-circle-image">
+                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                        </div>
+                        <h3>{{ cat.name }}</h3>
+                    </a>
+                </div>
+                {% endfor %}
+                
+                <!-- Set 3 (Duplicated for Wide Screens) -->
+                {% for cat in categories %}
+                <div class="category-carousel-item">
+                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <div class="category-circle-image">
+                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                        </div>
+                        <h3>{{ cat.name }}</h3>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 </section>
@@ -92,19 +124,47 @@
 
 <!-- Today's Deals Section -->
 {% if today_deals %}
-<section class="section-luxury bg-luxury">
+<section class="section-luxury bg-luxury py-5 position-relative">
     <div class="container">
-        <div class="section-heading-wrapper">
-            <span class="section-subtitle">Limited Time Offers</span>
-            <h2 class="section-title">Today's Deals</h2>
+        <div class="section-heading-wrapper d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="section-subtitle">Limited Time Offers</span>
+                <h2 class="section-title mb-0">Today's Deals</h2>
+            </div>
+            <!-- Swiper Navigation Arrows (Only if count > 5) -->
+            {% if today_deals|length > 5 %}
+            <div class="swiper-controls-wrapper d-flex gap-2">
+                <button class="swiper-button-prev-custom" aria-label="Previous Slide">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="swiper-button-next-custom" aria-label="Next Slide">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            {% endif %}
         </div>
-        <div class="row g-4">
+
+        {% if today_deals|length <= 5 %}
+        <!-- Standard Responsive Grid for <= 5 Products -->
+        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-5">
             {% for product in today_deals %}
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col">
                 {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <!-- Swiper Carousel for > 5 Products -->
+        <div class="swiper today-deals-swiper">
+            <div class="swiper-wrapper py-2">
+                {% for product in today_deals %}
+                <div class="swiper-slide">
+                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endif %}
@@ -250,4 +310,43 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if today_deals|length > 5 %}
+        const todayDealsSwiper = new Swiper('.today-deals-swiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            mousewheel: {
+                forceToAxis: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+            breakpoints: {
+                // Mobile: 1 slide
+                // Tablet: 2 slides
+                576: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                },
+                // Desktop small: 4 slides
+                992: {
+                    slidesPerView: 4,
+                    spaceBetween: 24,
+                },
+                // Desktop large: 5 slides
+                1200: {
+                    slidesPerView: 5,
+                    spaceBetween: 30,
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
 {% endblock %}
