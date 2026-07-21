@@ -1079,3 +1079,114 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     }
 }
 
+/* Offer Banners Styling */
+.offer-banners-section {
+    background-color: var(--luxury-cream, #fdfbf7) !important;
+}
+
+#offerBannerCarousel {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.offer-banner-card {
+    height: 380px;
+    background-color: #21030e;
+    position: relative;
+    border: 1px solid rgba(212, 175, 55, 0.15); /* Subtle gold border */
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.offer-banner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(33, 3, 14, 0.15) !important;
+}
+
+.offer-banner-img-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.offer-zoom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.offer-banner-card:hover .offer-zoom-img {
+    transform: scale(1.03);
+}
+
+/* Custom control styling for luxury look */
+#offerBannerCarousel .carousel-control-prev,
+#offerBannerCarousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background: rgba(33, 3, 14, 0.7);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+#offerBannerCarousel .carousel-control-prev {
+    left: 20px;
+}
+
+#offerBannerCarousel .carousel-control-next {
+    right: 20px;
+}
+
+#offerBannerCarousel:hover .carousel-control-prev,
+#offerBannerCarousel:hover .carousel-control-next {
+    opacity: 1;
+}
+
+#offerBannerCarousel .carousel-control-prev:hover,
+#offerBannerCarousel .carousel-control-next:hover {
+    background: #21030e;
+    border-color: #d4af37;
+}
+
+#offerBannerCarousel .carousel-control-prev-icon,
+#offerBannerCarousel .carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+@media (max-width: 992px) {
+    .offer-banner-card {
+        height: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .offer-banner-card {
+        height: 210px;
+    }
+    #offerBannerCarousel .carousel-control-prev,
+    #offerBannerCarousel .carousel-control-next {
+        width: 35px;
+        height: 35px;
+        opacity: 0.8;
+    }
+    #offerBannerCarousel .carousel-control-prev {
+        left: 10px;
+    }
+    #offerBannerCarousel .carousel-control-next {
+        right: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .offer-banner-card {
+        height: 150px;
+    }
+}
+
+
+

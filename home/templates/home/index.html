@@ -37,6 +37,39 @@
 </div>
 {% endif %}
 
+<!-- Offer Banners Section -->
+{% if banners %}
+<section class="offer-banners-section py-4 bg-white">
+    <div class="container">
+        <div id="offerBannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+            <div class="carousel-inner rounded-4 shadow-sm">
+                {% for banner in banners %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="{{ banner.link }}" class="offer-banner-card d-block position-relative overflow-hidden">
+                        <div class="offer-banner-img-wrapper">
+                            {% if banner.image %}
+                            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="w-100 img-fluid offer-zoom-img" loading="lazy">
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% if banners|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Categories Section (Marquee) -->
 {% if categories %}
 <section class="section-luxury py-5 overflow-hidden">
