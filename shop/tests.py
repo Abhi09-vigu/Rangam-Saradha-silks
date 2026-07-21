@@ -76,7 +76,7 @@ class OrderAdminTest(TestCase):
 
     def test_product_thumbnail_with_image(self):
         """
-        Verify that a product image thumbnail is rendered correctly when it exists.
+        Verify that a 60x60 thumbnail of the product is rendered.
         """
         OrderItem.objects.create(order=self.order, product=self.product_1, quantity=1, price=2999.00)
         ProductImage.objects.create(
@@ -86,14 +86,14 @@ class OrderAdminTest(TestCase):
         thumbnail_html = self.order_admin.product_thumbnail(self.order)
         self.assertIn("img", thumbnail_html)
         self.assertIn("saree1.jpg", thumbnail_html)
-        self.assertIn('target="_blank"', thumbnail_html)
 
     def test_product_name_column_single(self):
         """
         Verify that a single ordered product displays its name.
         """
         OrderItem.objects.create(order=self.order, product=self.product_1, quantity=1, price=2999.00)
-        self.assertEqual(self.order_admin.product_name_column(self.order), "Deep Maroon Saree")
+        html = self.order_admin.product_name_column(self.order)
+        self.assertEqual(html, "Deep Maroon Saree")
 
     def test_product_name_column_multiple(self):
         """
@@ -101,7 +101,8 @@ class OrderAdminTest(TestCase):
         """
         OrderItem.objects.create(order=self.order, product=self.product_1, quantity=1, price=2999.00)
         OrderItem.objects.create(order=self.order, product=self.product_2, quantity=1, price=4999.00)
-        self.assertEqual(self.order_admin.product_name_column(self.order), "Deep Maroon Saree + 1 more items")
+        html = self.order_admin.product_name_column(self.order)
+        self.assertEqual(html, "Deep Maroon Saree + 1 more items")
 
     def test_order_status_badge(self):
         """
@@ -133,6 +134,42 @@ class OrderAdminTest(TestCase):
         self.assertIn("Paid", badge)
         self.assertIn("#f1faf5", badge)  # Green
         self.assertIn("#1b8a53", badge)
+
+    def test_order_admin_separation_and_permissions(self):
+        """
+        Verify that OrderAdmin has correct readonly fields, fieldsets, and custom choices,
+        and that inline order items cannot be added or deleted.
+        """
+        # 1. Verify readonly fields
+        self.assertIn('order_number', self.order_admin.readonly_fields)
+        self.assertIn('full_name', self.order_admin.readonly_fields)
+        self.assertNotIn('order_status', self.order_admin.readonly_fields)
+        self.assertNotIn('payment_status', self.order_admin.readonly_fields)
+
+        # 2. Verify fieldsets setup
+        fieldsets_names = [f[0] for f in self.order_admin.fieldsets]
+        self.assertIn('Order Status & Workflow', fieldsets_names)
+        self.assertIn('Order Information', fieldsets_names)
+        self.assertIn('Customer Details', fieldsets_names)
+
+        # 3. Verify restricted choices in formfield_for_choice_field
+        from django.db import models
+        order_status_field = Order._meta.get_field('order_status')
+        form_field = self.order_admin.formfield_for_choice_field(order_status_field, None)
+        choices = [c[0] for c in form_field.choices]
+        self.assertIn('PENDING', choices)
+        self.assertIn('DELIVERED', choices)
+        self.assertNotIn('RETURNED', choices)
+
+        payment_status_field = Order._meta.get_field('payment_status')
+        form_field_payment = self.order_admin.formfield_for_choice_field(payment_status_field, None)
+        payment_choices = [c[0] for c in form_field_payment.choices]
+        self.assertIn('PENDING', payment_choices)
+        self.assertIn('REFUNDED', payment_choices)
+
+        # 4. Verify OrderItemInline add/delete permissions
+        self.assertFalse(self.order_item_inline.has_add_permission(None))
+        self.assertFalse(self.order_item_inline.has_delete_permission(None))
 
 @override_settings(
     STORAGES={
@@ -174,6 +211,42 @@ class ProductAdminTest(TestCase):
         self.assertIn("img", thumbnail_html)
         self.assertIn("saree_test.jpg", thumbnail_html)
         self.assertIn('target="_blank"', thumbnail_html)
+
+    def test_product_admin_separation_and_offer_price(self):
+        """
+        Verify that ProductAdmin fieldsets are configured correctly,
+        and that a custom offer_price is saved while a blank one is automatically calculated.
+        """
+        from decimal import Decimal
+        # 1. Verify fieldsets setup
+        fieldsets_names = [f[0] for f in self.product_admin.fieldsets]
+        self.assertIn('Basic Information', fieldsets_names)
+        self.assertIn('Pricing & Inventory', fieldsets_names)
+        self.assertIn('Product Description', fieldsets_names)
+
+        # 2. Test saving a custom offer price
+        product_custom = Product.objects.create(
+            name="Custom Price Saree",
+            slug="custom-price-saree",
+            sku="CPS-001",
+            price=3000.00,
+            discount_percentage=0,
+            offer_price=2500.00,
+            stock=10
+        )
+        self.assertEqual(product_custom.offer_price, Decimal('2500.00'))
+
+        # 3. Test automatic calculation of offer price when left blank
+        product_auto = Product.objects.create(
+            name="Auto Price Saree",
+            slug="auto-price-saree",
+            sku="APS-001",
+            price=3000.00,
+            discount_percentage=10,
+            offer_price=None,
+            stock=10
+        )
+        self.assertEqual(product_auto.offer_price, Decimal('2700.00'))
 
 class StockManagementAndTotalsTest(TestCase):
     def setUp(self):

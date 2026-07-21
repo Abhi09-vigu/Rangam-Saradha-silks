@@ -88,10 +88,12 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        if self.discount_percentage > 0:
-            self.offer_price = self.price - (self.price * Decimal(self.discount_percentage) / Decimal('100'))
-        else:
-            self.offer_price = self.price
+        if self.offer_price is None:
+            if self.discount_percentage > 0:
+                price_decimal = Decimal(str(self.price))
+                self.offer_price = price_decimal - (price_decimal * Decimal(self.discount_percentage) / Decimal('100'))
+            else:
+                self.offer_price = self.price
         super().save(*args, **kwargs)
 
     def __str__(self):

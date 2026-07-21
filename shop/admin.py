@@ -29,11 +29,34 @@ class ProductImageInline(admin.TabularInline):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'stock_status', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
+    list_display_links = ['name']
     list_filter = [StockStatusFilter, 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories', 'collection']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline]
     ordering = ['-created_at']
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'slug', 'sku', 'categories', 'collection', 'is_active')
+        }),
+        ('Pricing & Inventory', {
+            'fields': ('price', 'discount_percentage', 'offer_price', 'stock')
+        }),
+        ('Product Description', {
+            'fields': ('short_description', 'description')
+        }),
+        ('Marketing & Flags', {
+            'fields': ('is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal')
+        }),
+        ('Specifications & Details', {
+            'fields': ('video_url', 'tags', 'material', 'color', 'occasion', 'fabric', 'specifications')
+        }),
+        ('SEO Metadata', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
+            'classes': ('collapse',)
+        }),
+    )
 
     def get_queryset(self, request):
         """
@@ -112,6 +135,12 @@ class OrderItemInline(admin.TabularInline):
     readonly_fields = ['product_image', 'product_name', 'quantity', 'price', 'total_price']
     fields = ['product_image', 'product_name', 'quantity', 'price', 'total_price']
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     def get_queryset(self, request):
         """
         Optimize queryset for OrderItemInline to avoid N+1 queries.
@@ -141,10 +170,16 @@ class OrderItemInline(admin.TabularInline):
 
     def product_name(self, obj):
         """
-        Display product name or Deleted Product if product is missing.
+        Display product name with a link to the product's admin change page, or Deleted Product if product is missing.
         """
         if obj.product:
-            return obj.product.name
+            from django.urls import reverse
+            product_admin_url = reverse('custom_admin:shop_product_change', args=[obj.product.id])
+            return format_html(
+                '<a href="{}" target="_blank" style="color: #AF0446; text-decoration: underline; font-weight: 500;">{}</a>',
+                product_admin_url,
+                obj.product.name
+            )
         return "Deleted Product"
     product_name.short_description = "Product Name"
 
@@ -168,11 +203,58 @@ class OrderAdmin(admin.ModelAdmin):
         'grand_total',
         'created_at'
     ]
+    list_display_links = ['order_number']
     list_filter = ['order_status', 'payment_status', 'payment_method', 'created_at']
     search_fields = ['order_number', 'full_name', 'phone_number', 'items__product__name']
     inlines = [OrderItemInline]
-    readonly_fields = ['order_number', 'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge', 'discount_amount', 'grand_total', 'coupon_used']
+    readonly_fields = [
+        'order_number', 'user', 'full_name', 'phone_number', 'email',
+        'address_line_1', 'address_line_2', 'city', 'state', 'pincode', 'landmark',
+        'payment_method', 'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge',
+        'discount_amount', 'grand_total', 'coupon_used', 'created_at', 'updated_at'
+    ]
     ordering = ['-created_at']
+    change_form_template = 'admin/shop/order_change_form.html'
+
+    fieldsets = (
+        ('Order Status & Workflow', {
+            'fields': ('order_status', 'payment_status'),
+            'description': 'Update the status of the order and payment. Only these controls are editable.'
+        }),
+        ('Order Information', {
+            'fields': (
+                'order_number', 'user', 'payment_method', 'subtotal', 
+                'shipping_cost', 'tax_amount', 'cod_charge', 'discount_amount', 
+                'grand_total', 'coupon_used', 'created_at', 'updated_at'
+            ),
+        }),
+        ('Customer Details', {
+            'fields': (
+                'full_name', 'phone_number', 'email', 'address_line_1', 
+                'address_line_2', 'city', 'state', 'pincode', 'landmark'
+            ),
+        }),
+    )
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'order_status':
+            kwargs['choices'] = [
+                ('PENDING', 'Pending'),
+                ('CONFIRMED', 'Confirmed'),
+                ('PACKED', 'Packed'),
+                ('SHIPPED', 'Shipped'),
+                ('OUT_FOR_DELIVERY', 'Out For Delivery'),
+                ('DELIVERED', 'Delivered'),
+                ('CANCELLED', 'Cancelled'),
+            ]
+        elif db_field.name == 'payment_status':
+            kwargs['choices'] = [
+                ('PENDING', 'Pending'),
+                ('PAID', 'Paid'),
+                ('FAILED', 'Failed'),
+                ('REFUNDED', 'Refunded'),
+            ]
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
 
     def get_queryset(self, request):
         """
@@ -193,7 +275,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def product_thumbnail(self, obj):
         """
-        Display 60x60 clickable product image thumbnail for the first product in the order.
+        Display 60x60 product image thumbnail for the first product in the order.
         """
         items = list(obj.items.all())
         if not items or not items[0].product:
@@ -205,9 +287,7 @@ class OrderAdmin(admin.ModelAdmin):
             
         first_image = images[0]
         return format_html(
-            '<a href="{0}" target="_blank">'
-            '<img src="{0}" width="60" height="60" style="object-fit: cover; border-radius: 4px; display: block; max-width: 100%;" alt="Thumbnail">'
-            '</a>',
+            '<img src="{0}" width="60" height="60" style="object-fit: cover; border-radius: 4px; display: block; max-width: 100%;" alt="Thumbnail">',
             first_image.image.url
         )
     product_thumbnail.short_description = "Product Image"
@@ -221,7 +301,10 @@ class OrderAdmin(admin.ModelAdmin):
             return "No Products"
         
         first_item = items[0]
-        first_name = first_item.product.name if first_item.product else "Deleted Product"
+        if not first_item.product:
+            return "Deleted Product"
+            
+        first_name = first_item.product.name
         
         extra_count = len(items) - 1
         if extra_count > 0:

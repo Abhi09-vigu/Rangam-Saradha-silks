@@ -3,51 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance Mode - Rangam Saradha Silk Sarees</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+    <title>Under Maintenance - {{ site_settings.website_name }}</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-maroon: #8B0036;
+            --gold-accent: #D4AF37;
+            --dark-bg: #0f0a0c;
+            --light-text: #f5f2f3;
+            --muted-gold: #c5a059;
+            --card-bg: rgba(26, 17, 21, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #fdf8f8;
-            color: #2e2e2e;
-            height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark-bg);
+            /* Subtle elegant weave grid pattern */
+            background-image: 
+                linear-gradient(rgba(139, 0, 54, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 0, 54, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--light-text);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            padding: 2rem;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        h1 {
-            font-family: 'Playfair Display', serif;
-            color: #AF0446;
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
+
+        /* Subtle glowing background orbs */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 0, 54, 0.15) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
         }
-        .logo-placeholder {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #AE6F21;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+        body::before {
+            top: 10%;
+            left: 10%;
         }
-        .card-custom {
-            background-color: white;
-            padding: 4rem 3rem;
-            border-radius: 24px;
-            box-shadow: 0 16px 36px rgba(0,0,0,0.05);
-            max-width: 600px;
+        body::after {
+            bottom: 10%;
+            right: 10%;
+        }
+
+        .maintenance-container {
+            position: relative;
+            z-index: 10;
+            background-color: var(--card-bg);
+            border: 2px solid var(--gold-accent);
+            border-radius: 12px;
+            padding: 45px 35px;
+            max-width: 620px;
             width: 100%;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.1);
+            animation: goldGlow 6s infinite alternate;
+        }
+
+        /* Luxury Saree Brocade Border Accent on Top and Bottom of Card */
+        .saree-border-accent {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--gold-accent),
+                var(--gold-accent) 4px,
+                var(--primary-maroon) 4px,
+                var(--primary-maroon) 8px
+            );
+        }
+        .saree-border-accent.top {
+            top: 0;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .saree-border-accent.bottom {
+            bottom: 0;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Logo animations */
+        .brand-section {
+            margin-bottom: 25px;
+            animation: fadeInLogo 1.8s ease-out forwards;
+        }
+
+        .site-logo {
+            max-height: 80px;
+            width: auto;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .logo-fallback {
+            font-family: 'Marcellus', serif;
+            font-size: 2.2rem;
+            color: var(--gold-accent);
+            letter-spacing: 3px;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: inline-block;
+            border-bottom: 1.5px solid var(--gold-accent);
+            padding-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .brand-title {
+            font-family: 'Marcellus', serif;
+            font-size: 1.6rem;
+            color: var(--light-text);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        /* Elegant Mandala SVG Motif */
+        .mandala-motif {
+            width: 70px;
+            height: 70px;
+            margin: 20px auto;
+            fill: var(--gold-accent);
+            opacity: 0.95;
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.25));
+        }
+
+        h1 {
+            font-family: 'Marcellus', serif;
+            color: var(--gold-accent);
+            font-size: 2.1rem;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 400;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .message {
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: #d1c7c9;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        /* Deluxe Loading Pulse */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: dotPulse 1.4s infinite ease-in-out both;
+        }
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Elegant Saree Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+            flex-grow: 1;
+        }
+        .divider-diamond {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-accent);
+            transform: rotate(45deg);
+        }
+
+        /* Luxury Contact Info Card */
+        .contact-card {
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            background: rgba(139, 0, 54, 0.08);
+            border-radius: 8px;
+            padding: 22px 15px;
+            margin-bottom: 30px;
+        }
+
+        .contact-title {
+            font-family: 'Marcellus', serif;
+            color: var(--gold-accent);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 480px) {
+            .contact-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .contact-item.hours {
+                grid-column: span 2;
+            }
+        }
+
+        .contact-item {
+            font-size: 0.9rem;
+            color: #ece5e6;
+        }
+
+        .contact-label {
+            color: var(--muted-gold);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+
+        .contact-value {
+            font-weight: 400;
+        }
+
+        .patience-msg {
+            font-family: 'Marcellus', serif;
+            font-size: 1.2rem;
+            color: var(--gold-accent);
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+
+        /* Keyframe Animations */
+        @keyframes goldGlow {
+            0% {
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.05);
+                border-color: rgba(212, 175, 55, 0.7);
+            }
+            100% {
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.25);
+                border-color: rgba(212, 175, 55, 1);
+            }
+        }
+
+        @keyframes fadeInLogo {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+                box-shadow: 0 0 8px var(--gold-accent);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="card-custom">
-        <div class="logo-placeholder">Rangam Saradha Silk</div>
-        <h1>We'll Be Back Soon</h1>
-        <p class="text-muted fs-5 mb-0">Our online boutique is currently undergoing scheduled maintenance to bring you an improved shopping experience. Please check back shortly.</p>
+    <div class="maintenance-container">
+        <!-- Luxury Top Brocade Border -->
+        <div class="saree-border-accent top"></div>
+
+        <!-- Brand/Logo Section -->
+        <div class="brand-section">
+            {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" class="site-logo">
+            {% else %}
+                <div class="logo-fallback">Rangam Saradha</div>
+            {% endif %}
+            <div class="brand-title">{{ site_settings.website_name }}</div>
+        </div>
+
+        <!-- Luxury Weaving Mandala Motif -->
+        <svg class="mandala-motif" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50,15 A5,5 0 0,1 55,20 A5,5 0 0,1 50,25 A5,5 0 0,1 45,20 A5,5 0 0,1 50,15 Z M50,25 C45,25 35,35 35,45 C35,47 37,50 40,50 C42,50 45,47 45,45 C45,42 47,40 50,40 C53,40 55,42 55,45 C55,47 58,50 60,50 C63,50 65,47 65,45 C65,35 55,25 50,25 Z M50,40 C47,40 45,42 45,45 C45,48 47,50 50,50 C53,50 55,48 55,45 C55,42 53,40 50,40 Z M35,45 C25,45 15,50 15,60 C15,62 17,65 20,65 C22,65 25,62 25,60 C25,57 27,55 30,55 C33,55 35,57 35,60 C35,62 38,65 40,65 C43,65 45,62 45,60 C45,50 35,45 35,45 Z M65,45 C65,45 55,50 55,60 C55,62 57,65 60,65 C62,65 65,62 65,60 C65,57 67,55 70,55 C73,55 75,57 75,60 C75,62 78,65 80,65 C83,65 85,62 85,60 C85,50 75,45 65,45 Z M50,55 C45,55 35,60 35,70 C35,72 37,75 40,75 C42,75 45,72 45,70 C45,67 47,65 50,65 C53,65 55,67 55,70 C55,72 58,75 60,75 C63,75 65,72 65,70 C65,60 55,55 50,55 Z M50,75 A5,5 0 0,1 55,80 A5,5 0 0,1 50,85 A5,5 0 0,1 45,80 A5,5 0 0,1 50,75 Z" />
+            <circle cx="50" cy="50" r="3" />
+            <circle cx="50" cy="20" r="1.5" />
+            <circle cx="50" cy="80" r="1.5" />
+            <circle cx="20" cy="50" r="1.5" />
+            <circle cx="80" cy="50" r="1.5" />
+        </svg>
+
+        <h1>Website Under Maintenance</h1>
+        <p class="message">We are enhancing your shopping experience. Please visit again shortly.</p>
+
+        <!-- Loading Dots Animation -->
+        <div class="loading-container">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+
+        <!-- Saree Weaving Pattern Divider -->
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-diamond"></div>
+            <div class="divider-diamond" style="transform: scale(0.7) rotate(45deg); opacity: 0.7;"></div>
+            <div class="divider-diamond"></div>
+            <div class="divider-line"></div>
+        </div>
+
+        <!-- Contact details card -->
+        <div class="contact-card">
+            <div class="contact-title">Boutique Assistance</div>
+            <div class="contact-grid">
+                {% if contact_info.phone %}
+                <div class="contact-item">
+                    <div class="contact-label">Call Us</div>
+                    <div class="contact-value">{{ contact_info.phone }}</div>
+                </div>
+                {% endif %}
+                {% if contact_info.email %}
+                <div class="contact-item">
+                    <div class="contact-label">Write to Us</div>
+                    <div class="contact-value">{{ contact_info.email }}</div>
+                </div>
+                {% endif %}
+                {% if contact_info.working_hours %}
+                <div class="contact-item hours">
+                    <div class="contact-label">Business Hours</div>
+                    <div class="contact-value">{{ contact_info.working_hours }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="patience-msg">Thank you for your patience</div>
+
+        <!-- Luxury Bottom Brocade Border -->
+        <div class="saree-border-accent bottom"></div>
     </div>
 </body>
 </html>

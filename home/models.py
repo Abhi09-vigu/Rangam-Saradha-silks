@@ -18,9 +18,8 @@ class WebsiteSetting(models.Model):
         verbose_name_plural = "Website Settings"
 
     def save(self, *args, **kwargs):
-        # Override to ensure only one record exists
-        if not self.pk and WebsiteSetting.objects.exists():
-            return
+        # Force the primary key to always be 1 to guarantee a singleton record
+        self.pk = 1
         super().save(*args, **kwargs)
 
     def __str__(self):

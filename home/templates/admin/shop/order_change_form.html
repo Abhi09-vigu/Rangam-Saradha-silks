@@ -1,0 +1,446 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Professional ecommerce admin UI styling */
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .order-header-left h1 {
+        margin: 0 !important;
+        font-family: var(--font-family-serif) !important;
+        font-size: 2.2rem !important;
+        font-weight: 700 !important;
+        color: var(--primary) !important;
+    }
+    .order-meta-info {
+        font-size: 13px;
+        color: #888;
+        margin-top: 6px;
+    }
+    .order-badges {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .order-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    
+    @media (max-width: 1024px) {
+        .order-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .order-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+    
+    .order-card-header {
+        padding: 16px 24px;
+        background: #fffcf8;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .order-card-header h3 {
+        margin: 0 !important;
+        font-family: var(--font-family-serif) !important;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        color: var(--primary) !important;
+    }
+    
+    .order-card-body {
+        padding: 24px;
+    }
+    
+    /* Table of items styling */
+    .order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .order-items-table th {
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--primary);
+        border-bottom: 2px solid var(--border-color);
+        padding: 12px 16px;
+        text-align: left;
+    }
+    .order-items-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    .order-items-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .product-row-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .product-img-thumbnail {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .product-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-name-txt {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--link-color);
+    }
+    
+    .product-sku-txt {
+        font-size: 11px;
+        color: #888;
+        margin-top: 4px;
+    }
+    
+    /* Order totals styling */
+    .order-summary-block {
+        width: 340px;
+        margin-left: auto;
+        margin-top: 20px;
+    }
+    .order-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 13px;
+        color: #555;
+    }
+    .order-summary-row.grand-total-row {
+        border-top: 2px solid var(--border-color);
+        margin-top: 8px;
+        padding-top: 16px;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    /* Status workflows and sidebar styles */
+    .sidebar-actions-card {
+        border: 2px solid var(--secondary);
+    }
+    
+    .sidebar-form-group {
+        margin-bottom: 20px;
+    }
+    .sidebar-form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 8px;
+    }
+    .sidebar-form-group select {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        font-size: 13px;
+        background: #fff;
+    }
+    
+    .detail-info-item {
+        margin-bottom: 16px;
+    }
+    .detail-info-item:last-child {
+        margin-bottom: 0;
+    }
+    .detail-info-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+    .detail-info-val {
+        font-size: 14px;
+        color: var(--body-fg);
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+        display: inline-block;
+    }
+    
+    /* Badges styles */
+    .badge-pending { background: #fff8eb; color: #AE6F21; border-color: #fce8cd; }
+    .badge-confirmed { background: #faf5e6; color: #8c5d1c; border-color: #eedda6; }
+    .badge-packed { background: #fff0f5; color: #AF0446; border-color: #fcd2df; }
+    .badge-shipped { background: #fff5eb; color: #d96e14; border-color: #fcdbbf; }
+    .badge-out_for_delivery { background: #eefbfa; color: #0b7c8a; border-color: #beeae6; }
+    .badge-delivered { background: #f1faf5; color: #1b8a53; border-color: #c7eed9; }
+    .badge-cancelled { background: #fdf3f4; color: #AF0446; border-color: #fbd3d6; }
+    .badge-returned { background: #fdf2f2; color: #9e1c24; border-color: #fbd2d2; }
+    .badge-refunded { background: #f8f9fa; color: #5f666c; border-color: #e2e5e8; }
+    .badge-paid { background: #f1faf5; color: #1b8a53; border-color: #c7eed9; }
+    .badge-failed { background: #fdf3f4; color: #AF0446; border-color: #fbd3d6; }
+
+    /* Dark Mode Theme Overrides */
+    @media (prefers-color-scheme: dark) {
+        .order-card {
+            background: #1c1114;
+        }
+        .order-card-header {
+            background: #221519;
+        }
+        .sidebar-form-group select {
+            background: #221519;
+            color: #f5ebe6;
+        }
+        .order-summary-row {
+            color: #d2c5bf;
+        }
+        .detail-info-val {
+            color: #f5ebe6;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+        {% csrf_token %}
+        
+        {% if is_popup %}<input type="hidden" name="_popup" value="1">{% endif %}
+        {% if to_field %}<input type="hidden" name="_to_field" value="{{ to_field }}">{% endif %}
+        
+        <!-- silently render django formset management forms and hidden fields -->
+        {% for inline_admin_formset in inline_admin_formsets %}
+            {{ inline_admin_formset.management_form }}
+            {% for form in inline_admin_formset.formset %}
+                {% for field in form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+        
+        {% if errors %}
+            <p class="errornote">
+                {% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
+            </p>
+            {{ adminform.form.non_field_errors }}
+        {% endif %}
+
+        <div class="order-header">
+            <div class="order-header-left">
+                <h1>Order #{{ original.order_number }}</h1>
+                <div class="order-meta-info">Placed on {{ original.created_at|date:"F d, Y \a\t H:i" }}</div>
+            </div>
+            <div class="order-badges">
+                <span class="badge-status badge-{{ original.order_status|lower }}">{{ original.get_order_status_display }}</span>
+                <span class="badge-status badge-{{ original.payment_status|lower }}">Payment: {{ original.get_payment_status_display }}</span>
+            </div>
+        </div>
+
+        <div class="order-layout">
+            <!-- Left Side: Order Items and Summary -->
+            <div class="order-left-column">
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Items Ordered</h3>
+                    </div>
+                    <div class="order-card-body" style="padding: 0;">
+                        <table class="order-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Details</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th style="text-align: right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in original.items.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="product-row-info">
+                                                {% if item.product and item.product.images.all %}
+                                                    <img class="product-img-thumbnail" src="{{ item.product.images.all.0.image.url }}" alt="{{ item.product.name }}">
+                                                {% else %}
+                                                    <div class="product-img-thumbnail" style="display: flex; align-items: center; justify-content: center; background: #eee; font-size: 10px; color: #888;">No Image</div>
+                                                {% endif %}
+                                                <div class="product-details">
+                                                    <span class="product-name-txt" style="color: var(--body-fg);">{{ item.product.name|default:"Deleted Product" }}</span>
+                                                    <span class="product-sku-txt">SKU: {{ item.product.sku|default:"N/A" }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>x {{ item.quantity }}</td>
+                                        <td>₹{{ item.price }}</td>
+                                        <td style="text-align: right; font-weight: 600;">₹{{ item.get_total_price }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" style="padding: 24px; text-align: center;">No items found in this order.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Financial Summary</h3>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="order-summary-block">
+                            <div class="order-summary-row">
+                                <span>Subtotal</span>
+                                <span>₹{{ original.subtotal }}</span>
+                            </div>
+                            <div class="order-summary-row">
+                                <span>GST (Tax)</span>
+                                <span>₹{{ original.tax_amount }}</span>
+                            </div>
+                            {% if original.payment_method == 'COD' %}
+                                <div class="order-summary-row">
+                                    <span>COD Charge</span>
+                                    <span>₹{{ original.cod_charge }}</span>
+                                </div>
+                            {% endif %}
+                            {% if original.discount_amount > 0 %}
+                                <div class="order-summary-row" style="color: #1b8a53; font-weight: 600;">
+                                    <span>Discount</span>
+                                    <span>-₹{{ original.discount_amount }}</span>
+                                </div>
+                            {% endif %}
+                            {% if original.shipping_cost > 0 %}
+                                <div class="order-summary-row">
+                                    <span>Shipping Cost</span>
+                                    <span>₹{{ original.shipping_cost }}</span>
+                                </div>
+                            {% endif %}
+                            <div class="order-summary-row grand-total-row">
+                                <span>Grand Total</span>
+                                <span>₹{{ original.grand_total }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Workflow & Customer Info -->
+            <div class="order-right-column">
+                <!-- Status Actions Card -->
+                <div class="order-card sidebar-actions-card">
+                    <div class="order-card-header">
+                        <h3>Fulfillment & Payment Workflow</h3>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="sidebar-form-group">
+                            <label for="id_order_status">Order Status</label>
+                            {{ adminform.form.order_status }}
+                        </div>
+                        <div class="sidebar-form-group">
+                            <label for="id_payment_status">Payment Status</label>
+                            {{ adminform.form.payment_status }}
+                        </div>
+                        
+                        <div style="margin-top: 24px;">
+                            <input type="submit" value="Save Status Changes" class="default" name="_save" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Info Card -->
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Customer Information</h3>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Customer Name</div>
+                            <div class="detail-info-val">{{ original.full_name }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Phone Number</div>
+                            <div class="detail-info-val">{{ original.phone_number }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Email Address</div>
+                            <div class="detail-info-val">{{ original.email }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address Card -->
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Shipping & Delivery</h3>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Full Address</div>
+                            <div class="detail-info-val">
+                                {{ original.address_line_1 }}<br>
+                                {% if original.address_line_2 %}{{ original.address_line_2 }}<br>{% endif %}
+                                {% if original.landmark %}Landmark: {{ original.landmark }}<br>{% endif %}
+                            </div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">City</div>
+                            <div class="detail-info-val">{{ original.city }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">State</div>
+                            <div class="detail-info-val">{{ original.state }}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Pincode</div>
+                            <div class="detail-info-val">{{ original.pincode }}</div>
+                        </div>
+                        <div class="detail-info-item" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
+                            <div class="detail-info-label">Payment Method</div>
+                            <div class="detail-info-val" style="font-weight: 700; color: var(--secondary);">{{ original.get_payment_method_display }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

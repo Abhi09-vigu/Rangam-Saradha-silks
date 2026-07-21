@@ -70,6 +70,12 @@ class CustomMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        try:
+            setting_val = WebsiteSetting.objects.first().maintenance_mode
+        except Exception:
+            setting_val = "Error"
+        print(f"[DEBUG_REQ] Path: {request.path}, User: {request.user}, Staff: {getattr(request.user, 'is_staff', False)}, MaintenanceMode: {setting_val}")
+
         # Prevent customer users from accessing Django admin
         if request.path.startswith('/admin/'):
             if request.user.is_authenticated and not request.user.is_staff:
@@ -78,6 +84,10 @@ class CustomMiddleware:
                 return redirect('accounts:login')
             return self.get_response(request)
             
+        # Bypass maintenance check for static and media files
+        if request.path.startswith('/static/') or request.path.startswith('/media/'):
+            return self.get_response(request)
+
         # Bypass maintenance check for logged-in staff users (inspecting admin session cookie)
         admin_session_key = request.COOKIES.get('admin_sessionid')
         if admin_session_key:
