@@ -34,6 +34,7 @@ class Collection(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='collections/', blank=True, null=True, help_text="Cover image for this collection on the homepage.")
 
     def save(self, *args, **kwargs):
         if not self.slug:

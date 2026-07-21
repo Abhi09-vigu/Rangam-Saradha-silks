@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-{% endblock %}
-
 {% block meta_title %}Home - {{ site_settings.website_name }}{% endblock %}
 
 {% block content %}
@@ -41,36 +37,7 @@
 </div>
 {% endif %}
 
-<!-- Offer Banner / Promo Banner Carousel -->
-{% if banners %}
-<section class="py-4">
-    <div class="container">
-        <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner shadow-sm" style="border-radius: 16px;">
-                {% for banner in banners %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <a href="{{ banner.link }}">
-                        <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="d-block w-100 img-fluid">
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-            {% if banners|length > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-            {% endif %}
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<!-- Categories Section -->
+<!-- Categories Section (Marquee) -->
 {% if categories %}
 <section class="section-luxury py-5 overflow-hidden">
     <div class="container-fluid px-0">
@@ -122,94 +89,71 @@
 </section>
 {% endif %}
 
-<!-- Today's Deals Section -->
-{% if today_deals %}
-<section class="section-luxury bg-luxury py-5 position-relative">
+<!-- Featured Collections -->
+{% if featured_collections %}
+<section class="section-luxury bg-white py-5">
     <div class="container">
-        <div class="section-heading-wrapper d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <span class="section-subtitle">Limited Time Offers</span>
-                <h2 class="section-title mb-0">Today's Deals</h2>
-            </div>
-            <!-- Swiper Navigation Arrows (Only if count > 5) -->
-            {% if today_deals|length > 5 %}
-            <div class="swiper-controls-wrapper d-flex gap-2">
-                <button class="swiper-button-prev-custom" aria-label="Previous Slide">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <button class="swiper-button-next-custom" aria-label="Next Slide">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-            {% endif %}
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle text-uppercase tracking-wider">✨ Signature Series</span>
+            <h2 class="section-title font-heading fw-bold">Featured Collections</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
         </div>
+        <div class="row g-4 justify-content-center">
+            {% for col in featured_collections %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="collection-card overflow-hidden position-relative shadow-sm rounded-4">
+                    <div class="collection-image-wrapper">
+                        {% if col.image %}
+                        <img src="{{ col.image.url }}" alt="{{ col.name }}" class="w-100 img-fluid collection-zoom-img" loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/about_offer.jpg' %}" alt="{{ col.name }}" class="w-100 img-fluid collection-zoom-img" loading="lazy">
+                        {% endif %}
+                        <div class="collection-overlay d-flex flex-column justify-content-end p-4">
+                            <h3 class="text-white font-heading mb-2">{{ col.name }}</h3>
+                            <a href="{% url 'shop:catalog' %}?collection={{ col.id }}" class="text-gold text-decoration-none fw-semibold">
+                                Shop Now <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 
-        {% if today_deals|length <= 5 %}
-        <!-- Standard Responsive Grid for <= 5 Products -->
-        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-5">
-            {% for product in today_deals %}
+<!-- New Arrivals Section -->
+{% if new_arrivals %}
+<section class="section-luxury bg-luxury py-5">
+    <div class="container">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle">💎 Exquisite New Weaves</span>
+            <h2 class="section-title">New Arrivals</h2>
+        </div>
+        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
+            {% for product in new_arrivals %}
             <div class="col">
                 {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <!-- Swiper Carousel for > 5 Products -->
-        <div class="swiper today-deals-swiper">
-            <div class="swiper-wrapper py-2">
-                {% for product in today_deals %}
-                <div class="swiper-slide">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
     </div>
 </section>
 {% endif %}
 
-
-
-<!-- Brand Story -->
-<section class="section-luxury bg-luxury">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <span class="section-subtitle">Legacy of Elegance</span>
-                <h2 class="font-heading display-5 mb-4">About Rangam Saradha Silk Sarees</h2>
-                <p class="lead text-muted mb-4">Handweaving traditions preserved for generations, crafting memories in pure mulberry silk and golden zari.</p>
-                <p class="text-muted mb-5">At Rangam Saradha Silk Sarees, each saree tells a story of artistic heritage, intricate handwork, and modern designs tailored for the contemporary Indian woman. From royal Kanchipurams to exquisite designer silks, we offer unmatched purity and premium luxury.</p>
-                <a href="/page/about-us/" class="btn btn-primary">Read Our Full Story</a>
-            </div>
-            <div class="col-lg-6">
-                <div class="card border-0 overflow-hidden shadow-lg" style="border-radius: 24px;">
-                    <img src="{% static 'images/about_side.jpg' %}" alt="About Rangam Saradha Silks" class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Shop by Budget Section -->
-{% if budget_ranges %}
+<!-- Best Sellers Section -->
+{% if best_sellers %}
 <section class="section-luxury bg-white py-5">
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
-            <span class="section-subtitle text-uppercase tracking-wider">Browse By Value</span>
-            <h2 class="section-title font-heading fw-bold">Find Your Piece</h2>
-            <div class="gold-accent-line mx-auto mt-2"></div>
+            <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
+            <h2 class="section-title">Best Sellers</h2>
         </div>
-        <div class="row g-4">
-            {% for range in budget_ranges %}
-            <div class="col-12 col-sm-6 col-lg-3">
-                <a href="{% url 'shop:catalog' %}?{% if range.min_price %}min_price={{ range.min_price|floatformat:0 }}{% endif %}{% if range.min_price and range.max_price %}&{% endif %}{% if range.max_price %}max_price={{ range.max_price|floatformat:0 }}{% endif %}" class="budget-card text-center p-4 d-block text-decoration-none">
-                    <div class="budget-card-content">
-                        <span class="budget-card-currency">₹</span>
-                        <h3 class="budget-card-title font-heading">{{ range.title }}</h3>
-                        <span class="budget-card-explore">Explore Collection <i class="bi bi-arrow-right ms-1"></i></span>
-                    </div>
-                </a>
+        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
+            {% for product in best_sellers %}
+            <div class="col">
+                {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
             </div>
             {% endfor %}
         </div>
@@ -217,24 +161,67 @@
 </section>
 {% endif %}
 
-<!-- Testimonials Section -->
-{% if testimonials %}
-<section class="section-luxury">
+<!-- Why Choose Us Section -->
+{% if why_choose_us %}
+<section class="section-luxury bg-luxury py-5">
     <div class="container">
-        <div class="section-heading-wrapper text-center">
-            <span class="section-subtitle">Heartwarming Feedback</span>
-            <h2 class="section-title">What Our Customers Say</h2>
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle text-uppercase tracking-wider">{{ site_settings.why_choose_subtitle|default:"THE RANGAM SARADHA PROMISE" }}</span>
+            <h2 class="section-title font-heading fw-bold">{{ site_settings.why_choose_title|default:"Why Choose Us" }}</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for item in why_choose_us %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="why-choose-card text-center p-4 bg-white shadow-sm rounded-4 h-100 transition-all">
+                    <div class="why-choose-icon-wrapper mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle">
+                        <i class="bi {{ item.icon_class }} fs-2 text-primary"></i>
+                    </div>
+                    <h3 class="why-choose-title font-heading mb-2 text-dark">{{ item.title }}</h3>
+                    {% if item.description %}
+                    <p class="why-choose-subtitle text-muted mb-0 fs-6">{{ item.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Bridal Collection Banner -->
+<section class="bridal-collection-banner py-5 position-relative overflow-hidden" style="background-image: url('{% if site_settings.bridal_banner_image %}{{ site_settings.bridal_banner_image.url }}{% else %}{% static 'images/about_side.jpg' %}{% endif %}');">
+    <div class="bridal-banner-overlay"></div>
+    <div class="container position-relative z-3 py-5 text-center text-white">
+        <span class="bridal-subtitle text-uppercase tracking-widest mb-3 d-block text-gold">👰 Bridal Collection Banner</span>
+        <h2 class="bridal-title font-heading mb-4 text-white display-4 fw-bold">{{ site_settings.bridal_banner_title|default:"Bridal Collection" }}</h2>
+        <p class="bridal-description mx-auto mb-5 max-w-600 fs-5 text-light">{{ site_settings.bridal_banner_subtitle|default:"Exquisite handcrafted Kanchipuram bridal silk sarees designed for your special day." }}</p>
+        {% if site_settings.bridal_banner_button_url %}
+        <a href="{{ site_settings.bridal_banner_button_url }}" class="btn btn-luxury-maroon px-5 py-3">
+            {{ site_settings.bridal_banner_button_text|default:"Shop Wedding Collection" }}
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Customer Reviews Section -->
+{% if testimonials %}
+<section class="section-luxury bg-white py-5">
+    <div class="container">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle">⭐ Customer Reviews</span>
+            <h2 class="section-title">What Our Patrons Say</h2>
         </div>
         <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner text-center max-w-600 mx-auto">
                 {% for t in testimonials %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %} p-4">
-                    <p class="fs-4 italic text-dark mb-4">"{{ t.comment }}"</p>
-                    <div class="mb-3">
+                    <div class="mb-3 text-gold">
                         {% for i in "12345" %}
-                        <i class="bi bi-star-fill text-warning fs-5"></i>
+                        <i class="bi bi-star-fill"></i>
                         {% endfor %}
                     </div>
+                    <p class="fs-4 italic text-dark mb-4">"{{ t.comment }}"</p>
                     <h5 class="fw-bold mb-1">{{ t.customer_name }}</h5>
                     <span class="text-muted fs-7">{{ t.role_or_location }}</span>
                 </div>
@@ -256,7 +243,7 @@
 <section class="section-luxury bg-luxury">
     <div class="container">
         <div class="section-heading-wrapper text-center">
-            <span class="section-subtitle">Instagram Gallery</span>
+            <span class="section-subtitle">📸 Instagram Gallery</span>
             <h2 class="section-title">Follow Us @RangamSaradha</h2>
         </div>
         <div class="row g-3">
@@ -274,30 +261,11 @@
 </section>
 {% endif %}
 
-<!-- Recently Viewed Section -->
-{% if recently_viewed %}
-<section class="section-luxury">
-    <div class="container">
-        <div class="section-heading-wrapper">
-            <span class="section-subtitle">Your Browsing History</span>
-            <h2 class="section-title">Recently Viewed</h2>
-        </div>
-        <div class="row g-4">
-            {% for product in recently_viewed %}
-            <div class="col-6 col-md-4 col-lg-3">
-                {% include 'shop/components/product_card.html' with product=product %}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
-
 <!-- Newsletter Section -->
 <section class="py-5 bg-dark text-white text-center">
     <div class="container py-4">
         <div class="max-w-600 mx-auto">
-            <h2 class="font-heading display-6 mb-3 text-white">Join The Elite Club</h2>
+            <h2 class="font-heading display-6 mb-3 text-white">📧 Newsletter</h2>
             <p class="text-light mb-4">Subscribe to receive updates on our exclusive weaves, festive collections, and secret flash sales.</p>
             <form class="row g-2 justify-content-center">
                 <div class="col-md-8">
@@ -310,43 +278,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        {% if today_deals|length > 5 %}
-        const todayDealsSwiper = new Swiper('.today-deals-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            mousewheel: {
-                forceToAxis: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next-custom',
-                prevEl: '.swiper-button-prev-custom',
-            },
-            breakpoints: {
-                // Mobile: 1 slide
-                // Tablet: 2 slides
-                576: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                },
-                // Desktop small: 4 slides
-                992: {
-                    slidesPerView: 4,
-                    spaceBetween: 24,
-                },
-                // Desktop large: 5 slides
-                1200: {
-                    slidesPerView: 5,
-                    spaceBetween: 30,
-                }
-            }
-        });
-        {% endif %}
-    });
-</script>
 {% endblock %}

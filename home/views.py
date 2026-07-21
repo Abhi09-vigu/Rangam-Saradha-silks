@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange
-from shop.models import Category, Product
+from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs
+from shop.models import Category, Product, Collection
 
 def index(request):
     sliders = HeroSlider.objects.filter(is_active=True).order_by('display_order')
@@ -15,6 +15,10 @@ def index(request):
     best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:4]
     today_deals = Product.objects.filter(is_active=True, is_today_deal=True).prefetch_related('images', 'categories')[:12]
     
+    # Featured Collections and Why Choose Us
+    featured_collections = Collection.objects.filter(is_active=True)[:4]
+    why_choose_us = WhyChooseUs.objects.filter(is_active=True).order_by('display_order')
+
     # Offer Banners
     banners = OfferBanner.objects.filter(is_active=True).order_by('display_order')[:3]
     
@@ -40,6 +44,8 @@ def index(request):
         'new_arrivals': new_arrivals,
         'best_sellers': best_sellers,
         'today_deals': today_deals,
+        'featured_collections': featured_collections,
+        'why_choose_us': why_choose_us,
         'banners': banners,
         'testimonials': testimonials,
         'insta_posts': insta_posts,

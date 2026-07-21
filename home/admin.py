@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.forms import Textarea
-from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange
+from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs
 
 class SingletonAdmin(admin.ModelAdmin):
     # Prevents adding new items if one already exists
@@ -90,3 +90,10 @@ custom_admin_site.register(FAQ, FAQAdmin)
 custom_admin_site.register(InstagramPost, InstagramPostAdmin)
 custom_admin_site.register(ContactSubmission, ContactSubmissionAdmin)
 custom_admin_site.register(BudgetRange, BudgetRangeAdmin)
+
+class WhyChooseUsAdmin(admin.ModelAdmin):
+    list_display = ['title', 'description', 'icon_class', 'display_order', 'is_active']
+    list_editable = ['display_order', 'is_active']
+    search_fields = ['title', 'description']
+
+custom_admin_site.register(WhyChooseUs, WhyChooseUsAdmin)

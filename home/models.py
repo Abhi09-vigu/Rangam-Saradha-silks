@@ -13,6 +13,28 @@ class WebsiteSetting(models.Model):
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
     maintenance_mode = models.BooleanField(default=False)
 
+    # Dynamic About Section
+    about_title = models.CharField(max_length=150, default="About Rangam Saradha Silk Sarees", help_text="Main heading for the homepage About section.")
+    about_subtitle = models.CharField(max_length=100, default="LEGACY OF ELEGANCE", help_text="Small subtitle label above the main heading.")
+    about_description = models.TextField(
+        default="At Rangam Saradha Silk Sarees, each saree tells a story of artistic heritage, intricate handwork, and modern designs tailored for the contemporary Indian woman. From royal Kanchipurams to exquisite designer silks, we offer unmatched purity and premium luxury.",
+        help_text="Detailed description of the brand/about section."
+    )
+    about_image = models.ImageField(upload_to='about/', blank=True, null=True, help_text="Portrait image for the homepage About section.")
+    about_button_text = models.CharField(max_length=50, default="Read Our Full Story", help_text="Text to display on the action button.")
+    about_button_url = models.CharField(max_length=200, default="/page/about-us/", help_text="URL / page link the button redirects to.")
+
+    # Dynamic Bridal Banner Section
+    bridal_banner_title = models.CharField(max_length=150, default="Bridal Collection", help_text="Title for the homepage bridal banner.")
+    bridal_banner_subtitle = models.TextField(default="Exquisite handcrafted Kanchipuram bridal silk sarees designed for your special day.", help_text="Subtitle or description text.")
+    bridal_banner_image = models.ImageField(upload_to='bridal/', blank=True, null=True, help_text="Background image for the bridal banner.")
+    bridal_banner_button_text = models.CharField(max_length=50, default="Shop Wedding Collection", help_text="Text on the banner button.")
+    bridal_banner_button_url = models.CharField(max_length=200, default="/shop/?collection=bridal", help_text="URL the button links to.")
+
+    # Dynamic Why Choose Us Headers
+    why_choose_title = models.CharField(max_length=100, default="Why Choose Us", help_text="Main heading for the Why Choose Us section.")
+    why_choose_subtitle = models.CharField(max_length=150, default="THE RANGAM SARADHA PROMISE", help_text="Subtitle above the Why Choose Us heading.")
+
     class Meta:
         verbose_name = "Website Setting"
         verbose_name_plural = "Website Settings"
@@ -171,6 +193,21 @@ class BudgetRange(models.Model):
         ordering = ['display_order', 'id']
         verbose_name = "Budget Range"
         verbose_name_plural = "Budget Ranges"
+
+    def __str__(self):
+        return self.title
+
+class WhyChooseUs(models.Model):
+    title = models.CharField(max_length=100, help_text="e.g. Free Shipping")
+    description = models.CharField(max_length=150, blank=True, null=True, help_text="e.g. On orders over ₹1000")
+    icon_class = models.CharField(max_length=50, default="bi-truck", help_text="Bootstrap Icon class (e.g. bi-truck, bi-shield-check, bi-gem, bi-telephone)")
+    display_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'id']
+        verbose_name = "Why Choose Us Item"
+        verbose_name_plural = "Why Choose Us Items"
 
     def __str__(self):
         return self.title
