@@ -661,10 +661,14 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     margin-top: 12px;
 }
 
+.budget-container {
+    max-width: 960px !important;
+}
+
 .budget-card {
     background-color: #ffffff;
     border: 1px solid #e5d5c0; /* Light gold/bronze border */
-    padding: 35px 20px;
+    padding: 20px 15px;
     border-radius: 0; /* Square elegant borders */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
@@ -678,24 +682,24 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .budget-card-currency {
-    font-size: 28px;
+    font-size: 22px;
     color: #AE6F21; /* Gold Accent */
     font-weight: 300;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-family: 'Cormorant Garamond', Georgia, serif;
     transition: transform 0.3s ease;
 }
 
 .budget-card-title {
-    font-size: 16px;
+    font-size: 14px;
     color: #21030e; /* Dark rich brown */
     font-weight: 500;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     letter-spacing: 0.5px;
 }
 
 .budget-card-explore {
-    font-size: 11px;
+    font-size: 10px;
     color: #8c0338; /* Maroon subtext */
     text-transform: uppercase;
     font-weight: 600;
@@ -1185,6 +1189,319 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 @media (max-width: 480px) {
     .offer-banner-card {
         height: 150px;
+    }
+}
+
+
+/* ==========================================================================
+   Premium Product Action Panel & Hover Effects
+   ========================================================================== */
+.product-image-container-outer {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover .product-action-panel {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.product-action-panel {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    transform: translateX(15px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #ffffff;
+    width: 48px;
+    padding: 14px 6px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 5;
+}
+
+.product-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #222222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1.25rem;
+}
+
+.product-action-btn:hover {
+    color: var(--primary) !important;
+    transform: scale(1.18);
+    background: transparent !important;
+}
+
+.product-action-btn i.active {
+    color: var(--primary);
+}
+
+.product-action-btn:hover i.active {
+    color: white;
+}
+
+/* ==========================================================================
+   Premium Glassmorphism Quick View Modal
+   ========================================================================== */
+.premium-quickview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1080;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-quickview.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.quickview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(33, 3, 14, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.4s ease;
+}
+
+.quickview-wrapper {
+    position: relative;
+    width: 90%;
+    max-width: 880px;
+    max-height: 90vh;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    z-index: 2;
+    overflow-y: auto;
+    transform: scale(0.95) translateY(15px);
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.premium-quickview.show .quickview-wrapper {
+    transform: scale(1) translateY(0);
+}
+
+.quickview-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.quickview-close:hover {
+    background: var(--primary);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.quickview-content {
+    padding: 36px;
+}
+
+.quickview-thumbnails::-webkit-scrollbar {
+    height: 4px;
+}
+
+.quickview-thumbnails::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}
+
+.qv-thumb-wrapper:hover {
+    opacity: 0.9;
+}
+
+.qv-qty-btn {
+    padding: 0.25rem 0.75rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.qv-qty-btn:hover {
+    background-color: var(--primary) !important;
+    color: white;
+    border-color: var(--primary) !important;
+}
+
+.qv-qty-input::-webkit-outer-spin-button,
+.qv-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ==========================================================================
+   Premium Toast Notifications
+   ========================================================================== */
+.premium-toast-container {
+    pointer-events: none;
+}
+
+.premium-toast {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-left: 4px solid var(--primary);
+    box-shadow: 0 15px 35px rgba(33, 3, 14, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    min-width: 320px;
+    max-width: 380px;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+}
+
+.premium-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.premium-toast.toast-error {
+    border-left-color: #dc3545;
+}
+
+.premium-toast.toast-info {
+    border-left-color: var(--secondary-gold);
+}
+
+/* ==========================================================================
+   Compare Page Enhancements
+   ========================================================================== */
+.compare-img-wrapper img {
+    transition: transform 0.5s ease;
+}
+
+.compare-img-wrapper:hover img {
+    transform: scale(1.06);
+}
+
+.compare-table-wrapper table {
+    border-color: #efefef !important;
+}
+
+.compare-table-wrapper th, 
+.compare-table-wrapper td {
+    padding: 1.25rem 1rem !important;
+}
+
+.spec-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.spec-list li:last-child {
+    border-bottom: none;
+}
+
+.hover-primary:hover {
+    color: var(--primary) !important;
+}
+
+.btn-gold {
+    background-color: var(--secondary-gold);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+    background-color: #925c19;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(174, 111, 33, 0.2);
+}
+
+/* ==========================================================================
+   Responsive & Mobile Support
+   ========================================================================== */
+@media (max-width: 991px) {
+    .quickview-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-action-panel {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        padding: 8px 4px;
+        gap: 8px;
+        background-color: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        border-radius: 12px;
+    }
+    
+    .product-action-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .quickview-wrapper {
+        max-height: 92vh;
+        width: 94%;
+        border-radius: 16px;
+    }
+    
+    .quickview-content {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .quickview-wrapper {
+        width: 96%;
     }
 }
 

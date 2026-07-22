@@ -66,10 +66,19 @@ def global_context(request):
         cart_count = 0
         cart_total = Decimal("0.00")
 
+    wishlist_product_ids = []
+    if request.user.is_authenticated and not request.user.is_staff:
+        try:
+            from accounts.models import Wishlist
+            wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+        except Exception:
+            pass
+
     return {
         "site_settings": settings_obj,
         "contact_info": contact_obj,
         "nav_categories": categories,
         "cart_count": cart_count,
         "cart_total": cart_total,
+        "wishlist_product_ids": wishlist_product_ids,
     }

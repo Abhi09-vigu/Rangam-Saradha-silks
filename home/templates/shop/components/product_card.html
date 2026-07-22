@@ -1,9 +1,4 @@
 <div class="product-card">
-    <!-- Wishlist toggle -->
-    <a href="{% url 'accounts:toggle_wishlist' product.id %}" class="product-wishlist-btn" title="Add to Wishlist">
-        <i class="bi bi-heart-fill"></i>
-    </a>
-    
     <!-- Badges -->
     {% if badge_type == "featured" %}
     <span class="product-badge badge-featured">Featured</span>
@@ -13,15 +8,35 @@
     <span class="product-badge bg-success text-white">{{ product.discount_percentage }}% Off</span>
     {% endif %}
 
-    <a href="{% url 'shop:product_detail' product.slug %}" class="d-block text-decoration-none">
-        <div class="product-image-wrapper">
-            {% if product.images.all %}
-            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-            {% else %}
-            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree">
-            {% endif %}
+    <div class="product-image-container-outer" style="position: relative; overflow: hidden;">
+        <a href="{% url 'shop:product_detail' product.slug %}" class="d-block text-decoration-none">
+            <div class="product-image-wrapper">
+                {% if product.images.all %}
+                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree">
+                {% endif %}
+            </div>
+        </a>
+        
+        <!-- Premium Action Panel -->
+        <div class="product-action-panel">
+            <!-- Compare Icon -->
+            <a href="{% url 'shop:compare_add' product.id %}" class="product-action-btn compare-btn" data-product-id="{{ product.id }}" title="Compare Product">
+                <i class="bi bi-shuffle"></i>
+            </a>
+            
+            <!-- Quick View Icon -->
+            <button type="button" class="product-action-btn quickview-btn" data-product-id="{{ product.id }}" title="Quick View">
+                <i class="bi bi-search"></i>
+            </button>
+            
+            <!-- Wishlist Icon -->
+            <button type="button" class="product-action-btn wishlist-btn" data-product-id="{{ product.id }}" title="Add to Wishlist">
+                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active{% else %}bi-heart{% endif %}"></i>
+            </button>
         </div>
-    </a>
+    </div>
 
     <div class="product-info">
         <div class="product-category">

@@ -445,3 +445,94 @@ def add_review(request, product_id):
         messages.success(request, "Your review has been submitted successfully and is pending administrator approval.")
         
     return redirect(request.META.get('HTTP_REFERER', 'shop:product_detail'))
+
+
+def product_quick_view(request, product_id):
+    from django.urls import reverse
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    images = [img.image.url for img in product.images.all()]
+    if not images:
+        images = ["https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"]
+    
+    categories = [cat.name for cat in product.categories.all()]
+    category = categories[0] if categories else "Silk Saree"
+    
+    highlights = []
+    if product.fabric:
+        highlights.append(f"Fabric: {product.fabric}")
+    if product.color:
+        highlights.append(f"Color: {product.color}")
+    if product.material:
+        highlights.append(f"Material: {product.material}")
+    if product.occasion:
+        highlights.append(f"Occasion: {product.occasion}")
+    if isinstance(product.specifications, dict):
+        for key, val in product.specifications.items():
+            if len(highlights) < 6:
+                highlights.append(f"{key}: {val}")
+            
+    in_wishlist = False
+    if request.user.is_authenticated and not request.user.is_staff:
+        from accounts.models import Wishlist
+        in_wishlist = Wishlist.objects.filter(user=request.user, product=product).exists()
+    
+    data = {
+        'id': product.id,
+        'name': product.name,
+        'slug': product.slug,
+        'sku': product.sku,
+        'category': category,
+        'current_price': float(product.offer_price),
+        'original_price': float(product.price) if product.discount_percentage > 0 else None,
+        'discount_percentage': product.discount_percentage,
+        'stock': product.stock,
+        'stock_status': 'In Stock' if product.stock > 0 else 'Out of Stock',
+        'short_description': product.short_description or (product.description[:200] + '...'),
+        'highlights': highlights,
+        'images': images,
+        'in_wishlist': in_wishlist,
+        'detail_url': reverse('shop:product_detail', args=[product.slug]),
+        'add_to_cart_url': reverse('shop:cart_add', args=[product.id]),
+    }
+    return JsonResponse(data)
+
+
+def compare_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    compare_list = request.session.get('compare_list', [])
+    
+    if product.id not in compare_list:
+        compare_list.append(product.id)
+        if len(compare_list) > 4:
+            compare_list = compare_list[-4:]
+        request.session['compare_list'] = compare_list
+        request.session.modified = True
+        messages.success(request, f"Added {product.name} to comparison list.")
+    else:
+        messages.info(request, f"{product.name} is already in the comparison list.")
+        
+    return redirect('shop:compare_page')
+
+
+def compare_remove(request, product_id):
+    compare_list = request.session.get('compare_list', [])
+    if product_id in compare_list:
+        compare_list.remove(product_id)
+        request.session['compare_list'] = compare_list
+        request.session.modified = True
+        messages.success(request, "Product removed from comparison list.")
+    return redirect('shop:compare_page')
+
+
+def compare_page(request):
+    compare_ids = request.session.get('compare_list', [])
+    products = Product.objects.filter(id__in=compare_ids, is_active=True).prefetch_related('images', 'categories')
+    
+    # Sort products in the order they were added
+    products_dict = {p.id: p for p in products}
+    ordered_products = [products_dict[pid] for pid in compare_ids if pid in products_dict]
+    
+    context = {
+        'products': ordered_products,
+    }
+    return render(request, 'shop/compare.html', context)

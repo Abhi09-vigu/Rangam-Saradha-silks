@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Compare Products - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury bg-light py-5">
+    <div class="container text-center">
+        <h1 class="font-heading display-4 text-dark mb-0">Compare Products</h1>
+        <p class="text-muted mt-2">Compare traditional elegance side-by-side to find your perfect saree</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        {% if products %}
+        <div class="table-responsive compare-table-wrapper border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background: white;">
+            <table class="table table-bordered align-middle mb-0" style="min-width: 800px; border-collapse: separate; border-spacing: 0;">
+                <thead>
+                    <tr class="bg-light text-center">
+                        <th style="width: 20%; min-width: 180px;" class="border-0 py-3 font-heading text-uppercase text-muted fs-7">Features</th>
+                        {% for product in products %}
+                        <th style="width: {% widthratio 80 products|length 1 %}%; min-width: 200px;" class="border-0 py-3 position-relative">
+                            <div class="d-flex justify-content-end p-2 position-absolute end-0 top-0">
+                                <a href="{% url 'shop:compare_remove' product.id %}" class="btn-close shadow-none" style="font-size: 0.8rem;" title="Remove from Comparison"></a>
+                            </div>
+                            <div class="p-2 text-center">
+                                <a href="{% url 'shop:product_detail' product.slug %}" class="d-block mb-3">
+                                    <div class="compare-img-wrapper mx-auto mb-2" style="max-width: 140px; aspect-ratio: 3/4; overflow: hidden; border-radius: 8px;">
+                                        {% if product.images.all %}
+                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                        {% else %}
+                                        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree" class="w-100 h-100" style="object-fit: cover;">
+                                        {% endif %}
+                                    </div>
+                                </a>
+                                <h5 class="product-title font-heading fs-6 mb-1 text-truncate-2">
+                                    <a href="{% url 'shop:product_detail' product.slug %}" class="text-decoration-none text-dark hover-primary">{{ product.name }}</a>
+                                </h5>
+                                <div class="text-muted fs-7">{{ product.categories.first.name|default:"Silk Saree" }}</div>
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Price Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">Price</td>
+                        {% for product in products %}
+                        <td class="text-center py-3">
+                            <div class="product-price-wrapper">
+                                <span class="price-current fw-bold text-primary">{{ site_settings.currency }}{{ product.offer_price|floatformat:2 }}</span>
+                                {% if product.discount_percentage > 0 %}
+                                <br><span class="price-original text-muted text-decoration-line-through fs-7">{{ site_settings.currency }}{{ product.price|floatformat:2 }}</span>
+                                <span class="badge bg-success-subtle text-success fs-8 ms-1">{{ product.discount_percentage }}% Off</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- SKU Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">SKU</td>
+                        {% for product in products %}
+                        <td class="text-center text-muted fs-7 py-3">{{ product.sku }}</td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- Availability Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">Availability</td>
+                        {% for product in products %}
+                        <td class="text-center py-3">
+                            {% if product.stock == 0 %}
+                            <span class="badge bg-danger-subtle text-danger px-2 py-1 fs-7">Out of Stock</span>
+                            {% elif product.stock <= 5 %}
+                            <span class="badge bg-warning-subtle text-warning px-2 py-1 fs-7">Only {{ product.stock }} left</span>
+                            {% else %}
+                            <span class="badge bg-success-subtle text-success px-2 py-1 fs-7">In Stock</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- Description Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">Description</td>
+                        {% for product in products %}
+                        <td class="py-3 px-3 fs-7 text-muted" style="vertical-align: top; max-width: 250px;">
+                            {{ product.short_description|default:product.description|truncatechars:180 }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- Specs Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">Specifications</td>
+                        {% for product in products %}
+                        <td class="py-3 px-3 fs-7 text-dark" style="vertical-align: top;">
+                            <ul class="list-unstyled mb-0 spec-list">
+                                {% if product.fabric %}<li><strong>Fabric:</strong> {{ product.fabric }}</li>{% endif %}
+                                {% if product.color %}<li><strong>Color:</strong> {{ product.color }}</li>{% endif %}
+                                {% if product.material %}<li><strong>Material:</strong> {{ product.material }}</li>{% endif %}
+                                {% if product.occasion %}<li><strong>Occasion:</strong> {{ product.occasion }}</li>{% endif %}
+                                {% if product.specifications %}
+                                    {% for key, val in product.specifications.items %}
+                                    <li><strong>{{ key }}:</strong> {{ val }}</li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- Actions Row -->
+                    <tr>
+                        <td class="fw-bold bg-light py-3 ps-4 font-heading text-secondary text-uppercase fs-7">Action</td>
+                        {% for product in products %}
+                        <td class="text-center py-4">
+                            {% if product.stock > 0 %}
+                            <form action="{% url 'shop:cart_add' product.id %}" method="POST" class="d-inline-block">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm px-3 py-2 rounded-pill fw-semibold text-uppercase fs-7 mb-2 mb-md-0 me-md-2">
+                                    <i class="bi bi-cart-plus me-1"></i> Add To Cart
+                                </button>
+                                <button type="submit" name="buy_now" value="true" class="btn btn-gold btn-sm px-3 py-2 rounded-pill fw-semibold text-uppercase fs-7">
+                                    Buy Now
+                                </button>
+                            </form>
+                            {% else %}
+                            <button class="btn btn-secondary btn-sm px-3 py-2 rounded-pill text-uppercase fs-7" disabled>
+                                Out of Stock
+                            </button>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-arrow-left-right text-muted" style="font-size: 4rem; opacity: 0.4;"></i>
+            </div>
+            <h3 class="font-heading mb-3">No products selected for comparison</h3>
+            <p class="text-muted mb-4 mx-auto" style="max-width: 480px;">
+                You haven't added any sarees to your comparison list yet. Explore our collections and click the Compare icon on any product to compare details side-by-side.
+            </p>
+            <a href="{% url 'shop:catalog' %}" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold text-uppercase fs-7">
+                Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
