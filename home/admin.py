@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.forms import Textarea
-from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs
+from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 
 class SingletonAdmin(admin.ModelAdmin):
     # Prevents adding new items if one already exists
@@ -97,3 +97,11 @@ class WhyChooseUsAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description']
 
 custom_admin_site.register(WhyChooseUs, WhyChooseUsAdmin)
+
+class FabricCurationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'image', 'display_order', 'is_active']
+    list_editable = ['display_order', 'is_active']
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name', 'description']
+
+custom_admin_site.register(FabricCuration, FabricCurationAdmin)

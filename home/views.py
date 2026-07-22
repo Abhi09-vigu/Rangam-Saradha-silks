@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs
+from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 from shop.models import Category, Product, Collection
 
 def index(request):
@@ -15,9 +15,10 @@ def index(request):
     best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:12]
     today_deals = Product.objects.filter(is_active=True, is_today_deal=True).prefetch_related('images', 'categories')[:12]
     
-    # Featured Collections and Why Choose Us
+    # Featured Collections, Why Choose Us, Fabric Curations
     featured_collections = Collection.objects.filter(is_active=True)[:4]
     why_choose_us = WhyChooseUs.objects.filter(is_active=True).order_by('display_order')
+    fabric_curations = FabricCuration.objects.filter(is_active=True).order_by('display_order')
 
     # Offer Banners
     banners = OfferBanner.objects.filter(is_active=True).order_by('display_order')[:3]
@@ -46,6 +47,7 @@ def index(request):
         'today_deals': today_deals,
         'featured_collections': featured_collections,
         'why_choose_us': why_choose_us,
+        'fabric_curations': fabric_curations,
         'banners': banners,
         'testimonials': testimonials,
         'insta_posts': insta_posts,

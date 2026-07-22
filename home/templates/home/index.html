@@ -206,6 +206,39 @@
 </section>
 {% endif %}
 
+<!-- Fabric Curations Section (Shop By Material) -->
+{% if fabric_curations %}
+<section class="section-luxury fabric-curation-section py-5">
+    <div class="container">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle text-uppercase tracking-wider">{{ site_settings.fabric_curation_subtitle|default:"SHOP BY MATERIAL" }}</span>
+            <h2 class="section-title font-heading fw-bold">{{ site_settings.fabric_curation_title|default:"Fabric Curations" }}</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
+        </div>
+        
+        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
+            {% for item in fabric_curations %}
+            <div class="col">
+                <a href="{% url 'shop:catalog' %}?fabric={{ item.name }}" class="fabric-curation-card">
+                    <div class="fabric-curation-image-wrapper">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="fabric-curation-img" loading="lazy">
+                        {% else %}
+                        <img src="{% static 'images/about_offer.jpg' %}" alt="{{ item.name }}" class="fabric-curation-img" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="fabric-curation-overlay">
+                        <h3 class="fabric-curation-title">{{ item.name }}</h3>
+                        <span class="fabric-curation-subtitle-text">Explore Weaves <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Best Sellers Section -->
 {% if best_sellers %}
 <section class="section-luxury bg-white py-5 overflow-hidden">

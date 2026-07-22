@@ -51,7 +51,13 @@ def catalog(request):
         
     fabric = request.GET.get('fabric')
     if fabric:
-        products = products.filter(fabric__iexact=fabric)
+        products = products.filter(
+            Q(fabric__icontains=fabric) |
+            Q(material__icontains=fabric) |
+            Q(name__icontains=fabric) |
+            Q(categories__name__icontains=fabric) |
+            Q(tags__icontains=fabric)
+        ).distinct()
 
     occasion = request.GET.get('occasion')
     if occasion:

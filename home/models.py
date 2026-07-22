@@ -35,6 +35,10 @@ class WebsiteSetting(models.Model):
     why_choose_title = models.CharField(max_length=100, default="Why Choose Us", help_text="Main heading for the Why Choose Us section.")
     why_choose_subtitle = models.CharField(max_length=150, default="THE RANGAM SARADHA PROMISE", help_text="Subtitle above the Why Choose Us heading.")
 
+    # Dynamic Fabric Curations Headers
+    fabric_curation_title = models.CharField(max_length=100, default="Fabric Curations", help_text="Main heading for the Fabric Curations section.")
+    fabric_curation_subtitle = models.CharField(max_length=150, default="SHOP BY MATERIAL", help_text="Subtitle above the Fabric Curations heading.")
+
     class Meta:
         verbose_name = "Website Setting"
         verbose_name_plural = "Website Settings"
@@ -212,3 +216,25 @@ class WhyChooseUs(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class FabricCuration(models.Model):
+    name = models.CharField(max_length=100, help_text="e.g. Banarasi, Kanchipattu, Organza")
+    slug = models.SlugField(unique=True, blank=True)
+    image = models.ImageField(upload_to='fabric_curations/', blank=True, null=True, help_text="Upload card background image for this fabric curation")
+    description = models.CharField(max_length=200, blank=True, null=True, help_text="Optional short description or subtitle")
+    display_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = "Fabric Curation"
+        verbose_name_plural = "Fabric Curations"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
