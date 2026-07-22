@@ -200,7 +200,8 @@ class BudgetRange(models.Model):
 class WhyChooseUs(models.Model):
     title = models.CharField(max_length=100, help_text="e.g. Free Shipping")
     description = models.CharField(max_length=150, blank=True, null=True, help_text="e.g. On orders over ₹1000")
-    icon_class = models.CharField(max_length=50, default="bi-truck", help_text="Bootstrap Icon class (e.g. bi-truck, bi-shield-check, bi-gem, bi-telephone)")
+    icon_class = models.CharField(max_length=255, default="bi-truck", blank=True, help_text="Bootstrap Icon class (e.g. bi-truck) OR PNG file path/URL")
+    image = models.ImageField(upload_to='why_choose_us/', blank=True, null=True, help_text="Upload custom PNG/SVG icon image")
     display_order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 

@@ -256,6 +256,82 @@
 </section>
 {% endif %}
 
+<!-- Why Choose Us Section -->
+{% if why_choose_us %}
+<section class="section-luxury why-choose-trust-section py-5 position-relative bg-white" id="whyChooseUsSection">
+    <div class="container py-lg-4">
+        <div class="section-heading-wrapper text-center mb-5">
+            <span class="section-subtitle text-uppercase tracking-wider">{{ site_settings.why_choose_subtitle|default:"THE RANGAM SARADHA PROMISE" }}</span>
+            <h2 class="section-title font-heading fw-bold">{{ site_settings.why_choose_title|default:"Why Choose Us" }}</h2>
+            <div class="gold-accent-line mx-auto mt-2"></div>
+        </div>
+
+        <!-- Desktop & Tablet Layout (Grid: 4 cols on desktop, 2 cols on tablet) -->
+        <div class="row g-4 justify-content-center d-none d-md-flex">
+            {% for item in why_choose_us %}
+            <div class="col-12 col-md-6 col-lg-3 d-flex align-items-stretch">
+                <div class="why-choose-card w-100 p-4 p-xl-4 p-xxl-5 bg-white rounded-4 shadow-sm border text-start d-flex flex-column transition-all">
+                    <div class="why-choose-icon-wrapper mb-4 align-self-center d-flex align-items-center justify-content-center rounded-circle">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="why-choose-custom-icon img-fluid" style="max-width: 38px; max-height: 38px; object-fit: contain;">
+                        {% elif '.png' in item.icon_class or '.jpg' in item.icon_class or '.jpeg' in item.icon_class or '.svg' in item.icon_class or '/' in item.icon_class %}
+                        <img src="{% if item.icon_class|slice:':4' == 'http' or item.icon_class|slice:':1' == '/' %}{{ item.icon_class }}{% else %}{% static item.icon_class %}{% endif %}" alt="{{ item.title }}" class="why-choose-custom-icon img-fluid" style="max-width: 38px; max-height: 38px; object-fit: contain;">
+                        {% else %}
+                        <i class="bi {{ item.icon_class }} fs-2"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="why-choose-title font-heading mb-2 text-dark">{{ item.title }}</h3>
+                    {% if item.description %}
+                    <p class="why-choose-description text-muted mb-0 fs-6">{{ item.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Mobile Carousel Layout (Horizontal Slider with Navigation Arrows on < 768px) -->
+        <div class="d-block d-md-none position-relative why-choose-mobile-wrapper">
+            <div class="why-choose-mobile-slider" id="whyChooseMobileSlider">
+                {% for item in why_choose_us %}
+                <div class="why-choose-mobile-slide">
+                    <div class="why-choose-card p-4 bg-white rounded-4 shadow-sm border text-start d-flex flex-column h-100 transition-all">
+                        <div class="why-choose-icon-wrapper mb-4 align-self-center d-flex align-items-center justify-content-center rounded-circle">
+                            {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="why-choose-custom-icon img-fluid" style="max-width: 38px; max-height: 38px; object-fit: contain;">
+                            {% elif '.png' in item.icon_class or '.jpg' in item.icon_class or '.jpeg' in item.icon_class or '.svg' in item.icon_class or '/' in item.icon_class %}
+                            <img src="{% if item.icon_class|slice:':4' == 'http' or item.icon_class|slice:':1' == '/' %}{{ item.icon_class }}{% else %}{% static item.icon_class %}{% endif %}" alt="{{ item.title }}" class="why-choose-custom-icon img-fluid" style="max-width: 38px; max-height: 38px; object-fit: contain;">
+                            {% else %}
+                            <i class="bi {{ item.icon_class }} fs-2"></i>
+                            {% endif %}
+                        </div>
+                        <h3 class="why-choose-title font-heading mb-2 text-dark">{{ item.title }}</h3>
+                        {% if item.description %}
+                        <p class="why-choose-description text-muted mb-0 fs-6">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Mobile Navigation Controls -->
+            <div class="why-choose-nav-wrapper d-flex justify-content-center align-items-center gap-3 mt-4">
+                <button class="why-choose-nav-btn prev" id="whyChoosePrevBtn" aria-label="Previous Slide">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="why-choose-slider-dots d-flex gap-2 align-items-center" id="whyChooseDots">
+                    {% for item in why_choose_us %}
+                    <span class="why-choose-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+                    {% endfor %}
+                </div>
+                <button class="why-choose-nav-btn next" id="whyChooseNextBtn" aria-label="Next Slide">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Find Your Piece (Shop By Budget) Section -->
 {% if budget_ranges %}
 <section class="section-luxury bg-luxury py-5">
@@ -280,34 +356,6 @@
                         </div>
                     </div>
                 </a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<!-- Why Choose Us Section -->
-{% if why_choose_us %}
-<section class="section-luxury bg-luxury py-5">
-    <div class="container">
-        <div class="section-heading-wrapper text-center mb-5">
-            <span class="section-subtitle text-uppercase tracking-wider">{{ site_settings.why_choose_subtitle|default:"THE RANGAM SARADHA PROMISE" }}</span>
-            <h2 class="section-title font-heading fw-bold">{{ site_settings.why_choose_title|default:"Why Choose Us" }}</h2>
-            <div class="gold-accent-line mx-auto mt-2"></div>
-        </div>
-        <div class="row g-4 justify-content-center">
-            {% for item in why_choose_us %}
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="why-choose-card text-center p-4 bg-white shadow-sm rounded-4 h-100 transition-all">
-                    <div class="why-choose-icon-wrapper mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle">
-                        <i class="bi {{ item.icon_class }} fs-2 text-primary"></i>
-                    </div>
-                    <h3 class="why-choose-title font-heading mb-2 text-dark">{{ item.title }}</h3>
-                    {% if item.description %}
-                    <p class="why-choose-subtitle text-muted mb-0 fs-6">{{ item.description }}</p>
-                    {% endif %}
-                </div>
             </div>
             {% endfor %}
         </div>
@@ -416,6 +464,62 @@
         track.addEventListener('touchend', () => {
             track.classList.remove('paused');
         }, { passive: true });
+    });
+
+    // Why Choose Us Mobile Carousel Controls
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('whyChooseMobileSlider');
+        const prevBtn = document.getElementById('whyChoosePrevBtn');
+        const nextBtn = document.getElementById('whyChooseNextBtn');
+        const dots = document.querySelectorAll('.why-choose-dot');
+
+        if (slider && prevBtn && nextBtn) {
+            const getSlideWidth = () => {
+                const firstSlide = slider.querySelector('.why-choose-mobile-slide');
+                return firstSlide ? firstSlide.offsetWidth + 20 : slider.clientWidth * 0.88;
+            };
+
+            prevBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: -getSlideWidth(), behavior: 'smooth' });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: getSlideWidth(), behavior: 'smooth' });
+            });
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    const slides = slider.querySelectorAll('.why-choose-mobile-slide');
+                    if (slides[index]) {
+                        slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                });
+            });
+
+            slider.addEventListener('scroll', () => {
+                const slides = slider.querySelectorAll('.why-choose-mobile-slide');
+                const sliderCenter = slider.scrollLeft + slider.clientWidth / 2;
+                let closestIndex = 0;
+                let minDistance = Infinity;
+
+                slides.forEach((slide, idx) => {
+                    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+                    const distance = Math.abs(sliderCenter - slideCenter);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestIndex = idx;
+                    }
+                });
+
+                dots.forEach((d, i) => {
+                    if (i === closestIndex) {
+                        d.classList.add('active');
+                    } else {
+                        d.classList.remove('active');
+                    }
+                });
+            });
+        }
     });
 </script>
 {% endblock %}
