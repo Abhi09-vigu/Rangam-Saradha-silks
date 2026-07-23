@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cloudinary',
     'phonenumber_field',
+    'rest_framework',
     'accounts.apps.AccountsConfig',
     'shop.apps.ShopConfig',
     'home.apps.HomeConfig',

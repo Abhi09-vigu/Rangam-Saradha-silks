@@ -1,131 +1,18 @@
-{% extends 'base.html' %}
+import React, { useState } from 'react';
+import axios from 'axios';
 
-{% block meta_title %}Contact Us - {{ site_settings.website_name }}{% endblock %}
-
-{% block content %}
-<section class="section-luxury bg-light py-5">
-    <div class="container text-center">
-        <h1 class="font-heading display-4 text-dark mb-0">Contact Us</h1>
-    </div>
-</section>
-
-<section class="section-luxury">
-    <div class="container">
-        <div class="row g-5">
-            <!-- Contact Details & Map -->
-            <div class="col-lg-6">
-                <span class="section-subtitle">Get In Touch</span>
-                <h2 class="font-heading mb-4">We'd Love To Hear From You</h2>
-                <p class="text-muted mb-5">Have a question about our pure silk sarees, custom orders, or shipping times? Drop us a line or visit our flagship boutique store.</p>
-                
-                <div class="mb-4">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-geo-alt fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Our Flagship Store</h5>
-                            <p class="text-muted mb-0">{{ contact_info.address }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-telephone fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Call Us</h5>
-                            <p class="text-muted mb-0">{{ contact_info.phone }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-envelope fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Email Us</h5>
-                            <p class="text-muted mb-0">{{ contact_info.email }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-clock fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Working Hours</h5>
-                            <p class="text-muted mb-0">{{ contact_info.working_hours }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Google Maps Embed -->
-                {% if contact_info.google_map_iframe %}
-                <div class="mt-4 overflow-hidden rounded-4 shadow-sm border border-light">
-                    {{ contact_info.google_map_iframe|safe }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Contact Submission Form (React & Axios Integration) -->
-            <div class="col-lg-6">
-                <div id="react-contact-form-root">
-                    <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
-                        <h3 class="font-heading mb-4 text-center">Send Us a Message</h3>
-                        
-                        <form action="{% url 'home:contact' %}" method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="name" class="form-label text-muted">Your Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control px-3 py-2" id="name" placeholder="John Doe" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label text-muted">Email Address <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control px-3 py-2" id="email" placeholder="john@example.com" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="subject" class="form-label text-muted">Subject <span class="text-danger">*</span></label>
-                                <input type="text" name="subject" class="form-control px-3 py-2" id="subject" placeholder="Inquiry about Kanchipuram Sarees" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="message" class="form-label text-muted">Your Message <span class="text-danger">*</span></label>
-                                <textarea name="message" class="form-control px-3 py-2" id="message" rows="5" placeholder="Write your message here..." required></textarea>
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary w-100 py-2.5">Send Message</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-{% endblock %}
-
-{% block extra_js %}
-<!-- Axios JS Library -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- React 18 & ReactDOM -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-{% verbatim %}
-<script type="text/babel">
-const ContactFormReact = () => {
-    const [formData, setFormData] = React.useState({
+const ContactForm = () => {
+    const [formData, setFormData] = useState({
         name: '',
         email: '',
         subject: '',
         message: ''
     });
 
-    const [errors, setErrors] = React.useState({});
-    const [submitting, setSubmitting] = React.useState(false);
-    const [successMessage, setSuccessMessage] = React.useState('');
-    const [errorMessage, setErrorMessage] = React.useState('');
+    const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -264,7 +151,7 @@ const ContactFormReact = () => {
                         onChange={handleChange}
                         disabled={submitting}
                     />
-                    {errors.name && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.name}</div>}
+                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -281,7 +168,7 @@ const ContactFormReact = () => {
                         onChange={handleChange}
                         disabled={submitting}
                     />
-                    {errors.email && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.email}</div>}
+                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -298,7 +185,7 @@ const ContactFormReact = () => {
                         onChange={handleChange}
                         disabled={submitting}
                     />
-                    {errors.subject && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.subject}</div>}
+                    {errors.subject && <div className="invalid-feedback">{errors.subject}</div>}
                 </div>
 
                 <div className="mb-4">
@@ -315,7 +202,7 @@ const ContactFormReact = () => {
                         onChange={handleChange}
                         disabled={submitting}
                     ></textarea>
-                    {errors.message && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.message}</div>}
+                    {errors.message && <div className="invalid-feedback">{errors.message}</div>}
                 </div>
 
                 <div className="text-center">
@@ -339,8 +226,4 @@ const ContactFormReact = () => {
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('react-contact-form-root'));
-root.render(<ContactFormReact />);
-</script>
-{% endverbatim %}
-{% endblock %}
+export default ContactForm;

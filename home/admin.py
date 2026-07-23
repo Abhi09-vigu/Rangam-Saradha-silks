@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.forms import Textarea
-from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
+from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 
 class SingletonAdmin(admin.ModelAdmin):
     # Prevents adding new items if one already exists
@@ -65,7 +65,7 @@ class InstagramPostAdmin(admin.ModelAdmin):
     list_display = ['id', 'display_order', 'is_active']
     list_filter = ['is_active']
 
-class ContactSubmissionAdmin(admin.ModelAdmin):
+class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'subject', 'created_at']
     readonly_fields = ['name', 'email', 'subject', 'message', 'created_at']
     search_fields = ['name', 'email', 'subject', 'message']
@@ -88,7 +88,7 @@ custom_admin_site.register(Testimonial, TestimonialAdmin)
 custom_admin_site.register(CMSPage, CMSPageAdmin)
 custom_admin_site.register(FAQ, FAQAdmin)
 custom_admin_site.register(InstagramPost, InstagramPostAdmin)
-custom_admin_site.register(ContactSubmission, ContactSubmissionAdmin)
+custom_admin_site.register(ContactMessage, ContactMessageAdmin)
 custom_admin_site.register(BudgetRange, BudgetRangeAdmin)
 
 class WhyChooseUsAdmin(admin.ModelAdmin):

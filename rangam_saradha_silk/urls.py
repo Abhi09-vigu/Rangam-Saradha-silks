@@ -18,11 +18,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rangam_saradha_silk.admin import custom_admin_site
+from home.views import ContactFormAPIView
 
 urlpatterns = [
     path('admin/', custom_admin_site.urls),
     path('accounts/', include('accounts.urls')),
     path('shop/', include('shop.urls')),
+    path('api/contact/', ContactFormAPIView.as_view(), name='api_contact'),
     path('', include('home.urls')),
 ]
 

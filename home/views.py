@@ -1,7 +1,142 @@
+import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
+from .serializers import ContactMessageSerializer
 from shop.models import Category, Product, Collection
+
+logger = logging.getLogger(__name__)
+
+class ContactFormAPIView(APIView):
+    """
+    API endpoint for Contact Us form submission.
+    POST /api/contact/
+    """
+    def post(self, request, *args, **kwargs):
+        serializer = ContactMessageSerializer(data=request.data)
+        if not serializer.is_valid():
+            error_details = []
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    error_details.append(f"{field.capitalize()}: {error}")
+            error_msg = error_details[0] if error_details else "Validation error."
+            return Response(
+                {
+                    "success": False,
+                    "message": error_msg,
+                    "errors": serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save to database
+        contact_message = serializer.save()
+
+        # Format submission time
+        formatted_time = contact_message.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        # Email notification setup
+        email_subject = f"New Contact Form Submission - {contact_message.subject}"
+        email_body = (
+            f"You have received a new contact form submission on Rangam Saradha Silks.\n\n"
+            f"--------------------------------------------------\n"
+            f"Name: {contact_message.name}\n"
+            f"Email Address: {contact_message.email}\n"
+            f"Subject: {contact_message.subject}\n"
+            f"Message:\n{contact_message.message}\n"
+            f"--------------------------------------------------\n"
+            f"Date & Time of submission: {formatted_time}\n"
+        )
+        
+        recipient_email = "rangamsaradhasilks@gmail.com"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', 'rangamsaradhasilks@gmail.com')
+
+        try:
+            send_mail(
+                subject=email_subject,
+                message=email_body,
+                from_email=from_email,
+                recipient_list=[recipient_email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"Error sending contact form email: {str(e)}")
+            return Response(
+                {
+                    "success": False,
+                    "message": f"Failed to send email notification: {str(e)}"
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Thank you for contacting us. We will get back to you shortly.",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+def faq_view(request):
+    faqs = FAQ.objects.filter(is_active=True).order_by('display_order')
+    return render(request, 'home/faq.html', {'faqs': faqs})
+
+def contact_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        
+        if not name or not email or not subject or not message:
+            messages.error(request, "All fields (Name, Email, Subject, Message) are required.")
+            return redirect('home:contact')
+
+        contact_msg = ContactMessage.objects.create(
+            name=name,
+            email=email,
+            subject=subject,
+            message=message
+        )
+
+        formatted_time = contact_msg.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+        email_subject = f"New Contact Form Submission - {contact_msg.subject}"
+        email_body = (
+            f"You have received a new contact form submission on Rangam Saradha Silks.\n\n"
+            f"--------------------------------------------------\n"
+            f"Name: {contact_msg.name}\n"
+            f"Email Address: {contact_msg.email}\n"
+            f"Subject: {contact_msg.subject}\n"
+            f"Message:\n{contact_msg.message}\n"
+            f"--------------------------------------------------\n"
+            f"Date & Time of submission: {formatted_time}\n"
+        )
+        recipient_email = "rangamsaradhasilks@gmail.com"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', 'rangamsaradhasilks@gmail.com')
+
+        try:
+            send_mail(
+                subject=email_subject,
+                message=email_body,
+                from_email=from_email,
+                recipient_list=[recipient_email],
+                fail_silently=False,
+            )
+            messages.success(request, "Thank you for contacting us. We will get back to you shortly.")
+        except Exception as e:
+            logger.error(f"Error sending contact form email: {str(e)}")
+            messages.error(request, f"Failed to send email notification: {str(e)}")
+
+        return redirect('home:contact')
+        
+    return render(request, 'home/contact.html')
 
 def index(request):
     sliders = HeroSlider.objects.filter(is_active=True).order_by('display_order')
@@ -71,28 +206,6 @@ def cms_page_detail(request, slug):
             context['about_section_2'] = ""
             
     return render(request, 'home/cms_page.html', context)
-
-def faq_view(request):
-    faqs = FAQ.objects.filter(is_active=True).order_by('display_order')
-    return render(request, 'home/faq.html', {'faqs': faqs})
-
-def contact_view(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        subject = request.POST.get('subject')
-        message = request.POST.get('message')
-        
-        ContactSubmission.objects.create(
-            name=name,
-            email=email,
-            subject=subject,
-            message=message
-        )
-        messages.success(request, "Your message has been sent successfully! We will contact you shortly.")
-        return redirect('home:contact')
-        
-    return render(request, 'home/contact.html')
 
 def debug_db_view(request):
     if request.GET.get('key') != 'saradha123':
