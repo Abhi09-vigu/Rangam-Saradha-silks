@@ -4,12 +4,26 @@ from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
 
 class CustomUser(AbstractUser):
+    AUTH_PROVIDERS = (
+        ('email', 'Email / OTP'),
+        ('google', 'Google'),
+    )
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)
     is_verified = models.BooleanField(default=False)
     otp_code = models.CharField(max_length=6, blank=True, null=True)
     otp_expiry = models.DateTimeField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    profile_picture_url = models.URLField(max_length=500, blank=True, null=True)
+    auth_provider = models.CharField(max_length=20, choices=AUTH_PROVIDERS, default='email')
+    google_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    firebase_uid = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
+    def get_avatar_url(self):
+        if self.profile_picture:
+            return self.profile_picture.url
+        if self.profile_picture_url:
+            return self.profile_picture_url
+        return None
 
     def __str__(self):
         return self.username

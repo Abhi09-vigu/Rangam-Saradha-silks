@@ -450,7 +450,9 @@ def add_review(request, product_id):
         )
         messages.success(request, "Your review has been submitted successfully and is pending administrator approval.")
         
-    return redirect(request.META.get('HTTP_REFERER', 'shop:product_detail'))
+    from django.urls import reverse
+    referer = request.META.get('HTTP_REFERER')
+    return redirect(referer if referer else reverse('shop:product_detail', args=[product.slug]))
 
 
 def product_quick_view(request, product_id):

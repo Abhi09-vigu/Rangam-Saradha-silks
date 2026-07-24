@@ -159,6 +159,41 @@ LOGIN_REDIRECT_URL = 'home:index'
 LOGOUT_REDIRECT_URL = 'home:index'
 LOGIN_URL = 'accounts:login'
 
+# Google Authentication Credentials
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+
+# Firebase Admin SDK & Web Config
+import firebase_admin
+from firebase_admin import credentials
+
+FIREBASE_KEY_PATH = os.environ.get(
+    'FIREBASE_CREDENTIALS_PATH',
+    str(BASE_DIR / 'rangam-saradha-silks-firebase-adminsdk-fbsvc-ef25e865c8.json')
+)
+
+if not firebase_admin._apps:
+    if os.path.exists(FIREBASE_KEY_PATH):
+        try:
+            cred = credentials.Certificate(FIREBASE_KEY_PATH)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            print(f"Firebase Admin initialization error: {e}")
+    else:
+        try:
+            firebase_admin.initialize_app()
+        except Exception as e:
+            print(f"Firebase default initialization error: {e}")
+
+FIREBASE_CONFIG = {
+    'apiKey': os.environ.get('FIREBASE_API_KEY', ''),
+    'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN', 'rangam-saradha-silks.firebaseapp.com'),
+    'projectId': os.environ.get('FIREBASE_PROJECT_ID', 'rangam-saradha-silks'),
+    'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET', 'rangam-saradha-silks.appspot.com'),
+    'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID', ''),
+    'appId': os.environ.get('FIREBASE_APP_ID', '')
+}
+
 # Production Security Settings
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -193,5 +228,9 @@ if DEBUG and not EMAIL_HOST_USER:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Google Identity Services / OAuth POPUP configuration
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
 
 

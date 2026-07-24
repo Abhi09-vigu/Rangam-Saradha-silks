@@ -74,6 +74,17 @@ def global_context(request):
         except Exception:
             pass
 
+    # Dynamic dotenv check to ensure fresh credentials if .env was recently edited
+    import os
+    from django.conf import settings
+    from dotenv import load_dotenv
+    dotenv_path = settings.BASE_DIR / '.env'
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path, override=True)
+
+    google_client_id = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+    firebase_config = getattr(settings, 'FIREBASE_CONFIG', {})
+
     return {
         "site_settings": settings_obj,
         "contact_info": contact_obj,
@@ -81,4 +92,6 @@ def global_context(request):
         "cart_count": cart_count,
         "cart_total": cart_total,
         "wishlist_product_ids": wishlist_product_ids,
+        "google_client_id": google_client_id,
+        "firebase_config": firebase_config,
     }

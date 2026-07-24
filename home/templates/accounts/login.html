@@ -11,23 +11,49 @@
         background: transparent;
         transition: all 0.3s ease;
     }
+
     .nav-pills .nav-link.active {
         background-color: var(--primary, #6b1d2f) !important;
         color: #ffffff !important;
         border-color: var(--primary, #6b1d2f) !important;
     }
+
     .nav-pills .nav-link:hover:not(.active) {
         background-color: rgba(107, 29, 47, 0.05);
     }
+
     .input-group-text {
         border-color: #dee2e6;
         font-weight: 600;
         background-color: #f8f9fa;
     }
+
     .spinner-border-sm {
         width: 1rem;
         height: 1rem;
         border-width: 0.15em;
+    }
+
+    .btn-google {
+        background-color: #ffffff !important;
+        color: #3c4043 !important;
+        border: 1px solid #dadce0 !important;
+        box-shadow: 0 2px 6px rgba(60, 64, 67, 0.12) !important;
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        letter-spacing: 0.02em;
+    }
+
+    .btn-google:hover {
+        background-color: #f8f9fa !important;
+        border-color: #d2e3fc !important;
+        color: #1a73e8 !important;
+        box-shadow: 0 4px 12px rgba(60, 64, 67, 0.2) !important;
+        transform: translateY(-1px);
+    }
+
+    .btn-google:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15) !important;
     }
 </style>
 {% endblock %}
@@ -39,100 +65,154 @@
             <div class="col-md-5">
                 <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
                     <h2 class="font-heading mb-4 text-center">Welcome Back</h2>
-                    
+
+                    <!-- Google Authentication Button -->
+                    <div class="google-auth-container mb-3 d-flex justify-content-center">
+                        <div id="googleSignInBtnContainer" class="w-100">
+                            <button type="button"
+                                class="btn btn-google w-100 py-2.5 rounded-pill d-flex align-items-center justify-content-center gap-2 fw-semibold fs-7"
+                                id="googleSignInBtn" title="Continue with Google">
+                                <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+                                    <path fill="#4285F4"
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                    <path fill="#34A853"
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                    <path fill="#FBBC05"
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                    <path fill="#EA4335"
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                                </svg>
+                                <span class="btn-text">Continue with Google</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- OR Divider -->
+                    <div class="auth-divider mb-4 d-flex align-items-center text-muted">
+                        <hr class="flex-grow-1 my-0 border-secondary-subtle">
+                        <span class="px-3 fs-8 text-uppercase tracking-wider fw-semibold text-muted">OR</span>
+                        <hr class="flex-grow-1 my-0 border-secondary-subtle">
+                    </div>
+
                     <!-- Tabs for Login Methods -->
                     <ul class="nav nav-pills justify-content-center mb-4" id="loginTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if active_tab == 'phone' %}active{% endif %} rounded-pill px-4 me-2" 
-                                    id="phone-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#phone-login" 
-                                    type="button" 
-                                    role="tab" 
-                                    aria-controls="phone-login" 
-                                    aria-selected="{% if active_tab == 'phone' %}true{% else %}false{% endif %}">
+                            <button
+                                class="nav-link {% if active_tab == 'phone' %}active{% endif %} rounded-pill px-4 me-2"
+                                id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone-login" type="button"
+                                role="tab" aria-controls="phone-login"
+                                aria-selected="{% if active_tab == 'phone' %}true{% else %}false{% endif %}">
                                 <i class="bi bi-phone me-1"></i> Mobile OTP
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if active_tab != 'phone' %}active{% endif %} rounded-pill px-4" 
-                                    id="password-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#password-login" 
-                                    type="button" 
-                                    role="tab" 
-                                    aria-controls="password-login" 
-                                    aria-selected="{% if active_tab != 'phone' %}true{% else %}false{% endif %}">
+                            <button class="nav-link {% if active_tab != 'phone' %}active{% endif %} rounded-pill px-4"
+                                id="password-tab" data-bs-toggle="tab" data-bs-target="#password-login" type="button"
+                                role="tab" aria-controls="password-login"
+                                aria-selected="{% if active_tab != 'phone' %}true{% else %}false{% endif %}">
                                 <i class="bi bi-shield-lock me-1"></i> Password
                             </button>
                         </li>
                     </ul>
-                    
+
                     <div class="tab-content" id="loginTabContent">
                         <!-- Phone OTP Login Tab -->
-                        <div class="tab-pane fade {% if active_tab == 'phone' %}show active{% endif %}" id="phone-login" role="tabpanel" aria-labelledby="phone-tab">
+                        <div class="tab-pane fade {% if active_tab == 'phone' %}show active{% endif %}" id="phone-login"
+                            role="tabpanel" aria-labelledby="phone-tab">
                             <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="login_type" value="phone">
                                 <div class="mb-4">
-                                    <label for="phone_number_input" class="form-label text-muted fs-7">Mobile Number</label>
+                                    <label for="phone_number_input" class="form-label text-muted fs-7">Mobile
+                                        Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text">+91</span>
-                                        <input type="tel" 
-                                               name="phone_number" 
-                                               class="form-control px-3 py-2" 
-                                               id="phone_number_input" 
-                                               placeholder="Enter 10-digit mobile number" 
-                                               pattern="[6-9][0-9]{9}"
-                                               title="Please enter a valid 10-digit Indian mobile number"
-                                               required
-                                               value="{% if active_tab == 'phone' and phone_form.phone_number.value %}{{ phone_form.phone_number.value }}{% endif %}">
+                                        <input type="tel" name="phone_number" class="form-control px-3 py-2"
+                                            id="phone_number_input" placeholder="Enter 10-digit mobile number"
+                                            pattern="[6-9][0-9]{9}"
+                                            title="Please enter a valid 10-digit Indian mobile number" required
+                                            value="{% if active_tab == 'phone' and phone_form.phone_number.value %}{{ phone_form.phone_number.value }}{% endif %}">
                                     </div>
-                                    <small class="text-muted fs-8 mt-1 d-block">We'll send a 6-digit OTP code to verify your phone.</small>
+                                    <small class="text-muted fs-8 mt-1 d-block">We'll send a 6-digit OTP code to verify
+                                        your phone.</small>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
+                                <button type="submit"
+                                    class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
                                     Send Verification Code
                                 </button>
                             </form>
                         </div>
-                        
+
                         <!-- Password Login Tab -->
-                        <div class="tab-pane fade {% if active_tab != 'phone' %}show active{% endif %}" id="password-login" role="tabpanel" aria-labelledby="password-tab">
+                        <div class="tab-pane fade {% if active_tab != 'phone' %}show active{% endif %}"
+                            id="password-login" role="tabpanel" aria-labelledby="password-tab">
                             <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="login_type" value="password">
                                 <div class="mb-3">
-                                    <label for="username" class="form-label text-muted fs-7">Username or Email Address</label>
-                                    <input type="text" name="username" class="form-control px-3 py-2" id="username" placeholder="Enter username or email" required>
+                                    <label for="username" class="form-label text-muted fs-7">Username or Email
+                                        Address</label>
+                                    <input type="text" name="username" class="form-control px-3 py-2" id="username"
+                                        placeholder="Enter username or email" required>
                                 </div>
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between">
                                         <label for="password" class="form-label text-muted fs-7">Password</label>
-                                        <a href="{% url 'accounts:forgot_password' %}" class="fs-8 text-primary text-decoration-none">Forgot Password?</a>
+                                        <a href="{% url 'accounts:forgot_password' %}"
+                                            class="fs-8 text-primary text-decoration-none">Forgot Password?</a>
                                     </div>
-                                    <input type="password" name="password" class="form-control px-3 py-2" id="password" placeholder="Enter password" required>
+                                    <input type="password" name="password" class="form-control px-3 py-2" id="password"
+                                        placeholder="Enter password" required>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
+                                <button type="submit"
+                                    class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
                                     Login
                                 </button>
                             </form>
                         </div>
                     </div>
-                    
+
                     <div class="text-center mt-4">
-                        <p class="text-muted fs-7 mb-0">Don't have an account? <a href="{% url 'accounts:register' %}" class="text-primary text-decoration-none fw-semibold">Register Now</a></p>
+                        <p class="text-muted fs-7 mb-0">Don't have an account? <a href="{% url 'accounts:register' %}"
+                                class="text-primary text-decoration-none fw-semibold">Register Now</a></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Firebase & Google Authentication SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Firebase Web SDK if API key exists
+        const firebaseConfig = {
+            apiKey: "{{ firebase_config.apiKey|default:'' }}",
+            authDomain: "{{ firebase_config.authDomain|default:'rangam-saradha-silks.firebaseapp.com' }}",
+            projectId: "{{ firebase_config.projectId|default:'rangam-saradha-silks' }}",
+            storageBucket: "{{ firebase_config.storageBucket|default:'rangam-saradha-silks.appspot.com' }}",
+            messagingSenderId: "{{ firebase_config.messagingSenderId|default:'' }}",
+            appId: "{{ firebase_config.appId|default:'' }}"
+        };
+
+        if (firebaseConfig.apiKey && typeof firebase !== "undefined" && !firebase.apps.length) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+            } catch (e) {
+                console.warn("Firebase Init notice:", e);
+            }
+        }
+
+        // Standard form submission spinner
         const forms = document.querySelectorAll(".auth-form");
         forms.forEach(form => {
-            form.addEventListener("submit", function() {
+            form.addEventListener("submit", function () {
                 const btn = this.querySelector('button[type="submit"]');
                 if (btn) {
                     btn.disabled = true;
@@ -140,6 +220,222 @@
                 }
             });
         });
+
+        // Google Sign-In Handler
+        const googleBtn = document.getElementById("googleSignInBtn");
+
+        function sendTokenToBackend(credential, accessToken = null) {
+            if (googleBtn) {
+                googleBtn.disabled = true;
+                googleBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    <span>Signing in with Google...</span>
+                `;
+            }
+
+            const payload = {};
+            if (credential) payload.credential = credential;
+            if (accessToken) payload.access_token = accessToken;
+
+            const nextParam = new URLSearchParams(window.location.search).get('next');
+            if (nextParam) payload.next = nextParam;
+
+            fetch("{% url 'accounts:google_login' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        window.location.href = data.redirect_url || "/";
+                    } else {
+                        alert(data.message || "Google Authentication failed.");
+                        resetGoogleBtn();
+                    }
+                })
+                .catch(err => {
+                    console.error("Google Auth error:", err);
+                    alert("An error occurred during Google authentication. Please try again.");
+                    resetGoogleBtn();
+                });
+        }
+
+        function sendFirebaseTokenToBackend(idToken) {
+            if (googleBtn) {
+                googleBtn.disabled = true;
+                googleBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    <span>Signing in with Google...</span>
+                `;
+            }
+
+            const nextParam = new URLSearchParams(window.location.search).get('next');
+            const payload = {
+                id_token: idToken,
+                next: nextParam || '/'
+            };
+
+            fetch("{% url 'accounts:firebase_login' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        window.location.href = data.redirect_url || "/";
+                    } else {
+                        alert(data.message || "Firebase Authentication failed.");
+                        resetGoogleBtn();
+                    }
+                })
+                .catch(err => {
+                    console.error("Firebase Auth error:", err);
+                    alert("An error occurred during Google authentication. Please try again.");
+                    resetGoogleBtn();
+                });
+        }
+
+        function resetGoogleBtn() {
+            if (googleBtn) {
+                googleBtn.disabled = false;
+                googleBtn.innerHTML = `
+                    <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span class="btn-text">Continue with Google</span>
+                `;
+            }
+        }
+
+        function ensureGoogleSdk(callback) {
+            if (typeof google !== "undefined" && google.accounts) {
+                callback();
+                return;
+            }
+
+            let script = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+            if (!script) {
+                script = document.createElement('script');
+                script.src = "https://accounts.google.com/gsi/client";
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+
+            let attempts = 0;
+            const timer = setInterval(() => {
+                attempts++;
+                if (typeof google !== "undefined" && google.accounts) {
+                    clearInterval(timer);
+                    callback();
+                } else if (attempts >= 40) {
+                    clearInterval(timer);
+                    resetGoogleBtn();
+                }
+            }, 100);
+        }
+
+        const clientId = "{{ google_client_id|default:'' }}";
+
+        function handleCredentialResponse(response) {
+            if (response && response.credential) {
+                sendTokenToBackend(response.credential);
+            } else {
+                resetGoogleBtn();
+            }
+        }
+
+        // Auto-initialize Google Identity Services if Client ID is present
+        if (clientId) {
+            ensureGoogleSdk(() => {
+                try {
+                    if (typeof google !== "undefined" && google.accounts && google.accounts.id) {
+                        google.accounts.id.initialize({
+                            client_id: clientId,
+                            callback: handleCredentialResponse,
+                            auto_select: false,
+                            cancel_on_tap_outside: true
+                        });
+
+                        const googleBtnContainer = document.getElementById("googleSignInBtnContainer");
+                        if (googleBtnContainer) {
+                            google.accounts.id.renderButton(googleBtnContainer, {
+                                type: "standard",
+                                shape: "pill",
+                                theme: "outline",
+                                text: "continue_with",
+                                size: "large",
+                                width: "100%"
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Google Accounts ID Init notice:", e);
+                }
+            });
+        }
+
+        if (googleBtn) {
+            googleBtn.addEventListener("click", function () {
+                const hasFirebaseKey = "{{ firebase_config.apiKey|default:'' }}";
+
+                if (googleBtn.disabled) return;
+
+                if (clientId) {
+                    ensureGoogleSdk(() => {
+                        if (typeof google !== "undefined" && google.accounts && google.accounts.id) {
+                            googleBtn.disabled = true;
+                            googleBtn.innerHTML = `
+                                <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                                <span>Connecting to Google...</span>
+                            `;
+
+                            google.accounts.id.prompt((notification) => {
+                                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                                    resetGoogleBtn();
+                                }
+                            });
+                        }
+                    });
+                    return;
+                }
+
+                if (hasFirebaseKey && typeof firebase !== "undefined" && firebase.auth) {
+                    googleBtn.disabled = true;
+                    googleBtn.innerHTML = `
+                        <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                        <span>Connecting to Google...</span>
+                    `;
+
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('email');
+                    provider.addScope('profile');
+
+                    firebase.auth().signInWithPopup(provider)
+                        .then(result => result.user.getIdToken())
+                        .then(idToken => sendFirebaseTokenToBackend(idToken))
+                        .catch(error => {
+                            console.error("Firebase Sign-In Error:", error);
+                            resetGoogleBtn();
+                        });
+                    return;
+                }
+
+                alert("Google Client ID is missing. Please check settings.");
+                resetGoogleBtn();
+            });
+        }
     });
 </script>
 {% endblock %}

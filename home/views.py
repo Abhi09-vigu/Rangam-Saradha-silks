@@ -191,8 +191,43 @@ def index(request):
     }
     return render(request, 'home/index.html', context)
 
+DEFAULT_CMS_PAGES = {
+    'privacy-policy': {
+        'title': 'Privacy Policy',
+        'content': '<h2>Privacy Policy</h2><p>At Rangam Saradha Silks, we value your trust and are committed to protecting your personal information.</p><h4>1. Information Collection</h4><p>We collect essential information required to process your orders, such as your name, shipping address, email address, and phone number.</p><h4>2. Data Usage</h4><p>Your data is strictly used to fulfill orders, process payments, and improve your shopping experience.</p><h4>3. Security</h4><p>We implement robust security measures to protect your personal details against unauthorized access.</p>'
+    },
+    'terms-conditions': {
+        'title': 'Terms & Conditions',
+        'content': '<h2>Terms & Conditions</h2><p>Welcome to Rangam Saradha Silks. By accessing and using our website, you agree to comply with our terms of service.</p><h4>1. Product Authenticity</h4><p>All our silk sarees are 100% genuine and sourced directly from authentic master weavers.</p><h4>2. Pricing and Payments</h4><p>All prices are listed in INR. Prices and availability are subject to change without prior notice.</p><h4>3. Intellectual Property</h4><p>All images, content, and branding are the property of Rangam Saradha Silks.</p>'
+    },
+    'refund-policy': {
+        'title': 'Refund & Return Policy',
+        'content': '<h2>Refund & Return Policy</h2><p>We strive to ensure complete customer satisfaction with every handcrafted silk saree.</p><h4>1. Returns & Exchanges</h4><p>If you receive a defective or damaged product, please notify us within 48 hours of delivery with unboxing video proof.</p><h4>2. Refund Process</h4><p>Once verified, refunds will be initiated to your original payment method within 5-7 business days.</p>'
+    },
+    'shipping-policy': {
+        'title': 'Shipping & Delivery Policy',
+        'content': '<h2>Shipping & Delivery Policy</h2><p>We provide fast and reliable doorstep delivery across India and internationally.</p><h4>1. Delivery Timelines</h4><p>Orders are dispatched within 24-48 hours. Domestic deliveries typically take 3-6 business days.</p><h4>2. Order Tracking</h4><p>Once dispatched, a tracking ID and carrier link will be sent to your registered email and SMS.</p>'
+    },
+    'about-us': {
+        'title': 'About Our Brand',
+        'content': '<p class="lead">Rangam Saradha Silks brings you the finest handcrafted silk sarees embodying rich Indian heritage, timeless elegance, and exquisite craftsmanship.</p><hr class="my-5" style="border-color: var(--border-color);"><p>Each saree in our collection is woven with dedication by artisan weavers using pure silk and genuine zari.</p>'
+    }
+}
+
 def cms_page_detail(request, slug):
-    page = get_object_or_404(CMSPage, slug=slug)
+    try:
+        page = CMSPage.objects.get(slug=slug)
+    except CMSPage.DoesNotExist:
+        if slug in DEFAULT_CMS_PAGES:
+            page = CMSPage.objects.create(
+                slug=slug,
+                title=DEFAULT_CMS_PAGES[slug]['title'],
+                content=DEFAULT_CMS_PAGES[slug]['content']
+            )
+        else:
+            from django.http import Http404
+            raise Http404("Page not found")
+            
     context = {'page': page}
     
     if slug == 'about-us':

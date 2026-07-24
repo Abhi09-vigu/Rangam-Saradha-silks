@@ -165,26 +165,38 @@
             <span class="section-subtitle">💎 Exquisite New Weaves</span>
             <h2 class="section-title">New Arrivals</h2>
         </div>
-        <div class="product-marquee-container">
-            <div class="product-marquee-track-ltr">
-                <!-- Set 1 -->
-                {% for product in new_arrivals %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+        <div class="product-marquee-wrapper">
+            <button class="carousel-nav-btn prev-btn-float" id="newArrivalsPrev" aria-label="Previous New Arrivals" title="Previous">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <button class="carousel-nav-btn next-btn-float" id="newArrivalsNext" aria-label="Next New Arrivals" title="Next">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <div class="product-marquee-container" id="newArrivalsContainer">
+                <div class="product-marquee-track-ltr" id="newArrivalsTrack">
+                    <!-- Set 1 -->
+                    {% for product in new_arrivals %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                    </div>
+                    {% endfor %}
+                    <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                    {% for product in new_arrivals %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                    </div>
+                    {% endfor %}
+                    <!-- Set 3 (Duplicated for Wide Screens) -->
+                    {% for product in new_arrivals %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
-                {% for product in new_arrivals %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
-                </div>
-                {% endfor %}
-                <!-- Set 3 (Duplicated for Wide Screens) -->
-                {% for product in new_arrivals %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="new" %}
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -248,26 +260,38 @@
             <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
             <h2 class="section-title">Best Sellers</h2>
         </div>
-        <div class="product-marquee-container">
-            <div class="product-marquee-track-rtl">
-                <!-- Set 1 -->
-                {% for product in best_sellers %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+        <div class="product-marquee-wrapper">
+            <button class="carousel-nav-btn prev-btn-float" id="bestSellersPrev" aria-label="Previous Best Sellers" title="Previous">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <button class="carousel-nav-btn next-btn-float" id="bestSellersNext" aria-label="Next Best Sellers" title="Next">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <div class="product-marquee-container" id="bestSellersContainer">
+                <div class="product-marquee-track-rtl" id="bestSellersTrack">
+                    <!-- Set 1 -->
+                    {% for product in best_sellers %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                    </div>
+                    {% endfor %}
+                    <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                    {% for product in best_sellers %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                    </div>
+                    {% endfor %}
+                    <!-- Set 3 (Duplicated for Wide Screens) -->
+                    {% for product in best_sellers %}
+                    <div class="product-marquee-item">
+                        {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
-                {% for product in best_sellers %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
-                </div>
-                {% endfor %}
-                <!-- Set 3 (Duplicated for Wide Screens) -->
-                {% for product in best_sellers %}
-                <div class="product-marquee-item">
-                    {% include 'shop/components/product_card.html' with product=product badge_type="hot" %}
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -489,14 +513,196 @@
 
 {% block extra_js %}
 <script>
-    // Pause marquee sliders on mobile touch interaction
-    document.querySelectorAll('.product-marquee-track-ltr, .product-marquee-track-rtl').forEach(track => {
-        track.addEventListener('touchstart', () => {
-            track.classList.add('paused');
-        }, { passive: true });
-        track.addEventListener('touchend', () => {
-            track.classList.remove('paused');
-        }, { passive: true });
+    class MarqueeCarousel {
+        constructor({ container, track, prevBtn, nextBtn, direction = 'ltr', baseSpeed = 0.7 }) {
+            this.container = typeof container === 'string' ? document.querySelector(container) : container;
+            this.track = typeof track === 'string' ? document.querySelector(track) : track;
+            this.prevBtn = typeof prevBtn === 'string' ? document.querySelector(prevBtn) : prevBtn;
+            this.nextBtn = typeof nextBtn === 'string' ? document.querySelector(nextBtn) : nextBtn;
+
+            if (!this.container || !this.track) return;
+
+            this.direction = direction; // 'ltr' (+1) or 'rtl' (-1)
+            this.baseSpeed = baseSpeed;
+            this.currentX = 0;
+            this.targetX = 0;
+            this.isHovered = false;
+            this.isDragging = false;
+            this.startX = 0;
+            this.dragStartX = 0;
+            this.singleSetWidth = 0;
+            this.cardStep = 300;
+            this.animationFrameId = null;
+
+            this.init();
+        }
+
+        init() {
+            // Mark track as JS active to override static CSS keyframe animations
+            this.track.classList.add('js-marquee-active');
+
+            this.calculateSizes();
+
+            // Initial positioning for infinite seamless looping
+            if (this.direction === 'ltr') {
+                this.currentX = -this.singleSetWidth;
+                this.targetX = -this.singleSetWidth;
+            } else {
+                this.currentX = 0;
+                this.targetX = 0;
+            }
+            this.updateTransform();
+
+            this.bindEvents();
+            this.startLoop();
+        }
+
+        calculateSizes() {
+            const items = this.track.querySelectorAll('.product-marquee-item');
+            if (!items.length) return;
+
+            const totalItems = items.length;
+            const itemsPerSet = Math.max(1, Math.floor(totalItems / 3));
+
+            if (items[itemsPerSet] && items[0]) {
+                this.singleSetWidth = items[itemsPerSet].offsetLeft - items[0].offsetLeft;
+            } else {
+                let totalW = 0;
+                for (let i = 0; i < itemsPerSet; i++) {
+                    const style = window.getComputedStyle(items[i]);
+                    totalW += items[i].offsetWidth + parseFloat(style.marginRight || 0);
+                }
+                this.singleSetWidth = totalW;
+            }
+
+            if (items[1] && items[0]) {
+                this.cardStep = items[1].offsetLeft - items[0].offsetLeft;
+            } else if (items[0]) {
+                const style = window.getComputedStyle(items[0]);
+                this.cardStep = items[0].offsetWidth + parseFloat(style.marginRight || 0);
+            }
+        }
+
+        bindEvents() {
+            const wrapper = this.container.closest('.product-marquee-wrapper') || this.container;
+            const hoverElements = [wrapper, this.container, this.prevBtn, this.nextBtn].filter(Boolean);
+            hoverElements.forEach(el => {
+                el.addEventListener('mouseenter', () => { this.isHovered = true; });
+                el.addEventListener('mouseleave', () => { this.isHovered = false; });
+            });
+
+            if (this.prevBtn) {
+                this.prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.step('prev');
+                });
+            }
+
+            if (this.nextBtn) {
+                this.nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.step('next');
+                });
+            }
+
+            // Mobile Touch Drag Support
+            this.container.addEventListener('touchstart', (e) => {
+                this.isHovered = true;
+                this.isDragging = true;
+                this.startX = e.touches[0].clientX;
+                this.dragStartX = this.currentX;
+            }, { passive: true });
+
+            this.container.addEventListener('touchmove', (e) => {
+                if (!this.isDragging) return;
+                const diff = e.touches[0].clientX - this.startX;
+                this.currentX = this.dragStartX + diff;
+                this.targetX = this.currentX;
+                this.normalizeBounds();
+                this.updateTransform();
+            }, { passive: true });
+
+            const endTouch = () => {
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    setTimeout(() => { this.isHovered = false; }, 800);
+                }
+            };
+            this.container.addEventListener('touchend', endTouch, { passive: true });
+            this.container.addEventListener('touchcancel', endTouch, { passive: true });
+
+            window.addEventListener('resize', () => {
+                this.calculateSizes();
+                this.normalizeBounds();
+            });
+        }
+
+        step(action) {
+            const stepAmount = action === 'next' ? -this.cardStep : this.cardStep;
+            this.targetX += stepAmount;
+        }
+
+        normalizeBounds() {
+            if (!this.singleSetWidth) return;
+
+            while (this.currentX > 0) {
+                this.currentX -= this.singleSetWidth;
+                this.targetX -= this.singleSetWidth;
+            }
+            while (this.currentX < -this.singleSetWidth) {
+                this.currentX += this.singleSetWidth;
+                this.targetX += this.singleSetWidth;
+            }
+        }
+
+        updateTransform() {
+            this.track.style.transform = `translate3d(${this.currentX.toFixed(2)}px, 0, 0)`;
+        }
+
+        startLoop() {
+            const tick = () => {
+                if (!this.isDragging) {
+                    if (!this.isHovered) {
+                        const autoDelta = this.direction === 'ltr' ? this.baseSpeed : -this.baseSpeed;
+                        this.targetX += autoDelta;
+                    }
+
+                    const diff = this.targetX - this.currentX;
+                    if (Math.abs(diff) > 0.05) {
+                        this.currentX += diff * 0.14;
+                    } else {
+                        this.currentX = this.targetX;
+                    }
+
+                    this.normalizeBounds();
+                    this.updateTransform();
+                }
+                this.animationFrameId = requestAnimationFrame(tick);
+            };
+            this.animationFrameId = requestAnimationFrame(tick);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize New Arrivals Carousel (LTR)
+        new MarqueeCarousel({
+            container: '#newArrivalsContainer',
+            track: '#newArrivalsTrack',
+            prevBtn: '#newArrivalsPrev',
+            nextBtn: '#newArrivalsNext',
+            direction: 'ltr',
+            baseSpeed: 0.7
+        });
+
+        // Initialize Best Sellers Carousel (RTL)
+        new MarqueeCarousel({
+            container: '#bestSellersContainer',
+            track: '#bestSellersTrack',
+            prevBtn: '#bestSellersPrev',
+            nextBtn: '#bestSellersNext',
+            direction: 'rtl',
+            baseSpeed: 0.7
+        });
     });
 
     // Why Choose Us Mobile Carousel Controls

@@ -1198,15 +1198,21 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 /* Product Marquee Sliders */
+.product-marquee-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .product-marquee-container {
     overflow: hidden;
     width: 100%;
     position: relative;
     padding: 15px 0;
-    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
     scrollbar-width: none;
     -ms-overflow-style: none;
+    user-select: none;
 }
 
 .product-marquee-container::-webkit-scrollbar {
@@ -1219,6 +1225,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     align-items: stretch;
     animation: scroll-ltr 38s linear infinite;
     padding: 15px 0; /* Padding to prevent card hover shadows from being clipped */
+    will-change: transform;
 }
 
 .product-marquee-track-rtl {
@@ -1227,6 +1234,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     align-items: stretch;
     animation: scroll-rtl 38s linear infinite;
     padding: 15px 0; /* Padding to prevent card hover shadows from being clipped */
+    will-change: transform;
+}
+
+/* When JS controller takes over smooth continuous & step animation */
+.product-marquee-track-ltr.js-marquee-active,
+.product-marquee-track-rtl.js-marquee-active {
+    animation: none !important;
 }
 
 .product-marquee-track-ltr:hover,
@@ -1267,11 +1281,106 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     }
 }
 
-/* Responsive sizes for marquee products */
+/* Luxury Carousel Navigation Controls */
+.carousel-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    z-index: 5;
+}
+
+.carousel-nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(175, 4, 70, 0.18);
+    color: var(--primary, #AF0446);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    line-height: 1;
+}
+
+/* Floating Vertically-Centered Side Arrows Over Carousel Edges */
+.carousel-nav-btn.prev-btn-float,
+.carousel-nav-btn.next-btn-float {
+    position: absolute;
+    top: 50%;
+    z-index: 15;
+    transform: translateY(-50%);
+    pointer-events: auto;
+}
+
+.carousel-nav-btn.prev-btn-float {
+    left: 20px;
+}
+
+.carousel-nav-btn.next-btn-float {
+    right: 20px;
+}
+
+.carousel-nav-btn:hover {
+    background-color: var(--primary, #AF0446);
+    color: #FFFFFF;
+    border-color: var(--secondary-gold, #AE6F21);
+    box-shadow: 0 8px 24px rgba(175, 4, 70, 0.3), 0 0 0 3px rgba(174, 111, 33, 0.25);
+}
+
+.carousel-nav-btn.prev-btn-float:hover,
+.carousel-nav-btn.next-btn-float:hover {
+    transform: translateY(-50%) translateY(-2px) scale(1.08);
+}
+
+.carousel-nav-btn:focus-visible {
+    outline: 2px solid var(--secondary-gold, #AE6F21);
+    outline-offset: 2px;
+}
+
+.carousel-nav-btn:active {
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 2px 8px rgba(175, 4, 70, 0.2);
+}
+
+.carousel-nav-btn.prev-btn-float:active,
+.carousel-nav-btn.next-btn-float:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-nav-btn i {
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-block;
+}
+
+.carousel-nav-btn.prev-btn:hover i,
+.carousel-nav-btn.prev-btn-float:hover i {
+    transform: translateX(-2px);
+}
+
+.carousel-nav-btn.next-btn:hover i,
+.carousel-nav-btn.next-btn-float:hover i {
+    transform: translateX(2px);
+}
+
+/* Responsive sizes for marquee products & navigation controls */
 @media (max-width: 992px) {
     .product-marquee-item {
         width: 250px;
         margin-right: 20px;
+    }
+    .carousel-nav-btn.prev-btn-float {
+        left: 12px;
+    }
+    .carousel-nav-btn.next-btn-float {
+        right: 12px;
     }
 }
 
@@ -1282,7 +1391,18 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     }
     .product-marquee-track-ltr,
     .product-marquee-track-rtl {
-        animation-duration: 32s; /* Slightly faster on smaller viewports to look consistent */
+        animation-duration: 32s;
+    }
+    .carousel-nav-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+    .carousel-nav-btn.prev-btn-float {
+        left: 8px;
+    }
+    .carousel-nav-btn.next-btn-float {
+        right: 8px;
     }
 }
 
@@ -1294,6 +1414,20 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     .product-marquee-track-ltr,
     .product-marquee-track-rtl {
         animation-duration: 28s;
+    }
+    .carousel-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+    .carousel-nav-controls {
+        gap: 0.4rem;
+    }
+    .carousel-nav-btn.prev-btn-float {
+        left: 4px;
+    }
+    .carousel-nav-btn.next-btn-float {
+        right: 4px;
     }
 }
 

@@ -20,4 +20,6 @@ urlpatterns = [
     path('verify-reset-otp/', views.verify_reset_otp, name='verify_reset_otp'),
     path('reset-password/', views.reset_password, name='reset_password'),
     path('change-password/', views.change_password, name='change_password'),
+    path('google-login/', views.google_login_view, name='google_login'),
+    path('firebase-login/', views.firebase_login_view, name='firebase_login'),
 ]

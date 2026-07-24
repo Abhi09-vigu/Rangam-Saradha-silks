@@ -174,7 +174,11 @@ def register_view(request):
             return redirect('accounts:verify_otp')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'accounts/register.html', {
+        'form': form,
+        'google_client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
+        'firebase_config': getattr(settings, 'FIREBASE_CONFIG', {})
+    })
 
 def verify_otp(request):
     phone_number = request.session.get('otp_phone_number')
@@ -350,7 +354,9 @@ def login_view(request):
                 
     return render(request, 'accounts/login.html', {
         'phone_form': phone_form,
-        'active_tab': request.POST.get('login_type', 'phone')
+        'active_tab': request.POST.get('login_type', 'phone'),
+        'google_client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
+        'firebase_config': getattr(settings, 'FIREBASE_CONFIG', {})
     })
 
 def resend_otp_view(request):
@@ -467,8 +473,10 @@ def toggle_wishlist(request, product_id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'added': added, 'message': msg})
         
+    from django.urls import reverse
     messages.success(request, msg)
-    return redirect(request.META.get('HTTP_REFERER', 'shop:product_detail'))
+    referer = request.META.get('HTTP_REFERER')
+    return redirect(referer if referer else reverse('shop:product_detail', args=[product.slug]))
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -561,3 +569,271 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'accounts/change_password.html', {'form': form})
+
+from django.views.decorators.csrf import csrf_exempt
+import json
+import requests
+
+@csrf_exempt
+@require_POST
+def google_login_view(request):
+    """
+    Handles Google Authentication (Sign-In / Sign-Up).
+    Accepts Google ID Token (credential) or access_token via AJAX POST.
+    Validates token against Google's OAuth2 API endpoints.
+    Finds or creates CustomUser and authenticates session.
+    """
+    try:
+        # Parse payload from JSON body or POST form data
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+            except Exception:
+                data = request.POST
+        else:
+            data = request.POST
+
+        id_token_str = data.get('id_token') or data.get('credential') or data.get('token')
+        access_token = data.get('access_token')
+
+        if not id_token_str and not access_token:
+            return JsonResponse({'status': 'error', 'message': 'Google credential token missing.'}, status=400)
+
+        google_user_data = None
+
+        # Verify Google ID Token via Google's official tokeninfo endpoint
+        if id_token_str:
+            resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token_str}", timeout=8)
+            if resp.status_code == 200:
+                payload = resp.json()
+                google_user_data = {
+                    'email': payload.get('email'),
+                    'email_verified': str(payload.get('email_verified', '')).lower() in ['true', '1'],
+                    'google_id': payload.get('sub'),
+                    'name': payload.get('name', ''),
+                    'given_name': payload.get('given_name', ''),
+                    'family_name': payload.get('family_name', ''),
+                    'picture': payload.get('picture', ''),
+                }
+            else:
+                logger.warning(f"Google Token Verification failed: {resp.text}")
+
+        # Fallback verification via Google UserInfo API if access_token was passed
+        if not google_user_data and access_token:
+            resp = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {access_token}"}, timeout=8)
+            if resp.status_code == 200:
+                payload = resp.json()
+                google_user_data = {
+                    'email': payload.get('email'),
+                    'email_verified': str(payload.get('email_verified', '')).lower() in ['true', '1'],
+                    'google_id': payload.get('sub'),
+                    'name': payload.get('name', ''),
+                    'given_name': payload.get('given_name', ''),
+                    'family_name': payload.get('family_name', ''),
+                    'picture': payload.get('picture', ''),
+                }
+
+        if not google_user_data or not google_user_data.get('email'):
+            return JsonResponse({'status': 'error', 'message': 'Google authentication failed. Invalid token.'}, status=400)
+
+        email = google_user_data['email'].strip().lower()
+        google_id = google_user_data['google_id']
+        picture_url = google_user_data.get('picture', '')
+        first_name = google_user_data.get('given_name') or google_user_data.get('name') or ''
+        last_name = google_user_data.get('family_name') or ''
+
+        # Search for existing user by google_id or email
+        user = CustomUser.objects.filter(google_id=google_id).first()
+        if not user:
+            user = CustomUser.objects.filter(email__iexact=email).first()
+
+        old_session_key = request.session.session_key
+
+        if user:
+            # Update user attributes
+            if not user.google_id:
+                user.google_id = google_id
+            user.auth_provider = 'google'
+            if picture_url and not user.profile_picture_url:
+                user.profile_picture_url = picture_url
+            if first_name and not user.first_name:
+                user.first_name = first_name
+            if last_name and not user.last_name:
+                user.last_name = last_name
+            user.is_verified = True
+            user.is_active = True
+            user.save()
+        else:
+            # Create new user
+            username_base = email.split('@')[0]
+            username_candidate = username_base
+            import uuid
+            while CustomUser.objects.filter(username=username_candidate).exists():
+                username_candidate = f"{username_base}_{uuid.uuid4().hex[:4]}"
+
+            user = CustomUser.objects.create_user(
+                username=username_candidate,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                auth_provider='google',
+                google_id=google_id,
+                profile_picture_url=picture_url,
+                is_verified=True,
+                is_active=True
+            )
+            user.set_unusable_password()
+            user.save()
+
+        # Log in user persistently
+        login(request, user)
+
+        # Merge guest cart if helper is defined in module
+        try:
+            from shop.views import merge_carts_after_login
+            merge_carts_after_login(request, user, old_session_key)
+        except Exception as e:
+            logger.info(f"Cart merge check: {e}")
+
+        # Redirect destination
+        next_url = data.get('next') or request.GET.get('next')
+        if not next_url or next_url.startswith('/admin'):
+            next_url = '/'
+
+        messages.success(request, f"Welcome back, {user.first_name or user.username}! Authenticated via Google.")
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Google authentication successful.',
+            'redirect_url': next_url,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.get_full_name() or user.username,
+                'avatar': user.get_avatar_url()
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Google login exception: {str(e)}", exc_info=True)
+        return JsonResponse({'status': 'error', 'message': f'Server authentication error: {str(e)}'}, status=500)
+
+
+from firebase_admin import auth as firebase_auth
+
+@csrf_exempt
+@require_POST
+def firebase_login_view(request):
+    """
+    Handles Firebase Google Authentication.
+    Accepts Firebase ID Token from frontend, verifies it using Firebase Admin SDK auth.verify_id_token().
+    Finds or creates CustomUser in PostgreSQL database and logs user in.
+    Stores users ONLY in PostgreSQL (no Firestore / Firebase DB).
+    """
+    try:
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+            except Exception:
+                data = request.POST
+        else:
+            data = request.POST
+
+        id_token = data.get('id_token') or data.get('token') or data.get('credential')
+        if not id_token:
+            return JsonResponse({'status': 'error', 'message': 'Firebase ID token is missing.'}, status=400)
+
+        # Verify Firebase ID Token using Firebase Admin SDK
+        try:
+            decoded_token = firebase_auth.verify_id_token(id_token)
+        except Exception as ve:
+            logger.error(f"Firebase token verification error: {str(ve)}")
+            return JsonResponse({'status': 'error', 'message': f'Invalid Firebase token: {str(ve)}'}, status=400)
+
+        uid = decoded_token.get('uid')
+        email = decoded_token.get('email', '').strip().lower()
+        name = decoded_token.get('name', '')
+        picture_url = decoded_token.get('picture', '')
+
+        if not email or not uid:
+            return JsonResponse({'status': 'error', 'message': 'Email address not provided by Firebase token.'}, status=400)
+
+        # Parse name components
+        name_parts = name.split() if name else []
+        first_name = name_parts[0] if name_parts else ''
+        last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ''
+
+        # Look up existing user in PostgreSQL
+        user = CustomUser.objects.filter(firebase_uid=uid).first()
+        if not user:
+            user = CustomUser.objects.filter(email__iexact=email).first()
+
+        old_session_key = request.session.session_key
+
+        if user:
+            # Update user fields
+            if not user.firebase_uid:
+                user.firebase_uid = uid
+            user.auth_provider = 'google'
+            if picture_url and not user.profile_picture_url:
+                user.profile_picture_url = picture_url
+            if first_name and not user.first_name:
+                user.first_name = first_name
+            if last_name and not user.last_name:
+                user.last_name = last_name
+            user.is_verified = True
+            user.is_active = True
+            user.save()
+        else:
+            # Create new user in PostgreSQL
+            username_base = email.split('@')[0]
+            username_candidate = username_base
+            import uuid
+            while CustomUser.objects.filter(username=username_candidate).exists():
+                username_candidate = f"{username_base}_{uuid.uuid4().hex[:4]}"
+
+            user = CustomUser.objects.create_user(
+                username=username_candidate,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                auth_provider='google',
+                firebase_uid=uid,
+                profile_picture_url=picture_url,
+                is_verified=True,
+                is_active=True
+            )
+            user.set_unusable_password()
+            user.save()
+
+        # Establish persistent Django session login
+        login(request, user)
+
+        # Merge guest cart items
+        try:
+            from shop.views import merge_carts_after_login
+            merge_carts_after_login(request, user, old_session_key)
+        except Exception as e:
+            logger.info(f"Cart merge error check: {e}")
+
+        next_url = data.get('next') or request.GET.get('next')
+        if not next_url or next_url.startswith('/admin'):
+            next_url = '/'
+
+        messages.success(request, f"Welcome, {user.first_name or user.username}! Authenticated via Firebase Google Sign-In.")
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Firebase Google Authentication successful.',
+            'redirect_url': next_url,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.get_full_name() or user.username,
+                'avatar': user.get_avatar_url()
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Firebase login view error: {str(e)}", exc_info=True)
+        return JsonResponse({'status': 'error', 'message': f'Authentication failure: {str(e)}'}, status=500)
