@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from decimal import Decimal
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -67,7 +68,8 @@ class Product(models.Model):
     is_today_deal = models.BooleanField(default=False)
     
     # Product Specs
-    video_url = models.URLField(blank=True, null=True)
+    video_url = models.URLField(max_length=500, blank=True, null=True, help_text="External video URL (YouTube, Vimeo, etc.)")
+    video_file = models.FileField(upload_to='product_videos/', storage=VideoMediaCloudinaryStorage(), max_length=500, blank=True, null=True, help_text="Direct video file upload (MP4, WebM, MOV)")
     tags = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated tags")
     material = models.CharField(max_length=100, blank=True, null=True)
     color = models.CharField(max_length=100, blank=True, null=True)
@@ -99,6 +101,45 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def has_video(self):
+        return bool(self.video_file or self.video_url)
+
+    @property
+    def embed_video_url(self):
+        if self.video_file:
+            return self.video_file.url
+        if not self.video_url:
+            return ''
+        url = self.video_url.strip()
+        import re
+        
+        # YouTube Shorts
+        match_shorts = re.search(r'(?:youtube\.com|youtu\.be)/shorts/([a-zA-Z0-9_-]+)', url)
+        if match_shorts:
+            return f"https://www.youtube.com/embed/{match_shorts.group(1)}"
+        
+        # YouTube Standard Watch / Embed / Shortened
+        match_yt = re.search(r'(?:v=|/embed/|/v/|youtu\.be/)([a-zA-Z0-9_-]{11})', url)
+        if match_yt:
+            return f"https://www.youtube.com/embed/{match_yt.group(1)}"
+
+        # Vimeo
+        match_vimeo = re.search(r'(?:vimeo\.com/|player\.vimeo\.com/video/)([0-9]+)', url)
+        if match_vimeo:
+            return f"https://player.vimeo.com/video/{match_vimeo.group(1)}"
+
+        return url
+
+    @property
+    def is_direct_video_file(self):
+        if self.video_file:
+            return True
+        if not self.video_url:
+            return False
+        url = self.video_url.strip().lower()
+        return url.endswith(('.mp4', '.webm', '.ogg', '.mov', '.m4v'))
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')

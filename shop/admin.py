@@ -50,7 +50,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal')
         }),
         ('Specifications & Details', {
-            'fields': ('video_url', 'tags', 'material', 'color', 'occasion', 'fabric', 'specifications')
+            'fields': ('video_url', 'video_file', 'tags', 'material', 'color', 'occasion', 'fabric', 'specifications')
         }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),

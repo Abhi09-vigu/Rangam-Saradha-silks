@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bindWishlistEvents();
     bindQuickViewEvents();
     bindModalCloseEvents();
+    bindShareProductEvents();
 });
 
 /* ==========================================================================
@@ -427,3 +428,163 @@ function bindModalCloseEvents() {
         }
     });
 }
+
+/* ==========================================================================
+   Share Product Component Logic & Clipboard Utilities
+   ========================================================================== */
+function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    } else {
+        return new Promise((resolve, reject) => {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) resolve();
+                else reject(new Error('Copy command failed'));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+}
+
+function bindShareProductEvents() {
+    const shareBtn = document.getElementById('shareProductBtn');
+    const sharePopup = document.getElementById('shareOptionsPopup');
+    const wrapper = shareBtn ? shareBtn.closest('.share-btn-wrapper') : null;
+    const closeBtn = document.getElementById('closeSharePopupBtn');
+    const copyOptionBtn = document.getElementById('copyLinkOptionBtn');
+    
+    if (!shareBtn) return;
+
+    const productName = shareBtn.getAttribute('data-product-name') || document.title;
+    const productUrl = shareBtn.getAttribute('data-product-url') || window.location.href;
+
+    // Social share URL links
+    const shareText = `Check out ${productName} on Rangam Saradha Silk Sarees!`;
+    const whatsappBtn = document.getElementById('shareWhatsAppBtn');
+    const facebookBtn = document.getElementById('shareFacebookBtn');
+    const telegramBtn = document.getElementById('shareTelegramBtn');
+
+    if (whatsappBtn) {
+        whatsappBtn.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + productUrl)}`;
+    }
+    if (facebookBtn) {
+        facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+    }
+    if (telegramBtn) {
+        telegramBtn.href = `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth <= 768);
+
+    function openSharePopup() {
+        if (sharePopup) {
+            sharePopup.classList.add('active');
+            sharePopup.setAttribute('aria-hidden', 'false');
+            shareBtn.setAttribute('aria-expanded', 'true');
+            shareBtn.classList.add('active');
+            if (wrapper) wrapper.classList.add('popup-open');
+        }
+    }
+
+    function closeSharePopup() {
+        if (sharePopup) {
+            sharePopup.classList.remove('active');
+            sharePopup.setAttribute('aria-hidden', 'true');
+            shareBtn.setAttribute('aria-expanded', 'false');
+            shareBtn.classList.remove('active');
+            if (wrapper) wrapper.classList.remove('popup-open');
+        }
+    }
+
+    function executeCopyLink() {
+        copyTextToClipboard(productUrl)
+            .then(() => {
+                showPremiumToast("Product link copied successfully", "success");
+            })
+            .catch(() => {
+                showPremiumToast("Failed to copy link. Please copy manually.", "error");
+            });
+    }
+
+    // Trigger main share action on button click
+    shareBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Check if Web Share API is available (especially on mobile)
+        if (isMobileDevice && navigator.share) {
+            const shareData = {
+                title: productName,
+                text: shareText,
+                url: productUrl
+            };
+
+            navigator.share(shareData)
+                .then(() => {
+                    // Shared successfully via Web Share API
+                })
+                .catch((err) => {
+                    // Fallback to opening popup & copying link if user didn't intentionally cancel
+                    if (err.name !== 'AbortError') {
+                        executeCopyLink();
+                        openSharePopup();
+                    }
+                });
+        } else {
+            // Desktop or Web Share API unavailable: copy to clipboard & toggle popup
+            const isOpen = sharePopup && sharePopup.classList.contains('active');
+            if (isOpen) {
+                closeSharePopup();
+            } else {
+                executeCopyLink();
+                openSharePopup();
+            }
+        }
+    });
+
+    // Close button click
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeSharePopup();
+        });
+    }
+
+    // Copy link popup option click
+    if (copyOptionBtn) {
+        copyOptionBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            executeCopyLink();
+            closeSharePopup();
+        });
+    }
+
+    // Close popup on click outside
+    document.addEventListener('click', (e) => {
+        if (wrapper && !wrapper.contains(e.target)) {
+            closeSharePopup();
+        }
+    });
+
+    // Close popup on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sharePopup && sharePopup.classList.contains('active')) {
+            closeSharePopup();
+            shareBtn.focus();
+        }
+    });
+}
+

@@ -7,12 +7,14 @@
 {% block content %}
 <section class="py-5">
     <div class="container">
-        
+
         <!-- Breadcrumbs -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb fs-7">
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}"
+                        class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}"
+                        class="text-decoration-none text-muted">Shop</a></li>
                 <li class="breadcrumb-item active text-dark" aria-current="page">{{ product.name }}</li>
             </ol>
         </nav>
@@ -25,20 +27,25 @@
                     <div class="col-12">
                         <div class="card border border-light overflow-hidden shadow-sm" style="border-radius: 16px;">
                             {% if product.images.all %}
-                            <img id="mainProductImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="w-100 img-fluid" style="aspect-ratio: 3/4; object-fit: cover;">
+                            <img id="mainProductImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }}"
+                                class="w-100 img-fluid" style="aspect-ratio: 3/4; object-fit: cover;">
                             {% else %}
-                            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree" class="w-100 img-fluid">
+                            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"
+                                alt="Placeholder Saree" class="w-100 img-fluid">
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <!-- Thumbnails -->
                     {% if product.images.all|length > 1 %}
                     <div class="col-12">
                         <div class="d-flex gap-2 overflow-x-auto pb-2">
                             {% for img in product.images.all %}
-                            <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0" style="width: 80px; height: 100px; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('mainProductImg').src='{{ img.image.url }}';">
-                                <img src="{{ img.image.url }}" alt="Thumbnail" class="w-100 h-100" style="object-fit: cover;">
+                            <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0"
+                                style="width: 80px; height: 100px; border-radius: 8px; cursor: pointer;"
+                                onclick="document.getElementById('mainProductImg').src='{{ img.image.url }}';">
+                                <img src="{{ img.image.url }}" alt="Thumbnail" class="w-100 h-100"
+                                    style="object-fit: cover;">
                             </div>
                             {% endfor %}
                         </div>
@@ -51,13 +58,73 @@
             <div class="col-lg-6">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="text-muted text-uppercase fs-7 letter-spacing-1">SKU: {{ product.sku }}</span>
-                    <a href="{% url 'accounts:toggle_wishlist' product.id %}" class="btn btn-light rounded-circle shadow-sm" title="Add to Wishlist">
-                        <i class="bi bi-heart text-primary fs-5"></i>
-                    </a>
+                    
+                    <!-- Vertical Action Buttons Stack (Wishlist + Share Button) -->
+                    <div class="product-actions-stack d-flex flex-column align-items-center gap-3">
+                        <a href="{% url 'accounts:toggle_wishlist' product.id %}"
+                            class="wishlist-btn btn-product-action shadow-sm"
+                            data-product-id="{{ product.id }}"
+                            title="Add to Wishlist"
+                            aria-label="Add to Wishlist">
+                            <i class="bi bi-heart text-primary fs-5"></i>
+                        </a>
+
+                        <!-- Floating Share Product Button -->
+                        <div class="share-btn-wrapper position-relative">
+                            <button type="button" 
+                                id="shareProductBtn"
+                                class="share-product-btn btn-product-action shadow-sm"
+                                data-product-name="{{ product.name|escapejs }}"
+                                data-product-url="{{ request.build_absolute_uri }}"
+                                data-product-image="{% if product.images.first %}{{ request.scheme }}://{{ request.get_host }}{{ product.images.first.image.url }}{% endif %}"
+                                aria-label="Share Product"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                <svg class="share-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                            </button>
+                            <span class="custom-tooltip" role="tooltip">Share Product</span>
+
+                            <!-- Premium Share Options Popup -->
+                            <div id="shareOptionsPopup" class="share-popup shadow-lg" role="dialog" aria-label="Share Options" aria-hidden="true">
+                                <div class="share-popup-header d-flex justify-content-between align-items-center">
+                                    <h6 class="share-popup-title mb-0">
+                                        <i class="bi bi-share me-1" style="color: #C2185B;"></i> Share Product
+                                    </h6>
+                                    <button type="button" class="btn-close-share" id="closeSharePopupBtn" aria-label="Close Share Options">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                <div class="share-options-grid d-flex flex-column gap-1">
+                                    <a href="#" id="shareWhatsAppBtn" target="_blank" rel="noopener noreferrer" class="share-option-item whatsapp-option">
+                                        <span class="share-option-icon"><i class="fa-brands fa-whatsapp"></i></span>
+                                        <span class="share-option-text">WhatsApp</span>
+                                    </a>
+                                    <a href="#" id="shareFacebookBtn" target="_blank" rel="noopener noreferrer" class="share-option-item facebook-option">
+                                        <span class="share-option-icon"><i class="fa-brands fa-facebook-f"></i></span>
+                                        <span class="share-option-text">Facebook</span>
+                                    </a>
+                                    <a href="#" id="shareTelegramBtn" target="_blank" rel="noopener noreferrer" class="share-option-item telegram-option">
+                                        <span class="share-option-icon"><i class="fa-brands fa-telegram"></i></span>
+                                        <span class="share-option-text">Telegram</span>
+                                    </a>
+                                    <button type="button" id="copyLinkOptionBtn" class="share-option-item copy-option">
+                                        <span class="share-option-icon"><i class="bi bi-link-45deg"></i></span>
+                                        <span class="share-option-text">Copy Link</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <h1 class="font-heading display-6 mb-3">{{ product.name }}</h1>
-                
+
                 <!-- Ratings avg -->
                 <div class="d-flex align-items-center gap-2 mb-4">
                     <div class="text-warning">
@@ -75,13 +142,13 @@
                 <!-- Price Section -->
                 <div class="bg-light p-3 rounded-4 mb-4">
                     <div class="d-flex align-items-center gap-3">
-                        <span class="fs-2 fw-bold text-primary">{{ site_settings.currency }}{{ product.offer_price|floatformat:2 }}</span>
+                        <span class="fs-2 fw-bold text-primary">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:2 }}</span>
                         {% if product.discount_percentage > 0 %}
-                        <span class="fs-5 text-muted text-decoration-line-through">{{ site_settings.currency }}{{ product.price|floatformat:2 }}</span>
+                        <span class="fs-5 text-muted text-decoration-line-through">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:2 }}</span>
                         <span class="badge bg-success fs-7">{{ product.discount_percentage }}% OFF</span>
                         {% endif %}
                     </div>
-                    <p class="text-muted fs-8 mt-2 mb-0">Price inclusive of all taxes. Free shipping on orders above {{ site_settings.currency }}{{ site_settings.free_shipping_limit }}.</p>
+                    <p class="text-muted fs-8 mt-2 mb-0">Price inclusive of all taxes. Free shipping on orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|floatformat:2 }}.</p>
                 </div>
 
                 <!-- Short Description -->
@@ -118,15 +185,13 @@
                         <div class="col-auto">
                             <select name="quantity" id="quantity" class="form-select form-select-sm" style="width: 80px;" {% if product.stock == 0 %}disabled{% endif %}>
                                 {% if product.stock > 0 %}
-                                    {% with ''|center:product.stock as range %}
-                                    {% for _ in range %}
-                                        {% if forloop.counter <= 5 %}
-                                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% endwith %}
+                                {% with ''|center:product.stock as range %}
+                                {% for _ in range %}
+                                {% if forloop.counter <= 5 %}<option value="{{ forloop.counter }}">{{ forloop.counter }}</option>{% endif %}
+                                {% endfor %}
+                                {% endwith %}
                                 {% else %}
-                                    <option value="0">0</option>
+                                <option value="0">0</option>
                                 {% endif %}
                             </select>
                         </div>
@@ -140,15 +205,18 @@
 
                 <!-- Tabs (Description, Specifications, Reviews) -->
                 <div class="accordion accordion-flush border-top" id="productAccordion">
-                    
+
                     <!-- Description Tab -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingDesc">
-                            <button class="accordion-button py-3 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDesc" aria-expanded="true" aria-controls="collapseDesc">
+                            <button class="accordion-button py-3 fw-bold text-dark" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseDesc" aria-expanded="true"
+                                aria-controls="collapseDesc">
                                 Product Description
                             </button>
                         </h2>
-                        <div id="collapseDesc" class="accordion-collapse collapse show" aria-labelledby="headingDesc" data-bs-parent="#productAccordion">
+                        <div id="collapseDesc" class="accordion-collapse collapse show" aria-labelledby="headingDesc"
+                            data-bs-parent="#productAccordion">
                             <div class="accordion-body text-muted">
                                 {{ product.description|linebreaks }}
                             </div>
@@ -158,11 +226,14 @@
                     <!-- Specifications Tab -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingSpecs">
-                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpecs" aria-expanded="false" aria-controls="collapseSpecs">
+                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseSpecs" aria-expanded="false"
+                                aria-controls="collapseSpecs">
                                 Specifications & Details
                             </button>
                         </h2>
-                        <div id="collapseSpecs" class="accordion-collapse collapse" aria-labelledby="headingSpecs" data-bs-parent="#productAccordion">
+                        <div id="collapseSpecs" class="accordion-collapse collapse" aria-labelledby="headingSpecs"
+                            data-bs-parent="#productAccordion">
                             <div class="accordion-body">
                                 <table class="table table-sm table-borderless fs-7 mb-0">
                                     <tbody>
@@ -190,7 +261,7 @@
                                             <td class="text-dark">{{ product.occasion }}</td>
                                         </tr>
                                         {% endif %}
-                                        
+
                                         <!-- Custom specifications -->
                                         {% for key, val in product.specifications.items %}
                                         <tr>
@@ -205,18 +276,32 @@
                     </div>
 
                     <!-- Video Tab -->
-                    {% if product.video_url %}
+                    {% if product.has_video %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingVideo">
-                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVideo" aria-expanded="false" aria-controls="collapseVideo">
-                                Product Video Preview
+                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseVideo" aria-expanded="false"
+                                aria-controls="collapseVideo">
+                                <i class="bi bi-play-btn me-2 text-primary"></i> Product Video Preview
                             </button>
                         </h2>
-                        <div id="collapseVideo" class="accordion-collapse collapse" aria-labelledby="headingVideo" data-bs-parent="#productAccordion">
-                            <div class="accordion-body">
-                                <div class="ratio ratio-16x9">
-                                    <iframe src="{{ product.video_url }}" title="Product Video" allowfullscreen></iframe>
+                        <div id="collapseVideo" class="accordion-collapse collapse" aria-labelledby="headingVideo"
+                            data-bs-parent="#productAccordion">
+                            <div class="accordion-body p-0 p-md-3">
+                                {% if product.is_direct_video_file %}
+                                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
+                                    <video controls class="w-100 h-100 object-fit-cover" preload="metadata">
+                                        <source src="{{ product.embed_video_url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
                                 </div>
+                                {% else %}
+                                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
+                                    <iframe src="{{ product.embed_video_url }}" title="Product Video"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowfullscreen class="border-0 w-100 h-100"></iframe>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -230,7 +315,7 @@
         <div class="row mt-5 pt-5 border-top g-5">
             <div class="col-lg-6">
                 <h3 class="font-heading mb-4">Customer Reviews</h3>
-                
+
                 {% if reviews %}
                 <div class="d-flex flex-column gap-4">
                     {% for review in reviews %}
@@ -241,18 +326,18 @@
                         </div>
                         <div class="text-warning mb-2">
                             {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %}
-                            <i class="bi bi-star-fill fs-8"></i>
-                            {% else %}
-                            <i class="bi bi-star fs-8"></i>
-                            {% endif %}
-                            {% endfor %}
+                            {% if forloop.counter <= review.rating %} <i class="bi bi-star-fill fs-8"></i>
+                                {% else %}
+                                <i class="bi bi-star fs-8"></i>
+                                {% endif %}
+                                {% endfor %}
                         </div>
                         <p class="text-muted fs-7 mb-0">{{ review.comment }}</p>
-                        
+
                         {% if review.image %}
                         <div class="mt-3" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden;">
-                            <img src="{{ review.image.url }}" alt="Review Attachment" class="w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ review.image.url }}" alt="Review Attachment" class="w-100 h-100"
+                                style="object-fit: cover;">
                         </div>
                         {% endif %}
                     </div>
@@ -282,7 +367,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="comment" class="form-label text-muted fs-7">Comment</label>
-                            <textarea name="comment" id="comment" rows="4" class="form-control" placeholder="Share your experience wearing this saree..." required></textarea>
+                            <textarea name="comment" id="comment" rows="4" class="form-control"
+                                placeholder="Share your experience wearing this saree..." required></textarea>
                         </div>
                         <div class="mb-4">
                             <label for="reviewImage" class="form-label text-muted fs-7">Attach Image (Optional)</label>
@@ -294,7 +380,8 @@
                 {% else %}
                 <div class="card border-0 bg-light p-4 text-center" style="border-radius: 20px;">
                     <p class="text-muted mb-3">Please login to write a review for this product.</p>
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary">Login Now</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary">Login
+                        Now</a>
                 </div>
                 {% endif %}
             </div>

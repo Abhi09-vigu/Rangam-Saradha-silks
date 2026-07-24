@@ -188,6 +188,27 @@
                         {% endif %}
                     </div>
                     <p class="mb-4">{{ site_settings.meta_description|default:"Experience the epitome of Indian heritage and traditional luxury with our handwoven pure silk sarees." }}</p>
+                    
+                    <!-- Horizontal Social Media Icons -->
+                    {% if contact_info.facebook_url or contact_info.instagram_url or contact_info.youtube_url %}
+                    <div class="footer-social-icons d-flex flex-row gap-3 align-items-center mt-4">
+                        {% if contact_info.facebook_url %}
+                        <a href="{{ contact_info.facebook_url }}" class="social-sidebar-item facebook" target="_blank" rel="noopener noreferrer" title="Follow us on Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        {% endif %}
+                        {% if contact_info.instagram_url %}
+                        <a href="{{ contact_info.instagram_url }}" class="social-sidebar-item instagram" target="_blank" rel="noopener noreferrer" title="Follow us on Instagram">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        {% endif %}
+                        {% if contact_info.youtube_url %}
+                        <a href="{{ contact_info.youtube_url }}" class="social-sidebar-item youtube" target="_blank" rel="noopener noreferrer" title="Subscribe to our YouTube Channel">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Quick links -->
@@ -231,32 +252,11 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Floating Social Media Sidebar -->
-    {% if contact_info.facebook_url or contact_info.instagram_url or contact_info.youtube_url %}
-    <div class="social-sidebar">
-        {% if contact_info.facebook_url %}
-        <a href="{{ contact_info.facebook_url }}" class="social-sidebar-item facebook" target="_blank" rel="noopener noreferrer" title="Follow us on Facebook">
-            <i class="fa-brands fa-facebook-f"></i>
-        </a>
-        {% endif %}
-        {% if contact_info.instagram_url %}
-        <a href="{{ contact_info.instagram_url }}" class="social-sidebar-item instagram" target="_blank" rel="noopener noreferrer" title="Follow us on Instagram">
-            <i class="fa-brands fa-instagram"></i>
-        </a>
-        {% endif %}
-        {% if contact_info.youtube_url %}
-        <a href="{{ contact_info.youtube_url }}" class="social-sidebar-item youtube" target="_blank" rel="noopener noreferrer" title="Subscribe to our YouTube Channel">
-            <i class="fa-brands fa-youtube"></i>
-        </a>
-        {% endif %}
-    </div>
-    {% endif %}
 
     <!-- Floating WhatsApp Chat Button -->
     {% if contact_info.whatsapp_url %}
     <a href="{{ contact_info.whatsapp_url }}" class="whatsapp-float-btn" target="_blank" rel="noopener noreferrer">
-        <i class="fa-brands fa-whatsapp"></i>
+        <img src="{% static 'images/support_icon.png' %}" alt="Support" class="whatsapp-support-img">
         <span class="whatsapp-tooltip">Chat with us on WhatsApp</span>
     </a>
     {% endif %}
