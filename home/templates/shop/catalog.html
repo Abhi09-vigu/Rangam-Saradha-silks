@@ -4,7 +4,7 @@
 {% block meta_title %}Saree Catalog - {{ site_settings.website_name }}{% endblock %}
 
 {% block content %}
-{% if not current_filters.q %}
+{% if not has_filters %}
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
         <h1 class="font-heading display-4 text-dark mb-0">Our Handloom Catalog</h1>
@@ -108,18 +108,36 @@
     </div>
 </section>
 {% else %}
-<!-- Compact Search Results Header -->
+<!-- Compact Filtered Navigation Header -->
 <section class="bg-light py-3 border-bottom">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb fs-7 mb-1">
                 <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
-                <li class="breadcrumb-item active text-dark" aria-current="page">Search Results</li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">
+                    {% if current_filters.q %}
+                        Search Results
+                    {% elif active_category %}
+                        {{ active_category.name }}
+                    {% elif active_collection %}
+                        {{ active_collection.name }}
+                    {% else %}
+                        Filtered Collection
+                    {% endif %}
+                </li>
             </ol>
         </nav>
         <h1 class="font-heading h4 text-dark mb-0">
-            Search Results for <span class="text-primary">"{{ current_filters.q }}"</span>
+            {% if current_filters.q %}
+                Search Results for <span class="text-primary">"{{ current_filters.q }}"</span>
+            {% elif active_category %}
+                <span class="text-primary">{{ active_category.name }}</span> Collection
+            {% elif active_collection %}
+                <span class="text-primary">{{ active_collection.name }}</span> Collection
+            {% else %}
+                Filtered Saree Collection
+            {% endif %}
         </h1>
     </div>
 </section>

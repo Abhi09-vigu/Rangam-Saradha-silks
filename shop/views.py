@@ -104,6 +104,18 @@ def catalog(request):
     fabrics = [f for f in fabrics if f]
     occasions = [o for o in occasions if o]
 
+    # Active filter objects for header
+    active_category = None
+    if category_slug:
+        active_category = Category.objects.filter(slug=category_slug, is_active=True).first()
+
+    active_collection = None
+    if collection_id:
+        active_collection = Collection.objects.filter(id=collection_id, is_active=True).first()
+
+    # Determine if any filter / query parameter is active in URL
+    has_filters = any(v for v in request.GET.values() if v and str(v).strip())
+
     # Pagination
     from django.core.paginator import Paginator
     paginator = Paginator(products, 12)
@@ -118,6 +130,9 @@ def catalog(request):
         'fabrics': fabrics,
         'occasions': occasions,
         'current_filters': request.GET,
+        'has_filters': has_filters,
+        'active_category': active_category,
+        'active_collection': active_collection,
     }
     return render(request, 'shop/catalog.html', context)
 
