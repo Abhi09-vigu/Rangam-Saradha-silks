@@ -4,6 +4,7 @@
 {% block meta_title %}Saree Catalog - {{ site_settings.website_name }}{% endblock %}
 
 {% block content %}
+{% if not current_filters.q %}
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
         <h1 class="font-heading display-4 text-dark mb-0">Our Handloom Catalog</h1>
@@ -106,6 +107,23 @@
         </div>
     </div>
 </section>
+{% else %}
+<!-- Compact Search Results Header -->
+<section class="bg-light py-3 border-bottom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb fs-7 mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">Search Results</li>
+            </ol>
+        </nav>
+        <h1 class="font-heading h4 text-dark mb-0">
+            Search Results for <span class="text-primary">"{{ current_filters.q }}"</span>
+        </h1>
+    </div>
+</section>
+{% endif %}
 
 <section id="catalog-grid" class="py-5">
     <div class="container">
