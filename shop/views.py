@@ -37,13 +37,19 @@ def catalog(request):
         )
         
     # Filters
-    category_slug = request.GET.get('category')
-    if category_slug:
-        products = products.filter(categories__slug=category_slug)
+    category_param = request.GET.get('category')
+    if category_param:
+        if category_param.isdigit():
+            products = products.filter(categories__id=category_param)
+        else:
+            products = products.filter(categories__slug=category_param)
         
-    collection_id = request.GET.get('collection')
-    if collection_id:
-        products = products.filter(collection_id=collection_id)
+    collection_param = request.GET.get('collection')
+    if collection_param:
+        if collection_param.isdigit():
+            products = products.filter(collection_id=collection_param)
+        else:
+            products = products.filter(collection__slug=collection_param)
         
     color = request.GET.get('color')
     if color:
@@ -106,12 +112,18 @@ def catalog(request):
 
     # Active filter objects for header
     active_category = None
-    if category_slug:
-        active_category = Category.objects.filter(slug=category_slug, is_active=True).first()
+    if category_param:
+        if category_param.isdigit():
+            active_category = Category.objects.filter(id=category_param, is_active=True).first()
+        else:
+            active_category = Category.objects.filter(slug=category_param, is_active=True).first()
 
     active_collection = None
-    if collection_id:
-        active_collection = Collection.objects.filter(id=collection_id, is_active=True).first()
+    if collection_param:
+        if collection_param.isdigit():
+            active_collection = Collection.objects.filter(id=collection_param, is_active=True).first()
+        else:
+            active_collection = Collection.objects.filter(slug=collection_param, is_active=True).first()
 
     # Determine if any filter / query parameter is active in URL
     has_filters = any(v for v in request.GET.values() if v and str(v).strip())
