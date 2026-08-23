@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}{{ page.meta_title|default:page.title }} - {{ site_settings.website_name }}{% endblock %}
-{% block meta_description %}{{ page.meta_description }}{% endblock %}
-{% block meta_keywords %}{{ page.meta_keywords }}{% endblock %}
+{% block meta_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks - Traditional & Pure Silk Sarees{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks - Traditional & Pure Silk Sarees{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block meta_description %}{% if page.slug == 'about-us' %}Learn about Rangam Saradha Silks' legacy of offering pure Kanchipuram silk sarees, handcrafted traditional sarees, and authentic Indian weaves.{% else %}{{ page.meta_description|default:page.title|add:' - Rangam Saradha Silks premium traditional silk sarees.' }}{% endif %}{% endblock %}
+{% block meta_keywords %}{{ page.meta_keywords|default:'Rangam Saradha Silks, Silk Sarees, Traditional Sarees' }}{% endblock %}
+{% block canonical %}https://rangamsaradhasilks.com/page/{{ page.slug }}/{% endblock %}
+{% block og_url %}https://rangamsaradhasilks.com/page/{{ page.slug }}/{% endblock %}
+{% block og_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block og_description %}{% if page.slug == 'about-us' %}Learn about Rangam Saradha Silks' legacy of offering pure Kanchipuram silk sarees, handcrafted traditional sarees, and authentic Indian weaves.{% else %}{{ page.meta_description|default:page.title }}{% endif %}{% endblock %}
 
 {% block content %}
 <section class="section-luxury bg-light py-5">
@@ -24,7 +29,7 @@
             </div>
             <div class="col-lg-5">
                 <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
-                    <img src="{% static 'images/about_side.jpg' %}" alt="Rangam Saradha Silk Sarees Artistry" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
+                    <img src="{% static 'images/about_side.jpg' %}" alt="Rangam Saradha Silk Sarees Pure Handloom Artistry" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
                     <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
                         <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Legacy Woven Since 1995</span>
                     </div>
@@ -36,7 +41,7 @@
         <div class="row g-5 align-items-center mt-5">
             <div class="col-lg-5 order-2 order-lg-1">
                 <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
-                    <img src="{% static 'images/about_offer.jpg' %}" alt="Our Handcrafted Collections" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
+                    <img src="{% static 'images/about_offer.jpg' %}" alt="Rangam Saradha Silks Handcrafted Saree Collections" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
                     <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
                         <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Exquisite Boutique Craftsmanship</span>
                     </div>

@@ -27,6 +27,10 @@ class Category(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return f"{reverse('shop:catalog')}?category={self.slug}"
+
     def __str__(self):
         return self.name
 
@@ -98,6 +102,10 @@ class Product(models.Model):
             else:
                 self.offer_price = self.price
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('shop:product_detail', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.name

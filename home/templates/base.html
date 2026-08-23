@@ -6,10 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Dynamic SEO -->
-    <title>{% block meta_title %}{{ site_settings.website_name }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ site_settings.meta_description|default:'Premium silk sarees from Rangam Saradha Silk Sarees.' }}{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}{{ site_settings.meta_keywords|default:'Silk Sarees, Kanchipuram Sarees, Traditional Saree' }}{% endblock %}">
-    
+    <title>{% block title %}{% block meta_title %}{{ site_settings.website_name }} | Silk Sarees & Traditional Sarees{% endblock %}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}Rangam Saradha Silks, Rangam Saradha Silk Sarees, silk sarees, traditional sarees, sarees{% endblock %}">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <meta name="author" content="{% block author %}Rangam Saradha Silks{% endblock %}">
+    <meta name="google-site-verification" content="CGzLLvt0cPLXYIfVdrccuGNP63PSNau9P1RL3">
+    <link rel="canonical" href="{% block canonical %}https://rangamsaradhasilks.com{{ request.path }}{% endblock %}">
+
+    <!-- Open Graph Metadata -->
+    {% block og_tags %}
+    <meta property="og:title" content="{% block og_title %}{% block meta_title_og %}{{ site_settings.website_name }} | Silk Sarees & Traditional Sarees{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}https://rangamsaradhasilks.com{{ request.path }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}https://rangamsaradhasilks.com{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}{% endblock %}">
+    <meta property="og:site_name" content="Rangam Saradha Silks">
+    {% endblock %}
+
+    <!-- Twitter Card Metadata -->
+    {% block twitter_tags %}
+    <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ site_settings.website_name }} | Silk Sarees & Traditional Sarees{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}https://rangamsaradhasilks.com{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}{% endblock %}">
+    {% endblock %}
+
+    <!-- Structured Data (JSON-LD) -->
+    {% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ClothingStore",
+      "name": "Rangam Saradha Silks",
+      "url": "https://rangamsaradhasilks.com/",
+      "logo": "https://rangamsaradhasilks.com{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'images/logo.jpg' %}{% endif %}",
+      "description": "Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online."{% if contact_info.phone %},
+      "telephone": "{{ contact_info.phone }}"{% endif %}{% if contact_info.address %},
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ contact_info.address|escapejs }}"
+      }{% endif %}{% if contact_info.facebook_url or contact_info.instagram_url or contact_info.youtube_url %},
+      "sameAs": [
+        {% if contact_info.facebook_url %}"{{ contact_info.facebook_url }}"{% if contact_info.instagram_url or contact_info.youtube_url %},{% endif %}{% endif %}
+        {% if contact_info.instagram_url %}"{{ contact_info.instagram_url }}"{% if contact_info.youtube_url %},{% endif %}{% endif %}
+        {% if contact_info.youtube_url %}"{{ contact_info.youtube_url }}"{% endif %}
+      ]{% endif %}
+    }
+    </script>
+    {% endblock %}
+
     <!-- Favicon -->
     {% if site_settings.favicon %}
     <link rel="icon" type="image/png" href="{{ site_settings.favicon.url }}">
@@ -40,6 +86,7 @@
         }
     </style>
     
+    {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -50,9 +97,9 @@
             <!-- Brand Logo -->
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home:index' %}">
                 {% if site_settings.logo %}
-                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" style="max-height: 60px;">
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" style="max-height: 60px;">
                 {% else %}
-                <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }}" style="max-height: 60px;">
+                <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" style="max-height: 60px;">
                 {% endif %}
             </a>
             
@@ -182,9 +229,9 @@
                 <div class="col-md-4">
                     <div class="mb-4">
                         {% if site_settings.logo %}
-                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" style="max-height: 75px;">
+                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }} Logo" style="max-height: 75px;">
                         {% else %}
-                        <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }}" style="max-height: 75px; border-radius: 8px;">
+                        <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }} Logo" style="max-height: 75px; border-radius: 8px;">
                         {% endif %}
                     </div>
                     <p class="mb-4">{{ site_settings.meta_description|default:"Experience the epitome of Indian heritage and traditional luxury with our handwoven pure silk sarees." }}</p>
@@ -256,7 +303,7 @@
     <!-- Floating WhatsApp Chat Button -->
     {% if contact_info.whatsapp_url %}
     <a href="{{ contact_info.whatsapp_url }}" class="whatsapp-float-btn" target="_blank" rel="noopener noreferrer">
-        <img src="{% static 'images/support_icon.png' %}" alt="Support" class="whatsapp-support-img">
+        <img src="{% static 'images/support_icon.png' %}" alt="WhatsApp Customer Support - Rangam Saradha Silks" class="whatsapp-support-img">
         <span class="whatsapp-tooltip">Chat with us on WhatsApp</span>
     </a>
     {% endif %}

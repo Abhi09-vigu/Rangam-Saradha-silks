@@ -18,10 +18,21 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
+from django.contrib.sitemaps.views import sitemap
 from rangam_saradha_silk.admin import custom_admin_site
-from home.views import ContactFormAPIView
+from home.views import ContactFormAPIView, robots_txt
+from home.sitemaps import StaticViewSitemap, CMSPageSitemap, CategorySitemap, ProductSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'cms': CMSPageSitemap,
+    'categories': CategorySitemap,
+    'products': ProductSitemap,
+}
 
 urlpatterns = [
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'images/logo.jpg', permanent=True)),
     path('admin/', custom_admin_site.urls),
     path('accounts/', include('accounts.urls')),

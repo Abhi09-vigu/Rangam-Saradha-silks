@@ -1,5 +1,7 @@
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
+from django.views.decorators.http import require_GET
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
@@ -285,3 +287,21 @@ def debug_db_view(request):
     </html>
     """
     return HttpResponse(html)
+
+
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /accounts/",
+        "Disallow: /shop/cart/",
+        "Disallow: /shop/checkout/",
+        "Disallow: /shop/order/",
+        "Disallow: /api/",
+        "Disallow: /debug-db/",
+        "Allow: /",
+        "",
+        "Sitemap: https://rangamsaradhasilks.com/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+

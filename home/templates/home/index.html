@@ -1,9 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}Home - {{ site_settings.website_name }}{% endblock %}
+{% block meta_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
+{% block title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
+{% block meta_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
+{% block meta_keywords %}Rangam Saradha Silks, Rangam Saradha Silk Sarees, silk sarees, traditional sarees, sarees{% endblock %}
+{% block robots %}index, follow{% endblock %}
+{% block author %}Rangam Saradha Silks{% endblock %}
+{% block canonical %}https://rangamsaradhasilks.com/{% endblock %}
+{% block og_url %}https://rangamsaradhasilks.com/{% endblock %}
+{% block og_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
+{% block og_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
+{% block twitter_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
+{% block twitter_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
 
 {% block content %}
+<h1 class="visually-hidden">Rangam Saradha Silks</h1>
 <!-- Hero Slider (Bootstrap Carousel) -->
 {% if sliders %}
 <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -14,11 +26,11 @@
                 {% if slide.mobile_image %}
                 <source media="(max-width: 767px)" srcset="{{ slide.mobile_image.url }}">
                 {% endif %}
-                <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.title }}" style="max-height: 650px; object-fit: cover;">
+                <img src="{{ slide.image.url }}" class="d-block w-100" alt="Rangam Saradha Silks - {{ slide.title }}" style="max-height: 650px; object-fit: cover;">
             </picture>
             <div class="carousel-caption d-none d-md-block text-start" style="left: 10%; bottom: 25%; max-width: 500px;">
                 <h5 class="section-subtitle">{{ slide.subtitle }}</h5>
-                <h1 class="display-3 font-heading fw-bold text-white mb-4">{{ slide.title }}</h1>
+                <h2 class="display-3 font-heading fw-bold text-white mb-4">{{ slide.title }}</h2>
                 <a href="{{ slide.button_url }}" class="btn btn-primary btn-lg">{{ slide.button_text }}</a>
             </div>
         </div>
@@ -48,7 +60,7 @@
                     <a href="{{ banner.link }}" class="offer-banner-card d-block position-relative overflow-hidden">
                         <div class="offer-banner-img-wrapper">
                             {% if banner.image %}
-                            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="w-100 img-fluid offer-zoom-img" loading="lazy">
+                            <img src="{{ banner.image.url }}" alt="Rangam Saradha Silks Special Offer - {{ banner.title }}" class="w-100 img-fluid offer-zoom-img" loading="lazy">
                             {% endif %}
                         </div>
                     </a>
@@ -76,7 +88,7 @@
     <div class="container-fluid px-0">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">Discover Collections</span>
-            <h2 class="section-title">Shop by Category</h2>
+            <h2 class="section-title">Traditional Saree Collections</h2>
         </div>
         
         <div class="category-carousel-container">
@@ -86,7 +98,7 @@
                 <div class="category-carousel-item">
                     <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
                         <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
                         </div>
                         <h3>{{ cat.name }}</h3>
                     </a>
@@ -98,7 +110,7 @@
                 <div class="category-carousel-item">
                     <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
                         <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
                         </div>
                         <h3>{{ cat.name }}</h3>
                     </a>
@@ -110,7 +122,7 @@
                 <div class="category-carousel-item">
                     <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
                         <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
                         </div>
                         <h3>{{ cat.name }}</h3>
                     </a>
@@ -128,7 +140,7 @@
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle text-uppercase tracking-wider">✨ Signature Series</span>
-            <h2 class="section-title font-heading fw-bold">Featured Collections</h2>
+            <h2 class="section-title font-heading fw-bold">Featured Saree Collections</h2>
             <div class="gold-accent-line mx-auto mt-2"></div>
         </div>
         <div class="row g-4 justify-content-center">
@@ -137,9 +149,9 @@
                 <div class="collection-card overflow-hidden position-relative shadow-sm rounded-4">
                     <div class="collection-image-wrapper">
                         {% if col.image %}
-                        <img src="{{ col.image.url }}" alt="{{ col.name }}" class="w-100 img-fluid collection-zoom-img" loading="lazy">
+                        <img src="{{ col.image.url }}" alt="Rangam Saradha Silks - {{ col.name }} Collection" class="w-100 img-fluid collection-zoom-img" loading="lazy">
                         {% else %}
-                        <img src="{% static 'images/about_offer.jpg' %}" alt="{{ col.name }}" class="w-100 img-fluid collection-zoom-img" loading="lazy">
+                        <img src="{% static 'images/about_offer.jpg' %}" alt="Rangam Saradha Silks - {{ col.name }} Collection" class="w-100 img-fluid collection-zoom-img" loading="lazy">
                         {% endif %}
                         <div class="collection-overlay d-flex flex-column justify-content-end p-4">
                             <h3 class="text-white font-heading mb-2">{{ col.name }}</h3>
@@ -163,7 +175,7 @@
     <div class="container-fluid px-0">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">💎 Exquisite New Weaves</span>
-            <h2 class="section-title">New Arrivals</h2>
+            <h2 class="section-title">Our Latest Saree Collection</h2>
         </div>
         <div class="product-marquee-wrapper">
             <button class="carousel-nav-btn prev-btn-float" id="newArrivalsPrev" aria-label="Previous New Arrivals" title="Previous">
@@ -204,7 +216,7 @@
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">💎 Exquisite New Weaves</span>
-            <h2 class="section-title">New Arrivals</h2>
+            <h2 class="section-title">Our Latest Saree Collection</h2>
         </div>
         <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
             {% for product in new_arrivals %}
@@ -234,9 +246,9 @@
                 <a href="{% url 'shop:catalog' %}?fabric={{ item.name }}" class="fabric-curation-card">
                     <div class="fabric-curation-image-wrapper">
                         {% if item.image %}
-                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="fabric-curation-img" loading="lazy">
+                        <img src="{{ item.image.url }}" alt="Rangam Saradha Silks - {{ item.name }} Fabric Saree" class="fabric-curation-img" loading="lazy">
                         {% else %}
-                        <img src="{% static 'images/about_offer.jpg' %}" alt="{{ item.name }}" class="fabric-curation-img" loading="lazy">
+                        <img src="{% static 'images/about_offer.jpg' %}" alt="Rangam Saradha Silks - {{ item.name }} Fabric Saree" class="fabric-curation-img" loading="lazy">
                         {% endif %}
                     </div>
                     <div class="fabric-curation-overlay">
@@ -258,7 +270,7 @@
     <div class="container-fluid px-0">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
-            <h2 class="section-title">Best Sellers</h2>
+            <h2 class="section-title">Premium Silk Sarees</h2>
         </div>
         <div class="product-marquee-wrapper">
             <button class="carousel-nav-btn prev-btn-float" id="bestSellersPrev" aria-label="Previous Best Sellers" title="Previous">
@@ -299,7 +311,7 @@
     <div class="container">
         <div class="section-heading-wrapper text-center mb-5">
             <span class="section-subtitle">🔥 Most Loved Masterpieces</span>
-            <h2 class="section-title">Best Sellers</h2>
+            <h2 class="section-title">Premium Silk Sarees</h2>
         </div>
         <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
             {% for product in best_sellers %}
@@ -482,7 +494,7 @@
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="card border-0 overflow-hidden shadow-sm product-card" style="border-radius: 12px;">
                     <a href="{{ post.link }}" target="_blank">
-                        <img src="{{ post.image.url }}" alt="Instagram Image" class="w-100 img-fluid" style="aspect-ratio: 1/1; object-fit: cover;">
+                        <img src="{{ post.image.url }}" alt="Rangam Saradha Silks Instagram Gallery Post" class="w-100 img-fluid" style="aspect-ratio: 1/1; object-fit: cover;">
                     </a>
                 </div>
             </div>

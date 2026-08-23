@@ -148,6 +148,10 @@ class CMSPage(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('home:cms_page', kwargs={'slug': self.slug})
+
     def __str__(self):
         return self.title
 

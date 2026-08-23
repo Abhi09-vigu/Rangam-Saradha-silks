@@ -1,8 +1,55 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}{{ product.name }} - {{ site_settings.website_name }}{% endblock %}
-{% block meta_description %}{{ product.meta_description|default:product.short_description }}{% endblock %}
+{% block meta_title %}{{ product.meta_title|default:product.name }} | Rangam Saradha Silks{% endblock %}
+{% block title %}{{ product.meta_title|default:product.name }} | Rangam Saradha Silks{% endblock %}
+{% block meta_description %}{{ product.meta_description|default:product.short_description|default:product.description|striptags|truncatewords:25 }}{% endblock %}
+{% block meta_keywords %}{{ product.meta_keywords|default:product.name|add:', Rangam Saradha Silks, silk saree, Kanchipuram silk' }}{% endblock %}
+{% block canonical %}https://rangamsaradhasilks.com{{ product.get_absolute_url }}{% endblock %}
+{% block og_url %}https://rangamsaradhasilks.com{{ product.get_absolute_url }}{% endblock %}
+{% block og_title %}{{ product.name }} | Rangam Saradha Silks{% endblock %}
+{% block og_description %}{{ product.short_description|default:product.description|striptags|truncatewords:25 }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_image %}{% if product.images.first %}https://rangamsaradhasilks.com{{ product.images.first.image.url }}{% else %}https://rangamsaradhasilks.com{% static 'images/logo.jpg' %}{% endif %}{% endblock %}
+{% block twitter_title %}{{ product.name }} | Rangam Saradha Silks{% endblock %}
+{% block twitter_description %}{{ product.short_description|default:product.description|striptags|truncatewords:25 }}{% endblock %}
+{% block twitter_image %}{% if product.images.first %}https://rangamsaradhasilks.com{{ product.images.first.image.url }}{% else %}https://rangamsaradhasilks.com{% static 'images/logo.jpg' %}{% endif %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.name|escapejs }}",
+  "image": [
+    {% for img in product.images.all %}
+    "https://rangamsaradhasilks.com{{ img.image.url }}"{% if not forloop.last %},{% endif %}
+    {% empty %}
+    "https://rangamsaradhasilks.com{% static 'images/logo.jpg' %}"
+    {% endfor %}
+  ],
+  "description": "{{ product.short_description|default:product.description|striptags|escapejs }}",
+  "sku": "{{ product.sku|escapejs }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "Rangam Saradha Silks"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "https://rangamsaradhasilks.com{{ product.get_absolute_url }}",
+    "priceCurrency": "INR",
+    "price": "{{ product.offer_price|floatformat:2 }}",
+    "priceValidUntil": "2027-12-31",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": "Rangam Saradha Silks"
+    }
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="py-5">
@@ -27,11 +74,11 @@
                     <div class="col-12">
                         <div id="mainProductImgWrapper" class="card border border-light overflow-hidden shadow-sm product-zoom-container position-relative" style="border-radius: 16px; aspect-ratio: 3/4;">
                             {% if product.images.all %}
-                            <img id="mainProductImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }}"
+                            <img id="mainProductImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }} - Rangam Saradha Silks"
                                 class="w-100 h-100 img-fluid product-zoom-img" style="object-fit: cover;">
                             {% else %}
                             <img id="mainProductImg" src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"
-                                alt="Placeholder Saree" class="w-100 h-100 img-fluid product-zoom-img" style="object-fit: cover;">
+                                alt="{{ product.name }} - Rangam Saradha Silks" class="w-100 h-100 img-fluid product-zoom-img" style="object-fit: cover;">
                             {% endif %}
 
                             <!-- Manual Floating Circular Zoom Buttons -->
@@ -56,7 +103,7 @@
                             <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0"
                                 style="width: 80px; height: 100px; border-radius: 8px; cursor: pointer;"
                                 onclick="document.getElementById('mainProductImg').src='{{ img.image.url }}';">
-                                <img src="{{ img.image.url }}" alt="Thumbnail" class="w-100 h-100"
+                                <img src="{{ img.image.url }}" alt="{{ product.name }} Thumbnail - Rangam Saradha Silks" class="w-100 h-100"
                                     style="object-fit: cover;">
                             </div>
                             {% endfor %}
