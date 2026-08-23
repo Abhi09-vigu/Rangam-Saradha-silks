@@ -222,14 +222,28 @@
                         </div>
                         {% endif %}
 
-                        <!-- Price Range -->
+                        <!-- Dual Price Range Slider Bar -->
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Price Range</h5>
-                            <div class="d-flex gap-2">
-                                <input type="number" name="min_price" class="form-control fs-7" placeholder="Min" value="{{ current_filters.min_price }}">
-                                <input type="number" name="max_price" class="form-control fs-7" placeholder="Max" value="{{ current_filters.max_price }}">
+                            <div class="price-range-wrapper">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="price-badge">₹<span id="priceMinDisplay">{{ current_filters.min_price|default:min_catalog_price }}</span></span>
+                                    <span class="text-muted fs-8 fw-semibold">TO</span>
+                                    <span class="price-badge">₹<span id="priceMaxDisplay">{{ current_filters.max_price|default:max_catalog_price }}</span></span>
+                                </div>
+                                
+                                <div class="price-range-slider-container">
+                                    <div class="price-range-track position-absolute top-50 start-0 w-100 translate-middle-y"></div>
+                                    <div class="price-range-selected position-absolute top-50 translate-middle-y" id="priceRangeSelectedTrack"></div>
+                                    <input type="range" class="price-range-input" id="minPriceSlider" min="{{ min_catalog_price }}" max="{{ max_catalog_price }}" step="100" value="{{ current_filters.min_price|default:min_catalog_price }}">
+                                    <input type="range" class="price-range-input" id="maxPriceSlider" min="{{ min_catalog_price }}" max="{{ max_catalog_price }}" step="100" value="{{ current_filters.max_price|default:max_catalog_price }}">
+                                </div>
+
+                                <input type="hidden" name="min_price" id="minPriceInput" value="{{ current_filters.min_price|default:'' }}">
+                                <input type="hidden" name="max_price" id="maxPriceInput" value="{{ current_filters.max_price|default:'' }}">
+
+                                <button class="btn btn-outline-primary w-100 fs-7 mt-2 rounded-pill fw-semibold text-uppercase" type="submit">Apply Price Filter</button>
                             </div>
-                            <button class="btn btn-outline-primary w-100 fs-7 mt-2" type="submit">Apply Price</button>
                         </div>
 
                         <!-- Special Filters -->
@@ -318,4 +332,57 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const minSlider = document.getElementById("minPriceSlider");
+        const maxSlider = document.getElementById("maxPriceSlider");
+        const minDisplay = document.getElementById("priceMinDisplay");
+        const maxDisplay = document.getElementById("priceMaxDisplay");
+        const minInput = document.getElementById("minPriceInput");
+        const maxInput = document.getElementById("maxPriceInput");
+        const track = document.getElementById("priceRangeSelectedTrack");
+
+        if (!minSlider || !maxSlider) return;
+
+        const minGap = 200;
+        const minRangeVal = parseInt(minSlider.min) || 0;
+        const maxRangeVal = parseInt(maxSlider.max) || 100000;
+
+        function updatePriceSlider(e) {
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+
+            if (maxVal - minVal < minGap) {
+                if (e && e.target === minSlider) {
+                    minSlider.value = maxVal - minGap;
+                    minVal = parseInt(minSlider.value);
+                } else if (e && e.target === maxSlider) {
+                    maxSlider.value = minVal + minGap;
+                    maxVal = parseInt(maxSlider.value);
+                }
+            }
+
+            const totalRange = maxRangeVal - minRangeVal;
+            const leftPercent = totalRange > 0 ? ((minVal - minRangeVal) / totalRange) * 100 : 0;
+            const rightPercent = totalRange > 0 ? 100 - (((maxVal - minRangeVal) / totalRange) * 100) : 0;
+
+            if (track) {
+                track.style.left = leftPercent + "%";
+                track.style.right = rightPercent + "%";
+            }
+
+            if (minDisplay) minDisplay.textContent = minVal.toLocaleString('en-IN');
+            if (maxDisplay) maxDisplay.textContent = maxVal.toLocaleString('en-IN');
+            if (minInput) minInput.value = minVal;
+            if (maxInput) maxInput.value = maxVal;
+        }
+
+        minSlider.addEventListener("input", updatePriceSlider);
+        maxSlider.addEventListener("input", updatePriceSlider);
+        updatePriceSlider();
+    });
+</script>
 {% endblock %}

@@ -4,15 +4,36 @@ from .models import CustomUser, Address
 from phonenumber_field.formfields import PhoneNumberField
 
 class CustomUserCreationForm(UserCreationForm):
-    phone_number = PhoneNumberField(required=True, help_text="Provide phone number with country code (e.g. +919876543210)")
+    email = forms.EmailField(required=True, label="Email Address")
+    phone_number = PhoneNumberField(required=False, label="Phone Number (Optional)", help_text="Optional mobile number for order tracking.")
 
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'phone_number')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control px-3 py-2'
+            if field_name == 'username':
+                field.widget.attrs['placeholder'] = 'Choose a unique username'
+                field.label = 'Username'
+            elif field_name == 'email':
+                field.widget.attrs['placeholder'] = 'name@example.com'
+                field.label = 'Email Address'
+            elif field_name == 'phone_number':
+                field.widget.attrs['placeholder'] = '+91 9876543210'
+                field.label = 'Phone Number (Optional)'
+            elif field_name == 'password1':
+                field.widget.attrs['placeholder'] = 'Create a strong password'
+                field.label = 'Password'
+            elif field_name == 'password2':
+                field.widget.attrs['placeholder'] = 'Confirm your password'
+                field.label = 'Confirm Password'
+
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
-        if CustomUser.objects.filter(phone_number=phone_number).exists():
+        if phone_number and CustomUser.objects.filter(phone_number=phone_number).exists():
             raise forms.ValidationError("A user with this phone number already exists.")
         return phone_number
 

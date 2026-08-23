@@ -94,83 +94,30 @@
                         <hr class="flex-grow-1 my-0 border-secondary-subtle">
                     </div>
 
-                    <!-- Tabs for Login Methods -->
-                    <ul class="nav nav-pills justify-content-center mb-4" id="loginTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button
-                                class="nav-link {% if active_tab == 'phone' %}active{% endif %} rounded-pill px-4 me-2"
-                                id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone-login" type="button"
-                                role="tab" aria-controls="phone-login"
-                                aria-selected="{% if active_tab == 'phone' %}true{% else %}false{% endif %}">
-                                <i class="bi bi-phone me-1"></i> Mobile OTP
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if active_tab != 'phone' %}active{% endif %} rounded-pill px-4"
-                                id="password-tab" data-bs-toggle="tab" data-bs-target="#password-login" type="button"
-                                role="tab" aria-controls="password-login"
-                                aria-selected="{% if active_tab != 'phone' %}true{% else %}false{% endif %}">
-                                <i class="bi bi-shield-lock me-1"></i> Password
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="loginTabContent">
-                        <!-- Phone OTP Login Tab -->
-                        <div class="tab-pane fade {% if active_tab == 'phone' %}show active{% endif %}" id="phone-login"
-                            role="tabpanel" aria-labelledby="phone-tab">
-                            <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="login_type" value="phone">
-                                <div class="mb-4">
-                                    <label for="phone_number_input" class="form-label text-muted fs-7">Mobile
-                                        Number</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">+91</span>
-                                        <input type="tel" name="phone_number" class="form-control px-3 py-2"
-                                            id="phone_number_input" placeholder="Enter 10-digit mobile number"
-                                            pattern="[6-9][0-9]{9}"
-                                            title="Please enter a valid 10-digit Indian mobile number" required
-                                            value="{% if active_tab == 'phone' and phone_form.phone_number.value %}{{ phone_form.phone_number.value }}{% endif %}">
-                                    </div>
-                                    <small class="text-muted fs-8 mt-1 d-block">We'll send a 6-digit OTP code to verify
-                                        your phone.</small>
-                                </div>
-                                <button type="submit"
-                                    class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
-                                    Send Verification Code
-                                </button>
-                            </form>
+                    <!-- Password Login Form -->
+                    <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="login_type" value="password">
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-muted fs-7">Username or Email
+                                Address</label>
+                            <input type="text" name="username" class="form-control px-3 py-2" id="username"
+                                placeholder="Enter username or email" required>
                         </div>
-
-                        <!-- Password Login Tab -->
-                        <div class="tab-pane fade {% if active_tab != 'phone' %}show active{% endif %}"
-                            id="password-login" role="tabpanel" aria-labelledby="password-tab">
-                            <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="login_type" value="password">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label text-muted fs-7">Username or Email
-                                        Address</label>
-                                    <input type="text" name="username" class="form-control px-3 py-2" id="username"
-                                        placeholder="Enter username or email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between">
-                                        <label for="password" class="form-label text-muted fs-7">Password</label>
-                                        <a href="{% url 'accounts:forgot_password' %}"
-                                            class="fs-8 text-primary text-decoration-none">Forgot Password?</a>
-                                    </div>
-                                    <input type="password" name="password" class="form-control px-3 py-2" id="password"
-                                        placeholder="Enter password" required>
-                                </div>
-                                <button type="submit"
-                                    class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
-                                    Login
-                                </button>
-                            </form>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label for="password" class="form-label text-muted fs-7">Password</label>
+                                <a href="{% url 'accounts:forgot_password' %}"
+                                    class="fs-8 text-primary text-decoration-none">Forgot Password?</a>
+                            </div>
+                            <input type="password" name="password" class="form-control px-3 py-2" id="password"
+                                placeholder="Enter password" required>
                         </div>
-                    </div>
+                        <button type="submit"
+                            class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
+                            Login
+                        </button>
+                    </form>
 
                     <div class="text-center mt-4">
                         <p class="text-muted fs-7 mb-0">Don't have an account? <a href="{% url 'accounts:register' %}"

@@ -134,6 +134,21 @@ def catalog(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Determine maximum and minimum saree price all over the website
+    from django.db.models import Max, Min
+    price_stats = Product.objects.filter(is_active=True).aggregate(
+        max_offer=Max('offer_price'),
+        max_regular=Max('price'),
+        min_offer=Min('offer_price'),
+        min_regular=Min('price')
+    )
+    
+    valid_max_prices = [p for p in [price_stats['max_offer'], price_stats['max_regular']] if p is not None]
+    valid_min_prices = [p for p in [price_stats['min_offer'], price_stats['min_regular']] if p is not None]
+
+    max_catalog_price = int(max(valid_max_prices)) if valid_max_prices else 100000
+    min_catalog_price = int(min(valid_min_prices)) if valid_min_prices else 0
+
     context = {
         'products': page_obj,
         'categories': categories,
@@ -145,6 +160,8 @@ def catalog(request):
         'has_filters': has_filters,
         'active_category': active_category,
         'active_collection': active_collection,
+        'min_catalog_price': min_catalog_price,
+        'max_catalog_price': max_catalog_price,
     }
     return render(request, 'shop/catalog.html', context)
 

@@ -42,11 +42,16 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <form action="{% url 'shop:cart_update' item.id %}" method="POST" class="d-inline-block">
+                                    <form action="{% url 'shop:cart_update' item.id %}" method="POST" class="d-inline-block cart-qty-form">
                                         {% csrf_token %}
-                                        <div class="input-group input-group-sm mb-1" style="max-width: 100px; margin: 0 auto;">
-                                            <input type="number" name="quantity" class="form-control text-center" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" onchange="this.form.submit()" style="box-shadow: none;" required>
-                                            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-arrow-clockwise"></i></button>
+                                        <div class="input-group input-group-sm justify-content-center align-items-center" style="max-width: 130px; margin: 0 auto;">
+                                            <button type="button" class="btn btn-outline-secondary btn-qty-minus rounded-start px-2 py-1" onclick="changeCartQty(this, -1)" title="Decrease Quantity">
+                                                <i class="bi bi-dash-lg"></i>
+                                            </button>
+                                            <input type="number" name="quantity" class="form-control text-center fw-semibold qty-number-input px-1 py-1" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="max-width: 50px; box-shadow: none; border-left: 0; border-right: 0; background: #ffffff;" required readonly>
+                                            <button type="button" class="btn btn-outline-secondary btn-qty-plus rounded-end px-2 py-1" onclick="changeCartQty(this, 1)" title="Increase Quantity">
+                                                <i class="bi bi-plus-lg"></i>
+                                            </button>
                                         </div>
                                         {% if item.product.stock <= 5 %}
                                         <small class="text-danger d-block text-center mt-1" style="font-size: 0.75rem;">Only {{ item.product.stock }} items available.</small>
@@ -144,4 +149,24 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function changeCartQty(btn, delta) {
+        const form = btn.closest('form');
+        const input = form.querySelector('.qty-number-input');
+        if (!input) return;
+
+        let currentVal = parseInt(input.value) || 1;
+        let minVal = parseInt(input.getAttribute('min')) || 1;
+        let maxVal = parseInt(input.getAttribute('max')) || 999;
+
+        let newVal = currentVal + delta;
+        if (newVal >= minVal && newVal <= maxVal) {
+            input.value = newVal;
+            form.submit();
+        }
+    }
+</script>
 {% endblock %}

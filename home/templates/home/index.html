@@ -91,44 +91,56 @@
             <h2 class="section-title">Traditional Saree Collections</h2>
         </div>
         
-        <div class="category-carousel-container">
-            <div class="category-carousel-track">
-                <!-- Set 1 -->
-                {% for cat in categories %}
-                <div class="category-carousel-item">
-                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
-                        <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
-                        </div>
-                        <h3>{{ cat.name }}</h3>
-                    </a>
+        <div class="category-carousel-wrapper">
+            <!-- Left Arrow Button -->
+            <button type="button" class="cat-nav-btn cat-prev-btn" id="catPrevBtn" aria-label="Previous categories">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="category-carousel-container" id="categoryCarouselContainer">
+                <div class="category-carousel-track" id="categoryCarouselTrack">
+                    <!-- Set 1 -->
+                    {% for cat in categories %}
+                    <div class="category-carousel-item">
+                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                            <div class="category-circle-image">
+                                <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                            </div>
+                            <h3>{{ cat.name }}</h3>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
+                    {% for cat in categories %}
+                    <div class="category-carousel-item">
+                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                            <div class="category-circle-image">
+                                <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                            </div>
+                            <h3>{{ cat.name }}</h3>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Set 3 (Duplicated for Wide Screens) -->
+                    {% for cat in categories %}
+                    <div class="category-carousel-item">
+                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                            <div class="category-circle-image">
+                                <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                            </div>
+                            <h3>{{ cat.name }}</h3>
+                        </a>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-                
-                <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
-                {% for cat in categories %}
-                <div class="category-carousel-item">
-                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
-                        <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
-                        </div>
-                        <h3>{{ cat.name }}</h3>
-                    </a>
-                </div>
-                {% endfor %}
-                
-                <!-- Set 3 (Duplicated for Wide Screens) -->
-                {% for cat in categories %}
-                <div class="category-carousel-item">
-                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
-                        <div class="category-circle-image">
-                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
-                        </div>
-                        <h3>{{ cat.name }}</h3>
-                    </a>
-                </div>
-                {% endfor %}
             </div>
+
+            <!-- Right Arrow Button -->
+            <button type="button" class="cat-nav-btn cat-next-btn" id="catNextBtn" aria-label="Next categories">
+                <i class="bi bi-chevron-right"></i>
+            </button>
         </div>
     </div>
 </section>
@@ -769,6 +781,49 @@
                         d.classList.remove('active');
                     }
                 });
+            });
+        }
+
+        // Category Carousel Navigation Arrows + Auto Scrolling Sync
+        const catPrevBtn = document.getElementById("catPrevBtn");
+        const catNextBtn = document.getElementById("catNextBtn");
+        const catTrack = document.getElementById("categoryCarouselTrack");
+
+        if (catPrevBtn && catNextBtn && catTrack) {
+            function getCurrentTranslateX() {
+                const style = window.getComputedStyle(catTrack);
+                const matrix = new WebKitCSSMatrix(style.transform);
+                return matrix.m41;
+            }
+
+            function manualShift(step) {
+                const currentX = getCurrentTranslateX();
+                let newX = currentX + step;
+                const oneSetWidth = catTrack.scrollWidth / 3;
+
+                catTrack.style.animation = 'none';
+                if (Math.abs(newX) >= oneSetWidth * 2) {
+                    newX = -oneSetWidth;
+                } else if (newX > 0) {
+                    newX = -oneSetWidth;
+                }
+
+                catTrack.style.transform = `translateX(${newX}px)`;
+                catTrack.style.transition = "transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)";
+
+                clearTimeout(catTrack._autoResumeTimer);
+                catTrack._autoResumeTimer = setTimeout(() => {
+                    catTrack.style.transition = 'none';
+                    catTrack.style.animation = 'scroll-categories-carousel 35s linear infinite';
+                }, 2500);
+            }
+
+            catNextBtn.addEventListener("click", function () {
+                manualShift(-280);
+            });
+
+            catPrevBtn.addEventListener("click", function () {
+                manualShift(280);
             });
         }
     });

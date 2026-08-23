@@ -354,7 +354,7 @@ def login_view(request):
                 
     return render(request, 'accounts/login.html', {
         'phone_form': phone_form,
-        'active_tab': request.POST.get('login_type', 'phone'),
+        'active_tab': request.POST.get('login_type', 'password'),
         'google_client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
         'firebase_config': getattr(settings, 'FIREBASE_CONFIG', {})
     })

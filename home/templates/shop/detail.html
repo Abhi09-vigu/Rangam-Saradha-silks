@@ -244,19 +244,15 @@
                             <label for="quantity" class="form-label text-muted fs-7 mb-0">Qty:</label>
                         </div>
                         <div class="col-auto">
-                            <select name="quantity" id="quantity" class="form-select form-select-sm"
-                                style="width: 80px;" {% if product.stock == 0 %}disabled{% endif %}>
-                                {% if product.stock > 0 %}
-                                {% with ''|center:product.stock as range %}
-                                {% for _ in range %}
-                                {% if forloop.counter <= 5 %}<option value="{{ forloop.counter }}">{{ forloop.counter }}
-                                    </option>{% endif %}
-                                    {% endfor %}
-                                    {% endwith %}
-                                    {% else %}
-                                    <option value="0">0</option>
-                                    {% endif %}
-                            </select>
+                            <div class="input-group input-group-sm justify-content-center align-items-center" style="max-width: 120px;">
+                                <button type="button" class="btn btn-outline-secondary rounded-start px-2 py-1" onclick="changeDetailQty(-1)" {% if product.stock == 0 %}disabled{% endif %}>
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                                <input type="number" name="quantity" id="detailQtyInput" class="form-control text-center fw-semibold px-1 py-1" value="1" min="1" max="{{ product.stock }}" style="max-width: 45px; box-shadow: none; border-left: 0; border-right: 0; background: #ffffff;" readonly {% if product.stock == 0 %}disabled{% endif %}>
+                                <button type="button" class="btn btn-outline-secondary rounded-end px-2 py-1" onclick="changeDetailQty(1)" {% if product.stock == 0 %}disabled{% endif %}>
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-auto d-flex gap-2">
                             <button type="submit" class="btn btn-primary" {% if product.stock == 0 %}disabled{% endif %}>Add to Bag</button>
@@ -474,6 +470,18 @@
 {% block extra_js %}
 <script src="{% static 'js/product-zoom.js' %}?v=3.0"></script>
 <script>
+    function changeDetailQty(delta) {
+        const input = document.getElementById('detailQtyInput');
+        if (!input) return;
+        let currentVal = parseInt(input.value) || 1;
+        let minVal = parseInt(input.getAttribute('min')) || 1;
+        let maxVal = parseInt(input.getAttribute('max')) || 999;
+        let newVal = currentVal + delta;
+        if (newVal >= minVal && newVal <= maxVal) {
+            input.value = newVal;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const zoomContainer = document.getElementById('mainProductImgWrapper');
         if (zoomContainer) {
