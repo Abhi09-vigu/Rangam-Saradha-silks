@@ -59,8 +59,10 @@
     <!-- Favicon -->
     {% if site_settings.favicon %}
     <link rel="icon" type="image/png" href="{{ site_settings.favicon.url }}">
+    <link rel="shortcut icon" type="image/png" href="{{ site_settings.favicon.url }}">
     {% else %}
     <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
     {% endif %}
 
     <!-- Bootstrap 5 CSS -->
