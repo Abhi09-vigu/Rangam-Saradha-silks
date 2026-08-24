@@ -23,7 +23,51 @@ from django.conf import settings
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 
+from django.core.mail import send_mail
+
 logger = logging.getLogger(__name__)
+
+def send_registration_welcome_email(user):
+    """
+    Sends an automatic welcome email to newly registered users via Google / Firebase OAuth.
+    """
+    if not user or not user.email:
+        logger.warning("Skipping registration welcome email: User or user email address missing.")
+        return False
+
+    first_name = user.first_name or user.username or "Customer"
+    subject = "Welcome to Rangam Saradha Silks!"
+
+    body = (
+        f"Dear {first_name},\n\n"
+        f"Thank you for registering with Rangam Saradha Silks.\n\n"
+        f"We are delighted to have you with us. Explore our collection of traditional silk sarees and discover something special for every occasion.\n\n"
+        f"Visit our website:\n"
+        f"https://rangamsaradhasilks.com/\n\n"
+        f"Thank you for choosing Rangam Saradha Silks.\n\n"
+        f"Warm regards,\n"
+        f"Rangam Saradha Silks\n"
+        f"https://rangamsaradhasilks.com/"
+    )
+
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
+
+    try:
+        sent_count = send_mail(
+            subject=subject,
+            message=body,
+            from_email=from_email,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+        if sent_count == 0:
+            logger.error(f"Failed to send welcome email to {user.email} (send_mail returned 0).")
+        else:
+            logger.info(f"Welcome email successfully sent to {user.email}.")
+        return sent_count > 0
+    except Exception as e:
+        logger.error(f"Error sending welcome email to {user.email}: {str(e)}", exc_info=True)
+        return False
 
 def get_twilio_client():
     account_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
@@ -684,6 +728,7 @@ def google_login_view(request):
             )
             user.set_unusable_password()
             user.save()
+            send_registration_welcome_email(user)
 
         # Log in user persistently
         login(request, user)
@@ -805,6 +850,7 @@ def firebase_login_view(request):
             )
             user.set_unusable_password()
             user.save()
+            send_registration_welcome_email(user)
 
         # Establish persistent Django session login
         login(request, user)
