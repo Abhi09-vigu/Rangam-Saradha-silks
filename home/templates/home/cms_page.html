@@ -1,14 +1,37 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks - Traditional & Pure Silk Sarees{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks - Traditional & Pure Silk Sarees{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block meta_description %}{% if page.slug == 'about-us' %}Learn about Rangam Saradha Silks' legacy of offering pure Kanchipuram silk sarees, handcrafted traditional sarees, and authentic Indian weaves.{% else %}{{ page.meta_description|default:page.title|add:' - Rangam Saradha Silks premium traditional silk sarees.' }}{% endif %}{% endblock %}
+{% block meta_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block meta_description %}{% if page.slug == 'about-us' %}Discover the story of Rangam Saradha Silks. Learn about our commitment to authentic handwoven pure silk sarees, artisan weavers, and Indian textile heritage.{% else %}{{ page.meta_description|default:page.title|add:' - Rangam Saradha Silks premium traditional silk sarees.' }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{ page.meta_keywords|default:'Rangam Saradha Silks, Silk Sarees, Traditional Sarees' }}{% endblock %}
 {% block canonical %}https://rangamsaradhasilks.com/page/{{ page.slug }}/{% endblock %}
 {% block og_url %}https://rangamsaradhasilks.com/page/{{ page.slug }}/{% endblock %}
 {% block og_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block og_description %}{% if page.slug == 'about-us' %}Learn about Rangam Saradha Silks' legacy of offering pure Kanchipuram silk sarees, handcrafted traditional sarees, and authentic Indian weaves.{% else %}{{ page.meta_description|default:page.title }}{% endif %}{% endblock %}
+{% block og_description %}{% if page.slug == 'about-us' %}Discover the story of Rangam Saradha Silks. Learn about our commitment to authentic handwoven pure silk sarees, artisan weavers, and Indian textile heritage.{% else %}{{ page.meta_description|default:page.title }}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ page.title|escapejs }}",
+      "item": "https://rangamsaradhasilks.com/page/{{ page.slug }}/"
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="section-luxury bg-light py-5">
@@ -69,7 +92,7 @@
             <h4 class="font-heading mb-2">Explore Rangam Saradha Silks</h4>
             <p class="text-muted mb-3">Browse our traditional silk sarees or get in touch with our team for customer support.</p>
             <div class="d-flex justify-content-center flex-wrap gap-2">
-                <a href="{% url 'shop:catalog' %}" class="btn btn-outline-primary rounded-pill px-4">Categories</a>
+                <a href="{% url 'shop:categories' %}" class="btn btn-outline-primary rounded-pill px-4">Categories</a>
                 <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill px-4">Shop All</a>
                 <a href="{% url 'home:cms_page' slug='about-us' %}" class="btn btn-outline-dark rounded-pill px-4">About Us</a>
                 <a href="{% url 'home:contact' %}" class="btn btn-outline-secondary rounded-pill px-4">Contact Us</a>

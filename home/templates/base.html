@@ -116,16 +116,16 @@
                     </li>
                     
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="{% url 'shop:catalog' %}" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="{% url 'shop:categories' %}" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Categories
                         </a>
                         <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="categoriesDropdown">
-                            <li><a class="dropdown-item fw-semibold" href="{% url 'shop:catalog' %}">All Categories</a></li>
+                            <li><a class="dropdown-item fw-semibold" href="{% url 'shop:categories' %}">All Saree Categories</a></li>
                             <li><hr class="dropdown-divider"></li>
                             {% for cat in nav_categories %}
                             <li><a class="dropdown-item" href="{% url 'shop:catalog' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
                             {% empty %}
-                            <li><a class="dropdown-item" href="{% url 'shop:catalog' %}">Browse Collections</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop:categories' %}">Browse Categories</a></li>
                             {% endfor %}
                         </ul>
                     </li>
@@ -257,7 +257,7 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="{% url 'home:index' %}" class="d-block py-1">Home</a></li>
-                        <li><a href="{% url 'shop:catalog' %}" class="d-block py-1">Categories</a></li>
+                        <li><a href="{% url 'shop:categories' %}" class="d-block py-1">Categories</a></li>
                         <li><a href="{% url 'shop:catalog' %}" class="d-block py-1">Shop All</a></li>
                         <li><a href="{% url 'home:cms_page' slug='about-us' %}" class="d-block py-1">About Us</a></li>
                         <li><a href="{% url 'home:contact' %}" class="d-block py-1">Contact Us</a></li>

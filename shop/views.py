@@ -24,6 +24,21 @@ def _get_or_create_cart(request):
         cart, created = Cart.objects.get_or_create(session_key=session_key)
     return cart
 
+
+def categories_list(request):
+    """
+    Dedicated Categories landing page displaying all active saree categories.
+    """
+    from django.db.models import Count
+    categories = Category.objects.filter(is_active=True).annotate(
+        product_count=Count('products', filter=Q(products__is_active=True))
+    ).order_by('display_order')
+    
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'shop/categories.html', context)
+
 def catalog(request):
     products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')
     

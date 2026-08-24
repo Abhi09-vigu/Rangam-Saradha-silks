@@ -11,6 +11,29 @@
 {% block twitter_title %}Contact Us | Rangam Saradha Silks{% endblock %}
 {% block twitter_description %}Get in touch with Rangam Saradha Silks for queries regarding our pure silk saree collections, custom orders, store location, and customer support.{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Contact Us",
+      "item": "https://rangamsaradhasilks.com/contact/"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
@@ -74,7 +97,7 @@
                     <h5 class="fw-bold mb-2">Explore Rangam Saradha Silks</h5>
                     <p class="text-muted fs-7 mb-3">Discover our handwoven pure silk sarees or learn about our weaving legacy.</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'shop:catalog' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Categories</a>
+                        <a href="{% url 'shop:categories' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Categories</a>
                         <a href="{% url 'shop:catalog' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Shop All</a>
                         <a href="{% url 'home:cms_page' slug='about-us' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">About Us</a>
                         <a href="{% url 'home:contact' %}" class="btn btn-sm btn-primary rounded-pill px-3">Contact Us</a>

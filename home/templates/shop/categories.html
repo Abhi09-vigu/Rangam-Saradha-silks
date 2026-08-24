@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Saree Categories | Rangam Saradha Silks{% endblock %}
+{% block title %}Saree Categories | Rangam Saradha Silks{% endblock %}
+{% block meta_description %}Explore authentic handwoven saree categories at Rangam Saradha Silks. Discover pure Kanchipuram silk sarees, Banarasi sarees, soft silk sarees, and traditional weaves.{% endblock %}
+{% block meta_keywords %}Saree Categories, Rangam Saradha Silks categories, pure silk saree collections, Kanchipuram silk sarees, Banarasi sarees{% endblock %}
+{% block canonical %}https://rangamsaradhasilks.com/shop/categories/{% endblock %}
+{% block og_url %}https://rangamsaradhasilks.com/shop/categories/{% endblock %}
+{% block og_title %}Saree Categories | Rangam Saradha Silks{% endblock %}
+{% block og_description %}Explore authentic handwoven saree categories at Rangam Saradha Silks. Discover pure Kanchipuram silk sarees, Banarasi sarees, soft silk sarees, and traditional weaves.{% endblock %}
+{% block twitter_title %}Saree Categories | Rangam Saradha Silks{% endblock %}
+{% block twitter_description %}Explore authentic handwoven saree categories at Rangam Saradha Silks. Discover pure Kanchipuram silk sarees, Banarasi sarees, soft silk sarees, and traditional weaves.{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Categories",
+      "item": "https://rangamsaradhasilks.com/shop/categories/"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header & Breadcrumb -->
+<section class="section-luxury bg-light py-4 border-bottom">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center mb-2">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Categories</li>
+            </ol>
+        </nav>
+        <h1 class="font-heading display-5 text-dark mb-2">Saree Categories</h1>
+        <p class="text-muted max-w-600 mx-auto mb-0">Browse our handwoven traditional saree collections curated by authentic master weavers.</p>
+    </div>
+</section>
+
+<!-- Categories Grid -->
+<section class="section-luxury py-5">
+    <div class="container">
+        <div class="row g-4">
+            {% for cat in categories %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden hover-lift transition-all">
+                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="text-decoration-none d-block position-relative">
+                        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+                            {% if cat.image %}
+                            <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection" class="img-fluid object-fit-cover w-100 h-100" loading="lazy">
+                            {% else %}
+                            <img src="{% static 'images/logo.jpg' %}" alt="Rangam Saradha Silks - {{ cat.name }}" class="img-fluid object-fit-cover w-100 h-100" loading="lazy">
+                            {% endif %}
+                        </div>
+                        <span class="position-absolute top-0 end-0 m-3 badge bg-dark bg-opacity-75 rounded-pill fs-7">
+                            {{ cat.product_count }} {{ cat.product_count|pluralize:"Saree,Sarees" }}
+                        </span>
+                    </a>
+                    <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+                        <div>
+                            <h3 class="h5 font-heading text-dark mb-2">
+                                <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="text-decoration-none text-dark hover-gold">
+                                    {{ cat.name }}
+                                </a>
+                            </h3>
+                            {% if cat.description %}
+                            <p class="text-muted fs-7 mb-3 text-truncate-2">{{ cat.description }}</p>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 mt-2">
+                            Explore {{ cat.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-5 mb-3">No saree categories found.</p>
+                <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill px-4">Shop All Sarees</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Internal Links Banner -->
+        <div class="mt-5 p-4 bg-light rounded-4 text-center border border-light">
+            <h4 class="font-heading mb-2">Explore More Sections</h4>
+            <p class="text-muted mb-3">Discover all our products, read about our brand heritage, or contact our boutique store team.</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <a href="{% url 'shop:categories' %}" class="btn btn-primary rounded-pill px-4">Categories</a>
+                <a href="{% url 'shop:catalog' %}" class="btn btn-outline-primary rounded-pill px-4">Shop All</a>
+                <a href="{% url 'home:cms_page' slug='about-us' %}" class="btn btn-outline-dark rounded-pill px-4">About Us</a>
+                <a href="{% url 'home:contact' %}" class="btn btn-outline-secondary rounded-pill px-4">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

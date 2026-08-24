@@ -1,16 +1,39 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}Silk Sarees & Traditional Saree Collections | Rangam Saradha Silks{% endblock %}
-{% block title %}Silk Sarees & Traditional Saree Collections | Rangam Saradha Silks{% endblock %}
-{% block meta_description %}Browse our exclusive collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
-{% block meta_keywords %}Rangam Saradha Silks Shop, pure silk sarees online, Kanchipuram silk sarees, traditional sarees buy online{% endblock %}
+{% block meta_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
+{% block title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
+{% block meta_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
+{% block meta_keywords %}Shop All Sarees, Rangam Saradha Silks shop, pure silk sarees online, Kanchipuram silk sarees, traditional sarees buy online{% endblock %}
 {% block canonical %}https://rangamsaradhasilks.com/shop/{% endblock %}
 {% block og_url %}https://rangamsaradhasilks.com/shop/{% endblock %}
-{% block og_title %}Silk Sarees & Traditional Saree Collections | Rangam Saradha Silks{% endblock %}
-{% block og_description %}Browse our exclusive collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
-{% block twitter_title %}Silk Sarees & Traditional Saree Collections | Rangam Saradha Silks{% endblock %}
-{% block twitter_description %}Browse our exclusive collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
+{% block og_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
+{% block og_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
+{% block twitter_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
+{% block twitter_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Shop All",
+      "item": "https://rangamsaradhasilks.com/shop/"
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 {% if not has_filters %}
