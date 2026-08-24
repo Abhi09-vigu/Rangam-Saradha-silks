@@ -63,6 +63,18 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- Internal Links Banner -->
+        <div class="mt-5 p-4 bg-light rounded-4 text-center border border-light">
+            <h4 class="font-heading mb-2">Explore Rangam Saradha Silks</h4>
+            <p class="text-muted mb-3">Browse our traditional silk sarees or get in touch with our team for customer support.</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <a href="{% url 'shop:catalog' %}" class="btn btn-outline-primary rounded-pill px-4">Categories</a>
+                <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill px-4">Shop All</a>
+                <a href="{% url 'home:cms_page' slug='about-us' %}" class="btn btn-outline-dark rounded-pill px-4">About Us</a>
+                <a href="{% url 'home:contact' %}" class="btn btn-outline-secondary rounded-pill px-4">Contact Us</a>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}

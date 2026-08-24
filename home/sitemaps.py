@@ -18,6 +18,15 @@ class CMSPageSitemap(Sitemap):
     changefreq = 'weekly'
 
     def items(self):
+        try:
+            from home.views import DEFAULT_CMS_PAGES
+            for slug, data in DEFAULT_CMS_PAGES.items():
+                CMSPage.objects.get_or_create(
+                    slug=slug,
+                    defaults={'title': data['title'], 'content': data['content']}
+                )
+        except Exception:
+            pass
         return CMSPage.objects.all().order_by('id')
 
     def location(self, item):
