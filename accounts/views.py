@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from .decorators import customer_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
+from django.db.models import Q
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 import random
@@ -449,14 +450,42 @@ def profile_view(request):
         form = UserProfileForm(instance=user)
 
     
-    # Lazy import of Order to avoid circular imports
-    from shop.models import Order
+    # Lazy import of Order and CallBooking to avoid circular imports
+    from shop.models import Order, CallBooking
     orders = Order.objects.filter(user=user).order_by('-created_at')
+    
+    # Retrieve all call bookings belonging to the currently logged-in user
+    call_bookings = CallBooking.objects.filter(
+        Q(user=user) | (Q(email__iexact=user.email) & Q(user__isnull=True))
+    ).select_related('product').prefetch_related('product__images').order_by('-created_at')
     
     return render(request, 'accounts/profile.html', {
         'form': form,
         'orders': orders,
+        'call_bookings': call_bookings,
         'addresses': user.addresses.all(),
+    })
+
+@customer_required
+def call_booking_detail(request, booking_ref):
+    """
+    View complete details of a specific call booking.
+    Enforces security: only the authenticated customer who owns the booking
+    (request.user or booking user matching request.user/verified email) can access it.
+    Returns 404 when the booking does not belong to the logged-in customer.
+    """
+    from shop.models import CallBooking
+    user = request.user
+    
+    booking = CallBooking.objects.select_related('product').prefetch_related('product__images').filter(
+        Q(booking_reference=booking_ref) & (Q(user=user) | (Q(email__iexact=user.email) & Q(user__isnull=True)))
+    ).first()
+    
+    if not booking:
+        raise Http404("Booking not found or access denied.")
+        
+    return render(request, 'accounts/call_booking_detail.html', {
+        'booking': booking,
     })
 
 @customer_required

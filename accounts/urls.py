@@ -11,6 +11,8 @@ urlpatterns = [
 
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('bookings/<str:booking_ref>/', views.call_booking_detail, name='booking_detail'),
+    path('call-bookings/<str:booking_ref>/', views.call_booking_detail, name='call_booking_detail'),
     path('address/add/', views.address_create, name='address_add'),
     path('address/edit/<int:pk>/', views.address_edit, name='address_edit'),
     path('address/delete/<int:pk>/', views.address_delete, name='address_delete'),

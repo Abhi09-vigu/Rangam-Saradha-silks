@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Call Booking #{{ booking.booking_reference }} - {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury">
+    <div class="container">
+        
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb fs-7">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}#call-bookings" class="text-decoration-none text-muted">My Profile</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">Booking #{{ booking.booking_reference }}</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <!-- Main Booking Card -->
+                <div class="card border border-light p-4 p-md-5 shadow-sm bg-white" style="border-radius: 20px;">
+                    
+                    <!-- Header -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-4 mb-4 border-bottom">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-7 fw-semibold mb-2">
+                                Booking Reference: #{{ booking.booking_reference }}
+                            </span>
+                            <h2 class="font-heading fs-4 text-dark mb-0">Call Appointment Details</h2>
+                            <p class="text-muted fs-8 mb-0 mt-1">Booked on {{ booking.created_at|date:"d M Y, h:i A" }}</p>
+                        </div>
+                        <div>
+                            {% if booking.status == 'CONFIRMED' %}
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-7 fw-semibold">
+                                    <i class="bi bi-check-circle me-1"></i>Confirmed
+                                </span>
+                            {% elif booking.status == 'COMPLETED' %}
+                                <span class="badge rounded-pill bg-primary text-white px-3 py-2 fs-7 fw-semibold">
+                                    <i class="bi bi-patch-check me-1"></i>Completed
+                                </span>
+                            {% elif booking.status == 'CANCELLED' %}
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fs-7 fw-semibold">
+                                    <i class="bi bi-x-circle me-1"></i>Cancelled
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 fs-7 fw-semibold">
+                                    <i class="bi bi-clock-history me-1"></i>Pending
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Product Summary Section -->
+                    <h5 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">Booked Product</h5>
+                    <div class="card border border-light p-3 bg-light rounded-4 mb-4 shadow-sm">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-auto">
+                                <a href="{{ booking.product.get_absolute_url }}" class="d-block overflow-hidden rounded-3 shadow-sm border border-light" style="width: 80px; height: 105px;">
+                                    {% if booking.product.images.exists %}
+                                    <img src="{{ booking.product.images.first.image.url }}" alt="{{ booking.product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                    <div class="w-100 h-100 bg-secondary-subtle d-flex align-items-center justify-content-center text-muted fs-8">No Image</div>
+                                    {% endif %}
+                                </a>
+                            </div>
+                            <div class="col">
+                                <h5 class="fw-bold text-dark fs-6 mb-1">
+                                    <a href="{{ booking.product.get_absolute_url }}" class="text-dark text-decoration-none hover-primary">
+                                        {{ booking.product.name }}
+                                    </a>
+                                </h5>
+                                <div class="d-flex flex-wrap gap-3 text-muted fs-7 mb-2">
+                                    <span>SKU: <strong class="text-dark">{{ booking.product.sku|default:"N/A" }}</strong></span>
+                                    {% if booking.product.fabric %}
+                                    <span>Fabric: <strong class="text-dark">{{ booking.product.fabric }}</strong></span>
+                                    {% endif %}
+                                    <span>Price: <strong class="text-primary">{{ site_settings.currency|default:"₹" }}{{ booking.product.offer_price|floatformat:2 }}</strong></span>
+                                </div>
+                                <a href="{{ booking.product.get_absolute_url }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fs-8 fw-semibold">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>View Product Page
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appointment & Customer Details Grid -->
+                    <div class="row g-4 mb-4">
+                        <!-- Appointment Schedule -->
+                        <div class="col-md-6">
+                            <div class="p-3 border border-light rounded-4 h-100 bg-white shadow-xs">
+                                <h6 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">
+                                    <i class="bi bi-calendar-event me-1 text-primary"></i>Appointment Schedule
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="text-muted fs-7 d-block">Booking Date:</span>
+                                    <span class="fw-bold text-dark fs-6">{{ booking.booking_date|date:"d M Y (l)" }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="text-muted fs-7 d-block">Time Slot:</span>
+                                    <span class="fw-bold text-dark fs-6">{{ booking.time_slot }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted fs-7 d-block">Status:</span>
+                                    <span class="fw-semibold text-dark fs-7">{{ booking.get_status_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Details -->
+                        <div class="col-md-6">
+                            <div class="p-3 border border-light rounded-4 h-100 bg-white shadow-xs">
+                                <h6 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">
+                                    <i class="bi bi-person me-1 text-primary"></i>Customer Information
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="text-muted fs-7 d-block">Full Name:</span>
+                                    <span class="fw-bold text-dark fs-7">{{ booking.full_name }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="text-muted fs-7 d-block">Phone Number:</span>
+                                    <span class="fw-bold text-dark fs-7">{{ booking.phone_number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted fs-7 d-block">Email:</span>
+                                    <span class="fw-bold text-dark fs-7">{{ booking.email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Notes / Message -->
+                    {% if booking.notes %}
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-muted fs-7 text-uppercase mb-2" style="letter-spacing: 0.05em;">
+                            <i class="bi bi-chat-left-text me-1 text-primary"></i>Customer Notes / Message
+                        </h6>
+                        <div class="p-3 bg-light rounded-4 border border-light text-dark fs-7">
+                            {{ booking.notes }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Footer Actions -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-4 border-top">
+                        <a href="{% url 'accounts:profile' %}#call-bookings" class="btn btn-outline-secondary rounded-pill px-4 py-2 fs-7 fw-semibold">
+                            <i class="bi bi-arrow-left me-1"></i>Back to My Account
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ booking.product.get_absolute_url }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fs-7 fw-semibold">
+                                View Product
+                            </a>
+                            <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill px-4 py-2 fs-7 fw-semibold">
+                                Browse Catalog
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+

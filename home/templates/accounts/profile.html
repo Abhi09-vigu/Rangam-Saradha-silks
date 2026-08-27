@@ -18,6 +18,9 @@
                     <button class="list-group-item list-group-item-action py-3 px-4 border-0" id="order-history-tab" data-bs-toggle="pill" data-bs-target="#order-history" type="button" role="tab">
                         <i class="bi bi-receipt me-2"></i>My Orders
                     </button>
+                    <button class="list-group-item list-group-item-action py-3 px-4 border-0" id="call-bookings-tab" data-bs-toggle="pill" data-bs-target="#call-bookings" type="button" role="tab">
+                        <i class="bi bi-calendar-event me-2"></i>My Call Bookings
+                    </button>
                     <button class="list-group-item list-group-item-action py-3 px-4 border-0" id="saved-addresses-tab" data-bs-toggle="pill" data-bs-target="#saved-addresses" type="button" role="tab">
                         <i class="bi bi-geo-alt me-2"></i>Address Book
                     </button>
@@ -140,6 +143,112 @@
                         </div>
                     </div>
                     
+                    <!-- My Call Bookings -->
+                    <div class="tab-pane fade" id="call-bookings" role="tabpanel">
+                        <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
+                            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                                <h4 class="font-heading fs-5 mb-0">My Call Bookings</h4>
+                                <a href="{% url 'shop:catalog' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bi bi-telephone-plus me-1"></i>Book a Call
+                                </a>
+                            </div>
+                            
+                            {% if call_bookings %}
+                            <div class="d-flex flex-column gap-3">
+                                {% for booking in call_bookings %}
+                                <div class="card border border-light p-3 p-md-4 shadow-xs" style="border-radius: 14px; background-color: var(--bs-card-bg, #fff);">
+                                    <div class="row g-3 align-items-center">
+                                        <!-- Product Image -->
+                                        <div class="col-auto">
+                                            <a href="{{ booking.product.get_absolute_url }}" class="d-block overflow-hidden rounded-3 border border-light shadow-sm" style="width: 80px; height: 100px;">
+                                                {% if booking.product.images.exists %}
+                                                <img src="{{ booking.product.images.first.image.url }}" alt="{{ booking.product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                                {% else %}
+                                                <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted fs-8">No Image</div>
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                        
+                                        <!-- Booking & Product Info -->
+                                        <div class="col">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                                <div>
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8 fw-semibold mb-1">
+                                                        Booking ID: #{{ booking.booking_reference }}
+                                                    </span>
+                                                    <h5 class="fw-bold fs-6 mb-1">
+                                                        <a href="{{ booking.product.get_absolute_url }}" class="text-dark text-decoration-none hover-primary">
+                                                            {{ booking.product.name }}
+                                                        </a>
+                                                    </h5>
+                                                    {% if booking.product.sku %}
+                                                    <p class="text-muted fs-8 mb-0">SKU: <span class="fw-medium text-secondary">{{ booking.product.sku }}</span></p>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    {% if booking.status == 'CONFIRMED' %}
+                                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1.5 fs-8 fw-semibold">
+                                                            <i class="bi bi-check-circle me-1"></i>Confirmed
+                                                        </span>
+                                                    {% elif booking.status == 'COMPLETED' %}
+                                                        <span class="badge rounded-pill bg-primary text-white px-3 py-1.5 fs-8 fw-semibold">
+                                                            <i class="bi bi-patch-check me-1"></i>Completed
+                                                        </span>
+                                                    {% elif booking.status == 'CANCELLED' %}
+                                                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 fs-8 fw-semibold">
+                                                            <i class="bi bi-x-circle me-1"></i>Cancelled
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1.5 fs-8 fw-semibold">
+                                                            <i class="bi bi-clock-history me-1"></i>Pending
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row g-2 pt-2 border-top border-light fs-7 text-muted">
+                                                <div class="col-sm-6 col-md-3">
+                                                    <i class="bi bi-calendar3 me-1 text-primary"></i>
+                                                    <strong class="text-dark">Date:</strong> {{ booking.booking_date|date:"d M Y" }}
+                                                </div>
+                                                <div class="col-sm-6 col-md-4">
+                                                    <i class="bi bi-clock me-1 text-primary"></i>
+                                                    <strong class="text-dark">Time:</strong> {{ booking.time_slot }}
+                                                </div>
+                                                <div class="col-sm-12 col-md-5 text-md-end">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <span>Booked on: {{ booking.created_at|date:"d M Y, h:i A" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Actions -->
+                                        <div class="col-12 col-lg-auto text-lg-end mt-2 mt-lg-0 pt-2 pt-lg-0 border-top border-lg-0 border-light d-flex flex-row flex-lg-column gap-2 justify-content-end">
+                                            <a href="{% url 'accounts:booking_detail' booking.booking_reference %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fs-8 fw-semibold text-nowrap">
+                                                <i class="bi bi-eye me-1"></i>View Details
+                                            </a>
+                                            <a href="{{ booking.product.get_absolute_url }}" class="btn btn-sm btn-light rounded-pill px-3 py-1.5 fs-8 fw-semibold text-nowrap">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>Product Page
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-light text-primary rounded-circle mb-3 shadow-sm" style="width: 70px; height: 70px;">
+                                    <i class="bi bi-calendar-x fs-2"></i>
+                                </div>
+                                <p class="text-muted fs-6 mb-3">You haven't booked any calls yet.</p>
+                                <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill px-4 py-2 fs-7 fw-semibold">
+                                    <i class="bi bi-telephone-plus me-1"></i>Book a Call
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
                     <!-- Saved Addresses -->
                     <div class="tab-pane fade" id="saved-addresses" role="tabpanel">
                         <div class="card border border-light p-4 shadow-sm" style="border-radius: 16px;">
@@ -184,4 +293,31 @@
         
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle tab switching via URL hash (e.g. #orders, #call-bookings, #bookings, #saved-addresses)
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash) {
+            let targetTab = null;
+            if (hash === '#bookings' || hash === '#call-bookings') {
+                targetTab = document.querySelector('#call-bookings-tab');
+            } else if (hash === '#orders' || hash === '#order-history') {
+                targetTab = document.querySelector('#order-history-tab');
+            } else if (hash === '#addresses' || hash === '#saved-addresses') {
+                targetTab = document.querySelector('#saved-addresses-tab');
+            } else if (hash === '#profile' || hash === '#profile-details') {
+                targetTab = document.querySelector('#profile-details-tab');
+            } else {
+                targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
+            }
+            if (targetTab) {
+                const tabTrigger = new bootstrap.Tab(targetTab);
+                tabTrigger.show();
+            }
+        }
+    });
+</script>
 {% endblock %}
