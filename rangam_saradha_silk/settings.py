@@ -38,7 +38,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         "ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
+        "127.0.0.1,localhost,testserver,rangamsaradhasilks.com,www.rangamsaradhasilks.com,.rangamsaradhasilks.com,rangam-saradha-silks.onrender.com"
     ).split(",")
     if host.strip()
 ]
@@ -150,6 +150,13 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+
+import sys
+if "test" in sys.argv:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "test_db.sqlite3",
+    }
 
 
 # ============================================================
@@ -374,6 +381,8 @@ FIREBASE_CONFIG = {
 if not DEBUG:
 
     # HTTPS behind Nginx / reverse proxy
+    USE_X_FORWARDED_HOST = True
+
     SECURE_PROXY_SSL_HEADER = (
         "HTTP_X_FORWARDED_PROTO",
         "https",

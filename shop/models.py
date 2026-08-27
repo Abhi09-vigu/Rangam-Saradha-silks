@@ -29,7 +29,7 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return f"{reverse('shop:catalog')}?category={self.slug}"
+        return reverse('shop:category_detail', kwargs={'category_slug': self.slug})
 
     def __str__(self):
         return self.name
@@ -301,3 +301,96 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name if self.product else 'Deleted Product'} ({self.quantity})"
+
+class CallBooking(models.Model):
+    TIME_SLOT_CHOICES = (
+        ('10:00 AM - 11:00 AM', '10:00 AM - 11:00 AM'),
+        ('11:00 AM - 12:00 PM', '11:00 AM - 12:00 PM'),
+        ('02:00 PM - 03:00 PM', '02:00 PM - 03:00 PM'),
+        ('04:00 PM - 05:00 PM', '04:00 PM - 05:00 PM'),
+        ('06:00 PM - 07:00 PM', '06:00 PM - 07:00 PM'),
+    )
+
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('CONFIRMED', 'Confirmed'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    )
+
+    booking_reference = models.CharField(max_length=20, unique=True, editable=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='call_bookings')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='call_bookings')
+    
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20)
+    booking_date = models.DateField()
+    time_slot = models.CharField(max_length=50, choices=TIME_SLOT_CHOICES)
+    notes = models.TextField(blank=True, null=True, help_text="Specific requirements or questions for the call")
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Call Booking"
+        verbose_name_plural = "Call Bookings"
+
+    def save(self, *args, **kwargs):
+        if not self.booking_reference:
+            import uuid
+            self.booking_reference = f"BK-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Book a Call #{self.booking_reference} - {self.full_name} ({self.product.name})"
+
+
+class CallSlot(models.Model):
+    SLOT_STATUS_CHOICES = (
+        ('AVAILABLE', 'Available'),
+        ('BOOKED', 'Booked'),
+        ('BLOCKED', 'Blocked'),
+    )
+
+    date = models.DateField()
+    time_slot = models.CharField(max_length=50, choices=CallBooking.TIME_SLOT_CHOICES)
+    status = models.CharField(max_length=20, choices=SLOT_STATUS_CHOICES, default='AVAILABLE')
+    blocked_by_owner = models.BooleanField(default=False, help_text="Mark True to block this slot (owner unavailable/busy)")
+    notes = models.CharField(max_length=255, blank=True, null=True, help_text="Optional note / reason for blocking")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['date', 'time_slot']
+        unique_together = ['date', 'time_slot']
+        verbose_name = "Call Slot"
+        verbose_name_plural = "Call Slots"
+
+    def get_effective_status(self):
+        """
+        Computes effective slot status:
+        - If blocked_by_owner or status == 'BLOCKED' -> BLOCKED
+        - Else if active booking exists (PENDING, CONFIRMED, COMPLETED) -> BOOKED
+        - Else -> AVAILABLE
+        """
+        if self.blocked_by_owner or self.status == 'BLOCKED':
+            return 'BLOCKED'
+        
+        active_booking = CallBooking.objects.filter(
+            booking_date=self.date,
+            time_slot=self.time_slot,
+            status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+        ).first()
+        
+        if active_booking:
+            return 'BOOKED'
+            
+        return 'AVAILABLE'
+
+    def __str__(self):
+        return f"{self.date} ({self.time_slot}) - {self.get_status_display()}"
+
+

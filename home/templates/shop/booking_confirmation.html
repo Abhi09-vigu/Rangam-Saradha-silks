@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Booking Confirmation - Book a Call | {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-lg p-4 p-md-5 text-center" style="border-radius: 24px;">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check-lg display-4"></i>
+                        </div>
+                    </div>
+
+                    <h2 class="font-heading display-6 text-dark mb-2">Booking Confirmed!</h2>
+                    <p class="text-muted fs-7 mb-4">Your "Book a Call" request has been received. Our team will contact you at your requested time slot.</p>
+
+                    <!-- Booking Reference Badge -->
+                    <div class="mb-4">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-7 fw-semibold">
+                            Booking Reference: #{{ booking.booking_reference }}
+                        </span>
+                    </div>
+
+                    <!-- Booking Summary Card -->
+                    <div class="card border border-light p-4 bg-light rounded-4 text-start mb-4 shadow-sm">
+                        <h5 class="fw-bold text-dark fs-6 mb-3 border-bottom pb-2">Booking Summary</h5>
+                        
+                        <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
+                            <div class="overflow-hidden shadow-sm flex-shrink-0" style="width: 60px; height: 75px; border-radius: 10px;">
+                                {% if booking.product.images.exists %}
+                                <img src="{{ booking.product.images.first.image.url }}" alt="{{ booking.product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% else %}
+                                <div class="w-100 h-100 bg-secondary-subtle d-flex align-items-center justify-content-center text-muted fs-8">No Image</div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1 fs-7">{{ booking.product.name }}</h6>
+                                <span class="fw-bold text-primary fs-7">{{ site_settings.currency|default:"₹" }}{{ booking.product.offer_price|floatformat:2 }}</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 fs-7">
+                            <div class="col-sm-6">
+                                <span class="text-muted">Date:</span>
+                                <div class="fw-bold text-dark">{{ booking.booking_date|date:"d M Y (D)" }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted">Time Slot:</span>
+                                <div class="fw-bold text-dark">{{ booking.time_slot }}</div>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <span class="text-muted">Customer Name:</span>
+                                <div class="fw-semibold text-dark">{{ booking.full_name }}</div>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <span class="text-muted">Phone Number:</span>
+                                <div class="fw-semibold text-dark">{{ booking.phone_number }}</div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <span class="text-muted">Email:</span>
+                                <div class="fw-semibold text-dark">{{ booking.email }}</div>
+                            </div>
+                            {% if booking.notes %}
+                            <div class="col-12 mt-2">
+                                <span class="text-muted">Notes:</span>
+                                <div class="text-dark bg-white p-2 rounded border border-light mt-1 fs-8">{{ booking.notes }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        <a href="{{ booking.product.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill py-2.5 px-4 fs-7 fw-semibold">Back to Product</a>
+                        <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill py-2.5 px-4 fs-7 fw-semibold">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -78,8 +78,13 @@ class CustomMiddleware:
                 return redirect('accounts:login')
             return self.get_response(request)
             
-        # Bypass maintenance check for static and media files
-        if request.path.startswith('/static/') or request.path.startswith('/media/'):
+        # Bypass maintenance check for static and media files, as well as robots.txt and sitemap XML
+        if (
+            request.path.startswith('/static/')
+            or request.path.startswith('/media/')
+            or request.path in ['/robots.txt', '/sitemap.xml']
+            or request.path.startswith('/sitemap')
+        ):
             return self.get_response(request)
 
         # Bypass maintenance check for logged-in staff users (inspecting admin session cookie)

@@ -6,6 +6,7 @@ app_name = 'shop'
 urlpatterns = [
     path('', views.catalog, name='catalog'),
     path('categories/', views.categories_list, name='categories'),
+    path('category/<slug:category_slug>/', views.catalog, name='category_detail'),
     path('product/<slug:slug>/', views.product_detail, name='product_detail'),
     path('cart/', views.cart_detail, name='cart_detail'),
     path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),
@@ -23,4 +24,9 @@ urlpatterns = [
     path('compare/add/<int:product_id>/', views.compare_add, name='compare_add'),
     path('compare/remove/<int:product_id>/', views.compare_remove, name='compare_remove'),
     path('product/<int:product_id>/quick-view/', views.product_quick_view, name='product_quick_view'),
+    
+    # Book a Call URLs
+    path('product/<slug:slug>/book-call/', views.book_call, name='book_call'),
+    path('booking/confirmation/<str:booking_ref>/', views.booking_confirmation, name='booking_confirmation'),
+    path('api/slot-availability/', views.slot_availability_api, name='slot_availability_api'),
 ]

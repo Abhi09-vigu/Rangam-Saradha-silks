@@ -254,9 +254,10 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-auto d-flex gap-2">
+                        <div class="col-auto d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary" {% if product.stock == 0 %}disabled{% endif %}>Add to Bag</button>
                             <button type="submit" name="buy_now" value="true" class="btn btn-outline-primary" {% if product.stock == 0 %}disabled{% endif %}>Buy Now</button>
+                            <a href="{% url 'shop:book_call' product.slug %}" class="btn btn-book-call d-inline-flex align-items-center px-3" style="border: 1.5px solid var(--secondary-gold, #AE6F21); color: var(--secondary-gold, #856404); background-color: rgba(174, 111, 33, 0.08); font-weight: 600;"><i class="bi bi-camera-video-fill me-1.5" style="color: var(--secondary-gold, #AE6F21);"></i>Book a Call</a>
                         </div>
                     </div>
                 </form>

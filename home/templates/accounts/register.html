@@ -121,7 +121,7 @@
         }
 
         document.querySelectorAll('form input').forEach(input => {
-            if (input.type !== 'checkbox' && input.type !== 'submit') {
+            if (input.type !== 'checkbox' && input.type !== 'submit' && input.type !== 'hidden' && !input.closest('.phone-input-group')) {
                 input.classList.add('form-control');
                 input.classList.add('px-3');
                 input.classList.add('py-2');

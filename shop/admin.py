@@ -361,6 +361,71 @@ class OrderAdmin(admin.ModelAdmin):
     payment_status_badge.short_description = "Payment Status"
     payment_status_badge.admin_order_field = 'payment_status'
 
+from django.utils.html import format_html
+from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
+
+
+class CallSlotAdmin(admin.ModelAdmin):
+    list_display = ['date', 'time_slot', 'effective_status_badge', 'blocked_by_owner', 'booked_customer', 'related_product', 'notes', 'updated_at']
+    list_filter = ['blocked_by_owner', 'status', 'date', 'time_slot']
+    search_fields = ['notes', 'date']
+    list_editable = ['blocked_by_owner']
+    ordering = ['date', 'time_slot']
+    actions = ['mark_as_blocked', 'mark_as_unblocked']
+
+    def effective_status_badge(self, obj):
+        st = obj.get_effective_status()
+        if st == 'BLOCKED':
+            return format_html('<span style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🔴 BLOCKED</span>')
+        elif st == 'BOOKED':
+            return format_html('<span style="background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">⚫ BOOKED</span>')
+        return format_html('<span style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🟢 AVAILABLE</span>')
+
+    effective_status_badge.short_description = "Status"
+
+    def booked_customer(self, obj):
+        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['PENDING', 'CONFIRMED', 'COMPLETED']).first()
+        if booking:
+            return f"{booking.full_name} ({booking.phone_number})"
+        return "-"
+
+    booked_customer.short_description = "Customer"
+
+    def related_product(self, obj):
+        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['PENDING', 'CONFIRMED', 'COMPLETED']).first()
+        if booking and booking.product:
+            return booking.product.name
+        return "-"
+
+    related_product.short_description = "Product"
+
+    def mark_as_blocked(self, request, queryset):
+        rows = queryset.update(blocked_by_owner=True, status='BLOCKED')
+        self.message_user(request, f"{rows} time slot(s) successfully marked as BLOCKED.")
+
+    mark_as_blocked.short_description = "Block selected slots (Owner Unavailable)"
+
+    def mark_as_unblocked(self, request, queryset):
+        rows = queryset.update(blocked_by_owner=False, status='AVAILABLE')
+        self.message_user(request, f"{rows} time slot(s) successfully unblocked.")
+
+    mark_as_unblocked.short_description = "Unblock selected slots (Make Available)"
+
+
+class CallBookingAdmin(admin.ModelAdmin):
+    list_display = ['booking_reference', 'full_name', 'phone_number', 'email', 'product', 'product_sku', 'booking_date', 'time_slot', 'status', 'created_at']
+    list_filter = ['status', 'booking_date', 'time_slot', 'product']
+    search_fields = ['booking_reference', 'full_name', 'email', 'phone_number', 'product__name', 'product__sku']
+    readonly_fields = ['booking_reference', 'created_at', 'updated_at']
+    list_editable = ['status']
+    ordering = ['-created_at']
+
+    def product_sku(self, obj):
+        return obj.product.sku if obj.product and obj.product.sku else "-"
+
+    product_sku.short_description = "SKU"
+
+
 from rangam_saradha_silk.admin import custom_admin_site
 
 custom_admin_site.register(Category, CategoryAdmin)
@@ -369,5 +434,8 @@ custom_admin_site.register(Product, ProductAdmin)
 custom_admin_site.register(Review, ReviewAdmin)
 custom_admin_site.register(Coupon, CouponAdmin)
 custom_admin_site.register(Order, OrderAdmin)
+custom_admin_site.register(CallBooking, CallBookingAdmin)
+custom_admin_site.register(CallSlot, CallSlotAdmin)
 custom_admin_site.register(Cart)
 custom_admin_site.register(CartItem)
+

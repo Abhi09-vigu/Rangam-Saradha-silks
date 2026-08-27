@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Call Booking - Rangam Saradha Silks</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .header { background-color: #2D3748; padding: 25px 20px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .content { padding: 30px 25px; }
+        .title { font-size: 16px; color: #1A202C; margin-bottom: 20px; font-weight: bold; }
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .info-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #EDF2F7; }
+        .info-table td.label { font-weight: bold; color: #4A5568; width: 35%; background-color: #F7FAFC; }
+        .footer { background-color: #EDF2F7; padding: 15px; text-align: center; font-size: 12px; color: #718096; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Call Booking - Rangam Saradha Silks</h1>
+        </div>
+        <div class="content">
+            <div class="title">New Call Booking Received</div>
+            
+            <table class="info-table">
+                <tr><td class="label">Booking ID</td><td>{{ booking.booking_reference }}</td></tr>
+                <tr><td class="label">Customer Name</td><td>{{ booking.full_name }}</td></tr>
+                <tr><td class="label">Phone</td><td>{{ booking.phone_number }}</td></tr>
+                <tr><td class="label">Email</td><td>{{ booking.email|default:"Not Provided" }}</td></tr>
+                <tr><td class="label">Product</td><td>{{ booking.product.name }}</td></tr>
+                <tr><td class="label">Product ID/SKU</td><td>{{ booking.product.sku|default:booking.product.id }}</td></tr>
+                <tr><td class="label">Date</td><td>{{ booking.booking_date|date:"Y-m-d" }}</td></tr>
+                <tr><td class="label">Time Slot</td><td>{{ booking.time_slot }}</td></tr>
+                <tr><td class="label">Message</td><td>{{ booking.notes|default:"" }}</td></tr>
+                <tr><td class="label">Status</td><td>Pending</td></tr>
+                <tr><td class="label">Created At</td><td>{{ booking.created_at|date:"Y-m-d H:i:s" }}</td></tr>
+            </table>
+        </div>
+        <div class="footer">
+            Rangam Saradha Silks Administrative System
+        </div>
+    </div>
+</body>
+</html>

@@ -5,13 +5,20 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.utils import timezone
+from django.conf import settings
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template.loader import render_to_string
 import datetime
 import uuid
+import logging
 from decimal import Decimal
 
-from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem
+from django.db import transaction
+from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
 from accounts.models import Address
 from home.models import WebsiteSetting
+
+logger = logging.getLogger(__name__)
 
 # Cart Helper
 def _get_or_create_cart(request):
@@ -39,7 +46,7 @@ def categories_list(request):
     }
     return render(request, 'shop/categories.html', context)
 
-def catalog(request):
+def catalog(request, category_slug=None):
     products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')
     
     # Query / Search
@@ -52,9 +59,9 @@ def catalog(request):
         )
         
     # Filters
-    category_param = request.GET.get('category')
+    category_param = request.GET.get('category') or category_slug
     if category_param:
-        if category_param.isdigit():
+        if isinstance(category_param, str) and category_param.isdigit():
             products = products.filter(categories__id=category_param)
         else:
             products = products.filter(categories__slug=category_param)
@@ -603,3 +610,307 @@ def compare_page(request):
         'products': ordered_products,
     }
     return render(request, 'shop/compare.html', context)
+
+
+def get_slots_status_for_date(target_date):
+    """
+    Returns list of dicts for each standard time slot for target_date:
+    [
+        {
+            'time_slot': '10:00 AM - 11:00 AM',
+            'status': 'AVAILABLE' | 'BOOKED' | 'BLOCKED',
+            'is_selectable': True | False,
+            'label': 'Available' | 'Already booked' | 'Owner unavailable',
+        }, ...
+    ]
+    """
+    today = timezone.now().date()
+    is_past = target_date < today
+
+    blocked_slots = set(
+        CallSlot.objects.filter(date=target_date).filter(
+            Q(blocked_by_owner=True) | Q(status='BLOCKED')
+        ).values_list('time_slot', flat=True)
+    )
+
+    booked_slots = set(
+        CallBooking.objects.filter(
+            booking_date=target_date,
+            status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+        ).values_list('time_slot', flat=True)
+    )
+
+    result = []
+    valid_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
+    for slot_str in valid_slots:
+        if is_past:
+            status = 'BLOCKED'
+            is_selectable = False
+            label = 'Past date unavailable'
+        elif slot_str in blocked_slots:
+            status = 'BLOCKED'
+            is_selectable = False
+            label = 'Owner unavailable'
+        elif slot_str in booked_slots:
+            status = 'BOOKED'
+            is_selectable = False
+            label = 'Already booked'
+        else:
+            status = 'AVAILABLE'
+            is_selectable = True
+            label = 'Available'
+
+        result.append({
+            'time_slot': slot_str,
+            'status': status,
+            'is_selectable': is_selectable,
+            'label': label,
+        })
+    return result
+
+
+def slot_availability_api(request):
+    """
+    API endpoint returning time slot status for a given date ?date=YYYY-MM-DD
+    """
+    date_str = request.GET.get('date')
+    if not date_str:
+        return JsonResponse({'error': 'Missing date parameter'}, status=400)
+
+    try:
+        target_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+
+    slots_data = get_slots_status_for_date(target_date)
+    return JsonResponse({
+        'date': date_str,
+        'slots': slots_data,
+    })
+
+
+def send_booking_notification_email(booking):
+    """
+    Sends email confirmation to customer and notification to store admin.
+    Fails silently without interrupting booking process if SMTP error occurs.
+    """
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
+
+    # 1. CUSTOMER CONFIRMATION EMAIL
+    if booking.email and str(booking.email).strip():
+        try:
+            customer_subject = "Call Booking Confirmed - Rangam Saradha Silks"
+            customer_text = (
+                f"Dear {booking.full_name},\n\n"
+                f"Thank you for booking a call with Rangam Saradha Silks.\n\n"
+                f"Your call booking has been successfully received.\n\n"
+                f"Booking Details:\n\n"
+                f"Booking ID: {booking.booking_reference}\n"
+                f"Product: {booking.product.name}\n"
+                f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"
+                f"Time Slot: {booking.time_slot}\n"
+                f"Phone: {booking.phone_number}\n"
+                f"Email: {booking.email}\n\n"
+                f"Our team will reach out to you during your selected time slot.\n\n"
+                f"Thank you for choosing Rangam Saradha Silks.\n\n"
+                f"Regards,\n"
+                f"Rangam Saradha Silks\n"
+                f"https://rangamsaradhasilks.com/"
+            )
+            
+            customer_html = render_to_string('shop/emails/customer_call_booking_confirmation.html', {'booking': booking})
+            
+            msg_customer = EmailMultiAlternatives(
+                subject=customer_subject,
+                body=customer_text,
+                from_email=from_email,
+                to=[str(booking.email).strip()]
+            )
+            msg_customer.attach_alternative(customer_html, "text/html")
+            msg_customer.send(fail_silently=True)
+        except Exception as e:
+            logger.error(f"Failed to send customer call booking confirmation email: {str(e)}", exc_info=True)
+
+    # 2. ADMIN / OWNER NOTIFICATION EMAIL
+    try:
+        owner_subject = f"New Call Booking - {booking.product.name}"
+        created_str = booking.created_at.strftime('%Y-%m-%d %H:%M:%S') if booking.created_at else datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sku_str = booking.product.sku if booking.product.sku else str(booking.product.id)
+        notes_str = booking.notes if booking.notes else "None"
+        price_val = booking.product.offer_price if booking.product.offer_price else booking.product.price
+        price_str = f"Rs. {price_val:.2f}"
+
+        owner_text = (
+            f"New customer call booking received.\n\n"
+            f"Booking ID: {booking.booking_reference}\n\n"
+            f"Customer Name: {booking.full_name}\n"
+            f"Phone: {booking.phone_number}\n"
+            f"Email: {booking.email or 'N/A'}\n\n"
+            f"Product: {booking.product.name}\n"
+            f"Product ID: {booking.product.id}\n"
+            f"SKU: {sku_str}\n"
+            f"Price: {price_str}\n\n"
+            f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"
+            f"Time Slot: {booking.time_slot}\n\n"
+            f"Message:\n"
+            f"{notes_str}\n\n"
+            f"Status: {booking.get_status_display()}\n"
+            f"Created At: {created_str}\n\n"
+            f"Note: Customer has registered for a call regarding this particular saree."
+        )
+
+        owner_html = render_to_string('shop/emails/admin_call_booking_notification.html', {'booking': booking})
+
+        msg_owner = EmailMultiAlternatives(
+            subject=owner_subject,
+            body=owner_text,
+            from_email=from_email,
+            to=["rangamsaradhasilks@gmail.com"]
+        )
+        msg_owner.attach_alternative(owner_html, "text/html")
+        msg_owner.send(fail_silently=True)
+    except Exception as e:
+        logger.error(f"Failed to send owner call booking notification email: {str(e)}", exc_info=True)
+
+
+def book_call(request, slug):
+    product = get_object_or_404(Product, slug=slug, is_active=True)
+    
+    today = timezone.now().date()
+    available_dates = [today + datetime.timedelta(days=i) for i in range(1, 8)]
+    valid_time_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
+
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        booking_date_str = request.POST.get('booking_date', '').strip()
+        time_slot = request.POST.get('time_slot', '').strip()
+        notes = request.POST.get('notes', '').strip()
+
+        errors = []
+        if not full_name:
+            errors.append("Full Name is required.")
+        if not phone_number:
+            errors.append("Phone Number is required.")
+        if not booking_date_str:
+            errors.append("Please select a booking date.")
+        if not time_slot or time_slot not in valid_time_slots:
+            errors.append("Please select a valid time slot.")
+
+        booking_date = None
+        if booking_date_str:
+            try:
+                booking_date = datetime.datetime.strptime(booking_date_str, '%Y-%m-%d').date()
+                if booking_date < today:
+                    errors.append("Booking date cannot be in the past.")
+            except ValueError:
+                errors.append("Invalid date format.")
+
+        # Backend Verification for Blocked/Booked slots with Transaction locking
+        if booking_date and time_slot and time_slot in valid_time_slots and not errors:
+            with transaction.atomic():
+                # 1. Check if owner blocked slot
+                is_blocked = CallSlot.objects.filter(date=booking_date, time_slot=time_slot).filter(
+                    Q(blocked_by_owner=True) | Q(status='BLOCKED')
+                ).exists()
+                if is_blocked:
+                    errors.append("This time slot is blocked by the owner. Please select another slot.")
+
+                # 2. Check if already booked
+                is_booked = CallBooking.objects.filter(
+                    booking_date=booking_date,
+                    time_slot=time_slot,
+                    status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+                ).select_for_update().exists()
+                if is_booked:
+                    errors.append("This time slot has already been booked. Please select another time slot.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            selected_date = booking_date if booking_date else (available_dates[0] if available_dates else today)
+            slots_data = get_slots_status_for_date(selected_date)
+            return render(request, 'shop/book_call.html', {
+                'product': product,
+                'available_dates': available_dates,
+                'selected_date': selected_date.strftime('%Y-%m-%d'),
+                'slots_data': slots_data,
+                'form_data': request.POST,
+            })
+
+        # Duplicate protection check (same product, phone, date, slot in last 5 mins)
+        recent_cutoff = timezone.now() - datetime.timedelta(minutes=5)
+        existing_booking = CallBooking.objects.filter(
+            product=product,
+            phone_number=phone_number,
+            booking_date=booking_date,
+            time_slot=time_slot,
+            created_at__gte=recent_cutoff
+        ).first()
+
+        if existing_booking:
+            return redirect('shop:booking_confirmation', booking_ref=existing_booking.booking_reference)
+
+        with transaction.atomic():
+            booking = CallBooking.objects.create(
+                product=product,
+                user=request.user if request.user.is_authenticated else None,
+                full_name=full_name,
+                email=email,
+                phone_number=phone_number,
+                booking_date=booking_date,
+                time_slot=time_slot,
+                notes=notes,
+            )
+
+            # Sync/Update CallSlot status
+            CallSlot.objects.update_or_create(
+                date=booking_date,
+                time_slot=time_slot,
+                defaults={'status': 'BOOKED'}
+            )
+
+        try:
+            send_booking_notification_email(booking)
+        except Exception as e:
+            logger.error(f"Error in send_booking_notification_email: {str(e)}", exc_info=True)
+
+        return redirect('shop:booking_confirmation', booking_ref=booking.booking_reference)
+
+    selected_date_str = request.GET.get('booking_date')
+    selected_date = available_dates[0] if available_dates else today
+    if selected_date_str:
+        try:
+            selected_date = datetime.datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    slots_data = get_slots_status_for_date(selected_date)
+
+    form_data = {}
+    if request.user.is_authenticated:
+        phone_val = ''
+        if hasattr(request.user, 'phone_number') and request.user.phone_number:
+            phone_val = str(request.user.phone_number)
+        form_data = {
+            'full_name': request.user.get_full_name() or request.user.username,
+            'email': request.user.email,
+            'phone_number': phone_val,
+        }
+
+    return render(request, 'shop/book_call.html', {
+        'product': product,
+        'available_dates': available_dates,
+        'selected_date': selected_date.strftime('%Y-%m-%d'),
+        'slots_data': slots_data,
+        'form_data': form_data,
+    })
+
+
+def booking_confirmation(request, booking_ref):
+    booking = get_object_or_404(CallBooking, booking_reference=booking_ref)
+    return render(request, 'shop/booking_confirmation.html', {
+        'booking': booking,
+    })
+

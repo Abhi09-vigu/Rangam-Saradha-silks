@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta_title %}Book a Call - {{ product.name }} | {{ site_settings.website_name }}{% endblock %}
+
+{% block content %}
+<section class="section-luxury bg-light py-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 fs-8">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-muted">{{ product.name }}</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Book a Call</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<section class="section-luxury py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fs-8 fw-semibold mb-2">
+                            <i class="bi bi-camera-video-fill me-1"></i> Personal Shopping Assistance
+                        </span>
+                        <h2 class="font-heading display-6 text-dark mb-2">Book a Call</h2>
+                        <p class="text-muted fs-7">Schedule a call with our silk experts to view {{ product.name }} live and get personalized assistance.</p>
+                    </div>
+
+                    <!-- Selected Product Card Summary -->
+                    <div class="card border border-light p-3 mb-4 bg-light rounded-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="overflow-hidden shadow-sm flex-shrink-0" style="width: 70px; height: 90px; border-radius: 12px;">
+                                {% if product.images.exists %}
+                                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% else %}
+                                <div class="w-100 h-100 bg-secondary-subtle d-flex align-items-center justify-content-center text-muted fs-8">No Image</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold text-dark fs-6 mb-1">{{ product.name }}</h5>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold text-primary fs-6">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                    <span class="text-muted text-decoration-line-through fs-8">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:2 }}</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted fs-8">SKU: {{ product.sku }}{% if product.fabric %} | Fabric: {{ product.fabric }}{% endif %}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'danger' }} border-0 shadow-sm rounded-3 py-2 px-3 fs-7 mb-2" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form action="" method="POST" id="bookCallForm">
+                        {% csrf_token %}
+
+                        <!-- Step 1: Select Date -->
+                        <div class="mb-4">
+                            <label class="form-label text-dark fw-bold fs-7 mb-2">
+                                <i class="bi bi-calendar3 text-primary me-1"></i> 1. Select Date <span class="text-danger">*</span>
+                            </label>
+                            <div class="row g-2">
+                                {% for dt in available_dates %}
+                                <div class="col-6 col-sm-4 col-md-3">
+                                    <input type="radio" class="btn-check date-radio" name="booking_date" id="date_{{ dt|date:'YMD' }}" value="{{ dt|date:'Y-m-d' }}" {% if form_data.booking_date == dt|date:'Y-m-d' or selected_date == dt|date:'Y-m-d' %}checked{% elif forloop.first and not form_data.booking_date and not selected_date %}checked{% endif %} required>
+                                    <label class="btn btn-outline-secondary w-100 py-2 px-1 text-center rounded-3 fs-8 fw-medium shadow-none" for="date_{{ dt|date:'YMD' }}">
+                                        <div class="fw-bold text-dark fs-7">{{ dt|date:"D" }}</div>
+                                        <div class="text-muted fs-8">{{ dt|date:"d M" }}</div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Select Time Slot -->
+                        <div class="mb-4">
+                            <label class="form-label text-dark fw-bold fs-7 mb-2 d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-clock text-primary me-1"></i> 2. Select Time Slot <span class="text-danger">*</span></span>
+                                <small class="text-muted fs-8" id="slotLoadingSpinner" style="display: none;"><i class="bi bi-arrow-repeat spin me-1"></i> Checking availability...</small>
+                            </label>
+                            <div class="row g-2" id="timeSlotsContainer">
+                                {% for slot in slots_data %}
+                                <div class="col-12 col-sm-6">
+                                    <input type="radio" class="btn-check slot-radio" name="time_slot" id="slot_{{ forloop.counter }}" value="{{ slot.time_slot }}" 
+                                        {% if not slot.is_selectable %}disabled{% endif %}
+                                        {% if form_data.time_slot == slot.time_slot or forloop.first and slot.is_selectable %}checked{% endif %} required>
+                                    <label class="btn {% if slot.status == 'BLOCKED' %}btn-outline-danger disabled opacity-75{% elif slot.status == 'BOOKED' %}btn-outline-dark disabled opacity-75{% else %}btn-outline-secondary{% endif %} w-100 py-2.5 px-3 text-start rounded-3 fs-7 fw-medium shadow-none d-flex align-items-center justify-content-between" for="slot_{{ forloop.counter }}">
+                                        <span><i class="bi bi-alarm me-2 text-muted"></i>{{ slot.time_slot }}</span>
+                                        {% if slot.status == 'BLOCKED' %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill fs-8 fw-normal">
+                                            <i class="bi bi-slash-circle me-1"></i>Owner unavailable
+                                        </span>
+                                        {% elif slot.status == 'BOOKED' %}
+                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle rounded-pill fs-8 fw-normal">
+                                            <i class="bi bi-lock-fill me-1"></i>Already booked
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-8 fw-normal">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Available
+                                        </span>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Customer Details -->
+                        <div class="mb-4">
+                            <label class="form-label text-dark fw-bold fs-7 mb-3">
+                                <i class="bi bi-person-bounding-box text-primary me-1"></i> 3. Customer Details
+                            </label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="full_name" class="form-label text-muted fs-7">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="full_name" id="full_name" class="form-control px-3 py-2" placeholder="Your Name" value="{{ form_data.full_name|default:'' }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label text-muted fs-7">Email Address (Optional)</label>
+                                    <input type="email" name="email" id="email" class="form-control px-3 py-2" placeholder="name@example.com" value="{{ form_data.email|default:'' }}">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="phone_number" class="form-label text-muted fs-7">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone_number" id="phone_number" class="form-control px-3 py-2" placeholder="+91 9876543210" value="{{ form_data.phone_number|default:'' }}" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="notes" class="form-label text-muted fs-7">Special Queries / Requirements (Optional)</label>
+                                    <textarea name="notes" id="notes" class="form-control px-3 py-2" rows="3" placeholder="e.g. Please show the blouse piece and zari work live on call.">{{ form_data.notes|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1 shadow-sm">
+                                <i class="bi bi-camera-video-fill me-2"></i> Confirm Book a Call
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateRadios = document.querySelectorAll('.date-radio');
+    const container = document.getElementById('timeSlotsContainer');
+    const spinner = document.getElementById('slotLoadingSpinner');
+
+    function fetchSlotsForDate(dateStr) {
+        if (!dateStr || !container) return;
+        if (spinner) spinner.style.display = 'inline-block';
+
+        fetch('/shop/api/slot-availability/?date=' + encodeURIComponent(dateStr))
+            .then(res => res.json())
+            .then(data => {
+                if (spinner) spinner.style.display = 'none';
+                if (!data.slots) return;
+
+                let html = '';
+                let hasChecked = false;
+
+                data.slots.forEach(function(slot, index) {
+                    const isSelectable = slot.is_selectable;
+                    const disabledAttr = isSelectable ? '' : 'disabled';
+                    
+                    let btnClass = 'btn-outline-secondary';
+                    let badgeHtml = '';
+
+                    if (slot.status === 'BLOCKED') {
+                        btnClass = 'btn-outline-danger disabled opacity-75';
+                        badgeHtml = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill fs-8 fw-normal"><i class="bi bi-slash-circle me-1"></i>Owner unavailable</span>';
+                    } else if (slot.status === 'BOOKED') {
+                        btnClass = 'btn-outline-dark disabled opacity-75';
+                        badgeHtml = '<span class="badge bg-dark-subtle text-dark border border-dark-subtle rounded-pill fs-8 fw-normal"><i class="bi bi-lock-fill me-1"></i>Already booked</span>';
+                    } else {
+                        btnClass = 'btn-outline-secondary';
+                        badgeHtml = '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-8 fw-normal"><i class="bi bi-check-circle-fill me-1"></i>Available</span>';
+                    }
+
+                    let checkedAttr = '';
+                    if (isSelectable && !hasChecked) {
+                        checkedAttr = 'checked';
+                        hasChecked = true;
+                    }
+
+                    html += `
+                        <div class="col-12 col-sm-6">
+                            <input type="radio" class="btn-check slot-radio" name="time_slot" id="slot_${index + 1}" value="${slot.time_slot}" ${disabledAttr} ${checkedAttr} required>
+                            <label class="btn ${btnClass} w-100 py-2.5 px-3 text-start rounded-3 fs-7 fw-medium shadow-none d-flex align-items-center justify-content-between" for="slot_${index + 1}">
+                                <span><i class="bi bi-alarm me-2 text-muted"></i>${slot.time_slot}</span>
+                                ${badgeHtml}
+                            </label>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            })
+            .catch(err => {
+                if (spinner) spinner.style.display = 'none';
+                console.error('Error fetching slot availability:', err);
+            });
+    }
+
+    dateRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                fetchSlotsForDate(this.value);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

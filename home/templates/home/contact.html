@@ -34,6 +34,25 @@
 </script>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .google-map-container iframe {
+        width: 100% !important;
+        height: 300px !important;
+        min-height: 300px;
+        border: 0;
+        display: block;
+        border-radius: 16px;
+    }
+    @media (max-width: 576px) {
+        .google-map-container iframe {
+            height: 240px !important;
+            min-height: 240px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
@@ -93,9 +112,9 @@
                 </div>
                 
                 <!-- Google Maps Embed -->
-                {% if contact_info.google_map_iframe %}
-                <div class="mt-4 overflow-hidden rounded-4 shadow-sm border border-light">
-                    {{ contact_info.google_map_iframe|safe }}
+                {% if contact_info.safe_google_map_iframe %}
+                <div class="mt-4 overflow-hidden rounded-4 shadow-sm border border-light google-map-container" style="border-radius: 16px;">
+                    {{ contact_info.safe_google_map_iframe|safe }}
                 </div>
                 {% endif %}
             </div>

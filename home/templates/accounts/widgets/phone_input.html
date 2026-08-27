@@ -1,0 +1,66 @@
+<div class="phone-input-group input-group border rounded-3 overflow-hidden bg-white shadow-sm" style="border-color: #dee2e6 !important;">
+    <select name="{{ widget.name }}_country" 
+            id="{{ widget.attrs.id }}_country" 
+            class="form-select border-0 bg-transparent py-2 ps-3 pe-4 fw-medium text-dark country-code-select" 
+            style="width: auto; min-width: 90px; flex: 0 0 auto; cursor: pointer; box-shadow: none;">
+        {% for code, label in widget.country_choices %}
+        <option value="{{ code }}" {% if code == widget.country_code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <span class="input-group-text border-0 bg-transparent text-muted opacity-50 px-1 user-select-none">|</span>
+    <input type="tel" 
+           name="{{ widget.name }}_mobile" 
+           id="{{ widget.attrs.id }}_mobile" 
+           class="form-control border-0 bg-transparent py-2 px-3 mobile-number-input" 
+           placeholder="9876543210" 
+           value="{{ widget.mobile_number }}" 
+           maxlength="15"
+           style="box-shadow: none;">
+    <input type="hidden" name="{{ widget.name }}" id="{{ widget.attrs.id }}" value="{{ widget.value|default:'' }}">
+</div>
+
+<script>
+(function() {
+    function initPhoneInput() {
+        const countrySelect = document.getElementById("{{ widget.attrs.id }}_country");
+        const mobileInput = document.getElementById("{{ widget.attrs.id }}_mobile");
+        const hiddenInput = document.getElementById("{{ widget.attrs.id }}");
+
+        if (!countrySelect || !mobileInput || !hiddenInput) return;
+
+        function updateHiddenValue() {
+            let digits = mobileInput.value.replace(/\D/g, '');
+            if (digits) {
+                hiddenInput.value = countrySelect.value + digits;
+            } else {
+                hiddenInput.value = '';
+            }
+        }
+
+        countrySelect.addEventListener("change", updateHiddenValue);
+        mobileInput.addEventListener("input", function() {
+            // Strip any leading country codes or non-digits typed by user
+            let val = mobileInput.value;
+            if (val.startsWith('+91')) {
+                val = val.substring(3);
+            } else if (val.startsWith('+')) {
+                val = val.replace(/^\+\d+\s*/, '');
+            }
+            let cleaned = val.replace(/\D/g, '');
+            if (cleaned !== mobileInput.value) {
+                mobileInput.value = cleaned;
+            }
+            updateHiddenValue();
+        });
+        
+        // Initial sync
+        updateHiddenValue();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPhoneInput);
+    } else {
+        initPhoneInput();
+    }
+})();
+</script>

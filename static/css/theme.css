@@ -2778,3 +2778,29 @@ h6,
         right: 4px;
     }
 }
+
+/* ==========================================================================
+   Book a Call Button Styling
+   ========================================================================== */
+.btn-book-call {
+    border: 1.5px solid var(--secondary-gold, #AE6F21) !important;
+    color: var(--secondary-gold, #856404) !important;
+    background-color: rgba(174, 111, 33, 0.08) !important;
+    font-weight: 600;
+    transition: all 0.25s ease-in-out;
+}
+
+.btn-book-call:hover,
+.btn-book-call:focus,
+.btn-book-call:active {
+    background-color: var(--secondary-gold, #AE6F21) !important;
+    color: #ffffff !important;
+    border-color: var(--secondary-gold, #AE6F21) !important;
+    box-shadow: 0 4px 12px rgba(174, 111, 33, 0.25);
+}
+
+.btn-book-call:hover i,
+.btn-book-call:focus i,
+.btn-book-call:active i {
+    color: #ffffff !important;
+}

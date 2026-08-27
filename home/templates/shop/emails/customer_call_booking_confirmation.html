@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Booking Confirmed - Rangam Saradha Silks</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header {
+            background-color: #AF0446;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .intro-text {
+            color: #555555;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .booking-box {
+            background-color: #fafafa;
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .booking-box h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #AF0446;
+            font-size: 16px;
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 8px;
+        }
+        .detail-row {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #444444;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666666;
+            display: inline-block;
+            width: 110px;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer a {
+            color: #AF0446;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rangam Saradha Silks</h1>
+        </div>
+        <div class="content">
+            <div class="greeting">Dear {{ booking.full_name }},</div>
+            <div class="intro-text">
+                Thank you for booking a call with Rangam Saradha Silks.<br><br>
+                Your call booking has been successfully received.
+            </div>
+            
+            <div class="booking-box">
+                <h3>Booking Details:</h3>
+                <div class="detail-row"><span class="detail-label">Booking ID:</span> {{ booking.booking_reference }}</div>
+                <div class="detail-row"><span class="detail-label">Product:</span> {{ booking.product.name }}</div>
+                <div class="detail-row"><span class="detail-label">Date:</span> {{ booking.booking_date|date:"Y-m-d" }}</div>
+                <div class="detail-row"><span class="detail-label">Time Slot:</span> {{ booking.time_slot }}</div>
+            </div>
+
+            <div class="intro-text">
+                Our team will reach out to you during your selected time slot.<br><br>
+                Thank you for choosing Rangam Saradha Silks.
+            </div>
+        </div>
+        <div class="footer">
+            Regards,<br>
+            <strong>Rangam Saradha Silks</strong><br>
+            <a href="https://rangamsaradhasilks.com/">https://rangamsaradhasilks.com/</a>
+        </div>
+    </div>
+</body>
+</html>

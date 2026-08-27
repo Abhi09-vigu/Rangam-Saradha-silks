@@ -81,6 +81,22 @@ class ContactInfo(models.Model):
                 return f"https://wa.me/{cleaned}?text=Hello%20Rangam%20Saradha%20Silks"
         return None
 
+    @property
+    def safe_google_map_iframe(self):
+        if not self.google_map_iframe:
+            return ""
+        from .utils import sanitize_and_format_google_map
+        try:
+            return sanitize_and_format_google_map(self.google_map_iframe)
+        except Exception:
+            return ""
+
+    def clean(self):
+        super().clean()
+        if self.google_map_iframe:
+            from .utils import sanitize_and_format_google_map
+            self.google_map_iframe = sanitize_and_format_google_map(self.google_map_iframe)
+
     class Meta:
         verbose_name = "Contact Info"
         verbose_name_plural = "Contact Info"
@@ -88,6 +104,7 @@ class ContactInfo(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk and ContactInfo.objects.exists():
             return
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
