@@ -297,6 +297,8 @@ def robots_txt(request):
         "Disallow: /shop/cart/",
         "Disallow: /shop/checkout/",
         "Disallow: /shop/order/",
+        "Disallow: /shop/booking/",
+        "Disallow: /shop/coupon/",
         "Disallow: /api/",
         "Disallow: /debug-db/",
         "Allow: /",

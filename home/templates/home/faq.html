@@ -11,6 +11,29 @@
 {% block twitter_title %}Frequently Asked Questions | Rangam Saradha Silks{% endblock %}
 {% block twitter_description %}Find answers to common questions about silk saree authenticity, shipping, returns, care instructions, and ordering at Rangam Saradha Silks.{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Frequently Asked Questions",
+      "item": "https://rangamsaradhasilks.com/faqs/"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block structured_data %}
 {% if faqs %}
 <script type="application/ld+json">
@@ -37,6 +60,14 @@
 {% block content %}
 <section class="section-luxury">
     <div class="container">
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb justify-content-center fs-7">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">FAQ</li>
+            </ol>
+        </nav>
+
         <div class="section-heading-wrapper text-center">
             <span class="section-subtitle">Got Questions?</span>
             <h2 class="section-title">Frequently Asked Questions</h2>

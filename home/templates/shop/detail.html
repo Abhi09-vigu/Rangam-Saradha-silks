@@ -18,6 +18,46 @@
 {% block structured_data %}
 <script type="application/ld+json">
 {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rangamsaradhasilks.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Categories",
+      "item": "https://rangamsaradhasilks.com/shop/categories/"
+    }{% if product.categories.first %},
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ product.categories.first.name|escapejs }}",
+      "item": "https://rangamsaradhasilks.com{{ product.categories.first.get_absolute_url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ product.name|escapejs }}",
+      "item": "https://rangamsaradhasilks.com{{ product.get_absolute_url }}"
+    }
+    {% else %},
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ product.name|escapejs }}",
+      "item": "https://rangamsaradhasilks.com{{ product.get_absolute_url }}"
+    }
+    {% endif %}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
   "@context": "https://schema.org/",
   "@type": "Product",
   "name": "{{ product.name|escapejs }}",
@@ -58,10 +98,11 @@
         <!-- Breadcrumbs -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb fs-7">
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}"
-                        class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}"
-                        class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:categories' %}" class="text-decoration-none text-muted">Categories</a></li>
+                {% if product.categories.first %}
+                <li class="breadcrumb-item"><a href="{{ product.categories.first.get_absolute_url }}" class="text-decoration-none text-muted">{{ product.categories.first.name }}</a></li>
+                {% endif %}
                 <li class="breadcrumb-item active text-dark" aria-current="page">{{ product.name }}</li>
             </ol>
         </nav>

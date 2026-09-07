@@ -14,6 +14,25 @@
 {% block twitter_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
 {% block twitter_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Rangam Saradha Silks",
+  "url": "https://rangamsaradhasilks.com/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://rangamsaradhasilks.com/shop/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <h1 class="visually-hidden">Rangam Saradha Silks</h1>
 <!-- Hero Slider (Bootstrap Carousel) -->
@@ -102,9 +121,13 @@
                     <!-- Set 1 -->
                     {% for cat in categories %}
                     <div class="category-carousel-item">
-                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <a href="{{ cat.get_absolute_url }}" class="category-circle-card">
                             <div class="category-circle-image">
+                                {% if cat.image %}
                                 <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% else %}
+                                <img src="{% static 'images/logo.jpg' %}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% endif %}
                             </div>
                             <h3>{{ cat.name }}</h3>
                         </a>
@@ -114,9 +137,13 @@
                     <!-- Set 2 (Duplicated for Seamless Infinite Loop) -->
                     {% for cat in categories %}
                     <div class="category-carousel-item">
-                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <a href="{{ cat.get_absolute_url }}" class="category-circle-card">
                             <div class="category-circle-image">
+                                {% if cat.image %}
                                 <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% else %}
+                                <img src="{% static 'images/logo.jpg' %}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% endif %}
                             </div>
                             <h3>{{ cat.name }}</h3>
                         </a>
@@ -126,9 +153,13 @@
                     <!-- Set 3 (Duplicated for Wide Screens) -->
                     {% for cat in categories %}
                     <div class="category-carousel-item">
-                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="category-circle-card">
+                        <a href="{{ cat.get_absolute_url }}" class="category-circle-card">
                             <div class="category-circle-image">
+                                {% if cat.image %}
                                 <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% else %}
+                                <img src="{% static 'images/logo.jpg' %}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection">
+                                {% endif %}
                             </div>
                             <h3>{{ cat.name }}</h3>
                         </a>

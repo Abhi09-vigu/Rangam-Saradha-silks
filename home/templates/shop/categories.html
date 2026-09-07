@@ -57,7 +57,7 @@
             {% for cat in categories %}
             <div class="col-6 col-md-4 col-lg-3">
                 <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden hover-lift transition-all">
-                    <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="text-decoration-none d-block position-relative">
+                    <a href="{{ cat.get_absolute_url }}" class="text-decoration-none d-block position-relative">
                         <div class="ratio ratio-4x3 overflow-hidden bg-light">
                             {% if cat.image %}
                             <img src="{{ cat.image.url }}" alt="Rangam Saradha Silks - {{ cat.name }} Saree Collection" class="img-fluid object-fit-cover w-100 h-100" loading="lazy">
@@ -72,7 +72,7 @@
                     <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
                         <div>
                             <h3 class="h5 font-heading text-dark mb-2">
-                                <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="text-decoration-none text-dark hover-gold">
+                                <a href="{{ cat.get_absolute_url }}" class="text-decoration-none text-dark hover-gold">
                                     {{ cat.name }}
                                 </a>
                             </h3>
@@ -80,7 +80,7 @@
                             <p class="text-muted fs-7 mb-3 text-truncate-2">{{ cat.description }}</p>
                             {% endif %}
                         </div>
-                        <a href="{% url 'shop:catalog' %}?category={{ cat.slug }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 mt-2">
+                        <a href="{{ cat.get_absolute_url }}" class="btn btn-outline-primary btn-sm rounded-pill w-100 mt-2">
                             Explore {{ cat.name }}
                         </a>
                     </div>

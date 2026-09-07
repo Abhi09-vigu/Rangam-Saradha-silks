@@ -15,25 +15,49 @@ class BaseSitemap(Sitemap):
 
 
 class StaticViewSitemap(BaseSitemap):
-    priority = 0.9
-    changefreq = 'daily'
-
     def items(self):
         return ['home:index', 'shop:categories', 'shop:catalog', 'home:contact', 'home:faq']
 
     def location(self, item):
         return reverse(item)
 
+    def priority(self, item):
+        priorities = {
+            'home:index': 1.0,
+            'shop:categories': 0.9,
+            'shop:catalog': 0.9,
+            'home:contact': 0.8,
+            'home:faq': 0.8,
+        }
+        return priorities.get(item, 0.8)
+
+    def changefreq(self, item):
+        freqs = {
+            'home:index': 'daily',
+            'shop:categories': 'weekly',
+            'shop:catalog': 'daily',
+            'home:contact': 'monthly',
+            'home:faq': 'monthly',
+        }
+        return freqs.get(item, 'weekly')
+
 
 class CMSPageSitemap(BaseSitemap):
-    priority = 0.7
-    changefreq = 'weekly'
-
     def items(self):
         return CMSPage.objects.all().order_by('id')
 
     def location(self, item):
-        return reverse('home:cms_page', kwargs={'slug': item.slug})
+        return item.get_absolute_url()
+
+    def priority(self, item):
+        if item.slug == 'about-us':
+            return 0.8
+        return 0.5
+
+    def changefreq(self, item):
+        if item.slug == 'about-us':
+            return 'monthly'
+        return 'yearly'
 
 
 class CategorySitemap(BaseSitemap):
@@ -44,7 +68,7 @@ class CategorySitemap(BaseSitemap):
         return Category.objects.filter(is_active=True).order_by('display_order', 'id')
 
     def location(self, item):
-        return reverse('shop:category_detail', kwargs={'category_slug': item.slug})
+        return item.get_absolute_url()
 
 
 class ProductSitemap(BaseSitemap):
@@ -58,5 +82,5 @@ class ProductSitemap(BaseSitemap):
         return item.updated_at
 
     def location(self, item):
-        return reverse('shop:product_detail', kwargs={'slug': item.slug})
+        return item.get_absolute_url()
 

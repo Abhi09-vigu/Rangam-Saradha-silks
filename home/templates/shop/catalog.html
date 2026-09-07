@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
-{% block title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
-{% block meta_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
-{% block meta_keywords %}Shop All Sarees, Rangam Saradha Silks shop, pure silk sarees online, Kanchipuram silk sarees, traditional sarees buy online{% endblock %}
-{% block canonical %}https://rangamsaradhasilks.com/shop/{% endblock %}
-{% block og_url %}https://rangamsaradhasilks.com/shop/{% endblock %}
-{% block og_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
-{% block og_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
-{% block twitter_title %}Shop All Sarees | Rangam Saradha Silks{% endblock %}
-{% block twitter_description %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endblock %}
+{% block meta_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block meta_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% elif active_collection %}{{ active_collection.description|default:"Explore our exclusive "|add:active_collection.name|add:" collection of pure silk sarees at Rangam Saradha Silks." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
+{% block meta_keywords %}{% if active_category %}{{ active_category.meta_keywords|default:active_category.name|add:", silk sarees, Rangam Saradha Silks" }}{% else %}Shop All Sarees, Rangam Saradha Silks shop, pure silk sarees online, Kanchipuram silk sarees, traditional sarees buy online{% endif %}{% endblock %}
+{% block canonical %}{% if active_category %}https://rangamsaradhasilks.com{{ active_category.get_absolute_url }}{% else %}https://rangamsaradhasilks.com/shop/{% endif %}{% endblock %}
+{% block og_url %}{% if active_category %}https://rangamsaradhasilks.com{{ active_category.get_absolute_url }}{% else %}https://rangamsaradhasilks.com/shop/{% endif %}{% endblock %}
+{% block og_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block og_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
+{% block twitter_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block twitter_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
 
 {% block extra_head %}
 <script type="application/ld+json">
@@ -23,13 +23,27 @@
       "position": 1,
       "name": "Home",
       "item": "https://rangamsaradhasilks.com/"
+    }{% if active_category %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Categories",
+      "item": "https://rangamsaradhasilks.com/shop/categories/"
     },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ active_category.name|escapejs }}",
+      "item": "https://rangamsaradhasilks.com{{ active_category.get_absolute_url }}"
+    }
+    {% else %},
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Shop All",
       "item": "https://rangamsaradhasilks.com/shop/"
     }
+    {% endif %}
   ]
 }
 </script>
