@@ -1,7 +1,7 @@
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
@@ -142,18 +142,19 @@ def contact_view(request):
 
 def index(request):
     sliders = HeroSlider.objects.filter(is_active=True).order_by('display_order')
-    categories = Category.objects.filter(is_active=True).order_by('display_order')[:6]
+    categories = Category.objects.filter(is_active=True).order_by('display_order')[:16]
     budget_ranges = BudgetRange.objects.filter(is_active=True).order_by('display_order')
     
     # Dynamic Homepage Product Sections
-    featured_products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images', 'categories')[:4]
+    featured_products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images', 'categories')[:8]
+    if featured_products.count() < 4:
+        featured_products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')[:8]
     trending_products = Product.objects.filter(is_active=True, is_trending=True).prefetch_related('images', 'categories')[:4]
     new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).prefetch_related('images', 'categories')[:12]
     best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:12]
     today_deals = Product.objects.filter(is_active=True, is_today_deal=True).prefetch_related('images', 'categories')[:12]
     
-    # Featured Collections, Why Choose Us, Fabric Curations
-    featured_collections = Collection.objects.filter(is_active=True)[:4]
+    # Why Choose Us, Fabric Curations
     why_choose_us = WhyChooseUs.objects.filter(is_active=True).order_by('display_order')
     fabric_curations = FabricCuration.objects.filter(is_active=True).order_by('display_order')
 
@@ -182,7 +183,6 @@ def index(request):
         'new_arrivals': new_arrivals,
         'best_sellers': best_sellers,
         'today_deals': today_deals,
-        'featured_collections': featured_collections,
         'why_choose_us': why_choose_us,
         'fabric_curations': fabric_curations,
         'banners': banners,
@@ -306,4 +306,109 @@ def robots_txt(request):
         "Sitemap: https://rangamsaradhasilks.com/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+@require_POST
+def popup_book_call_api(request):
+    """
+    AJAX endpoint to book a saree consultation call directly from the promotional popup.
+    """
+    import json
+    import datetime
+    from django.db import transaction
+    from django.http import JsonResponse
+    from shop.models import CallBooking, CallSlot
+    
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            data = request.POST
+
+        full_name = data.get('full_name', '').strip()
+        phone_number = data.get('phone_number', '').strip()
+        booking_date_str = data.get('booking_date', '').strip()
+        time_slot = data.get('time_slot', '').strip()
+        saree_preference = data.get('saree_preference', '').strip()
+        notes = data.get('notes', '').strip()
+        email = data.get('email', '').strip()
+
+        if not full_name:
+            return JsonResponse({'success': False, 'message': 'Please enter your name.'}, status=400)
+        if not phone_number:
+            return JsonResponse({'success': False, 'message': 'Please enter your phone number.'}, status=400)
+        if not booking_date_str:
+            return JsonResponse({'success': False, 'message': 'Please select a preferred date.'}, status=400)
+        if not time_slot:
+            return JsonResponse({'success': False, 'message': 'Please choose a preferred time slot.'}, status=400)
+
+        # Validate time slot
+        valid_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
+        if time_slot not in valid_slots:
+            return JsonResponse({'success': False, 'message': 'Please select a valid time slot.'}, status=400)
+
+        # Validate booking date
+        try:
+            booking_date = datetime.datetime.strptime(booking_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({'success': False, 'message': 'Invalid date format.'}, status=400)
+
+        if booking_date < timezone.now().date():
+            return JsonResponse({'success': False, 'message': 'Please select today or a future date.'}, status=400)
+
+        # Duplicate protection (same phone, date, slot within 5 mins)
+        recent_cutoff = timezone.now() - datetime.timedelta(minutes=5)
+        existing_booking = CallBooking.objects.filter(
+            phone_number=phone_number,
+            booking_date=booking_date,
+            time_slot=time_slot,
+            created_at__gte=recent_cutoff
+        ).first()
+
+        if existing_booking:
+            return JsonResponse({
+                'success': True,
+                'booking_ref': existing_booking.booking_reference,
+                'booking_reference': existing_booking.booking_reference,
+                'message': f"We have already received your booking scheduled for {booking_date} at {time_slot} (Ref: #{existing_booking.booking_reference})."
+            })
+
+        # Atomic creation
+        with transaction.atomic():
+            booking = CallBooking.objects.create(
+                product=None,
+                saree_preference=saree_preference or "General Saree Selection Consultation",
+                user=request.user if request.user.is_authenticated else None,
+                full_name=full_name,
+                email=email or f"call_{phone_number[-6:]}@rangamsaradhasilk.com",
+                phone_number=phone_number,
+                booking_date=booking_date,
+                time_slot=time_slot,
+                notes=notes,
+            )
+
+            CallSlot.objects.update_or_create(
+                date=booking_date,
+                time_slot=time_slot,
+                defaults={'status': 'BOOKED'}
+            )
+
+        # Try email notification
+        try:
+            from shop.views import send_booking_notification_email
+            send_booking_notification_email(booking)
+        except Exception as e:
+            logger.warning(f"Could not send booking email for popup booking #{booking.booking_reference}: {e}")
+
+        formatted_date = booking_date.strftime('%b %d, %Y')
+        return JsonResponse({
+            'success': True,
+            'booking_ref': booking.booking_reference,
+            'booking_reference': booking.booking_reference,
+            'message': f"🎉 Thank you, {full_name}! Your saree selection call is confirmed for {formatted_date} at {time_slot}."
+        })
+    except Exception as e:
+        logger.error(f"Error in popup_book_call_api: {str(e)}", exc_info=True)
+        return JsonResponse({'success': False, 'message': 'An unexpected error occurred. Please try again.'}, status=500)
+
 

@@ -512,9 +512,10 @@ def add_review(request, product_id):
             user=request.user,
             rating=rating,
             comment=comment,
-            image=image
+            image=image,
+            is_approved=True
         )
-        messages.success(request, "Your review has been submitted successfully and is pending administrator approval.")
+        messages.success(request, "Your review has been submitted successfully! Thank you for your feedback.")
         
     from django.urls import reverse
     referer = request.META.get('HTTP_REFERER')
@@ -697,6 +698,8 @@ def send_booking_notification_email(booking):
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
 
     # 1. CUSTOMER CONFIRMATION EMAIL
+    product_label = booking.product.name if booking.product else (booking.saree_preference or "General Saree Selection")
+
     if booking.email and str(booking.email).strip():
         try:
             customer_subject = "Call Booking Confirmed - Rangam Saradha Silks"
@@ -706,7 +709,7 @@ def send_booking_notification_email(booking):
                 f"Your call booking has been successfully received.\n\n"
                 f"Booking Details:\n\n"
                 f"Booking ID: {booking.booking_reference}\n"
-                f"Product: {booking.product.name}\n"
+                f"Product: {product_label}\n"
                 f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"
                 f"Time Slot: {booking.time_slot}\n"
                 f"Phone: {booking.phone_number}\n"
@@ -733,12 +736,17 @@ def send_booking_notification_email(booking):
 
     # 2. ADMIN / OWNER NOTIFICATION EMAIL
     try:
-        owner_subject = f"New Call Booking - {booking.product.name}"
+        owner_subject = f"New Call Booking - {product_label}"
         created_str = booking.created_at.strftime('%Y-%m-%d %H:%M:%S') if booking.created_at else datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sku_str = booking.product.sku if booking.product.sku else str(booking.product.id)
+        sku_str = (booking.product.sku if booking.product.sku else str(booking.product.id)) if booking.product else "N/A"
         notes_str = booking.notes if booking.notes else "None"
-        price_val = booking.product.offer_price if booking.product.offer_price else booking.product.price
-        price_str = f"Rs. {price_val:.2f}"
+        if booking.product:
+            price_val = booking.product.offer_price if booking.product.offer_price else booking.product.price
+            price_str = f"Rs. {price_val:.2f}"
+            product_id_val = str(booking.product.id)
+        else:
+            price_str = "Consultation"
+            product_id_val = "N/A"
 
         owner_text = (
             f"New customer call booking received.\n\n"
@@ -746,8 +754,8 @@ def send_booking_notification_email(booking):
             f"Customer Name: {booking.full_name}\n"
             f"Phone: {booking.phone_number}\n"
             f"Email: {booking.email or 'N/A'}\n\n"
-            f"Product: {booking.product.name}\n"
-            f"Product ID: {booking.product.id}\n"
+            f"Product: {product_label}\n"
+            f"Product ID: {product_id_val}\n"
             f"SKU: {sku_str}\n"
             f"Price: {price_str}\n\n"
             f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"

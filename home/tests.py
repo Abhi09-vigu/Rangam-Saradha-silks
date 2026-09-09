@@ -1,9 +1,11 @@
+from django.test import TestCase
 import xml.etree.ElementTree as ET
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from shop.models import Category, Product
 from home.models import CMSPage, FAQ, WebsiteSetting, ContactInfo
 
+# Create your tests here.
 
 @override_settings(
     STORAGES={
@@ -273,8 +275,8 @@ class PageSEOAndStructuredDataTest(TestCase):
         self.assertIn('"@type": "ClothingStore"', content)
         self.assertIn('"url": "https://rangamsaradhasilks.com/"', content)
 
-        # FAQ in footer
-        self.assertIn(reverse('home:faq'), content)
+        # FAQ not in footer
+        self.assertNotIn(reverse('home:faq'), content)
 
     def test_categories_page_seo_and_schema(self):
         response = self.client.get(reverse('shop:categories'))
@@ -375,3 +377,157 @@ class PageSEOAndStructuredDataTest(TestCase):
         # BreadcrumbList schema
         self.assertIn('"@type": "BreadcrumbList"', content)
         self.assertIn('"name": "About Us"', content)
+
+
+class PopupManagementTests(TestCase):
+    """
+    Tests for the Promotional Popup Management System.
+    """
+
+    def setUp(self):
+        from home.models import Popup, WebsiteSetting, ContactInfo
+        from django.utils import timezone
+        WebsiteSetting.objects.create(website_name="Rangam Saradha Silks")
+        ContactInfo.objects.create(
+            phone="+91 98765 43210",
+            email="contact@rangamsaradhasilks.com",
+            address="123 Silk Street, Kanchipuram, Tamil Nadu",
+        )
+
+    def test_popup_priority_and_context_processor(self):
+        from home.models import Popup
+        popup_low = Popup.objects.create(
+            title="Low Priority Offer",
+            popup_type="OFFER",
+            priority=5,
+            is_active=True,
+        )
+        popup_high = Popup.objects.create(
+            title="High Priority Festival Offer",
+            popup_type="OFFER",
+            priority=15,
+            is_active=True,
+        )
+
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['active_popup'], popup_high)
+        self.assertIn("High Priority Festival Offer", response.content.decode('utf-8'))
+        self.assertNotIn("Low Priority Offer", response.content.decode('utf-8'))
+
+    def test_popup_date_filtering(self):
+        from home.models import Popup
+        from django.utils import timezone
+        from datetime import timedelta
+
+        now = timezone.now()
+        # Expired popup
+        Popup.objects.create(
+            title="Expired Popup",
+            popup_type="OFFER",
+            priority=100,
+            is_active=True,
+            end_date=now - timedelta(days=1),
+        )
+        # Future popup
+        Popup.objects.create(
+            title="Future Popup",
+            popup_type="OFFER",
+            priority=90,
+            is_active=True,
+            start_date=now + timedelta(days=2),
+        )
+        # Active eligible popup
+        valid_popup = Popup.objects.create(
+            title="Currently Active Popup",
+            popup_type="OFFER",
+            priority=50,
+            is_active=True,
+            start_date=now - timedelta(days=1),
+            end_date=now + timedelta(days=5),
+        )
+
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['active_popup'], valid_popup)
+
+    def test_popup_types_rendering(self):
+        from home.models import Popup
+        coupon_popup = Popup.objects.create(
+            title="Exclusive Festive Offer",
+            popup_type="OFFER",
+            badge_text="FESTIVE 2026",
+            coupon_code="FESTIVE15",
+            cta_text="Claim Offer",
+            cta_link="/shop/",
+            is_active=True,
+        )
+        response = self.client.get('/')
+        content = response.content.decode('utf-8')
+        self.assertIn('rssPromotionalPopup', content)
+        self.assertIn('FESTIVE15', content)
+        self.assertIn('FESTIVE 2026', content)
+        self.assertIn('Claim Offer', content)
+
+    def test_book_call_api_success_and_duplicate(self):
+        from django.utils import timezone
+        from datetime import timedelta
+        from shop.models import CallBooking
+
+        booking_date = (timezone.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+        post_data = {
+            'full_name': 'Meenakshi Sundaram',
+            'phone_number': '+91 98765 11223',
+            'booking_date': booking_date,
+            'time_slot': '11:00 AM - 12:00 PM',
+            'saree_preference': 'Bridal Kanchipuram Pure Zari',
+        }
+
+        # 1. First booking should succeed
+        url = reverse('home:popup_book_call')
+        resp = self.client.post(url, data=post_data)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['success'])
+        self.assertTrue(data['booking_reference'].startswith('BK-'))
+
+        booking = CallBooking.objects.get(booking_reference=data['booking_reference'])
+        self.assertEqual(booking.full_name, 'Meenakshi Sundaram')
+        self.assertEqual(booking.saree_preference, 'Bridal Kanchipuram Pure Zari')
+        self.assertIsNone(booking.product)
+
+        # 2. Duplicate booking within 5 minutes should return friendly message
+        dup_resp = self.client.post(url, data=post_data)
+        self.assertEqual(dup_resp.status_code, 200)
+        dup_data = dup_resp.json()
+        self.assertTrue(dup_data['success'])
+        self.assertIn('already received', dup_data['message'])
+
+    def test_book_call_api_invalid_date_or_slot(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        past_date = (timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        url = reverse('home:popup_book_call')
+
+        # Past date
+        resp = self.client.post(url, data={
+            'full_name': 'Test User',
+            'phone_number': '9876543210',
+            'booking_date': past_date,
+            'time_slot': '10:00 AM - 11:00 AM',
+        })
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(resp.json()['success'])
+
+        # Invalid slot
+        future_date = (timezone.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        resp_slot = self.client.post(url, data={
+            'full_name': 'Test User',
+            'phone_number': '9876543210',
+            'booking_date': future_date,
+            'time_slot': 'Invalid Slot',
+        })
+        self.assertEqual(resp_slot.status_code, 400)
+        self.assertFalse(resp_slot.json()['success'])
+

@@ -39,6 +39,13 @@ class WebsiteSetting(models.Model):
     fabric_curation_title = models.CharField(max_length=100, default="Fabric Curations", help_text="Main heading for the Fabric Curations section.")
     fabric_curation_subtitle = models.CharField(max_length=150, default="SHOP BY MATERIAL", help_text="Subtitle above the Fabric Curations heading.")
 
+    # Dynamic Categories Section Headers
+    category_title = models.CharField(max_length=150, default="Traditional Saree Collections", help_text="Main heading for the Categories section.")
+    category_subtitle = models.CharField(max_length=100, default="SHOP BY CATEGORY", help_text="Label above Categories heading.")
+    category_description = models.CharField(max_length=255, default="Explore timeless weaves crafted for every occasion.", help_text="Description text below Categories heading.")
+    category_button_text = models.CharField(max_length=50, default="View All Categories", help_text="Text for the Categories CTA button.")
+    category_button_url = models.CharField(max_length=200, default="/shop/", help_text="URL / link for the Categories CTA button.")
+
     class Meta:
         verbose_name = "Website Setting"
         verbose_name_plural = "Website Settings"
@@ -111,14 +118,45 @@ class ContactInfo(models.Model):
         return "Contact & Social Media Information"
 
 class HeroSlider(models.Model):
-    image = models.ImageField(upload_to='slider/')
-    mobile_image = models.ImageField(upload_to='slider_mobile/', blank=True, null=True)
-    title = models.CharField(max_length=150)
-    subtitle = models.CharField(max_length=255, blank=True, null=True)
-    button_text = models.CharField(max_length=50, default="Shop Now")
+    image = models.ImageField(upload_to='slider/', help_text="Background image (used if no video is provided or as poster)")
+    mobile_image = models.ImageField(upload_to='slider_mobile/', blank=True, null=True, help_text="Optional mobile-optimized image")
+    video_file = models.FileField(upload_to='slider_videos/', blank=True, null=True, help_text="Optional background video file (.mp4, .webm)")
+    video_url = models.URLField(blank=True, null=True, help_text="Optional background video URL (e.g. Cloudinary or direct MP4 link)")
+    title = models.CharField(max_length=150, default="Woven by Hand.\nMade to Treasure.", help_text="Main heading (can use line breaks)")
+    subtitle = models.CharField(max_length=255, blank=True, null=True, default="HANDWOVEN HERITAGE", help_text="Eyebrow text above headline")
+    description = models.TextField(blank=True, null=True, default="Pure Silks. Timeless Traditions. For Your Most Precious Moments.", help_text="Supporting description below headline")
+    button_text = models.CharField(max_length=50, default="Explore Collections")
     button_url = models.CharField(max_length=255, default="/shop/")
+    secondary_button_text = models.CharField(max_length=50, default="Watch Our Story", blank=True, null=True)
+    secondary_button_url = models.CharField(max_length=255, blank=True, null=True, help_text="Link for secondary button (leave blank to open Story Video modal)")
+    heritage_badge_1 = models.CharField(max_length=60, default="Authentic Handloom", blank=True)
+    heritage_badge_2 = models.CharField(max_length=60, default="Pure Silk Guaranteed", blank=True)
+    heritage_badge_3 = models.CharField(max_length=60, default="A Legacy of Tradition", blank=True)
     display_order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def has_video(self):
+        if self.video_file:
+            return True
+        if self.video_url:
+            return True
+        if self.image:
+            name = str(self.image.name).lower()
+            return name.endswith('.mp4') or name.endswith('.webm') or '/video/upload/' in name
+        return False
+
+    @property
+    def get_video_src(self):
+        if self.video_file:
+            return self.video_file.url
+        if self.video_url:
+            return self.video_url
+        if self.image:
+            name = str(self.image.name).lower()
+            if name.endswith('.mp4') or name.endswith('.webm') or '/video/upload/' in name:
+                return self.image.url
+        return ""
 
     class Meta:
         ordering = ['display_order']
@@ -267,3 +305,61 @@ class FabricCuration(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Popup(models.Model):
+    POPUP_TYPE_CHOICES = (
+        ('OFFER', 'Special Offer 🎁'),
+        ('CALL_BOOKING', 'Book a Call for Saree Selection 📞'),
+        ('VIDEO', 'Saree Video 🎥'),
+        ('WHATSAPP', 'WhatsApp / Enquiry 💬'),
+        ('COLLECTION', 'Collection Promotion 🛍️'),
+    )
+
+    title = models.CharField(max_length=200, help_text="Headline for the popup modal")
+    badge_text = models.CharField(max_length=100, blank=True, null=True, help_text="Top badge label (e.g. 🎁 SPECIAL OFFER, 📞 VIP CONSULTATION)")
+    popup_type = models.CharField(max_length=30, choices=POPUP_TYPE_CHOICES, default='OFFER', help_text="Select the interactive behavior and layout for this popup")
+    description = models.TextField(blank=True, null=True, help_text="Detailed message, terms, or promotional offer details")
+    
+    # Media
+    image = models.ImageField(upload_to='popups/', blank=True, null=True, help_text="Visual image banner for the popup")
+    video = models.FileField(upload_to='popups/videos/', blank=True, null=True, help_text="Upload optional MP4/WebM video")
+    video_url = models.URLField(blank=True, null=True, help_text="Optional external or Cloudinary video URL")
+    
+    # Call to Actions & Interactions
+    cta_text = models.CharField(max_length=60, default="Explore Now", help_text="Button label (e.g. Shop Collection, Book My Call)")
+    cta_link = models.CharField(max_length=255, default="/shop/", help_text="Destination URL when visitor clicks the CTA button")
+    coupon_code = models.CharField(max_length=50, blank=True, null=True, help_text="Optional discount code to display with 1-click copy")
+    whatsapp_number = models.CharField(max_length=20, blank=True, null=True, help_text="Custom WhatsApp number (leave blank to use store default)")
+    whatsapp_message = models.CharField(max_length=255, blank=True, default="Hello Rangam Saradha Silks, I would like to know more about your authentic handloom sarees.", help_text="Pre-filled WhatsApp message")
+
+    # Scheduling & Controls
+    is_active = models.BooleanField(default=True, help_text="Enable or disable this popup from appearing on the website")
+    priority = models.IntegerField(default=0, help_text="Higher number = higher priority. If multiple active popups exist, only the highest priority popup is shown.")
+    start_date = models.DateTimeField(blank=True, null=True, help_text="Popup starts appearing after this date/time (leave blank for immediately)")
+    end_date = models.DateTimeField(blank=True, null=True, help_text="Popup stops appearing after this date/time (leave blank for no expiration)")
+    show_delay_seconds = models.PositiveIntegerField(default=2, help_text="Delay in seconds after page load before displaying (1-2s recommended)")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-priority', '-created_at']
+        verbose_name = "Popup"
+        verbose_name_plural = "Popups"
+
+    def __str__(self):
+        return f"[{self.get_popup_type_display()}] {self.title} (Priority: {self.priority})"
+
+    @property
+    def is_currently_eligible(self):
+        from django.utils import timezone
+        if not self.is_active:
+            return False
+        now = timezone.now()
+        if self.start_date and now < self.start_date:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+

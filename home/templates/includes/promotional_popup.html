@@ -1,0 +1,794 @@
+{% if active_popup %}
+<!-- Rangam Saradha Silks - Promotional Modal Popup -->
+<div id="rssPromotionalPopup" class="rss-popup-backdrop" role="dialog" aria-modal="true" aria-labelledby="rssPopupTitle" style="display: none;">
+    <div class="rss-popup-container {% if active_popup.image or active_popup.video or active_popup.video_url %}has-media{% else %}no-media{% endif %}">
+        <!-- Close Button -->
+        <button type="button" class="rss-popup-close-btn" id="rssPopupCloseBtn" aria-label="Close popup">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+        <div class="rss-popup-grid">
+            <!-- Media Section (Left / Top) -->
+            {% if active_popup.image or active_popup.video or active_popup.video_url %}
+            <div class="rss-popup-media-col">
+                {% if active_popup.video %}
+                    <div class="rss-popup-video-wrap">
+                        <video id="rssPopupVideo" class="rss-popup-video" autoplay muted loop playsinline>
+                            <source src="{{ active_popup.video.url }}" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                        <button type="button" class="rss-popup-sound-toggle" id="rssPopupSoundToggle" aria-label="Toggle Sound">
+                            <i class="bi bi-volume-mute-fill"></i>
+                        </button>
+                    </div>
+                {% elif active_popup.video_url %}
+                    <div class="rss-popup-video-wrap">
+                        <video id="rssPopupVideo" class="rss-popup-video" autoplay muted loop playsinline>
+                            <source src="{{ active_popup.video_url }}" type="video/mp4">
+                        </video>
+                        <button type="button" class="rss-popup-sound-toggle" id="rssPopupSoundToggle" aria-label="Toggle Sound">
+                            <i class="bi bi-volume-mute-fill"></i>
+                        </button>
+                    </div>
+                {% elif active_popup.image %}
+                    <div class="rss-popup-image-wrap">
+                        <img src="{{ active_popup.image.url }}" alt="{{ active_popup.title }}" class="rss-popup-image" loading="lazy">
+                        <div class="rss-popup-image-overlay"></div>
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Content Section (Right / Bottom) -->
+            <div class="rss-popup-content-col">
+                <div class="rss-popup-inner-content">
+                    <!-- Badge -->
+                    {% if active_popup.badge_text %}
+                        <div class="rss-popup-badge-wrap">
+                            <span class="rss-popup-badge">
+                                <i class="bi bi-stars me-1"></i>{{ active_popup.badge_text }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Title -->
+                    <h3 id="rssPopupTitle" class="rss-popup-title">{{ active_popup.title }}</h3>
+
+                    <!-- Description -->
+                    {% if active_popup.description %}
+                        <p class="rss-popup-desc">{{ active_popup.description|linebreaksbr }}</p>
+                    {% endif %}
+
+                    <!-- Dynamic Body Based on Popup Type -->
+                    {% if active_popup.popup_type == 'OFFER' %}
+                        <!-- Special Offer with Coupon -->
+                        {% if active_popup.coupon_code %}
+                            <div class="rss-popup-coupon-box">
+                                <div class="rss-coupon-info">
+                                    <span class="rss-coupon-label">USE PROMO CODE</span>
+                                    <span class="rss-coupon-code" id="rssCouponCodeText">{{ active_popup.coupon_code }}</span>
+                                </div>
+                                <button type="button" class="rss-coupon-copy-btn" id="rssCopyCouponBtn" data-code="{{ active_popup.coupon_code }}" title="Copy Coupon Code">
+                                    <i class="bi bi-clipboard"></i> <span id="rssCopyBtnText">Copy</span>
+                                </button>
+                            </div>
+                        {% endif %}
+
+                        {% if active_popup.cta_link %}
+                            <a href="{{ active_popup.cta_link }}" class="rss-popup-cta-btn primary-btn-luxury" id="rssPopupCtaBtn">
+                                {{ active_popup.cta_text|default:"Shop Exclusive Offer" }}
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        {% endif %}
+
+                    {% elif active_popup.popup_type == 'CALL_BOOKING' %}
+                        <!-- Interactive Book a Call Form -->
+                        <div id="rssBookingFormContainer">
+                            <div id="rssBookingAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
+
+                            <form id="rssPopupCallForm" class="rss-popup-form" novalidate>
+                                {% csrf_token %}
+                                <div class="row g-2">
+                                    <div class="col-12 col-sm-6">
+                                        <label for="rssBookName" class="form-label rss-form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control rss-form-input" id="rssBookName" name="full_name" required placeholder="e.g. Priyadarshini">
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label for="rssBookPhone" class="form-label rss-form-label">Phone Number <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control rss-form-input" id="rssBookPhone" name="phone_number" required placeholder="+91 98765 43210">
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label for="rssBookDate" class="form-label rss-form-label">Preferred Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control rss-form-input" id="rssBookDate" name="booking_date" required>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label for="rssBookSlot" class="form-label rss-form-label">Time Slot <span class="text-danger">*</span></label>
+                                        <select class="form-select rss-form-input" id="rssBookSlot" name="time_slot" required>
+                                            <option value="" disabled selected>Select a slot</option>
+                                            <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                                            <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                                            <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                                            <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                                            <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="rssBookSaree" class="form-label rss-form-label">Saree or Style of Interest <span class="text-muted small">(Optional)</span></label>
+                                        <input type="text" class="form-control rss-form-input" id="rssBookSaree" name="saree_preference" placeholder="e.g. Bridal Kanchipuram, Pure Zari, Soft Silk">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="rss-popup-cta-btn primary-btn-luxury mt-3 w-100" id="rssSubmitBookingBtn">
+                                    <span class="rss-btn-text">
+                                        <i class="bi bi-telephone-outbound me-2"></i>{{ active_popup.cta_text|default:"Book Video Saree Consultation" }}
+                                    </span>
+                                    <span class="rss-btn-spinner d-none">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Scheduling...
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Success Screen for Booking -->
+                        <div id="rssBookingSuccessContainer" class="d-none text-center py-3">
+                            <div class="rss-success-icon mb-2">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 2.8rem;"></i>
+                            </div>
+                            <h4 class="rss-success-title">Call Scheduled!</h4>
+                            <p class="rss-success-msg text-muted mb-3" id="rssSuccessMsgText">
+                                Thank you! Our saree expert will connect with you via video call.
+                            </p>
+                            <div class="rss-booking-ref-badge p-2 mb-3 bg-light rounded border">
+                                <small class="text-uppercase text-muted d-block" style="letter-spacing: 1px; font-size: 0.75rem;">Booking Reference</small>
+                                <strong class="text-primary-dark" id="rssSuccessRef" style="font-size: 1.1rem; letter-spacing: 1.5px;"></strong>
+                            </div>
+                            <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-4" id="rssCloseAfterSuccessBtn">
+                                Done
+                            </button>
+                        </div>
+
+                    {% elif active_popup.popup_type == 'WHATSAPP' %}
+                        <!-- Direct WhatsApp Consultation -->
+                        <div class="rss-whatsapp-box p-3 rounded mb-3">
+                            <p class="mb-2 small text-muted">
+                                <i class="bi bi-chat-dots-fill text-success me-1"></i> Connect directly with our master weavers & saree consultants on WhatsApp.
+                            </p>
+                            <a href="https://wa.me/{{ active_popup.whatsapp_number|default:contact_info.phone|cut:' '|cut:'+'|cut:'-' }}?text={{ active_popup.whatsapp_message|default:'Hello Rangam Saradha Silks, I would like assistance with saree selection.'|urlencode }}" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="rss-popup-cta-btn whatsapp-btn-luxury w-100" 
+                               id="rssPopupWhatsappBtn">
+                                <i class="fa-brands fa-whatsapp fs-5 me-2"></i>
+                                {{ active_popup.cta_text|default:"Chat on WhatsApp Now" }}
+                            </a>
+                        </div>
+
+                    {% elif active_popup.popup_type == 'VIDEO' %}
+                        <!-- Saree Video Spotlight -->
+                        {% if active_popup.cta_link %}
+                            <a href="{{ active_popup.cta_link }}" class="rss-popup-cta-btn primary-btn-luxury" id="rssPopupCtaBtn">
+                                {{ active_popup.cta_text|default:"Watch & Shop Sarees" }}
+                                <i class="bi bi-play-circle ms-2"></i>
+                            </a>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- COLLECTION / General Promotion -->
+                        {% if active_popup.cta_link %}
+                            <a href="{{ active_popup.cta_link }}" class="rss-popup-cta-btn primary-btn-luxury" id="rssPopupCtaBtn">
+                                {{ active_popup.cta_text|default:"Explore Exclusive Collection" }}
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* =======================================================
+   RANGAM SARADHA SILKS - LUXURY PROMOTIONAL POPUP
+   ======================================================= */
+.rss-popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(26, 6, 12, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+}
+
+.rss-popup-backdrop.rss-popup-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.rss-popup-container {
+    position: relative;
+    width: 100%;
+    max-width: 820px;
+    max-height: 90vh;
+    background: #FFFFFF;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(174, 111, 33, 0.22);
+    transform: scale(0.92) translateY(18px);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.rss-popup-backdrop.rss-popup-active .rss-popup-container {
+    transform: scale(1) translateY(0);
+}
+
+.rss-popup-container.no-media {
+    max-width: 520px;
+}
+
+/* Close Button */
+.rss-popup-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(175, 4, 70, 0.15);
+    color: #4A0E17;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 30;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rss-popup-close-btn:hover {
+    background: #AF0446;
+    color: #FFFFFF;
+    transform: rotate(90deg) scale(1.05);
+    border-color: #AF0446;
+}
+
+/* 2-Column Grid */
+.rss-popup-grid {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Media Column */
+.rss-popup-media-col {
+    flex: 0 0 44%;
+    position: relative;
+    background: #190308;
+    overflow: hidden;
+    min-height: 280px;
+}
+
+.rss-popup-image-wrap,
+.rss-popup-video-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.rss-popup-image,
+.rss-popup-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.rss-popup-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(20, 3, 7, 0.35) 100%);
+}
+
+.rss-popup-sound-toggle {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.rss-popup-sound-toggle:hover {
+    background: rgba(175, 4, 70, 0.85);
+}
+
+/* Content Column */
+.rss-popup-content-col {
+    flex: 1;
+    padding: 34px 30px;
+    overflow-y: auto;
+    max-height: 88vh;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FDF9F7 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rss-popup-container.no-media .rss-popup-content-col {
+    padding: 40px 34px;
+}
+
+/* Badge */
+.rss-popup-badge-wrap {
+    margin-bottom: 12px;
+}
+
+.rss-popup-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #AE6F21 0%, #CE8E34 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(174, 111, 33, 0.28);
+}
+
+/* Typography */
+.rss-popup-title {
+    font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+    color: #4A0E17;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 12px;
+}
+
+.rss-popup-desc {
+    color: #555555;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 18px;
+}
+
+/* Coupon Box */
+.rss-popup-coupon-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FFF9F3;
+    border: 1.5px dashed #AE6F21;
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+}
+
+.rss-coupon-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #8A561A;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.rss-coupon-code {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #AF0446;
+    letter-spacing: 2px;
+}
+
+.rss-coupon-copy-btn {
+    border: none;
+    background: #AE6F21;
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rss-coupon-copy-btn:hover {
+    background: #8A561A;
+}
+
+.rss-coupon-copy-btn.copied {
+    background: #28a745 !important;
+}
+
+/* Luxury CTA Button */
+.rss-popup-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 30px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    outline: none;
+}
+
+.primary-btn-luxury {
+    background: linear-gradient(135deg, #AF0446 0%, #800233 100%);
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(175, 4, 70, 0.32);
+}
+
+.primary-btn-luxury:hover {
+    background: linear-gradient(135deg, #C40B4E 0%, #940238 100%);
+    box-shadow: 0 8px 24px rgba(175, 4, 70, 0.45);
+    transform: translateY(-2px);
+    color: #FFFFFF !important;
+}
+
+.whatsapp-btn-luxury {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-btn-luxury:hover {
+    background: linear-gradient(135deg, #28e26d 0%, #0e7266 100%);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.42);
+    transform: translateY(-2px);
+    color: #FFFFFF !important;
+}
+
+/* Booking Form Elements */
+.rss-form-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 3px;
+}
+
+.rss-form-input {
+    font-size: 0.86rem;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid #D8D4D0;
+    background: #FFFFFF;
+    color: #333333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rss-form-input:focus {
+    border-color: #AF0446;
+    box-shadow: 0 0 0 3px rgba(175, 4, 70, 0.12);
+    outline: none;
+}
+
+.rss-whatsapp-box {
+    background: #F4FBF7;
+    border: 1px solid #D1F2DE;
+}
+
+/* Responsive Mobile Layout */
+@media (max-width: 767.98px) {
+    .rss-popup-container {
+        max-width: 95vw;
+        max-height: 88vh;
+        border-radius: 14px;
+    }
+    .rss-popup-grid {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .rss-popup-media-col {
+        flex: 0 0 180px;
+        min-height: 180px;
+        max-height: 180px;
+    }
+    .rss-popup-content-col {
+        padding: 22px 18px;
+        max-height: none;
+    }
+    .rss-popup-title {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+    .rss-popup-desc {
+        font-size: 0.85rem;
+        margin-bottom: 14px;
+    }
+    .rss-popup-close-btn {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<script>
+(function() {
+    const popupId = "{{ active_popup.id }}";
+    const storageKey = 'rss_popup_seen_' + popupId;
+    const popupBackdrop = document.getElementById('rssPromotionalPopup');
+    if (!popupBackdrop) return;
+
+    // Check if user has already seen this popup
+    try {
+        if (localStorage.getItem(storageKey) === 'true') {
+            return; // Already seen, do not display
+        }
+    } catch (e) {
+        console.warn('localStorage is unavailable', e);
+    }
+
+    const closeBtn = document.getElementById('rssPopupCloseBtn');
+    const ctaBtn = document.getElementById('rssPopupCtaBtn');
+    const whatsappBtn = document.getElementById('rssPopupWhatsappBtn');
+    const delaySeconds = {{ active_popup.show_delay_seconds|default:2 }};
+    let soundToggle = document.getElementById('rssPopupSoundToggle');
+    let popupVideo = document.getElementById('rssPopupVideo');
+
+    function showPopup() {
+        popupBackdrop.style.display = 'flex';
+        // Trigger animation on next frame
+        requestAnimationFrame(() => {
+            popupBackdrop.classList.add('rss-popup-active');
+            // Autoplay video if present
+            if (popupVideo) {
+                popupVideo.play().catch(() => {});
+            }
+        });
+    }
+
+    function dismissPopup() {
+        popupBackdrop.classList.remove('rss-popup-active');
+        try {
+            localStorage.setItem(storageKey, 'true');
+        } catch (e) {}
+
+        setTimeout(() => {
+            popupBackdrop.style.display = 'none';
+            if (popupVideo) {
+                popupVideo.pause();
+            }
+        }, 400);
+    }
+
+    // Set delay timer to show popup smoothly
+    setTimeout(showPopup, Math.max(delaySeconds * 1000, 1000));
+
+    // Close Button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', dismissPopup);
+    }
+
+    // Backdrop Click (outside container)
+    popupBackdrop.addEventListener('click', function(e) {
+        if (e.target === popupBackdrop) {
+            dismissPopup();
+        }
+    });
+
+    // Escape Key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && popupBackdrop.classList.contains('rss-popup-active')) {
+            dismissPopup();
+        }
+    });
+
+    // Mark as seen on clicking primary CTA or WhatsApp
+    if (ctaBtn) {
+        ctaBtn.addEventListener('click', function() {
+            try { localStorage.setItem(storageKey, 'true'); } catch (e) {}
+        });
+    }
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', function() {
+            try { localStorage.setItem(storageKey, 'true'); } catch (e) {}
+        });
+    }
+
+    // Video Sound Toggle
+    if (soundToggle && popupVideo) {
+        soundToggle.addEventListener('click', function() {
+            popupVideo.muted = !popupVideo.muted;
+            const icon = soundToggle.querySelector('i');
+            if (icon) {
+                if (popupVideo.muted) {
+                    icon.className = 'bi bi-volume-mute-fill';
+                } else {
+                    icon.className = 'bi bi-volume-up-fill';
+                }
+            }
+        });
+    }
+
+    // Copy Coupon Code
+    const copyCouponBtn = document.getElementById('rssCopyCouponBtn');
+    if (copyCouponBtn) {
+        copyCouponBtn.addEventListener('click', function() {
+            const code = copyCouponBtn.getAttribute('data-code');
+            if (!code) return;
+
+            const copyTextSpan = document.getElementById('rssCopyBtnText');
+            function showCopied() {
+                copyCouponBtn.classList.add('copied');
+                if (copyTextSpan) copyTextSpan.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyCouponBtn.classList.remove('copied');
+                    if (copyTextSpan) copyTextSpan.textContent = 'Copy';
+                }, 2500);
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code).then(showCopied).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const tempInput = document.createElement('input');
+                tempInput.value = code;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try {
+                    document.execCommand('copy');
+                    showCopied();
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(tempInput);
+            }
+        });
+    }
+
+    // Handle Book a Call Form (AJAX)
+    const callForm = document.getElementById('rssPopupCallForm');
+    const bookDateInput = document.getElementById('rssBookDate');
+    if (bookDateInput) {
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        bookDateInput.setAttribute('min', today);
+    }
+
+    if (callForm) {
+        const alertBox = document.getElementById('rssBookingAlert');
+        const submitBtn = document.getElementById('rssSubmitBookingBtn');
+        const formContainer = document.getElementById('rssBookingFormContainer');
+        const successContainer = document.getElementById('rssBookingSuccessContainer');
+        const successRef = document.getElementById('rssSuccessRef');
+        const successMsgText = document.getElementById('rssSuccessMsgText');
+        const closeAfterSuccessBtn = document.getElementById('rssCloseAfterSuccessBtn');
+
+        if (closeAfterSuccessBtn) {
+            closeAfterSuccessBtn.addEventListener('click', dismissPopup);
+        }
+
+        callForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Client validation
+            const name = document.getElementById('rssBookName').value.trim();
+            const phone = document.getElementById('rssBookPhone').value.trim();
+            const date = document.getElementById('rssBookDate').value;
+            const slot = document.getElementById('rssBookSlot').value;
+            const saree = document.getElementById('rssBookSaree') ? document.getElementById('rssBookSaree').value.trim() : '';
+
+            if (!name || !phone || !date || !slot) {
+                showAlert('Please fill in all required fields.', 'danger');
+                return;
+            }
+
+            // Button loading state
+            setBtnLoading(true);
+            hideAlert();
+
+            const formData = new FormData();
+            formData.append('full_name', name);
+            formData.append('phone_number', phone);
+            formData.append('booking_date', date);
+            formData.append('time_slot', slot);
+            formData.append('saree_preference', saree);
+
+            const csrfTokenElement = callForm.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfToken = csrfTokenElement ? csrfTokenElement.value : (typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '');
+
+            fetch("{% url 'home:popup_book_call' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                setBtnLoading(false);
+                if (data.success) {
+                    // Success display
+                    if (formContainer) formContainer.classList.add('d-none');
+                    if (successContainer) {
+                        successContainer.classList.remove('d-none');
+                        if (successRef) successRef.textContent = data.booking_reference;
+                        if (successMsgText && data.message) successMsgText.textContent = data.message;
+                    }
+                    // Mark popup as seen
+                    try { localStorage.setItem(storageKey, 'true'); } catch (e) {}
+                } else {
+                    showAlert(data.message || 'Unable to complete your booking. Please try another slot or contact us.', 'danger');
+                }
+            })
+            .catch(err => {
+                setBtnLoading(false);
+                showAlert('An unexpected network error occurred. Please try again or reach out on WhatsApp.', 'danger');
+                console.error(err);
+            });
+        });
+
+        function showAlert(msg, type) {
+            if (!alertBox) return;
+            alertBox.className = `alert alert-${type} mb-3 py-2 px-3 small`;
+            alertBox.textContent = msg;
+            alertBox.classList.remove('d-none');
+        }
+
+        function hideAlert() {
+            if (!alertBox) return;
+            alertBox.classList.add('d-none');
+            alertBox.textContent = '';
+        }
+
+        function setBtnLoading(isLoading) {
+            if (!submitBtn) return;
+            const textSpan = submitBtn.querySelector('.rss-btn-text');
+            const spinnerSpan = submitBtn.querySelector('.rss-btn-spinner');
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                if (textSpan) textSpan.classList.add('d-none');
+                if (spinnerSpan) spinnerSpan.classList.remove('d-none');
+            } else {
+                if (textSpan) textSpan.classList.remove('d-none');
+                if (spinnerSpan) spinnerSpan.classList.add('d-none');
+            }
+        }
+    }
+})();
+</script>
+{% endif %}

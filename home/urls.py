@@ -9,5 +9,6 @@ urlpatterns = [
     path('faqs/', views.faq_view, name='faq'),
     path('contact/', views.contact_view, name='contact'),
     path('api/contact/', views.ContactFormAPIView.as_view(), name='api_contact_home'),
+    path('api/popup-book-call/', views.popup_book_call_api, name='popup_book_call'),
     path('debug-db/', views.debug_db_view, name='debug_db'),
 ]

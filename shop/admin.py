@@ -99,10 +99,21 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'display_order', 'is_active']
+    list_display = ['category_thumbnail', 'name', 'display_order', 'is_active']
+    list_display_links = ['category_thumbnail', 'name']
+    list_editable = ['display_order', 'is_active']
     list_filter = ['is_active']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
+
+    def category_thumbnail(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" width="48" height="48" style="object-fit: cover; border-radius: 50%; border: 2px solid #C5A059;" alt="{}">',
+                obj.image.url, obj.name
+            )
+        return format_html('<span style="color: #999;">No Image</span>')
+    category_thumbnail.short_description = "Preview"
 
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['name', 'is_active']
@@ -413,12 +424,18 @@ class CallSlotAdmin(admin.ModelAdmin):
 
 
 class CallBookingAdmin(admin.ModelAdmin):
-    list_display = ['booking_reference', 'full_name', 'phone_number', 'email', 'product', 'product_sku', 'booking_date', 'time_slot', 'status', 'created_at']
+    list_display = ['booking_reference', 'full_name', 'phone_number', 'email', 'saree_display', 'product_sku', 'booking_date', 'time_slot', 'status', 'created_at']
     list_filter = ['status', 'booking_date', 'time_slot', 'product']
-    search_fields = ['booking_reference', 'full_name', 'email', 'phone_number', 'product__name', 'product__sku']
+    search_fields = ['booking_reference', 'full_name', 'email', 'phone_number', 'saree_preference', 'product__name', 'product__sku']
     readonly_fields = ['booking_reference', 'created_at', 'updated_at']
     list_editable = ['status']
     ordering = ['-created_at']
+
+    def saree_display(self, obj):
+        if obj.product:
+            return obj.product.name
+        return obj.saree_preference or "General Consultation"
+    saree_display.short_description = "Saree / Product"
 
     def product_sku(self, obj):
         return obj.product.sku if obj.product and obj.product.sku else "-"

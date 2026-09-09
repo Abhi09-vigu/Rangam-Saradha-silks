@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block meta_title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block title %}{% if page.slug == 'about-us' %}About Us | Rangam Saradha Silks{% else %}{{ page.meta_title|default:page.title }} | Rangam Saradha Silks{% endif %}{% endblock %}
 {% block meta_description %}{% if page.slug == 'about-us' %}Discover the story of Rangam Saradha Silks. Learn about our commitment to authentic handwoven pure silk sarees, artisan weavers, and Indian textile heritage.{% else %}{{ page.meta_description|default:page.title|add:' - Rangam Saradha Silks premium traditional silk sarees.' }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{ page.meta_keywords|default:'Rangam Saradha Silks, Silk Sarees, Traditional Sarees' }}{% endblock %}
 {% block canonical %}https://rangamsaradhasilks.com/page/{{ page.slug }}/{% endblock %}
@@ -11,6 +10,12 @@
 {% block og_description %}{% if page.slug == 'about-us' %}Discover the story of Rangam Saradha Silks. Learn about our commitment to authentic handwoven pure silk sarees, artisan weavers, and Indian textile heritage.{% else %}{{ page.meta_description|default:page.title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -31,61 +36,711 @@
   ]
 }
 </script>
+
+{% if page.slug == 'about-us' %}
+<style>
+    /* Exact Luxury Editorial Design Matching Reference Image 1 */
+    :root {
+        --rss-cream-bg: #FAF7F2;
+        --rss-burgundy: #5A0F1B;
+        --rss-burgundy-dark: #450811;
+        --rss-gold: #9E6E2E;
+        --rss-gold-bright: #C5A059;
+        --rss-gold-border: #D8C3A5;
+        --rss-charcoal: #332D2B;
+        --rss-text-muted: #5C5451;
+        --rss-serif: 'Playfair Display', Georgia, serif;
+        --rss-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        --rss-script: 'Alex Brush', cursive;
+    }
+
+    .about-exact-wrapper {
+        background-color: var(--rss-cream-bg);
+        color: var(--rss-charcoal);
+        font-family: var(--rss-sans);
+        line-height: 1.7;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Common Typography */
+    .eyebrow-text {
+        font-family: var(--rss-sans);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--rss-gold);
+        display: inline-block;
+        margin-bottom: 1.1rem;
+    }
+
+    .section-main-heading {
+        font-family: var(--rss-serif);
+        font-size: clamp(2rem, 3.8vw, 2.9rem);
+        font-weight: 600;
+        color: var(--rss-burgundy);
+        line-height: 1.18;
+        margin-bottom: 1.2rem;
+    }
+
+    .section-paragraph {
+        font-size: 0.94rem;
+        color: var(--rss-text-muted);
+        line-height: 1.8;
+        font-weight: 400;
+        max-width: 500px;
+    }
+
+    /* Buttons */
+    .btn-exact-burgundy {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--rss-burgundy);
+        color: #FFFFFF !important;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 0.8rem 1.8rem;
+        border-radius: 4px;
+        border: 1px solid var(--rss-burgundy);
+        box-shadow: 0 4px 12px rgba(90, 15, 27, 0.2);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        text-decoration: none;
+    }
+
+    .btn-exact-burgundy:hover {
+        background-color: var(--rss-burgundy-dark);
+        border-color: var(--rss-burgundy-dark);
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(90, 15, 27, 0.3);
+    }
+
+    .btn-exact-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        color: #FAF7F2 !important;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 0.75rem 1.7rem;
+        border-radius: 4px;
+        border: 1px solid rgba(250, 247, 242, 0.85);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-exact-outline:hover {
+        background-color: var(--rss-gold-bright);
+        border-color: var(--rss-gold-bright);
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+    }
+
+    .story-link {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--rss-burgundy);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border-bottom: 1.5px solid var(--rss-gold);
+        padding-bottom: 2px;
+        transition: all 0.25s ease;
+    }
+
+    .story-link:hover {
+        color: var(--rss-gold);
+        border-color: var(--rss-burgundy);
+        padding-left: 3px;
+    }
+
+    /* 1. HERO SECTION */
+    .hero-corner-art {
+        position: absolute;
+        left: 0;
+        top: 25px;
+        width: 38px;
+        opacity: 0.85;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .hero-stat-value {
+        font-family: var(--rss-serif);
+        font-size: 2.1rem;
+        font-weight: 600;
+        color: var(--rss-burgundy);
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .hero-stat-label {
+        font-size: 0.72rem;
+        color: var(--rss-text-muted);
+        line-height: 1.3;
+        font-weight: 400;
+    }
+
+    .hero-stat-divider {
+        width: 1px;
+        height: 38px;
+        background-color: var(--rss-gold-border);
+    }
+
+    .hero-right-img {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(197, 160, 89, 0.22);
+        background-color: var(--rss-cream-bg);
+        transition: transform 0.5s ease;
+    }
+
+    .hero-right-img:hover {
+        transform: scale(1.012);
+    }
+
+    /* 2. OUR JOURNEY SECTION */
+    .journey-img-frame {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .journey-side-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.4rem;
+    }
+
+    .vertical-badge-text {
+        writing-mode: vertical-rl;
+        text-transform: uppercase;
+        font-size: 0.62rem;
+        letter-spacing: 0.28em;
+        color: var(--rss-gold);
+        font-weight: 600;
+    }
+
+    /* 3. WHY SECTION */
+    .value-circle-badge {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background-color: #FAF4EB;
+        border: 1px solid var(--rss-gold-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .value-unit:hover .value-circle-badge {
+        background-color: var(--rss-burgundy);
+        border-color: var(--rss-burgundy);
+        transform: translateY(-3px);
+    }
+
+    .value-unit:hover .value-circle-badge svg {
+        stroke: #FFFFFF !important;
+    }
+
+    .value-unit-title {
+        font-family: var(--rss-serif);
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: var(--rss-charcoal);
+        line-height: 1.35;
+        text-align: center;
+    }
+
+    /* 4. PROMISE SECTION */
+    .promise-split-banner {
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 16px 45px rgba(90, 15, 27, 0.16);
+        background-color: var(--rss-burgundy);
+    }
+
+    .promise-telugu-text {
+        font-family: 'Gautami', 'Nirmala UI', 'Mandali', var(--rss-serif);
+        font-size: clamp(2rem, 3.4vw, 2.7rem);
+        color: #FFFFFF;
+        font-weight: 700;
+        line-height: 1.35;
+        margin-bottom: 1.2rem;
+        letter-spacing: 0.02em;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .promise-body-text {
+        font-size: 0.95rem;
+        color: #EDE4DC;
+        line-height: 1.85;
+        font-weight: 300;
+        max-width: 460px;
+    }
+
+    .btn-promise-luxury {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        color: #FFFFFF !important;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        padding: 0.85rem 1.9rem;
+        border-radius: 4px;
+        border: 1.5px solid rgba(255, 255, 255, 0.85);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-promise-luxury:hover {
+        background-color: var(--rss-gold-bright);
+        border-color: var(--rss-gold-bright);
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .promise-vertical-statement {
+        position: absolute;
+        right: 22px;
+        bottom: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        text-align: right;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.72rem;
+        letter-spacing: 0.25em;
+        font-weight: 600;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* 5. FOUNDER'S NOTE */
+    .founder-card-seamless-box {
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(197, 160, 89, 0.25);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        transition: transform 0.35s ease;
+    }
+
+    .founder-card-seamless-box:hover {
+        transform: translateY(-3px);
+    }
+
+    .founder-signature-royal {
+        font-family: 'Great Vibes', 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-size: clamp(2.3rem, 3.8vw, 3.1rem);
+        font-weight: 500;
+        color: var(--rss-burgundy);
+        line-height: 1.15;
+    }
+
+    .founder-subline-royal {
+        font-family: var(--rss-sans);
+        font-size: 0.76rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--rss-gold);
+        font-weight: 600;
+        margin-top: 0.35rem;
+    }
+
+    /* 6. CUSTOMER FEEDBACK */
+    .feedback-enclosure {
+        background-color: #FAF7F2;
+        border: 1px solid var(--rss-gold-border);
+        border-radius: 16px;
+        padding: 2.5rem 2.5rem;
+    }
+
+    .feedback-icon-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #FAF4EB;
+        border: 1px solid var(--rss-gold-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feedback-telugu-phrase {
+        font-family: 'Gautami', 'Nirmala UI', 'Mandali', var(--rss-serif);
+        font-size: 1.45rem;
+        color: var(--rss-burgundy);
+        font-weight: 700;
+        line-height: 1.45;
+    }
+
+    .telugu-accent-line {
+        color: var(--rss-gold);
+        font-size: 0.8rem;
+        letter-spacing: 0.1em;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+
+        .hero-corner-art,
+        .temple-backdrop-art,
+        .journey-side-badge {
+            display: none !important;
+        }
+
+        .about-exact-section {
+            padding-top: 2.8rem !important;
+            padding-bottom: 2.8rem !important;
+        }
+    }
+</style>
+{% endif %}
 {% endblock %}
 
 {% block content %}
+{% if page.slug == 'about-us' %}
+<div class="about-exact-wrapper">
+
+
+    <!-- 1. HERO SECTION -->
+    <section class="about-exact-section py-5 position-relative">
+        <img src="{% static 'images/about/corner_ornament.png' %}" alt="" class="hero-corner-art d-none d-lg-block">
+
+        <div class="container py-lg-3 position-relative" style="max-width: 1240px;">
+            <div class="row align-items-center g-5">
+                <!-- Left Text Column -->
+                <div class="col-lg-6">
+                    <div class="pe-xl-3">
+                        <span class="eyebrow-text">&mdash; ABOUT US &mdash;</span>
+                        <h1 class="section-main-heading mb-3">
+                            A Story Woven<br>
+                            Through Four<br>
+                            Generations
+                        </h1>
+                        <p class="section-paragraph mb-4 pb-1">
+                            For four generations, our family has been part of the handloom tradition. What began as a
+                            family legacy is now Rangam Saradha Silks — a promise to keep our culture, craftsmanship,
+                            and weavers’ heritage alive.
+                        </p>
+
+                        <div class="mb-4 pb-2">
+                            <a href="{% url 'shop:catalog' %}" class="btn-exact-burgundy">
+                                EXPLORE OUR COLLECTION <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+
+                        <!-- 3 Statistics Row -->
+                        <div class="d-flex align-items-center gap-4 pt-3">
+                            <div>
+                                <div class="hero-stat-value">4+</div>
+                                <div class="hero-stat-label">Generations<br>of Tradition</div>
+                            </div>
+                            <div class="hero-stat-divider"></div>
+                            <div>
+                                <div class="hero-stat-value">1000+</div>
+                                <div class="hero-stat-label">Happy<br>Customers</div>
+                            </div>
+                            <div class="hero-stat-divider"></div>
+                            <div>
+                                <div class="hero-stat-value">Pure</div>
+                                <div class="hero-stat-label">Handloom<br>Sarees</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Visual Column (Founder Editorial Hero Portrait - HD) -->
+                <div class="col-lg-6">
+                    <div class="hero-right-img">
+                        <img src="{% static 'images/about/hero_founder_hd.jpg' %}?v=1"
+                            alt="Rangam Saradha Silks - Four Generations of Handloom Heritage"
+                            class="w-100 h-auto object-fit-cover d-block">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. OUR JOURNEY SECTION -->
+    <section class="about-exact-section py-5 position-relative">
+        <div class="container py-lg-3" style="max-width: 1240px;">
+            <div class="row align-items-center g-5">
+                <!-- Left Weaver Visual / Video -->
+                <div class="col-lg-5">
+                    <div class="journey-img-frame position-relative overflow-hidden">
+                        <video class="w-100 h-auto object-fit-cover d-block" autoplay loop muted playsinline
+                            poster="{% static 'images/about/journey_weaver.jpg' %}?v=2">
+                            <source src="{% static 'images/about/journey_weaver.mp4' %}" type="video/mp4">
+                            <img src="{% static 'images/about/journey_weaver.jpg' %}?v=2"
+                                alt="Traditional Handloom Weaver Artisan - Rangam Saradha Silks"
+                                class="w-100 h-auto object-fit-cover">
+                        </video>
+                    </div>
+                </div>
+
+                <!-- Middle / Right Text Column -->
+                <div class="col-lg-6">
+                    <div class="ps-lg-3">
+                        <span class="eyebrow-text">&mdash; OUR JOURNEY &mdash;</span>
+                        <h2 class="section-main-heading mb-3">From Our Family To Yours</h2>
+                        <p class="section-paragraph mb-4">
+                            We work closely with our own weavers, building relationships beyond business. Every saree we
+                            bring to you carries the patience, skill, and love of the people who create it.
+                        </p>
+                        <a href="{% url 'shop:catalog' %}" class="story-link">
+                            OUR STORY &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Far Right Badge Accent -->
+                <div class="col-lg-1 d-none d-lg-flex justify-content-end">
+                    <div class="journey-side-badge">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="1.3">
+                            <path d="M12 2C12 2 8 8 8 13C8 16.5 10 19 12 21C14 19 16 16.5 16 13C16 8 12 2 12 2Z" />
+                            <path d="M12 21C9 19 4 16 4 12C4 9 7 6 12 2C17 6 20 9 20 12C20 16 15 19 12 21Z" />
+                        </svg>
+                        <div class="vertical-badge-text my-2">
+                            HANDCRAFTED &bull; BY GENERATIONS &bull; CARRIED BY YOU
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. WHY RANGAM SARADHA SILKS SECTION -->
+    <section class="about-exact-section py-5">
+        <div class="container py-lg-3" style="max-width: 1240px;">
+            <div class="row align-items-center g-5">
+                <!-- Left Text -->
+                <div class="col-lg-5">
+                    <span class="eyebrow-text">&mdash; WHY RANGAM SARADHA SILKS &mdash;</span>
+                    <h2 class="section-main-heading mb-3">Tradition Meets Today</h2>
+                    <p class="section-paragraph mb-0">
+                        We started Rangam Saradha Silks to bring authentic handloom sarees closer to you — where
+                        tradition meets modern style, and every saree feels personal.
+                    </p>
+                </div>
+
+                <!-- Right 3 Value Units (Clean Circular Line Icon Badges) -->
+                <div class="col-lg-7">
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-4 text-center">
+                            <div class="value-unit">
+                                <div class="value-circle-badge">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5A0F1B"
+                                        stroke-width="1.4">
+                                        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                                        <polyline points="2 17 12 22 22 17" />
+                                        <polyline points="2 12 12 17 22 12" />
+                                    </svg>
+                                </div>
+                                <div class="value-unit-title">Authentic Handlooms</div>
+                            </div>
+                        </div>
+
+                        <div class="col-4 text-center">
+                            <div class="value-unit">
+                                <div class="value-circle-badge">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5A0F1B"
+                                        stroke-width="1.4">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <div class="value-unit-title">Our Own Weavers</div>
+                            </div>
+                        </div>
+
+                        <div class="col-4 text-center">
+                            <div class="value-unit">
+                                <div class="value-circle-badge">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5A0F1B"
+                                        stroke-width="1.4">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="value-unit-title">A Relationship<br>Not Just a Sale</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. OUR PROMISE SECTION (Crystal Clear 8K Luxury Silk Detail) -->
+    <section class="about-exact-section py-5">
+        <div class="container py-lg-2" style="max-width: 1240px;">
+            <div class="promise-split-banner">
+                <div class="row g-0 align-items-stretch">
+                    <!-- Left Burgundy Side -->
+                    <div class="col-lg-6 p-4 p-md-5 p-xl-5 d-flex flex-column justify-content-center"
+                        style="background-color: var(--rss-burgundy);">
+                        <span class="eyebrow-text mb-2" style="color: var(--rss-gold-bright);">&mdash; OUR PROMISE
+                            &mdash;</span>
+                        <h2 class="promise-telugu-text">మీ నమ్మకం… మా బాధ్యత.</h2>
+                        <p class="promise-body-text mb-4 pb-1">
+                            We may start with a saree, but we want to build something more valuable — your trust. Your
+                            satisfaction is our true success.
+                        </p>
+                        <div>
+                            <a href="{% url 'shop:catalog' %}" class="btn-promise-luxury">
+                                SHOP WITH CONFIDENCE &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Saree Detail Photo (Crystal Clear Ultra-High-Resolution) -->
+                    <div class="col-lg-6 position-relative p-0 overflow-hidden" style="min-height: 380px;">
+                        <img src="{% static 'images/about/promise_saree_luxury.jpg' %}"
+                            alt="Authentic Pure Silk Saree with Rich Gold Zari Weave"
+                            class="w-100 h-100 object-fit-cover d-block" style="min-height: 380px;">
+                        <div class="promise-vertical-statement">
+                            <span>A SAREE</span>
+                            <span>A TRADITION</span>
+                            <span>A STORY</span>
+                            <span>FOREVER</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. FOUNDER'S NOTE -->
+    <section class="about-exact-section py-5 position-relative">
+        <div class="container py-lg-3 position-relative" style="max-width: 1240px;">
+            <div class="row align-items-center g-5">
+                <!-- Left Card: Seamless Luxury Card with Owner Pic and Calligraphy -->
+                <div class="col-lg-5">
+                    <div class="founder-card-seamless-box rounded-4 overflow-hidden shadow-sm">
+                        <img src="{% static 'images/about/founder_card_perfect.jpg' %}?v=4"
+                            alt="Founder - Rangam Saradha Silks" class="w-100 h-auto object-fit-cover d-block">
+                    </div>
+                </div>
+
+                <!-- Right Editorial Note -->
+                <div class="col-lg-7">
+                    <div class="ps-lg-4">
+                        <span class="eyebrow-text">&mdash; FOUNDER'S NOTE &mdash;</span>
+                        <h2 class="section-main-heading mb-3">
+                            Four Generations.<br>
+                            One Continuing Story.
+                        </h2>
+                        <p class="section-paragraph mb-4">
+                            Our weavers, our family, and you — together keep this beautiful tradition alive. Every time
+                            you choose a Rangam Saradha saree, our story gets a new chapter.
+                        </p>
+                        <div class="pt-2">
+                            <div class="founder-signature-royal">Rangam Saradha Silks</div>
+                            <div class="founder-subline-royal">Tradition in Every Drape.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. CUSTOMER FEEDBACK SECTION (Exact Matching Image 1) -->
+    <section class="about-exact-section py-5 pb-lg-6">
+        <div class="container" style="max-width: 1240px;">
+            <div class="feedback-enclosure">
+                <div class="row align-items-center g-4">
+                    <!-- Left Feedback Details -->
+                    <div class="col-lg-7">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="feedback-icon-btn flex-shrink-0">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A0F1B"
+                                    stroke-width="1.5">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="eyebrow-text mb-1">&mdash; YOUR VOICE MATTERS &mdash;</span>
+                                <h3 class="section-main-heading mb-2" style="font-size: 1.85rem;">Help Us Grow Better
+                                </h3>
+                                <p class="section-paragraph mb-3 mb-lg-0" style="font-size: 0.88rem;">
+                                    Your feedback helps us improve. Share your thoughts about our sarees, designs, or
+                                    service — we’d love to hear from you.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Action & Telugu Phrase -->
+                    <div class="col-lg-5">
+                        <div
+                            class="ps-lg-4 border-start-lg d-flex flex-column align-items-lg-center text-lg-center gap-2">
+                            <a href="{% url 'home:contact' %}" class="btn-exact-burgundy">
+                                SHARE YOUR FEEDBACK &rarr;
+                            </a>
+                            <div class="mt-2 text-center">
+                                <div class="feedback-telugu-phrase">
+                                    మీ మాట<br>
+                                    మా అభివృద్ధికి మార్గం.
+                                </div>
+                                <div class="telugu-accent-line mt-1">
+                                    <span>&diams; &mdash;&mdash;&mdash; &diams;</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+{% else %}
+
+<!-- Generic CMS Page Layout -->
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
         <h1 class="font-heading display-4 text-dark mb-0">{{ page.title }}</h1>
     </div>
 </section>
 
-<section class="section-luxury">
+<section class="section-luxury py-5">
     <div class="container">
-        {% if page.slug == 'about-us' %}
-        <!-- Row 1: Brand Legacy Story -->
-        <div class="row g-5 align-items-center mb-5 pb-5">
-            <div class="col-lg-7">
-                <article class="cms-content text-dark fs-6" style="line-height: 1.8;">
-                    {{ about_section_1|safe }}
-                </article>
-            </div>
-            <div class="col-lg-5">
-                <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
-                    <img src="{% static 'images/about_side.jpg' %}" alt="Rangam Saradha Silk Sarees Pure Handloom Artistry" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
-                    <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
-                        <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Legacy Woven Since 1995</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Row 2: What We Offer -->
-        <div class="row g-5 align-items-center mt-5">
-            <div class="col-lg-5 order-2 order-lg-1">
-                <div class="position-relative overflow-hidden rounded-4 shadow-lg border border-light" style="max-height: 600px;">
-                    <img src="{% static 'images/about_offer.jpg' %}" alt="Rangam Saradha Silks Handcrafted Saree Collections" class="w-100 img-fluid" style="object-fit: cover; aspect-ratio: 3/4;">
-                    <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white text-center" style="background: linear-gradient(transparent, rgba(0,0,0,0.85));">
-                        <span class="fs-6 fw-semibold text-uppercase letter-spacing-2 text-white">Exquisite Boutique Craftsmanship</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-7 order-1 order-lg-2">
-                <article class="cms-content text-dark fs-6" style="line-height: 1.8;">
-                    {{ about_section_2|safe }}
-                </article>
-            </div>
-        </div>
-        {% else %}
         <div class="row justify-content-center">
             <div class="col-lg-9">
-                <article class="cms-content text-dark">
-                    <!-- Renders dynamic HTML content safely -->
+                <article class="cms-content text-dark fs-6" style="line-height: 1.8;">
                     {{ page.content|safe }}
                 </article>
             </div>
         </div>
-        {% endif %}
     </div>
 </section>
+
+{% endif %}
 {% endblock %}

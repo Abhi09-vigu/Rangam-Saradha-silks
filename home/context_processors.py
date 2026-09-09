@@ -67,7 +67,7 @@ def global_context(request):
         cart_total = Decimal("0.00")
 
     wishlist_product_ids = []
-    if request.user.is_authenticated and not request.user.is_staff:
+    if hasattr(request, 'user') and request.user.is_authenticated and not request.user.is_staff:
         try:
             from accounts.models import Wishlist
             wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
@@ -85,6 +85,21 @@ def global_context(request):
     google_client_id = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
     firebase_config = getattr(settings, 'FIREBASE_CONFIG', {})
 
+    active_popup = None
+    try:
+        from django.db import models
+        from django.utils import timezone
+        from home.models import Popup
+        now = timezone.now()
+        active_popup = Popup.objects.filter(
+            is_active=True
+        ).filter(
+            models.Q(start_date__isnull=True) | models.Q(start_date__lte=now),
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
+        ).order_by('-priority', '-created_at').first()
+    except Exception:
+        active_popup = None
+
     return {
         "site_settings": settings_obj,
         "contact_info": contact_obj,
@@ -94,4 +109,5 @@ def global_context(request):
         "wishlist_product_ids": wishlist_product_ids,
         "google_client_id": google_client_id,
         "firebase_config": firebase_config,
+        "active_popup": active_popup,
     }

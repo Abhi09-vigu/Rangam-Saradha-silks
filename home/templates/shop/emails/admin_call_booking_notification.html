@@ -30,8 +30,8 @@
                 <tr><td class="label">Customer Name</td><td>{{ booking.full_name }}</td></tr>
                 <tr><td class="label">Phone</td><td>{{ booking.phone_number }}</td></tr>
                 <tr><td class="label">Email</td><td>{{ booking.email|default:"Not Provided" }}</td></tr>
-                <tr><td class="label">Product</td><td>{{ booking.product.name }}</td></tr>
-                <tr><td class="label">Product ID/SKU</td><td>{{ booking.product.sku|default:booking.product.id }}</td></tr>
+                <tr><td class="label">Product</td><td>{% if booking.product %}{{ booking.product.name }}{% elif booking.saree_preference %}{{ booking.saree_preference }}{% else %}General Consultation{% endif %}</td></tr>
+                <tr><td class="label">Product ID/SKU</td><td>{% if booking.product %}{{ booking.product.sku|default:booking.product.id }}{% else %}N/A{% endif %}</td></tr>
                 <tr><td class="label">Date</td><td>{{ booking.booking_date|date:"Y-m-d" }}</td></tr>
                 <tr><td class="label">Time Slot</td><td>{{ booking.time_slot }}</td></tr>
                 <tr><td class="label">Message</td><td>{{ booking.notes|default:"" }}</td></tr>

@@ -262,7 +262,6 @@
                         <li><a href="{% url 'shop:catalog' %}" class="d-block py-1">Shop All</a></li>
                         <li><a href="{% url 'home:cms_page' slug='about-us' %}" class="d-block py-1">About Us</a></li>
                         <li><a href="{% url 'home:contact' %}" class="d-block py-1">Contact Us</a></li>
-                        <li><a href="{% url 'home:faq' %}" class="d-block py-1">FAQ</a></li>
                     </ul>
                 </div>
                 
@@ -318,6 +317,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Promotional First-Visit Popup -->
+    {% include 'includes/promotional_popup.html' %}
 
     <!-- Global Config for JS -->
     <script>

@@ -15,6 +15,9 @@ class BaseSitemap(Sitemap):
 
 
 class StaticViewSitemap(BaseSitemap):
+    priority = 0.9
+    changefreq = 'daily'
+
     def items(self):
         return ['home:index', 'shop:categories', 'shop:catalog', 'home:contact', 'home:faq']
 
@@ -43,10 +46,14 @@ class StaticViewSitemap(BaseSitemap):
 
 
 class CMSPageSitemap(BaseSitemap):
+    priority = 0.7
+    changefreq = 'weekly'
+
     def items(self):
         return CMSPage.objects.all().order_by('id')
 
     def location(self, item):
+        return reverse('home:cms_page', kwargs={'slug': item.slug})
         return item.get_absolute_url()
 
     def priority(self, item):
@@ -68,6 +75,7 @@ class CategorySitemap(BaseSitemap):
         return Category.objects.filter(is_active=True).order_by('display_order', 'id')
 
     def location(self, item):
+        return reverse('shop:category_detail', kwargs={'category_slug': item.slug})
         return item.get_absolute_url()
 
 
@@ -82,5 +90,6 @@ class ProductSitemap(BaseSitemap):
         return item.updated_at
 
     def location(self, item):
+        return reverse('shop:product_detail', kwargs={'slug': item.slug})
         return item.get_absolute_url()
 

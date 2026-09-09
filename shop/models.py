@@ -149,6 +149,23 @@ class Product(models.Model):
         url = self.video_url.strip().lower()
         return url.endswith(('.mp4', '.webm', '.ogg', '.mov', '.m4v'))
 
+    @property
+    def approved_reviews(self):
+        return self.reviews.filter(is_approved=True)
+
+    @property
+    def review_count(self):
+        return self.approved_reviews.count()
+
+    @property
+    def average_rating(self):
+        approved = self.approved_reviews
+        if approved.exists():
+            from django.db.models import Avg
+            avg = approved.aggregate(Avg('rating'))['rating__avg']
+            return round(avg, 1) if avg else 0
+        return 0
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
@@ -163,7 +180,7 @@ class Review(models.Model):
     rating = models.IntegerField(default=5, choices=[(i, i) for i in range(1, 6)])
     comment = models.TextField()
     image = models.ImageField(upload_to='reviews/', blank=True, null=True)
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -319,11 +336,12 @@ class CallBooking(models.Model):
     )
 
     booking_reference = models.CharField(max_length=20, unique=True, editable=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='call_bookings')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='call_bookings')
+    saree_preference = models.CharField(max_length=255, blank=True, null=True, help_text="Saree or product of interest from general booking")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='call_bookings')
     
     full_name = models.CharField(max_length=150)
-    email = models.EmailField()
+    email = models.EmailField(blank=True, default='')
     phone_number = models.CharField(max_length=20)
     booking_date = models.DateField()
     time_slot = models.CharField(max_length=50, choices=TIME_SLOT_CHOICES)
@@ -345,7 +363,8 @@ class CallBooking(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Book a Call #{self.booking_reference} - {self.full_name} ({self.product.name})"
+        prod_label = self.product.name if self.product else (self.saree_preference or 'General Consultation')
+        return f"Book a Call #{self.booking_reference} - {self.full_name} ({prod_label})"
 
 
 class CallSlot(models.Model):
