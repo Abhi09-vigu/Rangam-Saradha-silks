@@ -22,12 +22,35 @@
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    box-sizing: border-box;
+}
+
 body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
     font-family: var(--font-body);
     color: var(--text-color);
     background-color: var(--bg-color);
     font-size: 0.95rem;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+img, video, iframe {
+    max-width: 100%;
+    height: auto;
 }
 
 h1,
@@ -3219,8 +3242,8 @@ h6,
 @media (max-width: 991.98px) {
     .rss-hero-stage {
         height: auto;
-        min-height: 520px;
-        padding: 50px 0;
+        min-height: 460px;
+        padding: 40px 0;
     }
 
     .rss-hero-content-box {
@@ -3239,7 +3262,232 @@ h6,
     }
 
     .rss-hero-editorial-badge {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .rss-hero-section {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .rss-hero-stage {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: unset;
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .rss-hero-bg-media {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        max-height: 60vw;
+        min-height: 220px;
+        object-fit: cover;
+        object-position: center 25%;
+        display: block;
+        z-index: 1;
+    }
+
+    .rss-hero-gradient-overlay {
         display: none;
+    }
+
+    .rss-hero-content-layer {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        background-color: #120207;
+        padding: 24px 0 20px 0;
+    }
+
+    .rss-hero-content-box {
+        max-width: 100%;
+        padding: 0;
+        text-align: left;
+    }
+
+    .rss-hero-eyebrow-row {
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .rss-hero-eyebrow-row .eyebrow-line {
+        width: 28px;
+    }
+
+    .rss-hero-title {
+        font-size: clamp(30px, 8vw, 36px);
+        line-height: 1.2;
+        margin-bottom: 14px;
+        word-break: break-word;
+    }
+
+    .rss-hero-description {
+        font-size: clamp(15px, 4vw, 17px);
+        line-height: 1.55;
+        margin-bottom: 22px;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 100%;
+    }
+
+    .rss-hero-btn-row {
+        gap: 12px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .rss-hero-primary-btn {
+        padding: 12px 24px;
+        font-size: 0.92rem;
+        flex: 0 0 auto;
+        border-radius: 6px;
+    }
+
+    .rss-hero-story-btn {
+        padding: 8px 12px;
+    }
+
+    .rss-hero-story-btn .story-play-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .rss-hero-story-btn .story-play-text {
+        font-size: 0.88rem;
+    }
+
+    /* 3 Heritage / USP Badges */
+    .rss-hero-badges-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding-top: 16px;
+        margin-top: 10px;
+        border-top: 1px solid rgba(197, 160, 89, 0.25);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .rss-hero-badge-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 6px;
+        padding: 4px 2px;
+    }
+
+    .rss-hero-badge-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .rss-hero-badge-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .rss-hero-badge-text {
+        font-size: 0.68rem;
+        line-height: 1.25;
+        color: #E5D3B8;
+        text-align: center;
+        letter-spacing: 0.02em;
+        font-weight: 500;
+    }
+
+    .rss-hero-counter {
+        bottom: 12px;
+        left: 16px;
+        font-size: 0.75rem;
+    }
+
+    .rss-hero-arrow-btns {
+        bottom: 10px;
+        right: 16px;
+        gap: 8px;
+    }
+
+    .rss-hero-arrow-btns .hero-arrow {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .rss-hero-bg-media {
+        height: 240px;
+    }
+
+    .rss-hero-title {
+        font-size: clamp(28px, 8.5vw, 34px);
+    }
+
+    .rss-hero-description {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .rss-hero-btn-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .rss-hero-primary-btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .rss-hero-story-btn {
+        justify-content: center;
+    }
+
+    .rss-hero-badges-row {
+        gap: 6px;
+    }
+
+    .rss-hero-badge-text {
+        font-size: 0.64rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .rss-hero-bg-media {
+        height: 210px;
+    }
+
+    .rss-hero-title {
+        font-size: clamp(24px, 8vw, 29px);
+    }
+
+    .rss-hero-badges-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
+
+    .rss-hero-badge-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .rss-hero-badge-text {
+        font-size: 0.60rem;
+        line-height: 1.2;
     }
 }
 
@@ -3616,7 +3864,7 @@ h6,
     box-shadow: 0 6px 20px rgba(114, 20, 40, 0.28);
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for Category Showcase */
 @media (max-width: 991.98px) {
     .cat-slider-container {
         padding: 0 40px;
@@ -3632,31 +3880,181 @@ h6,
     }
 
     .cat-corner-brand-left,
-    .cat-corner-brand-right {
-        display: none;
+    .cat-corner-brand-right,
+    .cat-corner-mandala {
+        display: none !important;
     }
 
     .cat-corner-jhumka {
-        width: 42px;
-        height: 90px;
+        width: 36px;
+        height: 80px;
+        opacity: 0.6;
     }
 
     .cat-jhumka-left {
-        left: 10px;
+        left: 8px;
     }
 
     .cat-jhumka-right {
-        right: 10px;
+        right: 8px;
     }
 }
 
-@media (max-width: 575.98px) {
+@media (max-width: 768px) {
     .rss-category-showcase-section {
-        padding: 48px 0 40px 0;
+        padding: 44px 0 36px 0;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .cat-header-wrapper {
+        padding: 0 16px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .cat-header-eyebrow .eyebrow-text {
+        font-size: 0.74rem;
+        letter-spacing: 0.16em;
+    }
+
+    .cat-header-title {
+        font-size: clamp(26px, 6.5vw, 32px);
+        line-height: 1.22;
+        margin-bottom: 8px;
+    }
+
+    .cat-header-desc {
+        font-size: clamp(14px, 3.8vw, 16px);
+        line-height: 1.5;
+        max-width: 92%;
+        margin: 0 auto 12px auto;
     }
 
     .cat-slider-container {
-        padding: 0 24px;
+        padding: 0 36px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    .cat-showcase-track {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 10px 4px 16px 4px;
+    }
+
+    .cat-showcase-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cat-showcase-item {
+        flex: 0 0 calc(100% / 2.3);
+        min-width: 130px;
+        max-width: 160px;
+        scroll-snap-align: center;
+    }
+
+    .cat-circle-frame {
+        width: 112px;
+        height: 112px;
+        margin: 0 auto;
+    }
+
+    .cat-card-title {
+        font-size: 0.92rem;
+        margin-top: 10px;
+    }
+
+    .cat-nav-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        z-index: 10;
+    }
+
+    .cat-nav-arrow.cat-nav-prev {
+        left: 2px;
+    }
+
+    .cat-nav-arrow.cat-nav-next {
+        right: 2px;
+    }
+
+    .cat-corner-jhumka {
+        width: 30px;
+        height: 65px;
+        opacity: 0.45;
+    }
+
+    .cat-jhumka-left {
+        left: 6px;
+    }
+
+    .cat-jhumka-right {
+        right: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cat-slider-container {
+        padding: 0 32px;
+    }
+
+    .cat-showcase-item {
+        flex: 0 0 calc(80% - 8px);
+        min-width: 140px;
+        max-width: 200px;
+        scroll-snap-align: center;
+    }
+
+    .cat-circle-frame {
+        width: 118px;
+        height: 118px;
+    }
+
+    .cat-header-title {
+        font-size: clamp(25px, 7.2vw, 30px);
+    }
+
+    .cat-header-desc {
+        font-size: 14.5px;
+    }
+
+    .cat-nav-arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .cat-nav-arrow.cat-nav-prev {
+        left: 0px;
+    }
+
+    .cat-nav-arrow.cat-nav-next {
+        right: 0px;
+    }
+}
+
+@media (max-width: 400px) {
+    .cat-corner-jhumka {
+        display: none !important;
+    }
+
+    .cat-slider-container {
+        padding: 0 28px;
+    }
+
+    .cat-showcase-item {
+        flex: 0 0 calc(85% - 6px);
+        min-width: 135px;
+        max-width: 180px;
     }
 
     .cat-circle-frame {
@@ -3664,18 +4062,12 @@ h6,
         height: 105px;
     }
 
-    .cat-showcase-item {
-        width: 110px;
+    .cat-header-title {
+        font-size: clamp(23px, 7vw, 27px);
     }
 
-    .cat-card-title {
-        font-size: 0.88rem;
-    }
-
-    .cat-nav-arrow {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+    .cat-header-desc {
+        font-size: 14px;
     }
 }
 
@@ -5395,5 +5787,645 @@ h6,
     .rss-family-btn {
         padding: 0 20px;
         font-size: 0.84rem;
+    }
+}
+
+/* ==========================================================================
+   RANGAM SARADHA SILKS - MOBILE RESPONSIVENESS MASTER SYSTEM
+   Targets: 320px, 360px, 375px, 390px, 414px, 430px (and up to 768px)
+   Strictly mobile-only. Desktop layout (> 768px) is completely preserved.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /* 1. Global Document & Section Overflow Containment */
+    html,
+    body {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box !important;
+    }
+
+    section,
+    .rss-hero-section,
+    .rss-category-showcase-section,
+    .rss-featured-section,
+    .rss-trust-section,
+    .rss-story-fullwidth-section,
+    .fabric-curation-section,
+    .why-choose-trust-section,
+    .rss-bridal-showcase-section,
+    .rss-budget-section,
+    .rss-consult-section,
+    .rss-new-arrivals-section,
+    .rss-family-section,
+    .footer-luxury {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden;
+    }
+
+    /* Standardize mobile container width & eliminate desktop fixed widths */
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Prevent Bootstrap row negative-margin blowout on mobile */
+    .row {
+        margin-left: -8px !important;
+        margin-right: -8px !important;
+    }
+
+    .row > * {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    /* Media responsive containment */
+    img,
+    video,
+    iframe,
+    svg {
+        max-width: 100% !important;
+        height: auto;
+    }
+
+    /* 2. Featured Saree Collections (Product Cards Showcase) */
+    .rss-featured-section {
+        padding: 44px 0 40px 0 !important;
+        overflow: hidden !important;
+    }
+
+    .rss-featured-header-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 14px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .rss-featured-title {
+        font-size: clamp(24px, 6.5vw, 30px) !important;
+        line-height: 1.25 !important;
+    }
+
+    .rss-featured-subtitle {
+        font-size: 0.90rem !important;
+    }
+
+    .rss-featured-slider-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 34px !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
+
+    .rss-featured-track {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scroll-behavior: smooth !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 14px !important;
+        padding: 8px 2px 20px 2px !important;
+    }
+
+    .rss-featured-track::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .rss-featured-col {
+        flex: 0 0 calc(100% - 24px) !important;
+        max-width: 270px !important;
+        min-width: 215px !important;
+        scroll-snap-align: center !important;
+        display: block !important;
+        padding: 0 !important;
+    }
+
+    .rss-featured-nav-btn {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.95rem !important;
+        z-index: 10 !important;
+    }
+
+    .rss-featured-nav-prev {
+        left: 0px !important;
+    }
+
+    .rss-featured-nav-next {
+        right: 0px !important;
+    }
+
+    /* 3. Trust & Craftsmanship Highlights */
+    .rss-trust-section {
+        padding: 24px 0 !important;
+    }
+
+    .rss-trust-card {
+        padding: 16px 10px !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .rss-trust-box {
+        padding: 12px 6px !important;
+        text-align: center !important;
+    }
+
+    .rss-trust-title {
+        font-size: 0.92rem !important;
+        margin-bottom: 2px !important;
+    }
+
+    .rss-trust-desc {
+        font-size: 0.78rem !important;
+    }
+
+    .rss-trust-divider {
+        display: none !important;
+    }
+
+    /* 4. Behind The Weave Story Section */
+    .rss-story-fullwidth-section {
+        margin: 16px 0 0 0 !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-story-container-fluid {
+        flex-direction: column !important;
+        width: 100% !important;
+        min-height: auto !important;
+    }
+
+    .rss-story-visual-left {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 230px !important;
+        min-height: 230px !important;
+    }
+
+    .rss-story-visual-right {
+        display: none !important;
+    }
+
+    .rss-story-content-center {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 24px 16px 30px 16px !important;
+        text-align: center !important;
+        align-items: center !important;
+    }
+
+    .rss-story-title {
+        font-size: clamp(24px, 6.2vw, 30px) !important;
+        margin-bottom: 12px !important;
+    }
+
+    .rss-story-desc {
+        font-size: 0.94rem !important;
+        line-height: 1.6 !important;
+        max-width: 100% !important;
+        margin-bottom: 20px !important;
+    }
+
+    .rss-story-action {
+        margin-bottom: 24px !important;
+        width: 100% !important;
+    }
+
+    .rss-story-cta-btn {
+        width: 100% !important;
+        max-width: 260px !important;
+        justify-content: center !important;
+    }
+
+    .rss-story-badges-row {
+        justify-content: center !important;
+        gap: 12px !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+    }
+
+    .rss-story-badge-divider {
+        display: none !important;
+    }
+
+    .rss-story-badge-text {
+        font-size: 0.76rem !important;
+    }
+
+    /* 5. Fabric Curations */
+    .fabric-curation-section {
+        padding: 36px 0 !important;
+    }
+
+    .fabric-curation-card {
+        border-radius: 12px !important;
+    }
+
+    .fabric-curation-title {
+        font-size: 0.96rem !important;
+    }
+
+    /* 6. Why Choose Us Section */
+    .why-choose-trust-section {
+        padding: 36px 0 !important;
+    }
+
+    .why-choose-mobile-wrapper {
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .why-choose-mobile-slider {
+        width: 100% !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 12px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .why-choose-mobile-slide {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        scroll-snap-align: start !important;
+    }
+
+    .why-choose-card {
+        padding: 20px 16px !important;
+    }
+
+    /* 7. Bridal Collection Showcase */
+    .rss-bridal-showcase-section {
+        min-height: 380px !important;
+        background-position: 80% center !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-bridal-container-fluid {
+        padding: 0 16px !important;
+        width: 100% !important;
+    }
+
+    .rss-bridal-title {
+        font-size: clamp(25px, 6.5vw, 32px) !important;
+        line-height: 1.25 !important;
+        margin-bottom: 14px !important;
+    }
+
+    .rss-bridal-desc {
+        font-size: 0.94rem !important;
+        line-height: 1.6 !important;
+        max-width: 100% !important;
+        margin-bottom: 22px !important;
+    }
+
+    .rss-bridal-cta-btn {
+        width: 100% !important;
+        max-width: 290px !important;
+        justify-content: center !important;
+    }
+
+    .rss-bridal-pillars {
+        display: none !important;
+    }
+
+    /* 8. Find Your Piece (Budget Section) */
+    .rss-budget-section {
+        padding: 36px 0 !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-budget-container {
+        padding: 0 16px !important;
+        width: 100% !important;
+    }
+
+    .rss-budget-title {
+        font-size: clamp(24px, 6vw, 28px) !important;
+    }
+
+    .rss-budget-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 12px !important;
+        padding: 6px 2px 14px 2px !important;
+    }
+
+    .rss-budget-grid::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .rss-budget-card-link {
+        flex: 0 0 148px !important;
+        min-width: 140px !important;
+        scroll-snap-align: start !important;
+    }
+
+    .rss-budget-card {
+        padding: 16px 12px !important;
+    }
+
+    .rss-budget-card-title {
+        font-size: 0.88rem !important;
+    }
+
+    /* 9. Consultation Banner */
+    .rss-consult-section {
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-consult-img-wrapper {
+        min-height: 190px !important;
+        max-height: 220px !important;
+    }
+
+    .rss-consult-content-col {
+        padding: 20px 16px !important;
+        text-align: center !important;
+    }
+
+    .rss-consult-title {
+        font-size: clamp(22px, 5.8vw, 28px) !important;
+        margin-bottom: 8px !important;
+    }
+
+    .rss-consult-desc {
+        font-size: 0.90rem !important;
+        margin-bottom: 18px !important;
+    }
+
+    .rss-consult-buttons {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .rss-consult-btn-whatsapp-dark {
+        width: 100% !important;
+        max-width: 280px !important;
+        justify-content: center !important;
+    }
+
+    .rss-consult-features-col {
+        border-left: none !important;
+        border-top: 1px solid #E5DAD0 !important;
+        padding: 18px 16px !important;
+    }
+
+    .rss-consult-features-list {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .rss-consult-feature-label {
+        font-size: 0.82rem !important;
+    }
+
+    /* 10. New Arrivals Carousel */
+    .rss-new-arrivals-section {
+        padding: 34px 0 !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-new-arrivals-container {
+        padding: 0 16px !important;
+        width: 100% !important;
+    }
+
+    .rss-new-arrivals-title {
+        font-size: clamp(22px, 5.5vw, 26px) !important;
+    }
+
+    .rss-new-arrivals-carousel-wrapper {
+        padding: 0 30px !important;
+        position: relative !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .rss-new-arrivals-nav-btn {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.85rem !important;
+        z-index: 10 !important;
+    }
+
+    .rss-new-arrivals-nav-btn.prev {
+        left: 0px !important;
+    }
+
+    .rss-new-arrivals-nav-btn.next {
+        right: 0px !important;
+    }
+
+    .rss-new-arrivals-track {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scroll-behavior: smooth !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 12px !important;
+        padding: 6px 2px 14px 2px !important;
+    }
+
+    .rss-new-arrivals-track::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .rss-new-arrivals-card {
+        flex: 0 0 155px !important;
+        min-width: 145px !important;
+        scroll-snap-align: start !important;
+    }
+
+    .rss-new-arrivals-img-wrap {
+        height: 180px !important;
+    }
+
+    /* 11. Family Newsletter */
+    .rss-family-section {
+        padding: 28px 0 !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .rss-family-container {
+        padding: 0 16px !important;
+        width: 100% !important;
+    }
+
+    .rss-family-title {
+        font-size: clamp(22px, 5.5vw, 26px) !important;
+        text-align: center !important;
+    }
+
+    .rss-family-subtitle {
+        text-align: center !important;
+        font-size: 0.88rem !important;
+        margin-bottom: 16px !important;
+    }
+
+    .rss-family-pill-form {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 46px !important;
+        margin: 0 auto !important;
+    }
+
+    .rss-family-corner-left,
+    .rss-family-corner-right {
+        width: 44px !important;
+        height: 44px !important;
+        opacity: 0.25 !important;
+    }
+
+    /* 12. Floating WhatsApp and Footer */
+    .whatsapp-float-btn {
+        bottom: 16px !important;
+        right: 14px !important;
+        width: 46px !important;
+        height: 46px !important;
+        z-index: 1050 !important;
+    }
+
+    .whatsapp-tooltip {
+        display: none !important;
+    }
+
+    .footer-luxury {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .footer-luxury .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .footer-social-icons {
+        justify-content: flex-start !important;
+    }
+}
+
+/* ==========================================================================
+   BREAKPOINT: Max-Width 480px (Standard Mobile Screens)
+   ========================================================================== */
+@media (max-width: 480px) {
+    .container,
+    .container-fluid {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .rss-consult-features-list {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .rss-featured-col {
+        flex: 0 0 calc(100% - 16px) !important;
+        max-width: 255px !important;
+        min-width: 200px !important;
+    }
+}
+
+/* ==========================================================================
+   BREAKPOINT: Max-Width 375px (Compact Mobile Screens: 320px, 360px, 375px)
+   ========================================================================== */
+@media (max-width: 375px) {
+    .container,
+    .container-fluid {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .cat-corner-jhumka,
+    .rss-family-corner-left,
+    .rss-family-corner-right {
+        display: none !important;
+    }
+
+    .rss-featured-slider-wrap,
+    .cat-slider-container,
+    .rss-new-arrivals-carousel-wrapper {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+    }
+
+    .rss-featured-nav-btn,
+    .cat-nav-arrow,
+    .rss-new-arrivals-nav-btn {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.82rem !important;
+    }
+
+    .rss-featured-col {
+        flex: 0 0 calc(100% - 10px) !important;
+        max-width: 230px !important;
+        min-width: 185px !important;
+    }
+
+    .rss-new-arrivals-card {
+        flex: 0 0 140px !important;
+        min-width: 132px !important;
+    }
+
+    .rss-new-arrivals-img-wrap {
+        height: 160px !important;
+    }
+
+    .cat-circle-frame {
+        width: 98px !important;
+        height: 98px !important;
+    }
+
+    .cat-card-title {
+        font-size: 0.85rem !important;
+    }
+
+    .rss-hero-badge-text {
+        font-size: 0.58rem !important;
     }
 }
