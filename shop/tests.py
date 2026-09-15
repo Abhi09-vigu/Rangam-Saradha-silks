@@ -140,17 +140,25 @@ class OrderAdminTest(TestCase):
         Verify that OrderAdmin has correct readonly fields, fieldsets, and custom choices,
         and that inline order items cannot be added or deleted.
         """
-        # 1. Verify readonly fields
+        # 1. Verify readonly fields (system metadata and financial amounts are locked, customer & billing info are editable)
         self.assertIn('order_number', self.order_admin.readonly_fields)
-        self.assertIn('full_name', self.order_admin.readonly_fields)
+        self.assertIn('subtotal', self.order_admin.readonly_fields)
+        self.assertIn('tax_amount', self.order_admin.readonly_fields)
+        self.assertIn('grand_total', self.order_admin.readonly_fields)
+        self.assertNotIn('full_name', self.order_admin.readonly_fields)
         self.assertNotIn('order_status', self.order_admin.readonly_fields)
         self.assertNotIn('payment_status', self.order_admin.readonly_fields)
 
-        # 2. Verify fieldsets setup
-        fieldsets_names = [f[0] for f in self.order_admin.fieldsets]
-        self.assertIn('Order Status & Workflow', fieldsets_names)
-        self.assertIn('Order Information', fieldsets_names)
-        self.assertIn('Customer Details', fieldsets_names)
+        # 2. Verify fieldsets setup (gst_number is removed from editable customer fields, tracking fields added)
+        fieldsets_dict = dict(self.order_admin.fieldsets)
+        self.assertIn('Customer & Billing Details', fieldsets_dict)
+        self.assertIn('Shipment & Tracking', fieldsets_dict)
+        self.assertIn('Invoice & Financials (Locked)', fieldsets_dict)
+        customer_fields = fieldsets_dict['Customer & Billing Details']['fields']
+        self.assertNotIn('gst_number', customer_fields)
+        tracking_fields = fieldsets_dict['Shipment & Tracking']['fields']
+        self.assertIn('tracking_link', tracking_fields)
+        self.assertIn('tracking_number', tracking_fields)
 
         # 3. Verify restricted choices in formfield_for_choice_field
         from django.db import models
@@ -167,9 +175,15 @@ class OrderAdminTest(TestCase):
         self.assertIn('PENDING', payment_choices)
         self.assertIn('REFUNDED', payment_choices)
 
-        # 4. Verify OrderItemInline add/delete permissions
-        self.assertFalse(self.order_item_inline.has_add_permission(None))
-        self.assertFalse(self.order_item_inline.has_delete_permission(None))
+        # 4. Verify OrderItemInline prevents adding/deleting to protect order amounts
+        from django.test import RequestFactory
+        from django.contrib.auth import get_user_model
+        rf = RequestFactory()
+        req = rf.get('/')
+        User = get_user_model()
+        req.user = User.objects.create_superuser(username='superadmin_perm_test', email='adm@test.com', password='password123')
+        self.assertFalse(self.order_item_inline.has_add_permission(req, None))
+        self.assertFalse(self.order_item_inline.has_delete_permission(req, None))
 
 @override_settings(
     STORAGES={
@@ -381,5 +395,63 @@ class OrderEmailSignalsTest(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Status Update: Shipped", mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, ["abhi@example.com"])
+
+
+class CatalogSkuFilterTest(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(name="Silk Sarees", slug="silk-sarees")
+        self.product_1 = Product.objects.create(
+            name="Kanjeevaram Gold Border Saree",
+            slug="kanjeevaram-gold-border",
+            sku="KJB-101",
+            price=12000.00,
+            stock=8,
+            is_active=True
+        )
+        self.product_1.categories.add(self.category)
+
+        self.product_2 = Product.objects.create(
+            name="Banarasi Brocade Silk Saree",
+            slug="banarasi-brocade-silk",
+            sku="BBS-202",
+            price=18000.00,
+            stock=4,
+            is_active=True
+        )
+        self.product_2.categories.add(self.category)
+
+    def test_catalog_filter_by_exact_sku(self):
+        from django.urls import reverse
+        response = self.client.get(reverse('shop:catalog'), {'sku': 'KJB-101'})
+        self.assertEqual(response.status_code, 200)
+        product_list = list(response.context['products'])
+        self.assertEqual(len(product_list), 1)
+        self.assertEqual(product_list[0].sku, 'KJB-101')
+        self.assertContains(response, 'KJB-101')
+
+    def test_catalog_filter_by_partial_sku(self):
+        from django.urls import reverse
+        response = self.client.get(reverse('shop:catalog'), {'sku': 'bbs'})
+        self.assertEqual(response.status_code, 200)
+        product_list = list(response.context['products'])
+        self.assertEqual(len(product_list), 1)
+        self.assertEqual(product_list[0].sku, 'BBS-202')
+
+    def test_sku_autocomplete_api(self):
+        from django.urls import reverse
+        response = self.client.get(reverse('shop:sku_autocomplete_api'), {'q': 'KJB'})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn('results', data)
+        self.assertEqual(len(data['results']), 1)
+        self.assertEqual(data['results'][0]['sku'], 'KJB-101')
+
+    def test_main_query_includes_sku(self):
+        from django.urls import reverse
+        response = self.client.get(reverse('shop:catalog'), {'q': 'BBS-202'})
+        self.assertEqual(response.status_code, 200)
+        product_list = list(response.context['products'])
+        self.assertEqual(len(product_list), 1)
+        self.assertEqual(product_list[0].sku, 'BBS-202')
 
 

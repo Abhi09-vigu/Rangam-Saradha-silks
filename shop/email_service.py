@@ -1,5 +1,6 @@
 import logging
 import threading
+from decimal import Decimal, ROUND_HALF_UP
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -107,3 +108,57 @@ def send_order_status_update_email(order, original_status):
     except Exception as e:
         logger.error(f"Error preparing status update email for #{order.order_number}: {e}", exc_info=True)
         return False
+
+def send_owner_order_notification_email(order):
+    """
+    Dispatches a comprehensive accounting & order alert email to the store owner/admin.
+    Sent on every order to rangamsaradhasilks@gmail.com with complete 5% GST breakdown,
+    GSTIN, itemised SKU breakdown, COD charges, and customer info.
+    """
+    admin_recipient = "rangamsaradhasilks@gmail.com"
+    site_settings = WebsiteSetting.objects.first()
+    
+    # Calculate 5% GST accounting split
+    total_gst_amount = Decimal(str(order.tax_amount or '0.00'))
+    cgst_amount = (total_gst_amount / Decimal('2')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    sgst_amount = total_gst_amount - cgst_amount
+    
+    subtotal = Decimal(str(order.subtotal or '0.00'))
+    discount = Decimal(str(order.discount_amount or '0.00'))
+    taxable_value = subtotal - discount - total_gst_amount
+    
+    gst_number = site_settings.gst_number if site_settings and site_settings.gst_number else "33AAAAA0000A1Z5"
+    currency = site_settings.currency if site_settings and site_settings.currency else "₹"
+    
+    context = {
+        'order': order,
+        'items': order.items.all(),
+        'site_settings': site_settings,
+        'gst_number': gst_number,
+        'currency': currency,
+        'taxable_value': taxable_value,
+        'total_gst_amount': total_gst_amount,
+        'cgst_amount': cgst_amount,
+        'sgst_amount': sgst_amount,
+        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhanasilks.com'),
+    }
+    
+    subject = f"New Order Received: #{order.order_number} ({currency}{order.grand_total}) - Rangam Saradha Silks"
+    
+    try:
+        html_content = render_to_string('shop/emails/admin_order_notification.html', context)
+        text_content = strip_tags(html_content)
+        
+        from_email = settings.DEFAULT_FROM_EMAIL or 'no-reply@rangamsaradhanasilks.com'
+        to_email = [admin_recipient]
+        
+        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+        msg.attach_alternative(html_content, "text/html")
+        
+        # Dispatch in background thread
+        threading.Thread(target=send_email_async, args=(msg,)).start()
+        return True
+    except Exception as e:
+        logger.error(f"Error preparing admin order notification email for #{order.order_number}: {e}", exc_info=True)
+        return False
+

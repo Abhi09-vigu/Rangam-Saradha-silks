@@ -189,6 +189,12 @@
                         <td class="label">Payment Method:</td>
                         <td>{{ order.get_payment_method_display }}</td>
                     </tr>
+                    {% if site_settings.gst_number %}
+                    <tr>
+                        <td class="label">GSTIN:</td>
+                        <td>{{ site_settings.gst_number }}</td>
+                    </tr>
+                    {% endif %}
                 </table>
             </div>
             
@@ -227,10 +233,6 @@
                     <td class="price" style="color: #28a745;">-{{ site_settings.currency }}{{ order.discount_amount|floatformat:2 }}</td>
                 </tr>
                 {% endif %}
-                <tr>
-                    <td>GST/Tax:</td>
-                    <td class="price">{{ site_settings.currency }}{{ order.tax_amount|floatformat:2 }}</td>
-                </tr>
                 {% if order.cod_charge > 0 %}
                 <tr>
                     <td>COD Charge:</td>
@@ -248,7 +250,7 @@
                     </td>
                 </tr>
                 <tr class="total">
-                    <td>Grand Total:</td>
+                    <td>Grand Total:<br><span style="font-size: 11px; font-weight: normal; color: #888888;">(Inclusive of all taxes)</span></td>
                     <td class="price">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</td>
                 </tr>
             </table>

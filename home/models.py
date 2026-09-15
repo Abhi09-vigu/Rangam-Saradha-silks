@@ -9,9 +9,16 @@ class WebsiteSetting(models.Model):
     secondary_color = models.CharField(max_length=7, default="#AE6F21", help_text="HEX Color code (e.g. #AE6F21)")
     currency = models.CharField(max_length=10, default="₹")
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=5.00, help_text="Tax percentage (e.g., 5.00 for 5% GST)")
+    gst_number = models.CharField(max_length=30, default="33AAAAA0000A1Z5", blank=True, help_text="Business GSTIN for invoices and tax compliance")
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
+    cod_charge = models.DecimalField(max_digits=10, decimal_places=2, default=49.00, help_text="Cash On Delivery fee for orders below the threshold")
+    cod_max_limit = models.DecimalField(max_digits=10, decimal_places=2, default=2000.00, help_text="Orders at or above this amount receive FREE Cash On Delivery (₹0 COD fee)")
     maintenance_mode = models.BooleanField(default=False)
+
+    @property
+    def cod_free_threshold(self):
+        return self.cod_max_limit
 
     # Dynamic About Section
     about_title = models.CharField(max_length=150, default="About Rangam Saradha Silk Sarees", help_text="Main heading for the homepage About section.")

@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -320,6 +321,13 @@ def popup_book_call_api(request):
     from shop.models import CallBooking, CallSlot
     
     try:
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'login_required': True,
+                'message': 'Please log in to your account to book a video call.'
+            }, status=401)
+
         if request.content_type == 'application/json':
             data = json.loads(request.body.decode('utf-8'))
         else:
@@ -373,18 +381,42 @@ def popup_book_call_api(request):
                 'message': f"We have already received your booking scheduled for {booking_date} at {time_slot} (Ref: #{existing_booking.booking_reference})."
             })
 
-        # Atomic creation
+        # Atomic creation with slot availability verification
         with transaction.atomic():
+            # 1. Check if owner blocked slot
+            is_blocked = CallSlot.objects.filter(date=booking_date, time_slot=time_slot).filter(
+                Q(blocked_by_owner=True) | Q(status='BLOCKED')
+            ).exists()
+            if is_blocked:
+                return JsonResponse({
+                    'success': False,
+                    'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} is unavailable. Please choose another slot."
+                }, status=400)
+
+            # 2. Check if ANY customer has already booked this slot
+            is_already_booked = CallBooking.objects.filter(
+                booking_date=booking_date,
+                time_slot=time_slot,
+                status__in=['CONFIRMED', 'COMPLETED']
+            ).select_for_update().exists()
+
+            if is_already_booked:
+                return JsonResponse({
+                    'success': False,
+                    'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} has already been booked. Please choose another time slot."
+                }, status=400)
+
             booking = CallBooking.objects.create(
                 product=None,
                 saree_preference=saree_preference or "General Saree Selection Consultation",
-                user=request.user if request.user.is_authenticated else None,
+                user=request.user,
                 full_name=full_name,
-                email=email or f"call_{phone_number[-6:]}@rangamsaradhasilk.com",
+                email=request.user.email or email or f"call_{phone_number[-6:]}@rangamsaradhasilk.com",
                 phone_number=phone_number,
                 booking_date=booking_date,
                 time_slot=time_slot,
                 notes=notes,
+                status='CONFIRMED',
             )
 
             CallSlot.objects.update_or_create(

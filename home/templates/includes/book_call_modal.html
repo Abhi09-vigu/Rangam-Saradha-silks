@@ -1,0 +1,330 @@
+<!-- Book a Video Call Modal -->
+<div class="modal fade" id="floatingBookCallModal" tabindex="-1" aria-labelledby="floatingBookCallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0 pt-4 px-4 align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 42px; height: 42px; background: rgba(175, 4, 70, 0.1); color: var(--primary, #AF0446);">
+                        <i class="bi bi-camera-video-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title font-heading fw-bold mb-0" id="floatingBookCallModalLabel" style="font-size: 1.25rem;">Book a Video Call</h5>
+                        <small class="text-muted" style="font-size: 0.82rem;">Personalized 1-on-1 live saree consultation</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <!-- Alert box for errors or notices -->
+                <div id="floatBookingAlert" class="alert d-none py-2 px-3 fs-8 mb-3" role="alert"></div>
+
+                {% if user.is_authenticated %}
+                <!-- Booking Form -->
+                <form id="floatBookCallForm" action="/api/popup-book-call/" method="POST" onsubmit="return handleFloatBookCallSubmit(event);" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="fbcName" class="form-label fs-8 fw-semibold text-dark mb-1">Your Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="fbcName" name="full_name" required placeholder="Enter your full name" style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;" value="{{ user.get_full_name|default:user.username }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="fbcPhone" class="form-label fs-8 fw-semibold text-dark mb-1">Phone / WhatsApp Number <span class="text-danger">*</span></label>
+                            <div class="input-group" style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4; overflow: hidden; background: #fff;">
+                                <span class="input-group-text bg-light border-0 fw-semibold text-dark px-3" style="font-size: 0.9rem;">+91</span>
+                                <input type="tel" class="form-control border-0 px-3" id="fbcPhone" name="phone_number" required placeholder="10-digit mobile number" maxlength="15" style="box-shadow: none;" value="{{ user.phone_number|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="fbcDate" class="form-label fs-8 fw-semibold text-dark mb-1">Preferred Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="fbcDate" name="booking_date" required style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="fbcSlot" class="form-label fs-8 fw-semibold text-dark mb-1">Time Slot <span class="text-danger">*</span></label>
+                            <select class="form-select" id="fbcSlot" name="time_slot" required style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;">
+                                <option value="" disabled selected>Select a slot</option>
+                                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                                <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                                <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                                <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                                <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="fbcSaree" class="form-label fs-8 fw-semibold text-dark mb-1">Saree or Style of Interest <span class="text-muted fw-normal">(Optional)</span></label>
+                            <input type="text" class="form-control" id="fbcSaree" name="saree_preference" placeholder="e.g. Bridal Kanchipuram, Pure Zari, Soft Silk" style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="handleFloatBookCallSubmit(event)" class="btn w-100 mt-4 text-white fw-semibold py-2.5 rounded-pill shadow-sm" id="fbcSubmitBtn" style="background: linear-gradient(135deg, #AF0446 0%, #8c0338 100%); font-size: 0.95rem; letter-spacing: 0.3px;">
+                        <span class="fbc-btn-text"><i class="bi bi-calendar-check me-2"></i>Schedule Video Call</span>
+                        <span class="fbc-btn-spinner d-none"><span class="spinner-border spinner-border-sm me-2"></span>Scheduling...</span>
+                    </button>
+                </form>
+
+                <!-- Success State Screen (hidden initially) -->
+                <div id="fbcSuccessScreen" class="d-none text-center py-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow-sm" style="width: 70px; height: 70px; background: rgba(25, 135, 84, 0.1); color: #198754;">
+                        <i class="bi bi-check-circle-fill display-5"></i>
+                    </div>
+                    <h4 class="font-heading fw-bold mb-2">Video Call Scheduled!</h4>
+                    <p class="text-muted fs-7 mb-3" id="fbcSuccessMsg">
+                        Thank you! Our saree expert will connect with you on your WhatsApp / phone number for your live video drape session.
+                    </p>
+                    <div class="p-3 bg-light rounded-3 border mb-4">
+                        <small class="text-uppercase text-muted d-block fw-semibold" style="letter-spacing: 1px; font-size: 0.72rem;">Booking Reference</small>
+                        <span class="fw-bold fs-5 text-dark" id="fbcSuccessRef">#RS-CALL</span>
+                    </div>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold" data-bs-dismiss="modal">Done</button>
+                </div>
+                {% else %}
+                <!-- Login Required Screen -->
+                <div class="text-center py-4 px-2">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow-sm" style="width: 72px; height: 72px; background: rgba(175, 4, 70, 0.08); color: var(--primary, #AF0446);">
+                        <i class="bi bi-person-lock display-5"></i>
+                    </div>
+                    <h4 class="font-heading fw-bold mb-2">Login Required</h4>
+                    <p class="text-muted fs-7 mb-4 px-2">
+                        Please log in to your Rangam Saradha Silks account to schedule a personalized 1-on-1 live video saree consultation.
+                    </p>
+                    <div class="d-flex flex-column gap-2 px-3">
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn text-white fw-semibold py-2.5 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #AF0446 0%, #8c0338 100%); font-size: 0.95rem;">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book Call
+                        </a>
+                        <a href="{% url 'accounts:register' %}?next={{ request.path }}" class="btn btn-outline-dark fw-semibold py-2.5 rounded-pill fs-7">
+                            <i class="bi bi-person-plus me-2"></i>Create New Account
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let fbcDateInput = null;
+    let fbcSlotSelect = null;
+    let fbcForm = null;
+
+    async function loadAvailableSlots(dateVal) {
+        if (!fbcSlotSelect) {
+            fbcSlotSelect = document.getElementById('fbcSlot');
+        }
+        if (!fbcSlotSelect || !dateVal) return;
+        
+        const previousVal = fbcSlotSelect.value;
+        fbcSlotSelect.innerHTML = '<option value="" disabled selected>Checking slot availability...</option>';
+        fbcSlotSelect.disabled = true;
+
+        try {
+            const res = await fetch(`/shop/api/slot-availability/?date=${encodeURIComponent(dateVal)}`);
+            const data = await res.json();
+            
+            fbcSlotSelect.innerHTML = '<option value="" disabled selected>Select an available slot</option>';
+            fbcSlotSelect.disabled = false;
+
+            let hasAvailable = false;
+            if (data.slots && data.slots.length > 0) {
+                data.slots.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.time_slot;
+                    if (s.is_selectable) {
+                        hasAvailable = true;
+                        opt.textContent = `${s.time_slot} (Available)`;
+                        if (s.time_slot === previousVal) {
+                            opt.selected = true;
+                        }
+                    } else {
+                        opt.disabled = true;
+                        opt.textContent = `${s.time_slot} — (${s.label || 'Already booked'})`;
+                        opt.style.color = '#888';
+                        opt.style.backgroundColor = '#f1f2f4';
+                    }
+                    fbcSlotSelect.appendChild(opt);
+                });
+            }
+
+            if (!hasAvailable) {
+                fbcSlotSelect.innerHTML = '<option value="" disabled selected>All slots booked on this date — Please pick another date</option>';
+            }
+        } catch (err) {
+            console.error('Failed to load slots:', err);
+            fbcSlotSelect.disabled = false;
+        }
+    }
+
+    function initFloatingBookCallModal() {
+        fbcForm = document.getElementById('floatBookCallForm');
+        fbcDateInput = document.getElementById('fbcDate');
+        fbcSlotSelect = document.getElementById('fbcSlot');
+
+        if (fbcDateInput) {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const today = `${y}-${m}-${d}`;
+            fbcDateInput.min = today;
+            if (!fbcDateInput.value) {
+                fbcDateInput.value = today;
+            }
+            loadAvailableSlots(fbcDateInput.value);
+
+            fbcDateInput.addEventListener('change', function() {
+                loadAvailableSlots(this.value);
+            });
+        }
+
+        const modalEl = document.getElementById('floatingBookCallModal');
+        if (modalEl) {
+            modalEl.addEventListener('show.bs.modal', function() {
+                if (fbcDateInput && fbcDateInput.value) {
+                    loadAvailableSlots(fbcDateInput.value);
+                }
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                const successScreen = document.getElementById('fbcSuccessScreen');
+                if (successScreen && !successScreen.classList.contains('d-none')) {
+                    successScreen.classList.add('d-none');
+                    if (fbcForm) {
+                        fbcForm.classList.remove('d-none');
+                        fbcForm.reset();
+                        if (fbcDateInput) {
+                            const now = new Date();
+                            const y = now.getFullYear();
+                            const m = String(now.getMonth() + 1).padStart(2, '0');
+                            const d = String(now.getDate()).padStart(2, '0');
+                            fbcDateInput.value = `${y}-${m}-${d}`;
+                            loadAvailableSlots(fbcDateInput.value);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    window.handleFloatBookCallSubmit = async function(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        const alertBox = document.getElementById('floatBookingAlert');
+        const submitBtn = document.getElementById('fbcSubmitBtn');
+        const form = document.getElementById('floatBookCallForm');
+        if (!form) return false;
+
+        const btnText = submitBtn ? submitBtn.querySelector('.fbc-btn-text') : null;
+        const btnSpinner = submitBtn ? submitBtn.querySelector('.fbc-btn-spinner') : null;
+
+        if (alertBox) {
+            alertBox.classList.add('d-none');
+            alertBox.className = 'alert d-none py-2 px-3 fs-8 mb-3';
+        }
+
+        const name = (document.getElementById('fbcName')?.value || '').trim();
+        const phone = (document.getElementById('fbcPhone')?.value || '').trim();
+        const date = (document.getElementById('fbcDate')?.value || '').trim();
+        const slot = (document.getElementById('fbcSlot')?.value || '').trim();
+        const saree = (document.getElementById('fbcSaree')?.value || '').trim();
+
+        if (!name) {
+            showAlert('Please enter your full name.', 'danger');
+            return false;
+        }
+        if (!phone) {
+            showAlert('Please enter your WhatsApp / phone number.', 'danger');
+            return false;
+        }
+        if (!date) {
+            showAlert('Please select your preferred date.', 'danger');
+            return false;
+        }
+        if (!slot) {
+            showAlert('Please choose an available time slot.', 'danger');
+            return false;
+        }
+
+        let cleanPhone = phone;
+        if (!cleanPhone.startsWith('+')) {
+            const digits = cleanPhone.replace(/\D/g, '');
+            if (digits.length === 10) {
+                cleanPhone = '+91' + digits;
+            } else if (digits.length === 12 && digits.startsWith('91')) {
+                cleanPhone = '+' + digits;
+            } else {
+                cleanPhone = '+91' + digits;
+            }
+        }
+
+        if (btnText) btnText.classList.add('d-none');
+        if (btnSpinner) btnSpinner.classList.remove('d-none');
+        if (submitBtn) submitBtn.disabled = true;
+
+        function showAlert(msg, type) {
+            if (alertBox) {
+                alertBox.textContent = msg;
+                alertBox.className = `alert alert-${type} py-2 px-3 fs-8 mb-3`;
+                alertBox.classList.remove('d-none');
+            }
+        }
+
+        try {
+            const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfVal = csrfInput ? csrfInput.value : (typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '');
+
+            const res = await fetch('/api/popup-book-call/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfVal
+                },
+                body: JSON.stringify({
+                    full_name: name,
+                    phone_number: cleanPhone,
+                    booking_date: date,
+                    time_slot: slot,
+                    saree_preference: saree
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                form.classList.add('d-none');
+                const successScreen = document.getElementById('fbcSuccessScreen');
+                if (successScreen) {
+                    successScreen.classList.remove('d-none');
+                }
+                const refEl = document.getElementById('fbcSuccessRef');
+                if (refEl) {
+                    refEl.textContent = '#' + (data.booking_ref || data.booking_reference || '');
+                }
+                const msgEl = document.getElementById('fbcSuccessMsg');
+                if (msgEl && data.message) {
+                    msgEl.textContent = data.message;
+                }
+            } else {
+                showAlert(data.message || 'Could not schedule booking. Please try again.', 'danger');
+            }
+        } catch (err) {
+            showAlert('Network error. Please try again.', 'danger');
+        } finally {
+            if (btnText) btnText.classList.remove('d-none');
+            if (btnSpinner) btnSpinner.classList.add('d-none');
+            if (submitBtn) submitBtn.disabled = false;
+        }
+
+        return false;
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFloatingBookCallModal);
+    } else {
+        initFloatingBookCallModal();
+    }
+})();
+</script>

@@ -17,6 +17,8 @@ from django.db import transaction
 from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
 from accounts.models import Address
 from home.models import WebsiteSetting
+from .pricing import calculate_order_pricing
+from .email_service import send_owner_order_notification_email
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +51,19 @@ def categories_list(request):
 def catalog(request, category_slug=None):
     products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')
     
+    # SKU Filter
+    sku_param = request.GET.get('sku', '').strip()
+    if sku_param:
+        products = products.filter(sku__icontains=sku_param)
+
     # Query / Search
     query = request.GET.get('q')
     if query:
         products = products.filter(
             Q(name__icontains=query) |
             Q(description__icontains=query) |
-            Q(tags__icontains=query)
+            Q(tags__icontains=query) |
+            Q(sku__icontains=query)
         )
         
     # Filters
@@ -148,7 +156,11 @@ def catalog(request, category_slug=None):
             active_collection = Collection.objects.filter(slug=collection_param, is_active=True).first()
 
     # Determine if any filter / query parameter is active in URL
-    has_filters = any(v for v in request.GET.values() if v and str(v).strip())
+    has_filters = bool(
+        category_param or 
+        collection_param or 
+        any(v for v in request.GET.values() if v and str(v).strip())
+    )
 
     # Pagination
     from django.core.paginator import Paginator
@@ -179,6 +191,8 @@ def catalog(request, category_slug=None):
         'fabrics': fabrics,
         'occasions': occasions,
         'current_filters': request.GET,
+        'category_param': category_param,
+        'collection_param': collection_param,
         'has_filters': has_filters,
         'active_category': active_category,
         'active_collection': active_collection,
@@ -222,7 +236,7 @@ def cart_detail(request):
     # Check for coupon in session
     coupon_code = request.session.get('coupon_code')
     coupon = None
-    discount = 0
+    discount = Decimal('0.00')
     
     if coupon_code:
         try:
@@ -235,24 +249,23 @@ def cart_detail(request):
         except Coupon.DoesNotExist:
             del request.session['coupon_code']
             
-    # Calculate tax & shipping
-    tax_percent = settings_obj.tax_percentage
-    tax = (subtotal - discount) * (tax_percent / Decimal('100'))
-    
-    shipping = settings_obj.shipping_charge
-    if subtotal - discount >= settings_obj.free_shipping_limit:
-        shipping = 0
-        
-    grand_total = subtotal - discount + tax + shipping
+    pricing = calculate_order_pricing(subtotal, discount=discount, payment_method='ONLINE', settings_obj=settings_obj)
 
     context = {
         'cart': cart,
-        'subtotal': subtotal,
+        'subtotal': pricing['subtotal'],
         'coupon': coupon,
-        'discount': discount,
-        'tax': tax,
-        'shipping': shipping,
-        'grand_total': grand_total,
+        'discount': pricing['discount'],
+        'tax': pricing['tax_amount'],
+        'shipping': pricing['shipping'],
+        'order_amount_before_cod': pricing['order_amount_before_cod'],
+        'is_cod_eligible': pricing['is_cod_eligible'],
+        'cod_is_free': pricing['cod_is_free'],
+        'cod_free_threshold': pricing['cod_free_threshold'],
+        'cod_max_limit': pricing['cod_max_limit'],
+        'standard_cod_fee': pricing['standard_cod_fee'],
+        'grand_total': pricing['grand_total'],
+        'site_settings': settings_obj,
     }
     return render(request, 'shop/cart.html', context)
 
@@ -282,15 +295,21 @@ def cart_add(request, product_id):
 
 def cart_update(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
-    quantity = int(request.POST.get('quantity', 1))
-    
-    if cart_item.product.stock < quantity:
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+    except (ValueError, TypeError):
+        quantity = 1
+
+    if quantity <= 0:
+        cart_item.delete()
+        messages.success(request, "Item removed from Cart.")
+    elif cart_item.product.stock < quantity:
         messages.error(request, f"Only {cart_item.product.stock} items available.")
     else:
         cart_item.quantity = quantity
         cart_item.save()
         messages.success(request, "Cart updated.")
-        
+
     return redirect('shop:cart_detail')
 
 
@@ -326,7 +345,6 @@ def remove_coupon(request):
 
 @customer_required
 def checkout(request):
-        
     cart = _get_or_create_cart(request)
     cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
     if not cart.items.exists():
@@ -341,7 +359,7 @@ def checkout(request):
     # Coupon calculation
     coupon_code = request.session.get('coupon_code')
     coupon = None
-    discount = 0
+    discount = Decimal('0.00')
     if coupon_code:
         try:
             coupon = Coupon.objects.get(code=coupon_code, is_active=True)
@@ -350,27 +368,28 @@ def checkout(request):
         except Coupon.DoesNotExist:
             pass
             
-    tax_percent = settings_obj.tax_percentage
-    tax = (subtotal - discount) * (tax_percent / Decimal('100'))
-    
-    shipping = settings_obj.shipping_charge
-    if subtotal - discount >= settings_obj.free_shipping_limit:
-        shipping = 0
-        
-    # By default, checkout payment method is COD
-    cod_charge = Decimal('49.00')
-    grand_total = subtotal - discount + tax + shipping + cod_charge
+    # Pricing evaluation
+    pricing = calculate_order_pricing(subtotal, discount=discount, payment_method='COD', settings_obj=settings_obj)
+    default_payment = 'COD'
 
     context = {
         'cart': cart,
         'addresses': addresses,
-        'subtotal': subtotal,
+        'subtotal': pricing['subtotal'],
         'coupon': coupon,
-        'discount': discount,
-        'tax': tax,
-        'shipping': shipping,
-        'cod_charge': cod_charge,
-        'grand_total': grand_total,
+        'discount': pricing['discount'],
+        'tax': pricing['tax_amount'],
+        'shipping': pricing['shipping'],
+        'order_amount_before_cod': pricing['order_amount_before_cod'],
+        'is_cod_eligible': pricing['is_cod_eligible'],
+        'cod_is_free': pricing['cod_is_free'],
+        'cod_free_threshold': pricing['cod_free_threshold'],
+        'cod_max_limit': pricing['cod_max_limit'],
+        'standard_cod_fee': pricing['standard_cod_fee'],
+        'cod_charge': pricing['cod_charge'],
+        'default_payment_method': default_payment,
+        'grand_total': pricing['grand_total'],
+        'site_settings': settings_obj,
     }
     return render(request, 'shop/checkout.html', context)
 
@@ -389,8 +408,9 @@ def order_create(request):
             return redirect('shop:checkout')
             
         address = get_object_or_404(Address, id=address_id, user=request.user)
-        payment_method = request.POST.get('payment_method', 'COD')
-        cod_charge = Decimal('49.00') if payment_method == 'COD' else Decimal('0.00')
+        payment_method = request.POST.get('payment_method', 'COD').upper()
+        if payment_method not in ['COD', 'ONLINE']:
+            payment_method = 'ONLINE'
         
         try:
             with transaction.atomic():
@@ -410,14 +430,14 @@ def order_create(request):
                     if product.stock < item.quantity:
                         raise ValueError(f"Product '{product.name}' has insufficient stock. Only {product.stock} left.")
                 
-                # Calculate pricing
+                # Calculate pricing directly on the server - NEVER trust frontend amounts
                 settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
                 subtotal = sum(item.get_total_price() for item in cart_items)
                 
                 # Coupon
                 coupon_code = request.session.get('coupon_code')
                 coupon = None
-                discount = 0
+                discount = Decimal('0.00')
                 if coupon_code:
                     try:
                         coupon = Coupon.objects.get(code=coupon_code, is_active=True)
@@ -426,14 +446,18 @@ def order_create(request):
                     except Coupon.DoesNotExist:
                         pass
                         
-                tax_percent = settings_obj.tax_percentage
-                tax = (subtotal - discount) * (tax_percent / Decimal('100'))
+                pricing = calculate_order_pricing(subtotal, discount=discount, payment_method=payment_method, settings_obj=settings_obj)
                 
-                shipping = settings_obj.shipping_charge
-                if subtotal - discount >= settings_obj.free_shipping_limit:
-                    shipping = 0
-                    
-                grand_total = subtotal - discount + tax + shipping + cod_charge
+                # STRICT BACKEND COD SECURITY VALIDATION
+                if payment_method == 'COD' and not pricing['is_cod_eligible']:
+                    messages.error(request, f"Cash on Delivery is available only for orders below ₹{pricing['cod_max_limit']:.0f}. Please choose Online Payment.")
+                    return redirect('shop:checkout')
+
+                tax = pricing['tax_amount']
+                shipping = pricing['shipping']
+                cod_charge = pricing['cod_charge']
+                grand_total = pricing['grand_total']
+                final_payment_method = pricing['effective_payment_method']
                 
                 # Generate Order Number
                 order_number = f"RS-{uuid.uuid4().hex[:8].upper()}"
@@ -451,14 +475,14 @@ def order_create(request):
                     state=address.state,
                     pincode=address.pincode,
                     landmark=address.landmark,
-                    payment_method=payment_method,
-                    payment_status='PENDING' if payment_method == 'COD' else 'PAID',
+                    payment_method=final_payment_method,
+                    payment_status='PENDING' if final_payment_method == 'COD' else 'PAID',
                     order_status='PENDING',
-                    subtotal=subtotal,
+                    subtotal=pricing['subtotal'],
                     shipping_cost=shipping,
                     tax_amount=tax,
                     cod_charge=cod_charge,
-                    discount_amount=discount,
+                    discount_amount=pricing['discount'],
                     grand_total=grand_total,
                     coupon_used=coupon
                 )
@@ -470,7 +494,7 @@ def order_create(request):
                         order=order,
                         product=product,
                         quantity=item.quantity,
-                        price=product.offer_price
+                        price=item.get_unit_price_with_tax()
                     )
                     product.stock -= item.quantity
                     product.save()
@@ -484,8 +508,11 @@ def order_create(request):
                 # Clear Cart
                 cart.items.all().delete()
                 
+                # Dispatch comprehensive accounting order notification to store owner/admin
+                send_owner_order_notification_email(order)
+                
                 messages.success(request, f"Order #{order_number} placed successfully!")
-                return render(request, 'shop/order_success.html', {'order': order})
+                return render(request, 'shop/order_success.html', {'order': order, 'site_settings': settings_obj})
                 
         except ValueError as e:
             messages.error(request, str(e))
@@ -497,7 +524,8 @@ def order_create(request):
 @customer_required
 def order_detail(request, order_number):
     order = get_object_or_404(Order.objects.prefetch_related('items__product'), order_number=order_number, user=request.user)
-    return render(request, 'shop/order_detail.html', {'order': order})
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+    return render(request, 'shop/order_detail.html', {'order': order, 'site_settings': settings_obj})
 
 @customer_required
 def add_review(request, product_id):
@@ -637,7 +665,12 @@ def get_slots_status_for_date(target_date):
     booked_slots = set(
         CallBooking.objects.filter(
             booking_date=target_date,
-            status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+            status__in=['CONFIRMED', 'COMPLETED']
+        ).values_list('time_slot', flat=True)
+    ) | set(
+        CallSlot.objects.filter(
+            date=target_date,
+            status='BOOKED'
         ).values_list('time_slot', flat=True)
     )
 
@@ -688,6 +721,37 @@ def slot_availability_api(request):
         'date': date_str,
         'slots': slots_data,
     })
+
+
+def sku_autocomplete_api(request):
+    """
+    Fast API endpoint for live SKU auto-suggestions in filters and search.
+    Returns matching products with SKU, title, thumbnail, price, and catalog filter query.
+    """
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return JsonResponse({'results': []})
+
+    matches = Product.objects.filter(
+        is_active=True
+    ).filter(
+        Q(sku__icontains=q) | Q(name__icontains=q)
+    ).prefetch_related('images')[:8]
+
+    results = []
+    for p in matches:
+        first_img = p.images.first()
+        img_url = first_img.image.url if first_img and first_img.image else ''
+        price_val = p.offer_price if p.offer_price is not None else p.price
+        results.append({
+            'sku': p.sku,
+            'name': p.name,
+            'price': f"{price_val:.2f}" if price_val else "0.00",
+            'image': img_url,
+            'url': p.get_absolute_url(),
+        })
+
+    return JsonResponse({'results': results})
 
 
 def send_booking_notification_email(booking):
@@ -781,11 +845,12 @@ def send_booking_notification_email(booking):
         logger.error(f"Failed to send owner call booking notification email: {str(e)}", exc_info=True)
 
 
+@login_required(login_url='accounts:login')
 def book_call(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
     
     today = timezone.now().date()
-    available_dates = [today + datetime.timedelta(days=i) for i in range(1, 8)]
+    available_dates = [today + datetime.timedelta(days=i) for i in range(0, 8)]
     valid_time_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
 
     if request.method == 'POST':
@@ -829,7 +894,7 @@ def book_call(request, slug):
                 is_booked = CallBooking.objects.filter(
                     booking_date=booking_date,
                     time_slot=time_slot,
-                    status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+                    status__in=['CONFIRMED', 'COMPLETED']
                 ).select_for_update().exists()
                 if is_booked:
                     errors.append("This time slot has already been booked. Please select another time slot.")
@@ -843,6 +908,7 @@ def book_call(request, slug):
                 'product': product,
                 'available_dates': available_dates,
                 'selected_date': selected_date.strftime('%Y-%m-%d'),
+                'today': today,
                 'slots_data': slots_data,
                 'form_data': request.POST,
             })
@@ -870,6 +936,7 @@ def book_call(request, slug):
                 booking_date=booking_date,
                 time_slot=time_slot,
                 notes=notes,
+                status='CONFIRMED',
             )
 
             # Sync/Update CallSlot status
@@ -911,6 +978,7 @@ def book_call(request, slug):
         'product': product,
         'available_dates': available_dates,
         'selected_date': selected_date.strftime('%Y-%m-%d'),
+        'today': today,
         'slots_data': slots_data,
         'form_data': form_data,
     })

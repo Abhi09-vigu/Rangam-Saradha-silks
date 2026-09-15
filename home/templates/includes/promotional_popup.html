@@ -82,6 +82,7 @@
                         {% endif %}
 
                     {% elif active_popup.popup_type == 'CALL_BOOKING' %}
+                        {% if user.is_authenticated %}
                         <!-- Interactive Book a Call Form -->
                         <div id="rssBookingFormContainer">
                             <div id="rssBookingAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
@@ -91,11 +92,11 @@
                                 <div class="row g-2">
                                     <div class="col-12 col-sm-6">
                                         <label for="rssBookName" class="form-label rss-form-label">Full Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control rss-form-input" id="rssBookName" name="full_name" required placeholder="e.g. Priyadarshini">
+                                        <input type="text" class="form-control rss-form-input" id="rssBookName" name="full_name" required placeholder="e.g. Priyadarshini" value="{{ user.get_full_name|default:user.username }}">
                                     </div>
                                     <div class="col-12 col-sm-6">
                                         <label for="rssBookPhone" class="form-label rss-form-label">Phone Number <span class="text-danger">*</span></label>
-                                        <input type="tel" class="form-control rss-form-input" id="rssBookPhone" name="phone_number" required placeholder="+91 98765 43210">
+                                        <input type="tel" class="form-control rss-form-input" id="rssBookPhone" name="phone_number" required placeholder="+91 98765 43210" value="{{ user.phone_number|default:'' }}">
                                     </div>
                                     <div class="col-12 col-sm-6">
                                         <label for="rssBookDate" class="form-label rss-form-label">Preferred Date <span class="text-danger">*</span></label>
@@ -129,6 +130,22 @@
                                 </button>
                             </form>
                         </div>
+                        {% else %}
+                        <!-- Login Required Prompt for Popup -->
+                        <div class="text-center py-3 px-2">
+                            <div class="mb-3">
+                                <i class="bi bi-person-lock fs-1 text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Login Required</h5>
+                            <p class="text-muted small mb-4">Please log in to your account to book a personalized video saree consultation.</p>
+                            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="rss-popup-cta-btn primary-btn-luxury d-block text-center text-white mb-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book Call
+                            </a>
+                            <a href="{% url 'accounts:register' %}?next={{ request.path }}" class="btn btn-outline-dark btn-sm rounded-pill w-100">
+                                Create an Account
+                            </a>
+                        </div>
+                        {% endif %}
 
                         <!-- Success Screen for Booking -->
                         <div id="rssBookingSuccessContainer" class="d-none text-center py-3">

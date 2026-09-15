@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from .decorators import customer_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
@@ -16,7 +17,7 @@ from .models import CustomUser, Address, Wishlist
 from .forms import (
     CustomUserCreationForm, UserProfileForm, AddressForm, 
     OTPVerificationForm, ForgotPasswordForm, ResetPasswordForm,
-    PhoneLoginForm
+    PhoneLoginForm, CompletePhoneForm
 )
 
 # Twilio Verify Client Helpers & Setup
@@ -24,13 +25,31 @@ from django.conf import settings
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 
+import threading
 from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
+def _send_welcome_email_worker(email, first_name, from_email, subject, body):
+    try:
+        sent_count = send_mail(
+            subject=subject,
+            message=body,
+            from_email=from_email,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+        if sent_count == 0:
+            logger.error(f"Failed to send welcome email to {email} (send_mail returned 0).")
+        else:
+            logger.info(f"Welcome email successfully sent to {email}.")
+    except Exception as e:
+        logger.error(f"Error sending welcome email to {email}: {str(e)}", exc_info=True)
+
 def send_registration_welcome_email(user):
     """
-    Sends an automatic welcome email to newly registered users via Google / Firebase OAuth.
+    Sends an automatic welcome email to newly registered users via Google / Firebase OAuth
+    in a background thread to prevent blocking sign-up requests.
     """
     if not user or not user.email:
         logger.warning("Skipping registration welcome email: User or user email address missing.")
@@ -53,22 +72,12 @@ def send_registration_welcome_email(user):
 
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
 
-    try:
-        sent_count = send_mail(
-            subject=subject,
-            message=body,
-            from_email=from_email,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
-        if sent_count == 0:
-            logger.error(f"Failed to send welcome email to {user.email} (send_mail returned 0).")
-        else:
-            logger.info(f"Welcome email successfully sent to {user.email}.")
-        return sent_count > 0
-    except Exception as e:
-        logger.error(f"Error sending welcome email to {user.email}: {str(e)}", exc_info=True)
-        return False
+    threading.Thread(
+        target=_send_welcome_email_worker,
+        args=(user.email, first_name, from_email, subject, body),
+        daemon=True
+    ).start()
+    return True
 
 def get_twilio_client():
     account_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
@@ -204,19 +213,21 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False # Deactivate until OTP verified
-            # Generate mock OTP
-            otp = str(random.randint(100000, 999999))
-            user.otp_code = otp
-            user.otp_expiry = timezone.now() + timedelta(minutes=10)
+            user.is_active = True
+            user.is_verified = True
             user.save()
             
-            # Save username in session for verification
-            request.session['registration_username'] = user.username
+            old_session_key = request.session.session_key
+            login(request, user)
+            merge_carts_after_login(request, user, old_session_key)
+            send_registration_welcome_email(user)
             
-            # Output message with mock OTP for easy developer access (instead of sending SMS/Email)
-            messages.success(request, f"Registration success! Use mock verification code: {otp}")
-            return redirect('accounts:verify_otp')
+            next_url = request.GET.get('next')
+            if not next_url or next_url.startswith('/admin'):
+                next_url = 'home:index'
+            
+            messages.success(request, f"Account created successfully! Welcome to Rangam Saradha Silks, {user.username}.")
+            return redirect(next_url)
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {
@@ -365,16 +376,23 @@ def login_view(request):
                     'active_tab': 'phone'
                 })
         else:
-            username_or_email = request.POST.get('username')
+            username_or_email = request.POST.get('username', '').strip()
             password = request.POST.get('password')
             
             user = authenticate(request, username=username_or_email, password=password)
             if not user:
-                try:
-                    user_obj = CustomUser.objects.get(email=username_or_email)
+                # 1. Search by email
+                user_obj = CustomUser.objects.filter(email__iexact=username_or_email).first()
+                # 2. Search by mobile number (exact or last 10 digits)
+                if not user_obj:
+                    digits = ''.join(c for c in username_or_email if c.isdigit())
+                    if len(digits) >= 10:
+                        user_obj = CustomUser.objects.filter(phone_number__endswith=digits[-10:]).first()
+                    elif digits:
+                        user_obj = CustomUser.objects.filter(phone_number=username_or_email).first()
+
+                if user_obj:
                     user = authenticate(request, username=user_obj.username, password=password)
-                except CustomUser.DoesNotExist:
-                    pass
                     
             if user:
                 if user.is_staff or user.is_superuser:
@@ -392,10 +410,10 @@ def login_view(request):
                         next_url = 'home:index'
                     return redirect(next_url)
                 else:
-                    messages.error(request, "Account is disabled. Please verify your OTP.")
-                    return redirect('accounts:register')
+                    messages.error(request, "Account is disabled. Please contact support.")
+                    return redirect('accounts:login')
             else:
-                messages.error(request, "Invalid credentials.")
+                messages.error(request, "Invalid credentials. Please check your username, email, or mobile number and password.")
                 
     return render(request, 'accounts/login.html', {
         'phone_form': phone_form,
@@ -490,36 +508,56 @@ def call_booking_detail(request, booking_ref):
 
 @customer_required
 def address_create(request):
+    next_url = request.POST.get('next') or request.GET.get('next')
     if request.method == 'POST':
         form = AddressForm(request.POST)
         if form.is_valid():
             address = form.save(commit=False)
             address.user = request.user
+            # Automatically set as default if it's the user's first address
+            if not Address.objects.filter(user=request.user).exists():
+                address.is_default = True
             address.save()
             messages.success(request, "Address added successfully.")
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
             return redirect('accounts:profile')
     else:
         form = AddressForm()
-    return render(request, 'accounts/address_form.html', {'form': form, 'title': 'Add Address'})
+    return render(request, 'accounts/address_form.html', {
+        'form': form,
+        'title': 'Add Address',
+        'next_url': next_url
+    })
 
 @customer_required
 def address_edit(request, pk):
     address = get_object_or_404(Address, pk=pk, user=request.user)
+    next_url = request.POST.get('next') or request.GET.get('next')
     if request.method == 'POST':
         form = AddressForm(request.POST, instance=address)
         if form.is_valid():
             form.save()
             messages.success(request, "Address updated successfully.")
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
             return redirect('accounts:profile')
     else:
         form = AddressForm(instance=address)
-    return render(request, 'accounts/address_form.html', {'form': form, 'title': 'Edit Address'})
+    return render(request, 'accounts/address_form.html', {
+        'form': form,
+        'title': 'Edit Address',
+        'next_url': next_url
+    })
 
 @customer_required
 def address_delete(request, pk):
     address = get_object_or_404(Address, pk=pk, user=request.user)
+    next_url = request.POST.get('next') or request.GET.get('next')
     address.delete()
     messages.success(request, "Address deleted successfully.")
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
     return redirect('accounts:profile')
 
 @customer_required
@@ -674,8 +712,32 @@ def google_login_view(request):
 
         google_user_data = None
 
-        # Verify Google ID Token via Google's official tokeninfo endpoint
+        # Verify Google ID Token: First attempt ultra-fast local verification via Google Auth SDK (cached certs)
         if id_token_str:
+            try:
+                from google.oauth2 import id_token as google_id_token
+                from google.auth.transport import requests as google_requests
+                client_id = getattr(settings, 'GOOGLE_CLIENT_ID', None)
+                payload = google_id_token.verify_oauth2_token(
+                    id_token_str,
+                    google_requests.Request(),
+                    audience=client_id if client_id else None
+                )
+                if payload:
+                    google_user_data = {
+                        'email': payload.get('email'),
+                        'email_verified': str(payload.get('email_verified', '')).lower() in ['true', '1'],
+                        'google_id': payload.get('sub'),
+                        'name': payload.get('name', ''),
+                        'given_name': payload.get('given_name', ''),
+                        'family_name': payload.get('family_name', ''),
+                        'picture': payload.get('picture', ''),
+                    }
+            except Exception as ex:
+                logger.debug(f"Direct token verification fallback: {ex}")
+
+        # Fallback to official tokeninfo endpoint if not verified yet
+        if not google_user_data and id_token_str:
             resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token_str}", timeout=8)
             if resp.status_code == 200:
                 payload = resp.json()
@@ -774,12 +836,20 @@ def google_login_view(request):
         if not next_url or next_url.startswith('/admin'):
             next_url = '/'
 
-        messages.success(request, f"Welcome back, {user.first_name or user.username}! Authenticated via Google.")
+        # If user has no phone number, prompt them to complete their mobile number
+        if not user.phone_number:
+            from django.urls import reverse
+            redirect_url = reverse('accounts:complete_phone')
+            if next_url != '/':
+                redirect_url += f"?next={next_url}"
+        else:
+            redirect_url = next_url
+            messages.success(request, f"Welcome back, {user.first_name or user.username}! Authenticated via Google.")
 
         return JsonResponse({
             'status': 'success',
             'message': 'Google authentication successful.',
-            'redirect_url': next_url,
+            'redirect_url': redirect_url,
             'user': {
                 'id': user.id,
                 'email': user.email,
@@ -895,12 +965,20 @@ def firebase_login_view(request):
         if not next_url or next_url.startswith('/admin'):
             next_url = '/'
 
-        messages.success(request, f"Welcome, {user.first_name or user.username}! Authenticated via Firebase Google Sign-In.")
+        # If user has no phone number, prompt them to complete their mobile number
+        if not user.phone_number:
+            from django.urls import reverse
+            redirect_url = reverse('accounts:complete_phone')
+            if next_url != '/':
+                redirect_url += f"?next={next_url}"
+        else:
+            redirect_url = next_url
+            messages.success(request, f"Welcome, {user.first_name or user.username}! Authenticated via Firebase Google Sign-In.")
 
         return JsonResponse({
             'status': 'success',
             'message': 'Firebase Google Authentication successful.',
-            'redirect_url': next_url,
+            'redirect_url': redirect_url,
             'user': {
                 'id': user.id,
                 'email': user.email,
@@ -912,3 +990,44 @@ def firebase_login_view(request):
     except Exception as e:
         logger.error(f"Firebase login view error: {str(e)}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': f'Authentication failure: {str(e)}'}, status=500)
+
+
+@login_required
+def complete_phone_view(request):
+    """
+    Prompts users who registered/logged in via Google (or any provider without a phone number)
+    to provide their mobile number before continuing.
+    """
+    next_url = request.GET.get('next') or request.POST.get('next') or 'home:index'
+    if not next_url or next_url.startswith('/admin'):
+        next_url = 'home:index'
+
+    if request.user.phone_number:
+        return redirect(next_url)
+
+    if request.method == 'POST':
+        form = CompletePhoneForm(request.POST, user=request.user)
+        if form.is_valid():
+            request.user.phone_number = form.cleaned_data['phone_number']
+            request.user.save(update_fields=['phone_number'])
+            messages.success(request, f"Mobile number saved successfully! Welcome, {request.user.first_name or request.user.username}.")
+            return redirect(next_url)
+    else:
+        form = CompletePhoneForm(user=request.user)
+
+    return render(request, 'accounts/complete_phone.html', {
+        'form': form,
+        'next_url': next_url,
+    })
+
+
+
+@staff_member_required
+def export_users_excel(request):
+    """
+    Direct view to export all users as an Excel sheet (.xlsx).
+    Restricted to authenticated admin staff members only.
+    """
+    from accounts.admin import generate_users_excel_response
+    return generate_users_excel_response()
+

@@ -167,6 +167,262 @@ h6,
     width: 60%;
 }
 
+/* Desktop Hover Dropdown Support for Navbar */
+@media (min-width: 992px) {
+    .navbar-premium .nav-item.dropdown,
+    .navbar-premium .navbar-icons .dropdown {
+        position: relative;
+    }
+
+    .navbar-premium .nav-item.dropdown .dropdown-menu,
+    .navbar-premium .navbar-icons .dropdown .dropdown-menu {
+        display: block !important;
+        margin-top: 0;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(17, 24, 39, 0.12), 0 2px 8px rgba(197, 160, 89, 0.15) !important;
+        border: 1px solid rgba(197, 160, 89, 0.25) !important;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 8px 0;
+    }
+
+    /* Invisible hover bridge between toggle and menu */
+    .navbar-premium .nav-item.dropdown .dropdown-menu::before,
+    .navbar-premium .navbar-icons .dropdown .dropdown-menu::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 0;
+        width: 100%;
+        height: 12px;
+    }
+
+    .navbar-premium .nav-item.dropdown:hover > .dropdown-menu,
+    .navbar-premium .nav-item.dropdown.show > .dropdown-menu,
+    .navbar-premium .navbar-icons .dropdown:hover > .dropdown-menu,
+    .navbar-premium .navbar-icons .dropdown.show > .dropdown-menu {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translateY(0) !important;
+    }
+
+    .navbar-premium .nav-item.dropdown:hover > .nav-link,
+    .navbar-premium .nav-item.dropdown.show > .nav-link {
+        color: var(--primary) !important;
+    }
+
+    .navbar-premium .nav-item.dropdown:hover > .nav-link::after,
+    .navbar-premium .nav-item.dropdown.show > .nav-link::after {
+        width: 60%;
+    }
+
+    .navbar-premium .dropdown-item {
+        padding: 9px 22px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.18s ease;
+    }
+
+    .navbar-premium .dropdown-item:hover,
+    .navbar-premium .dropdown-item:focus {
+        background-color: rgba(175, 4, 70, 0.08);
+        color: var(--primary) !important;
+    }
+}
+
+/* Responsive Filter Drawer for Catalog on Mobile & Tablets */
+@media (max-width: 991.98px) {
+    .catalog-filter-offcanvas.offcanvas-lg {
+        width: 320px;
+        max-width: 88vw;
+        background-color: #ffffff;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    .catalog-filter-offcanvas .card {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 1rem !important;
+    }
+    .catalog-filter-offcanvas .offcanvas-header {
+        border-bottom: 1px solid #f1f1f1;
+    }
+}
+
+/* ==========================================================================
+   Luxury User Profile Dropdown
+   ========================================================================== */
+.user-profile-dropdown {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center;
+    margin-left: 1.25rem;
+}
+
+.user-profile-dropdown .dropdown-toggle {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+}
+
+.user-profile-dropdown .dropdown-toggle:hover {
+    transform: scale(1.06);
+}
+
+.user-nav-avatar {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--primary, #af0446);
+    box-shadow: 0 2px 8px rgba(175, 4, 70, 0.25);
+    transition: all 0.2s ease;
+}
+
+.user-nav-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary, #af0446) 0%, #7d0231 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(175, 4, 70, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Normal Clean User Profile Dropdown */
+.user-profile-dropdown .profile-normal-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 1060 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* User Info Header in Dropdown */
+.profile-normal-menu .profile-header-wrap {
+    background-color: #fafafa !important;
+    padding: 12px 14px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    box-sizing: border-box !important;
+}
+
+.profile-header-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1.5px solid #e5e7eb !important;
+    flex-shrink: 0 !important;
+}
+
+.profile-header-avatar-placeholder {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: var(--primary, #af0446) !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+}
+
+.profile-user-name {
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+    line-height: 1.25 !important;
+}
+
+.profile-user-email {
+    font-size: 0.78rem !important;
+    color: #6b7280 !important;
+    line-height: 1.3 !important;
+    margin-top: 1px !important;
+}
+
+.profile-normal-menu li {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    list-style: none !important;
+}
+
+.profile-normal-menu .dropdown-item {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    margin: 2px 8px !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.profile-normal-menu .dropdown-item:hover,
+.profile-normal-menu .dropdown-item:focus {
+    background-color: #f3f4f6 !important;
+    color: var(--primary, #af0446) !important;
+}
+
+.profile-normal-menu .dropdown-item.text-danger {
+    color: #dc2626 !important;
+}
+
+.profile-normal-menu .dropdown-item.text-danger:hover,
+.profile-normal-menu .dropdown-item.text-danger:focus {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+@media (max-width: 576px) {
+    .user-profile-dropdown .profile-normal-menu {
+        right: -6px !important;
+        width: 230px !important;
+        min-width: 230px !important;
+        max-width: 230px !important;
+    }
+}
+
 .navbar-icons a {
     color: var(--text-color);
     font-size: 1.2rem;
@@ -610,31 +866,42 @@ h6,
     background-color: #FF0000;
 }
 
-/* Floating WhatsApp / Customer Care Chat Button */
-.whatsapp-float-btn {
+/* Floating Contact & Book Video Call Widget Group */
+.floating-contact-widget {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 9999;
+    gap: 8px;
+}
+
+/* Floating WhatsApp / Customer Care Icon Button (Top) */
+.floating-support-btn,
+.whatsapp-float-btn {
+    width: 54px;
+    height: 54px;
     background-color: #ffffff;
     color: #ffffff !important;
     border-radius: 50%;
-    /* Purely circular button */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
     text-decoration: none !important;
-    z-index: 9999;
-    opacity: 1 !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
     overflow: hidden;
-    padding: 10px;
-    border: 1px solid #e0e0e0;
+    padding: 9px;
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+    position: relative;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-right: 18px;
 }
 
+.floating-support-img,
 .whatsapp-support-img {
     width: 100%;
     height: 100%;
@@ -642,21 +909,21 @@ h6,
     display: block;
 }
 
+.floating-support-btn:hover,
 .whatsapp-float-btn:hover {
-    transform: scale(1.1) translateY(-5px);
+    transform: translateY(-2px) scale(1.08);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    opacity: 1 !important;
     background-color: #ffffff;
 }
 
-/* WhatsApp Custom Tooltip */
+/* Floating Custom Tooltip */
+.floating-support-tooltip,
 .whatsapp-tooltip {
     position: absolute;
-    right: 70px;
+    right: 68px;
     top: 50%;
     transform: translateY(-50%) scale(0.9);
     background-color: #21030e;
-    /* Dark elegant header color */
     color: #ffffff;
     padding: 8px 16px;
     border-radius: 8px;
@@ -668,12 +935,11 @@ h6,
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 9998;
-    /* Stays below button */
     font-family: 'Inter', sans-serif;
     font-weight: 500;
 }
 
-/* Tooltip Arrow pointing to the right */
+.floating-support-tooltip::after,
 .whatsapp-tooltip::after {
     content: "";
     position: absolute;
@@ -685,10 +951,95 @@ h6,
     border-color: transparent transparent transparent #21030e;
 }
 
+.floating-support-btn:hover .floating-support-tooltip,
 .whatsapp-float-btn:hover .whatsapp-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateY(-50%) scale(1);
+}
+
+/* Pill-Shaped Book Video Call Button Below The Icon */
+.floating-book-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary, #AF0446);
+    background: linear-gradient(135deg, #AF0446 0%, #8c0338 100%);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 50px;
+    padding: 6px 18px 6px 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(175, 4, 70, 0.4);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none !important;
+    outline: none;
+    user-select: none;
+}
+
+.floating-book-call-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(175, 4, 70, 0.55);
+    background: linear-gradient(135deg, #c40650 0%, #9e0440 100%);
+    color: #ffffff !important;
+}
+
+.floating-book-call-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.floating-book-call-btn .video-icon-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.floating-book-call-btn:hover .video-icon-badge {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.floating-book-call-btn .video-btn-label {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    color: #ffffff;
+}
+
+@media (max-width: 576px) {
+    .floating-contact-widget {
+        bottom: 16px;
+        right: 14px;
+        gap: 6px;
+    }
+    .floating-support-btn,
+    .whatsapp-float-btn {
+        width: 46px;
+        height: 46px;
+        padding: 7px;
+        margin-right: 12px;
+    }
+    .floating-book-call-btn {
+        padding: 5px 14px 5px 6px;
+        gap: 7px;
+    }
+    .floating-book-call-btn .video-icon-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
+    .floating-book-call-btn .video-btn-label {
+        font-size: 0.82rem;
+    }
 }
 
 /* WhatsApp Circular Pulsing Glow Animation */
@@ -6429,3 +6780,401 @@ h6,
         font-size: 0.58rem !important;
     }
 }
+
+/* ==========================================================================
+   Why Choose Rangam Saradha Silks Banner Section (Reference Matched)
+   ========================================================================== */
+.rss-why-choose-banner-section {
+    width: 100%;
+    background-color: #FAF7F2;
+    border-top: 1px solid #EBE2D7;
+    border-bottom: 1px solid #EBE2D7;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.rss-why-container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+}
+
+.rss-why-image-col {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 190px;
+}
+
+.rss-why-img-wrapper {
+    width: 100%;
+    height: 100%;
+    min-height: 190px;
+    max-height: 230px;
+    display: flex;
+    align-items: center;
+}
+
+.rss-why-img {
+    width: 100%;
+    height: 100%;
+    max-height: 230px;
+    object-fit: cover;
+    object-position: left center;
+}
+
+.rss-why-content-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rss-why-heading-group {
+    max-width: 480px;
+}
+
+.rss-why-ornament {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rss-why-ornament-line {
+    display: inline-block;
+    width: 42px;
+    height: 1px;
+    background: #D9B780;
+    vertical-align: middle;
+}
+
+.rss-why-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #5A0020;
+    font-size: clamp(1.35rem, 1.8vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.25;
+}
+
+.rss-why-subtitle {
+    color: #555555;
+    font-size: clamp(0.85rem, 0.95vw, 0.92rem);
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    margin-bottom: 16px !important;
+}
+
+.rss-why-action-wrap {
+    display: block;
+}
+
+.rss-why-btn-know-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #7A0026 0%, #63001E 100%);
+    color: #FFFFFF !important;
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.2px;
+    padding: 9px 26px;
+    border-radius: 50px;
+    text-decoration: none !important;
+    box-shadow: 0 3px 12px rgba(122, 0, 38, 0.25);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    white-space: nowrap;
+}
+
+.rss-why-btn-know-more i {
+    transition: transform 0.25s ease;
+}
+
+.rss-why-btn-know-more:hover {
+    background: linear-gradient(135deg, #8C0338 0%, #720024 100%);
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(122, 0, 38, 0.35);
+}
+
+.rss-why-btn-know-more:hover i {
+    transform: translateX(4px);
+}
+
+.rss-why-features-col {
+    display: flex;
+    align-items: center;
+}
+
+.rss-why-items-row {
+    gap: 8px 16px;
+    width: 100%;
+}
+
+.rss-why-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2px 6px;
+    min-width: 120px;
+    transition: transform 0.25s ease;
+}
+
+.rss-why-item:hover {
+    transform: translateY(-2px);
+}
+
+.rss-why-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #FFF6F8 0%, #FDEBF0 100%);
+    border: 1.5px solid #F6D6DF;
+    box-shadow: 0 3px 10px rgba(122, 0, 38, 0.07);
+    transition: all 0.3s ease;
+}
+
+.rss-why-item:hover .rss-why-icon-wrap {
+    box-shadow: 0 5px 14px rgba(122, 0, 38, 0.16);
+    transform: translateY(-2px) scale(1.05);
+    border-color: #ECAEBE;
+}
+
+.rss-why-item-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #242424;
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.rss-why-item-desc {
+    font-size: 0.74rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.rss-why-divider {
+    width: 1px;
+    height: 36px;
+    background: #E8DDD2;
+    align-self: center;
+}
+
+@media (max-width: 1200px) {
+    .rss-why-item {
+        min-width: 110px;
+        padding: 2px 4px;
+    }
+    .rss-why-item-title {
+        font-size: 0.84rem;
+    }
+    .rss-why-item-desc {
+        font-size: 0.72rem;
+    }
+}
+
+@media (max-width: 991px) {
+    .rss-why-content-col {
+        text-align: center;
+        align-items: center;
+        padding: 24px 16px 12px 16px !important;
+    }
+    .rss-why-heading-group {
+        margin: 0 auto;
+        text-align: center;
+    }
+    .rss-why-ornament {
+        justify-content: center;
+    }
+    .rss-why-action-wrap {
+        text-align: center;
+    }
+    .rss-why-features-col {
+        justify-content: center;
+        padding: 12px 16px 24px 16px !important;
+    }
+    .rss-why-items-row {
+        justify-content: center !important;
+        gap: 16px 20px;
+    }
+    .rss-why-divider {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .rss-why-item {
+        min-width: 125px;
+    }
+}
+
+/* ==========================================================================
+   Top Floating Notification Popup (Welcome & Alert Messages)
+   ========================================================================== */
+.top-popup-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    width: auto;
+    max-width: 90vw;
+}
+
+.top-popup-alert {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px 10px 12px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 999px;
+    box-shadow: 0 14px 38px -4px rgba(33, 3, 14, 0.18), 0 4px 14px rgba(197, 160, 89, 0.22);
+    border: 1.5px solid rgba(197, 160, 89, 0.5);
+    color: #1f2937;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    animation: topPopupSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.top-popup-alert.top-popup-hiding {
+    opacity: 0 !important;
+    transform: translateY(-24px) scale(0.92) !important;
+    pointer-events: none !important;
+}
+
+.top-popup-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.popup-success .top-popup-icon-wrap {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+}
+.popup-success {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.popup-danger .top-popup-icon-wrap {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+}
+.popup-danger {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.popup-warning .top-popup-icon-wrap {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+}
+.popup-warning {
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.popup-info .top-popup-icon-wrap {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
+}
+.popup-info {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.top-popup-content {
+    display: flex;
+    align-items: center;
+}
+
+.top-popup-text {
+    line-height: 1.35;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.top-popup-close {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    margin-left: 6px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.top-popup-close:hover {
+    color: #111827;
+    transform: scale(1.15);
+}
+
+@keyframes topPopupSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ==========================================================================
+   Universal Print Styles for Tax Invoice & Bill Printing
+   ========================================================================== */
+@media print {
+    /* Hide all website navigation, headers, footers, and widgets */
+    header,
+    footer,
+    nav,
+    .navbar,
+    .breadcrumb,
+    .floating-contact-widget,
+    .order-tracking-card,
+    .no-print,
+    .btn-print,
+    .premium-toast-container,
+    .modal,
+    .modal-backdrop,
+    #floatingBookCallModal,
+    #premiumQuickViewModal,
+    #promotionalFirstVisitModal,
+    .promotional-popup-backdrop,
+    .social-sidebar-item,
+    .footer-social-icons,
+    .social-sidebar {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

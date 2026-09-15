@@ -99,10 +99,9 @@
                         {% csrf_token %}
                         <input type="hidden" name="login_type" value="password">
                         <div class="mb-3">
-                            <label for="username" class="form-label text-muted fs-7">Username or Email
-                                Address</label>
+                            <label for="username" class="form-label text-muted fs-7">Username, Email or Mobile Number</label>
                             <input type="text" name="username" class="form-control px-3 py-2" id="username"
-                                placeholder="Enter username or email" required>
+                                placeholder="Enter username, email, or mobile number" required>
                         </div>
                         <div class="mb-3">
                             <div class="d-flex justify-content-between">
@@ -110,8 +109,18 @@
                                 <a href="{% url 'accounts:forgot_password' %}"
                                     class="fs-8 text-primary text-decoration-none">Forgot Password?</a>
                             </div>
-                            <input type="password" name="password" class="form-control px-3 py-2" id="password"
-                                placeholder="Enter password" required>
+                            <div class="position-relative password-field-wrapper">
+                                <input type="password" name="password" class="form-control px-3 py-2 pe-5" id="password"
+                                    placeholder="Enter password" required>
+                                <button type="button" 
+                                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted pe-3 p-0 toggle-password-visibility border-0 shadow-none" 
+                                        style="z-index: 10; cursor: pointer; text-decoration: none;" 
+                                        aria-label="Toggle password visibility" 
+                                        tabindex="-1"
+                                        title="Show password">
+                                    <i class="bi bi-eye fs-6"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit"
                             class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
@@ -168,10 +177,47 @@
             });
         });
 
+        // Instant Auth Transition Overlay for Rapid Reload
+        function showFastAuthOverlay(message = "Verifying with Google...") {
+            let overlay = document.getElementById("fastAuthOverlay");
+            if (!overlay) {
+                overlay = document.createElement("div");
+                overlay.id = "fastAuthOverlay";
+                overlay.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:9999999;opacity:0;transition:opacity 0.18s ease;";
+                overlay.innerHTML = `
+                    <div style="background:rgba(255,255,255,0.98);border:1.5px solid rgba(197,160,89,0.45);border-radius:24px;padding:28px 36px;box-shadow:0 24px 55px rgba(0,0,0,0.25);display:flex;flex-direction:column;align-items:center;gap:14px;max-width:340px;text-align:center;">
+                        <div class="spinner-border" style="width:2.75rem;height:2.75rem;color:#AF0446!important;border-width:3.5px;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div id="fastAuthOverlayText" style="font-weight:700;font-size:1.05rem;color:#1f2937;letter-spacing:0.01em;">
+                            ${message}
+                        </div>
+                        <div style="font-size:0.82rem;color:#6b7280;">Loading website fastly...</div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                requestAnimationFrame(() => { overlay.style.opacity = "1"; });
+            } else {
+                const textEl = document.getElementById("fastAuthOverlayText");
+                if (textEl) textEl.textContent = message;
+                overlay.style.display = "flex";
+                overlay.style.opacity = "1";
+            }
+        }
+
+        function hideFastAuthOverlay() {
+            const overlay = document.getElementById("fastAuthOverlay");
+            if (overlay) {
+                overlay.style.opacity = "0";
+                setTimeout(() => { overlay.style.display = "none"; }, 180);
+            }
+        }
+
         // Google Sign-In Handler
         const googleBtn = document.getElementById("googleSignInBtn");
 
         function sendTokenToBackend(credential, accessToken = null) {
+            showFastAuthOverlay("Signing in with Google...");
             if (googleBtn) {
                 googleBtn.disabled = true;
                 googleBtn.innerHTML = `
@@ -198,20 +244,35 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "success") {
-                        window.location.href = data.redirect_url || "/";
+                        const targetUrl = data.redirect_url || "/";
+                        const textEl = document.getElementById("fastAuthOverlayText");
+                        if (textEl) textEl.textContent = "Welcome! Loading website...";
+
+                        // Immediate fast replacement to reload target page without history lag
+                        try {
+                            const prefetch = document.createElement("link");
+                            prefetch.rel = "prefetch";
+                            prefetch.href = targetUrl;
+                            document.head.appendChild(prefetch);
+                        } catch (e) {}
+
+                        window.location.replace(targetUrl);
                     } else {
+                        hideFastAuthOverlay();
                         alert(data.message || "Google Authentication failed.");
                         resetGoogleBtn();
                     }
                 })
                 .catch(err => {
                     console.error("Google Auth error:", err);
+                    hideFastAuthOverlay();
                     alert("An error occurred during Google authentication. Please try again.");
                     resetGoogleBtn();
                 });
         }
 
         function sendFirebaseTokenToBackend(idToken) {
+            showFastAuthOverlay("Signing in with Google...");
             if (googleBtn) {
                 googleBtn.disabled = true;
                 googleBtn.innerHTML = `
@@ -237,14 +298,27 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "success") {
-                        window.location.href = data.redirect_url || "/";
+                        const targetUrl = data.redirect_url || "/";
+                        const textEl = document.getElementById("fastAuthOverlayText");
+                        if (textEl) textEl.textContent = "Welcome! Loading website...";
+
+                        try {
+                            const prefetch = document.createElement("link");
+                            prefetch.rel = "prefetch";
+                            prefetch.href = targetUrl;
+                            document.head.appendChild(prefetch);
+                        } catch (e) {}
+
+                        window.location.replace(targetUrl);
                     } else {
+                        hideFastAuthOverlay();
                         alert(data.message || "Firebase Authentication failed.");
                         resetGoogleBtn();
                     }
                 })
                 .catch(err => {
                     console.error("Firebase Auth error:", err);
+                    hideFastAuthOverlay();
                     alert("An error occurred during Google authentication. Please try again.");
                     resetGoogleBtn();
                 });
@@ -297,8 +371,10 @@
 
         function handleCredentialResponse(response) {
             if (response && response.credential) {
+                showFastAuthOverlay("Verified with Google! Logging you in...");
                 sendTokenToBackend(response.credential);
             } else {
+                hideFastAuthOverlay();
                 resetGoogleBtn();
             }
         }

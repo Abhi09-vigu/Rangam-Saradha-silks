@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
 class Category(models.Model):
@@ -241,6 +241,13 @@ class CartItem(models.Model):
     def get_total_price(self):
         return self.product.offer_price * self.quantity
 
+    def get_unit_price_with_tax(self, tax_rate=Decimal('0.05')):
+        unit_price = Decimal(str(self.product.offer_price))
+        return (unit_price * (Decimal('1.00') + tax_rate)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    def get_total_price_with_tax(self, tax_rate=Decimal('0.05')):
+        return (self.get_unit_price_with_tax(tax_rate) * self.quantity).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
     def __str__(self):
         return f"{self.product.name} ({self.quantity})"
 
@@ -274,6 +281,13 @@ class Order(models.Model):
     
     # Billing/Shipping Info
     full_name = models.CharField(max_length=150)
+    gst_number = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True, 
+        verbose_name="Billing GST Number / GSTIN", 
+        help_text="Customer or Business GSTIN for billing invoice"
+    )
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
     address_line_1 = models.CharField(max_length=255)
@@ -287,6 +301,22 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='COD')
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     order_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    
+    # Shipment Tracking
+    tracking_link = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Tracking Link",
+        help_text="Direct URL to track the courier shipment"
+    )
+    tracking_number = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Tracking / AWB Number",
+        help_text="Consignment number or AWB number"
+    )
     
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -329,7 +359,6 @@ class CallBooking(models.Model):
     )
 
     STATUS_CHOICES = (
-        ('PENDING', 'Pending'),
         ('CONFIRMED', 'Confirmed'),
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
@@ -347,7 +376,7 @@ class CallBooking(models.Model):
     time_slot = models.CharField(max_length=50, choices=TIME_SLOT_CHOICES)
     notes = models.TextField(blank=True, null=True, help_text="Specific requirements or questions for the call")
     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='CONFIRMED')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -392,7 +421,7 @@ class CallSlot(models.Model):
         """
         Computes effective slot status:
         - If blocked_by_owner or status == 'BLOCKED' -> BLOCKED
-        - Else if active booking exists (PENDING, CONFIRMED, COMPLETED) -> BOOKED
+        - Else if active booking exists (CONFIRMED, COMPLETED) -> BOOKED
         - Else -> AVAILABLE
         """
         if self.blocked_by_owner or self.status == 'BLOCKED':
@@ -401,7 +430,7 @@ class CallSlot(models.Model):
         active_booking = CallBooking.objects.filter(
             booking_date=self.date,
             time_slot=self.time_slot,
-            status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+            status__in=['CONFIRMED', 'COMPLETED']
         ).first()
         
         if active_booking:

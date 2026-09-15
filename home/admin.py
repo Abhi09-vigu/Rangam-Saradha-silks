@@ -15,10 +15,10 @@ class SingletonAdmin(admin.ModelAdmin):
         return False
 
 class WebsiteSettingAdmin(SingletonAdmin):
-    list_display = ['website_name', 'primary_color', 'secondary_color', 'currency', 'tax_percentage', 'shipping_charge', 'free_shipping_limit', 'maintenance_mode']
+    list_display = ['website_name', 'gst_number', 'tax_percentage', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit', 'maintenance_mode']
     fieldsets = (
         ('General Website Settings', {
-            'fields': ('website_name', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), 'maintenance_mode'),
+            'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), ('cod_charge', 'cod_max_limit'), 'maintenance_mode'),
         }),
         ('Traditional Saree Collections Section (Categories)', {
             'fields': ('category_subtitle', 'category_title', 'category_description', ('category_button_text', 'category_button_url')),

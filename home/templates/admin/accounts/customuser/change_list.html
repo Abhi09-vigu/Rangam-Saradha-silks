@@ -1,0 +1,42 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="export-excel/" class="button export-excel-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      DOWNLOAD ALL USERS (EXCEL)
+    </a>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    .object-tools .export-excel-btn {
+      background: #107C41 !important;
+      border: 1px solid #0d6334 !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.3px;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 7px !important;
+      border-radius: 8px !important;
+      padding: 8px 14px !important;
+      box-shadow: 0 2px 4px rgba(16, 124, 65, 0.2) !important;
+      transition: all 0.2s ease !important;
+      text-decoration: none !important;
+    }
+    .object-tools .export-excel-btn:hover {
+      background: #0d6334 !important;
+      box-shadow: 0 4px 8px rgba(16, 124, 65, 0.35) !important;
+      transform: translateY(-1px);
+    }
+  </style>
+{% endblock %}

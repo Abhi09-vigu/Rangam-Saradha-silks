@@ -76,7 +76,7 @@
                                 <div class="col-6 col-sm-4 col-md-3">
                                     <input type="radio" class="btn-check date-radio" name="booking_date" id="date_{{ dt|date:'YMD' }}" value="{{ dt|date:'Y-m-d' }}" {% if form_data.booking_date == dt|date:'Y-m-d' or selected_date == dt|date:'Y-m-d' %}checked{% elif forloop.first and not form_data.booking_date and not selected_date %}checked{% endif %} required>
                                     <label class="btn btn-outline-secondary w-100 py-2 px-1 text-center rounded-3 fs-8 fw-medium shadow-none" for="date_{{ dt|date:'YMD' }}">
-                                        <div class="fw-bold text-dark fs-7">{{ dt|date:"D" }}</div>
+                                        <div class="fw-bold text-dark fs-7">{% if dt == today %}Today{% else %}{{ dt|date:"D" }}{% endif %}</div>
                                         <div class="text-muted fs-8">{{ dt|date:"d M" }}</div>
                                     </label>
                                 </div>

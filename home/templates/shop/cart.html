@@ -37,7 +37,7 @@
                                         <div>
                                             <h5 class="fw-semibold fs-7 mb-1"><a href="{% url 'shop:product_detail' item.product.slug %}" class="text-dark text-decoration-none">{{ item.product.name }}</a></h5>
                                             <p class="text-muted fs-8 mb-0">SKU: {{ item.product.sku }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</p>
-                                            <p class="text-primary fw-semibold fs-7 mt-1">{{ site_settings.currency }}{{ item.product.offer_price|floatformat:2 }}</p>
+                                            <p class="text-primary fw-semibold fs-7 mt-1">{{ site_settings.currency }}{{ item.get_unit_price_with_tax|floatformat:2 }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -48,7 +48,7 @@
                                             <button type="button" class="btn btn-outline-secondary btn-qty-minus rounded-start px-2 py-1" onclick="changeCartQty(this, -1)" title="Decrease Quantity">
                                                 <i class="bi bi-dash-lg"></i>
                                             </button>
-                                            <input type="number" name="quantity" class="form-control text-center fw-semibold qty-number-input px-1 py-1" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="max-width: 50px; box-shadow: none; border-left: 0; border-right: 0; background: #ffffff;" required readonly>
+                                            <input type="number" name="quantity" class="form-control text-center fw-semibold qty-number-input px-1 py-1" value="{{ item.quantity }}" min="0" max="{{ item.product.stock }}" style="max-width: 50px; box-shadow: none; border-left: 0; border-right: 0; background: #ffffff;" required readonly>
                                             <button type="button" class="btn btn-outline-secondary btn-qty-plus rounded-end px-2 py-1" onclick="changeCartQty(this, 1)" title="Increase Quantity">
                                                 <i class="bi bi-plus-lg"></i>
                                             </button>
@@ -60,7 +60,7 @@
                                 </td>
 
                                 <td class="text-end fw-bold text-dark fs-7">
-                                    {{ site_settings.currency }}{{ item.get_total_price|floatformat:2 }}
+                                    {{ site_settings.currency }}{{ item.get_total_price_with_tax|floatformat:2 }}
                                 </td>
                                 <td class="text-center">
                                     <a href="{% url 'shop:cart_remove' item.id %}" class="text-danger fs-6" title="Remove Item"><i class="bi bi-trash"></i></a>
@@ -111,13 +111,6 @@
                     </div>
                     {% endif %}
 
-                    {% if tax > 0 %}
-                    <div class="d-flex justify-content-between mb-2 fs-7">
-                        <span class="text-muted">GST/Tax ({{ site_settings.tax_percentage }}%):</span>
-                        <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ tax|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-
                     <div class="d-flex justify-content-between mb-4 fs-7 pb-2 border-bottom">
                         <span class="text-muted">Shipping Charges:</span>
                         <span class="fw-semibold text-dark">
@@ -129,9 +122,22 @@
                         </span>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-4 fs-5 fw-bold text-dark">
+                    <div class="d-flex justify-content-between mb-1 fs-5 fw-bold text-dark">
                         <span>Grand Total:</span>
                         <span class="text-primary">{{ site_settings.currency }}{{ grand_total|floatformat:2 }}</span>
+                    </div>
+                    <div class="text-end text-muted fs-8 mb-4">
+                        <span>(Inclusive of all taxes)</span>
+                    </div>
+
+                    <!-- COD / Payment Notice -->
+                    <div class="p-2.5 rounded-3 mb-3 fs-8 bg-light text-muted border border-light">
+                        <i class="bi bi-truck me-1 text-success"></i> <strong>Cash on Delivery (COD) Available</strong>
+                        {% if cod_is_free %}
+                        <span class="badge bg-success ms-1">FREE COD</span>
+                        {% else %}
+                        <div class="text-muted mt-0.5 fs-8">({{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD fee; Free COD on orders {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }}+)</div>
+                        {% endif %}
                     </div>
 
                     <a href="{% url 'shop:checkout' %}" class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Proceed to Checkout</a>
@@ -159,11 +165,24 @@
         if (!input) return;
 
         let currentVal = parseInt(input.value) || 1;
-        let minVal = parseInt(input.getAttribute('min')) || 1;
         let maxVal = parseInt(input.getAttribute('max')) || 999;
 
         let newVal = currentVal + delta;
-        if (newVal >= minVal && newVal <= maxVal) {
+        if (newVal <= 0) {
+            // When quantity is 1 and minus is clicked, clear/remove the item
+            const row = form.closest('tr');
+            const removeLink = row ? row.querySelector('a[href*="cart/remove"]') : null;
+            if (removeLink && removeLink.href) {
+                window.location.href = removeLink.href;
+                return;
+            }
+            input.min = "0";
+            input.value = 0;
+            form.submit();
+            return;
+        }
+
+        if (newVal <= maxVal) {
             input.value = newVal;
             form.submit();
         }

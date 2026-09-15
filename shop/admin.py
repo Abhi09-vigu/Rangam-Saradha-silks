@@ -143,8 +143,9 @@ class CouponAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ['product_image', 'product_name', 'quantity', 'price', 'total_price']
-    fields = ['product_image', 'product_name', 'quantity', 'price', 'total_price']
+    can_delete = False
+    fields = ['product', 'quantity', 'price', 'item_total_display']
+    readonly_fields = ['product', 'quantity', 'price', 'item_total_display']
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -159,47 +160,11 @@ class OrderItemInline(admin.TabularInline):
         """
         return super().get_queryset(request).select_related('product').prefetch_related('product__images')
 
-    def product_image(self, obj):
-        """
-        Display a clickable 60x60 thumbnail of the product in the inline.
-        """
-        if not obj.product:
-            return "No Image"
-        
-        images = list(obj.product.images.all())
-        if not images or not images[0].image:
-            return "No Image"
-            
-        first_image = images[0]
-        return format_html(
-            '<a href="{0}" target="_blank">'
-            '<img src="{0}" width="60" height="60" style="object-fit: cover; border-radius: 4px; display: block; max-width: 100%;" alt="Thumbnail">'
-            '</a>',
-            first_image.image.url
-        )
-    product_image.short_description = "Product Image"
-
-    def product_name(self, obj):
-        """
-        Display product name with a link to the product's admin change page, or Deleted Product if product is missing.
-        """
-        if obj.product:
-            from django.urls import reverse
-            product_admin_url = reverse('custom_admin:shop_product_change', args=[obj.product.id])
-            return format_html(
-                '<a href="{}" target="_blank" style="color: #AF0446; text-decoration: underline; font-weight: 500;">{}</a>',
-                product_admin_url,
-                obj.product.name
-            )
-        return "Deleted Product"
-    product_name.short_description = "Product Name"
-
-    def total_price(self, obj):
-        """
-        Calculate total price for the item (quantity * price).
-        """
-        return f"₹{obj.price * obj.quantity}"
-    total_price.short_description = "Total"
+    def item_total_display(self, obj):
+        if obj.pk and obj.price is not None and obj.quantity is not None:
+            return f"₹{obj.price * obj.quantity:.2f}"
+        return "-"
+    item_total_display.short_description = "Item Total"
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
@@ -216,34 +181,42 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     list_display_links = ['order_number']
     list_filter = ['order_status', 'payment_status', 'payment_method', 'created_at']
-    search_fields = ['order_number', 'full_name', 'phone_number', 'items__product__name']
+    search_fields = ['order_number', 'full_name', 'phone_number', 'tracking_number', 'items__product__name']
     inlines = [OrderItemInline]
     readonly_fields = [
-        'order_number', 'user', 'full_name', 'phone_number', 'email',
-        'address_line_1', 'address_line_2', 'city', 'state', 'pincode', 'landmark',
-        'payment_method', 'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge',
-        'discount_amount', 'grand_total', 'coupon_used', 'created_at', 'updated_at'
+        'order_number', 'user', 'created_at', 'updated_at',
+        'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge', 
+        'discount_amount', 'grand_total', 'coupon_used', 'gst_number'
     ]
     ordering = ['-created_at']
     change_form_template = 'admin/shop/order_change_form.html'
 
     fieldsets = (
-        ('Order Status & Workflow', {
-            'fields': ('order_status', 'payment_status'),
-            'description': 'Update the status of the order and payment. Only these controls are editable.'
+        ('Order Status & Payment Method', {
+            'fields': ('order_status', 'payment_status', 'payment_method'),
+            'description': 'Update fulfillment state, payment settlement, and payment method.'
         }),
-        ('Order Information', {
-            'fields': (
-                'order_number', 'user', 'payment_method', 'subtotal', 
-                'shipping_cost', 'tax_amount', 'cod_charge', 'discount_amount', 
-                'grand_total', 'coupon_used', 'created_at', 'updated_at'
-            ),
+        ('Shipment & Tracking', {
+            'fields': ('tracking_link', 'tracking_number'),
+            'description': 'Enter courier tracking link and AWB/tracking number for customer shipment tracking.'
         }),
-        ('Customer Details', {
+        ('Customer & Billing Details', {
             'fields': (
                 'full_name', 'phone_number', 'email', 'address_line_1', 
                 'address_line_2', 'city', 'state', 'pincode', 'landmark'
             ),
+            'description': 'Edit customer name, contact, and delivery address for invoices.'
+        }),
+        ('Invoice & Financials (Locked)', {
+            'fields': (
+                'subtotal', 'tax_amount', 'shipping_cost', 'cod_charge', 
+                'discount_amount', 'grand_total', 'coupon_used'
+            ),
+            'description': 'System-calculated financial amounts (locked from manual modification to preserve invoice integrity).'
+        }),
+        ('System Metadata', {
+            'fields': ('order_number', 'user', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
         }),
     )
 
@@ -395,7 +368,7 @@ class CallSlotAdmin(admin.ModelAdmin):
     effective_status_badge.short_description = "Status"
 
     def booked_customer(self, obj):
-        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['PENDING', 'CONFIRMED', 'COMPLETED']).first()
+        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['CONFIRMED', 'COMPLETED']).first()
         if booking:
             return f"{booking.full_name} ({booking.phone_number})"
         return "-"
@@ -403,7 +376,7 @@ class CallSlotAdmin(admin.ModelAdmin):
     booked_customer.short_description = "Customer"
 
     def related_product(self, obj):
-        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['PENDING', 'CONFIRMED', 'COMPLETED']).first()
+        booking = CallBooking.objects.filter(booking_date=obj.date, time_slot=obj.time_slot, status__in=['CONFIRMED', 'COMPLETED']).first()
         if booking and booking.product:
             return booking.product.name
         return "-"
@@ -430,6 +403,7 @@ class CallBookingAdmin(admin.ModelAdmin):
     readonly_fields = ['booking_reference', 'created_at', 'updated_at']
     list_editable = ['status']
     ordering = ['-created_at']
+    actions = ['mark_as_completed', 'mark_as_cancelled', 'mark_as_confirmed']
 
     def saree_display(self, obj):
         if obj.product:
@@ -441,6 +415,54 @@ class CallBookingAdmin(admin.ModelAdmin):
         return obj.product.sku if obj.product and obj.product.sku else "-"
 
     product_sku.short_description = "SKU"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if obj.status == 'CANCELLED':
+            has_other = CallBooking.objects.filter(
+                booking_date=obj.booking_date,
+                time_slot=obj.time_slot,
+                status__in=['CONFIRMED', 'COMPLETED']
+            ).exclude(pk=obj.pk).exists()
+            if not has_other:
+                CallSlot.objects.filter(date=obj.booking_date, time_slot=obj.time_slot, blocked_by_owner=False).update(status='AVAILABLE')
+        elif obj.status in ['CONFIRMED', 'COMPLETED']:
+            CallSlot.objects.update_or_create(
+                date=obj.booking_date,
+                time_slot=obj.time_slot,
+                defaults={'status': 'BOOKED'}
+            )
+
+    def mark_as_completed(self, request, queryset):
+        updated = queryset.update(status='COMPLETED')
+        self.message_user(request, f"{updated} booking(s) marked as Completed.")
+    mark_as_completed.short_description = "Mark selected as Completed"
+
+    def mark_as_cancelled(self, request, queryset):
+        for b in queryset:
+            b.status = 'CANCELLED'
+            b.save()
+            has_other = CallBooking.objects.filter(
+                booking_date=b.booking_date,
+                time_slot=b.time_slot,
+                status__in=['CONFIRMED', 'COMPLETED']
+            ).exclude(pk=b.pk).exists()
+            if not has_other:
+                CallSlot.objects.filter(date=b.booking_date, time_slot=b.time_slot, blocked_by_owner=False).update(status='AVAILABLE')
+        self.message_user(request, f"{queryset.count()} booking(s) marked as Cancelled.")
+    mark_as_cancelled.short_description = "Mark selected as Cancelled (Unblocks Slot)"
+
+    def mark_as_confirmed(self, request, queryset):
+        for b in queryset:
+            b.status = 'CONFIRMED'
+            b.save()
+            CallSlot.objects.update_or_create(
+                date=b.booking_date,
+                time_slot=b.time_slot,
+                defaults={'status': 'BOOKED'}
+            )
+        self.message_user(request, f"{queryset.count()} booking(s) marked as Confirmed.")
+    mark_as_confirmed.short_description = "Mark selected as Confirmed (Blocks Slot)"
 
 
 from rangam_saradha_silk.admin import custom_admin_site

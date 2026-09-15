@@ -13,6 +13,11 @@
                     
                     <form action="" method="POST">
                         {% csrf_token %}
+                        {% if next_url %}
+                        <input type="hidden" name="next" value="{{ next_url }}">
+                        {% elif request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
                         <div class="row g-3">
                             {% for field in form %}
                             <div class="col-md-{% if field.name == 'full_name' or field.name == 'address_line_1' or field.name == 'address_line_2' %}12{% else %}6{% endif %}">
@@ -35,7 +40,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{% if next_url %}{{ next_url }}{% elif request.GET.next %}{{ request.GET.next }}{% else %}{% url 'accounts:profile' %}{% endif %}" class="btn btn-outline-secondary">Cancel</a>
                             <button type="submit" class="btn btn-primary">Save Address</button>
                         </div>
                     </form>

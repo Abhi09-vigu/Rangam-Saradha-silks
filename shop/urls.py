@@ -29,4 +29,5 @@ urlpatterns = [
     path('product/<slug:slug>/book-call/', views.book_call, name='book_call'),
     path('booking/confirmation/<str:booking_ref>/', views.booking_confirmation, name='booking_confirmation'),
     path('api/slot-availability/', views.slot_availability_api, name='slot_availability_api'),
+    path('api/sku-autocomplete/', views.sku_autocomplete_api, name='sku_autocomplete_api'),
 ]

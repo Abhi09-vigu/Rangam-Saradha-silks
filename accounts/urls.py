@@ -24,4 +24,6 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('google-login/', views.google_login_view, name='google_login'),
     path('firebase-login/', views.firebase_login_view, name='firebase_login'),
+    path('complete-phone/', views.complete_phone_view, name='complete_phone'),
+    path('export-users-excel/', views.export_users_excel, name='export_users_excel'),
 ]

@@ -62,10 +62,11 @@ class CountryCodePhoneWidget(forms.Widget):
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email Address")
     phone_number = PhoneNumberField(
-        required=False, 
-        label="Phone Number (Optional)", 
-        help_text="Optional mobile number for order tracking.",
-        widget=CountryCodePhoneWidget()
+        required=True, 
+        label="Phone Number", 
+        help_text="Mobile number is mandatory for order updates and verification.",
+        widget=CountryCodePhoneWidget(attrs={'required': True}),
+        error_messages={'required': 'Phone number is mandatory.'}
     )
 
     class Meta:
@@ -84,7 +85,7 @@ class CustomUserCreationForm(UserCreationForm):
                 field.widget.attrs['placeholder'] = 'name@example.com'
                 field.label = 'Email Address'
             elif field_name == 'phone_number':
-                field.label = 'Phone Number (Optional)'
+                field.label = 'Phone Number'
             elif field_name == 'password1':
                 field.widget.attrs['placeholder'] = 'Create a strong password'
                 field.label = 'Password'
@@ -92,11 +93,43 @@ class CustomUserCreationForm(UserCreationForm):
                 field.widget.attrs['placeholder'] = 'Confirm your password'
                 field.label = 'Confirm Password'
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if not email:
+            raise forms.ValidationError("Email address is mandatory.")
+        if CustomUser.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account already exists with this email address. Please log in.")
+        return email
+
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
-        if phone_number and CustomUser.objects.filter(phone_number=phone_number).exists():
-            raise forms.ValidationError("A user with this phone number already exists.")
+        if not phone_number:
+            raise forms.ValidationError("Phone number is mandatory.")
+        
+        phone_str = str(phone_number).strip()
+        digits = ''.join(c for c in phone_str if c.isdigit())
+        
+        # Check if phone number already belongs to an existing user
+        existing_user = CustomUser.objects.filter(phone_number=phone_number).first()
+        if not existing_user and len(digits) >= 10:
+            existing_user = CustomUser.objects.filter(phone_number__endswith=digits[-10:]).first()
+            
+        if existing_user:
+            raise forms.ValidationError("An account already exists with this mobile number. A mobile number cannot be registered with multiple emails.")
         return phone_number
+
+    def clean(self):
+        cleaned_data = super().clean()
+        phone_number = cleaned_data.get('phone_number')
+        if phone_number:
+            phone_str = str(phone_number).strip()
+            digits = ''.join(c for c in phone_str if c.isdigit())
+            existing_user = CustomUser.objects.filter(phone_number=phone_number).first()
+            if not existing_user and len(digits) >= 10:
+                existing_user = CustomUser.objects.filter(phone_number__endswith=digits[-10:]).first()
+            if existing_user:
+                self.add_error('phone_number', "An account already exists with this mobile number.")
+        return cleaned_data
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
@@ -104,17 +137,57 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('username', 'email', 'phone_number', 'is_verified')
 
 class UserProfileForm(forms.ModelForm):
-    phone_number = PhoneNumberField(required=False, widget=CountryCodePhoneWidget())
+    phone_number = PhoneNumberField(
+        required=True,
+        widget=CountryCodePhoneWidget(attrs={'required': True}),
+        error_messages={'required': 'Mobile number is mandatory.'}
+    )
 
     class Meta:
         model = CustomUser
         fields = ('first_name', 'last_name', 'email', 'phone_number', 'profile_picture')
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter Email Address'}),
             'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name != 'phone_number':
+                field.widget.attrs['class'] = 'form-control'
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if email:
+            qs = CustomUser.objects.filter(email__iexact=email)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError("An account already exists with this email address.")
+        return email
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if not phone_number:
+            raise forms.ValidationError("Mobile number is mandatory.")
+        phone_str = str(phone_number).strip()
+        digits = ''.join(c for c in phone_str if c.isdigit())
+        qs = CustomUser.objects.filter(phone_number=phone_number)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("An account already exists with this mobile number.")
+        if len(digits) >= 10:
+            qs_end = CustomUser.objects.filter(phone_number__endswith=digits[-10:])
+            if self.instance and self.instance.pk:
+                qs_end = qs_end.exclude(pk=self.instance.pk)
+            if qs_end.exists():
+                raise forms.ValidationError("An account already exists with this mobile number.")
+        return phone_number
+
 
 
 class AddressForm(forms.ModelForm):
@@ -186,4 +259,46 @@ class PhoneLoginForm(forms.Form):
             raise forms.ValidationError("Invalid phone number format.")
             
         return full_number
+
+
+class CompletePhoneForm(forms.Form):
+    phone_number = PhoneNumberField(
+        required=True,
+        label="Mobile Number",
+        help_text="Please enter a valid mobile number for your account.",
+        widget=CountryCodePhoneWidget(attrs={'required': True}),
+        error_messages={'required': 'Mobile number is mandatory.'}
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if not phone_number:
+            raise forms.ValidationError("Mobile number is mandatory.")
+
+        phone_str = str(phone_number).strip()
+        digits = ''.join(c for c in phone_str if c.isdigit())
+
+        qs = CustomUser.objects.filter(phone_number=phone_number)
+        if self.user and self.user.pk:
+            qs = qs.exclude(pk=self.user.pk)
+        if qs.exists():
+            raise forms.ValidationError(
+                "An account already exists with this mobile number. A mobile number cannot be registered with multiple emails."
+            )
+
+        if len(digits) >= 10:
+            qs_end = CustomUser.objects.filter(phone_number__endswith=digits[-10:])
+            if self.user and self.user.pk:
+                qs_end = qs_end.exclude(pk=self.user.pk)
+            if qs_end.exists():
+                raise forms.ValidationError(
+                    "An account already exists with this mobile number. A mobile number cannot be registered with multiple emails."
+                )
+
+        return phone_number
+
 

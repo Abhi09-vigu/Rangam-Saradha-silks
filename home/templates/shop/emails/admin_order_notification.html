@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order Alert #{{ order.order_number }} - Rangam Saradha Silks</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 650px;
+            margin: 25px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 24px 30px;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .content {
+            padding: 25px 30px;
+        }
+        .alert-banner {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 22px;
+            font-size: 14px;
+            color: #065f46;
+            font-weight: 500;
+        }
+        .card-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+        }
+        .card-box h3 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-table td {
+            padding: 4px 0;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: top;
+        }
+        .info-table td.label {
+            font-weight: 600;
+            color: #64748b;
+            width: 150px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 22px;
+        }
+        .items-table th {
+            background-color: #f1f5f9;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 11px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .items-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 8px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+        .items-table td.center {
+            text-align: center;
+        }
+        .items-table td.right {
+            text-align: right;
+            font-weight: 600;
+        }
+        .accounting-card {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+        }
+        .accounting-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .accounting-table td {
+            padding: 6px 0;
+            font-size: 13px;
+            color: #334155;
+        }
+        .accounting-table td.val {
+            text-align: right;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .accounting-table tr.gst-detail td {
+            font-size: 12px;
+            color: #64748b;
+            padding-left: 12px;
+        }
+        .accounting-table tr.grand-total td {
+            border-top: 2px solid #0f172a;
+            padding-top: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-cod {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .badge-online {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .footer {
+            background-color: #0f172a;
+            padding: 18px 25px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>New Order Received &bull; Order #{{ order.order_number }}</h1>
+            <p>Rangam Saradha Silks Store Management Alert</p>
+        </div>
+
+        <div class="content">
+            <div class="alert-banner">
+                A new order has been placed on the website and requires fulfillment.
+            </div>
+
+            <!-- Order Overview -->
+            <div class="card-box">
+                <h3>Order Overview</h3>
+                <table class="info-table">
+                    <tr>
+                        <td class="label">Order ID:</td>
+                        <td><strong>#{{ order.order_number }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Date & Time:</td>
+                        <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Order Status:</td>
+                        <td><strong>{{ order.get_order_status_display }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Payment Method:</td>
+                        <td>
+                            {% if order.payment_method == 'COD' %}
+                            <span class="badge badge-cod">Cash on Delivery (COD)</span>
+                            {% else %}
+                            <span class="badge badge-online">{{ order.get_payment_method_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Customer & Delivery Information -->
+            <div class="card-box">
+                <h3>Customer & Delivery Details</h3>
+                <table class="info-table">
+                    <tr>
+                        <td class="label">Customer Name:</td>
+                        <td><strong>{{ order.full_name }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Phone:</td>
+                        <td><a href="tel:{{ order.phone_number }}" style="color: #0284c7; text-decoration: none;">{{ order.phone_number }}</a></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Email:</td>
+                        <td><a href="mailto:{{ order.email }}" style="color: #0284c7; text-decoration: none;">{{ order.email }}</a></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Delivery Address:</td>
+                        <td>
+                            {{ order.address_line_1 }}<br>
+                            {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                            {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+                            {% if order.landmark %}Landmark: {{ order.landmark }}{% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Items Ordered -->
+            <div class="card-box">
+                <h3>Ordered Items</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product / Saree</th>
+                            <th class="center" style="width: 110px;">SKU</th>
+                            <th class="center" style="width: 40px;">Qty</th>
+                            <th class="right" style="width: 90px;">Price</th>
+                            <th class="right" style="width: 90px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.product.name }}</strong>
+                                {% if item.product.fabric %}
+                                <div style="font-size: 11px; color: #64748b;">Fabric: {{ item.product.fabric }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="center"><code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px; font-size: 11px;">{{ item.product.sku }}</code></td>
+                            <td class="center">{{ item.quantity }}</td>
+                            <td class="right">{{ currency }}{{ item.price|floatformat:2 }}</td>
+                            <td class="right">{{ currency }}{{ item.get_total_price|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Accounting & Tax Breakdown -->
+            <div class="accounting-card">
+                <h3 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">
+                    Accounting & GST Summary (GSTIN: {{ gst_number }})
+                </h3>
+                <table class="accounting-table">
+                    <tr>
+                        <td>Gross Product Subtotal:</td>
+                        <td class="val">{{ currency }}{{ order.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% if order.discount_amount > 0 %}
+                    <tr style="color: #16a34a;">
+                        <td>Coupon / Discount:</td>
+                        <td class="val" style="color: #16a34a;">-{{ currency }}{{ order.discount_amount|floatformat:2 }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td>Taxable Value (Turnover before GST):</td>
+                        <td class="val">{{ currency }}{{ taxable_value|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="gst-detail">
+                        <td>&bull; GST Rate:</td>
+                        <td class="val" style="font-size: 12px; color: #64748b;">5% (CGST 2.5% + SGST 2.5%)</td>
+                    </tr>
+                    <tr class="gst-detail">
+                        <td>&bull; CGST (2.5%):</td>
+                        <td class="val" style="font-size: 12px; color: #64748b;">{{ currency }}{{ cgst_amount|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="gst-detail">
+                        <td>&bull; SGST (2.5%):</td>
+                        <td class="val" style="font-size: 12px; color: #64748b;">{{ currency }}{{ sgst_amount|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total GST Included (5%):</strong></td>
+                        <td class="val"><strong>{{ currency }}{{ total_gst_amount|floatformat:2 }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            COD Charge:
+                            {% if order.payment_method == 'COD' %}
+                                {% if order.cod_charge > 0 %}
+                                <span class="badge badge-cod">Applied</span>
+                                {% else %}
+                                <span class="badge" style="background-color: #ecfdf5; color: #065f46;">Free COD (₹2,000+)</span>
+                                {% endif %}
+                            {% else %}
+                            <span style="font-size: 11px; color: #64748b;">(Not Applicable - Online)</span>
+                            {% endif %}
+                        </td>
+                        <td class="val">
+                            {% if order.payment_method == 'COD' and order.cod_charge > 0 %}
+                            {{ currency }}{{ order.cod_charge|floatformat:2 }}
+                            {% else %}
+                            {{ currency }}0.00
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Shipping Charges:</td>
+                        <td class="val">
+                            {% if order.shipping_cost == 0 %}
+                            <span style="color: #16a34a; font-weight: 600;">FREE</span>
+                            {% else %}
+                            {{ currency }}{{ order.shipping_cost|floatformat:2 }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td>Grand Total:</td>
+                        <td class="val">{{ currency }}{{ order.grand_total|floatformat:2 }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="font-size: 12px; color: #64748b; line-height: 1.5; text-align: center;">
+                GSTIN: <strong>{{ gst_number }}</strong> &bull; Rangam Saradha Silks Admin Portal &bull; Auto-generated notification
+            </div>
+        </div>
+
+        <div class="footer">
+            Rangam Saradha Silks Store Notification &bull; Generated for rangamsaradhasilks@gmail.com
+        </div>
+    </div>
+</body>
+</html>

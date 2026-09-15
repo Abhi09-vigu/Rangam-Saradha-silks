@@ -50,7 +50,121 @@
 {% endblock %}
 
 {% block content %}
-{% if not has_filters %}
+{% if active_category %}
+<!-- Dedicated Luxury Category Header -->
+<section class="section-luxury bg-light py-4 border-bottom position-relative">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb fs-8 mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:categories' %}" class="text-decoration-none text-muted">Categories</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">{{ active_category.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8 col-md-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border border-light text-primary fs-8 fw-semibold mb-2 shadow-xs">
+                    <i class="bi bi-gem"></i> Authentic Traditional Weaves
+                </div>
+                <h1 class="font-heading display-5 text-dark mb-2 fw-bold">
+                    {{ active_category.name }}
+                </h1>
+                <p class="text-muted fs-6 mb-3" style="max-width: 650px;">
+                    {{ active_category.description|default:"Explore our authentic handwoven collection of pure silk sarees, crafted with heritage artistry and timeless tradition." }}
+                </p>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <span class="badge rounded-pill px-3 py-2 fs-8 fw-semibold" style="background: rgba(175, 4, 70, 0.1); color: var(--primary);">
+                        <i class="bi bi-tag-fill me-1"></i> {{ products.paginator.count }} {{ products.paginator.count|pluralize:'Saree,Sarees' }} Found
+                    </span>
+                    <a href="{% url 'shop:categories' %}" class="text-muted fs-8 text-decoration-none hover-primary">
+                        <i class="bi bi-grid-3x3-gap me-1"></i> All Saree Categories
+                    </a>
+                </div>
+            </div>
+            {% if active_category.image %}
+            <div class="col-lg-4 col-md-5 d-none d-md-block text-end">
+                <div class="category-header-thumbnail position-relative d-inline-block rounded-4 overflow-hidden shadow-sm" style="max-width: 240px; height: 160px; border: 2px solid rgba(197, 160, 89, 0.35);">
+                    <img src="{{ active_category.image.url }}" alt="{{ active_category.name }}" class="w-100 h-100 object-fit-cover">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% elif active_collection %}
+<!-- Dedicated Luxury Collection Header -->
+<section class="section-luxury bg-light py-4 border-bottom position-relative">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb fs-8 mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">{{ active_collection.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8 col-md-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border border-light text-primary fs-8 fw-semibold mb-2 shadow-xs">
+                    <i class="bi bi-stars"></i> Curated Collection
+                </div>
+                <h1 class="font-heading display-5 text-dark mb-2 fw-bold">
+                    {{ active_collection.name }}
+                </h1>
+                <p class="text-muted fs-6 mb-3" style="max-width: 650px;">
+                    {{ active_collection.description|default:"Explore our exclusive handwoven saree collection curated for memorable moments." }}
+                </p>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <span class="badge rounded-pill px-3 py-2 fs-8 fw-semibold" style="background: rgba(175, 4, 70, 0.1); color: var(--primary);">
+                        <i class="bi bi-tag-fill me-1"></i> {{ products.paginator.count }} {{ products.paginator.count|pluralize:'Saree,Sarees' }} Found
+                    </span>
+                    <a href="{% url 'shop:catalog' %}" class="text-muted fs-8 text-decoration-none hover-primary">
+                        <i class="bi bi-grid-3x3-gap me-1"></i> View All Sarees
+                    </a>
+                </div>
+            </div>
+            {% if active_collection.image %}
+            <div class="col-lg-4 col-md-5 d-none d-md-block text-end">
+                <div class="category-header-thumbnail position-relative d-inline-block rounded-4 overflow-hidden shadow-sm" style="max-width: 240px; height: 160px; border: 2px solid rgba(197, 160, 89, 0.35);">
+                    <img src="{{ active_collection.image.url }}" alt="{{ active_collection.name }}" class="w-100 h-100 object-fit-cover">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% elif has_filters %}
+<!-- Compact Filtered Navigation Header (Search / Attributes) -->
+<section class="bg-light py-3 border-bottom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb fs-7 mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">
+                    {% if current_filters.q %}
+                        Search Results
+                    {% else %}
+                        Filtered Sarees
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+        <h1 class="font-heading h4 text-dark mb-0">
+            {% if current_filters.q %}
+                Search Results for <span class="text-primary">"{{ current_filters.q }}"</span>
+            {% else %}
+                Filtered Saree Collection
+            {% endif %}
+        </h1>
+    </div>
+</section>
+
+{% else %}
+<!-- Generic All Catalog Header & Hero Banner (Only for Shop All with no filters) -->
 <section class="section-luxury bg-light py-5">
     <div class="container text-center">
         <h1 class="font-heading display-4 text-dark mb-0">Our Handloom Catalog</h1>
@@ -153,40 +267,6 @@
         </div>
     </div>
 </section>
-{% else %}
-<!-- Compact Filtered Navigation Header -->
-<section class="bg-light py-3 border-bottom">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb fs-7 mb-1">
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
-                <li class="breadcrumb-item active text-dark" aria-current="page">
-                    {% if current_filters.q %}
-                        Search Results
-                    {% elif active_category %}
-                        {{ active_category.name }}
-                    {% elif active_collection %}
-                        {{ active_collection.name }}
-                    {% else %}
-                        Filtered Collection
-                    {% endif %}
-                </li>
-            </ol>
-        </nav>
-        <h1 class="font-heading h4 text-dark mb-0">
-            {% if current_filters.q %}
-                Search Results for <span class="text-primary">"{{ current_filters.q }}"</span>
-            {% elif active_category %}
-                <span class="text-primary">{{ active_category.name }}</span> Collection
-            {% elif active_collection %}
-                <span class="text-primary">{{ active_collection.name }}</span> Collection
-            {% else %}
-                Filtered Saree Collection
-            {% endif %}
-        </h1>
-    </div>
-</section>
 {% endif %}
 
 <section id="catalog-grid" class="py-5">
@@ -195,24 +275,81 @@
             
             <!-- Filter Sidebar -->
             <div class="col-lg-3">
-                <div class="card border-0 shadow-sm p-4" style="border-radius: 16px;">
-                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                        <h4 class="font-heading fs-5 mb-0">Filters</h4>
-                        <a href="{% url 'shop:catalog' %}" class="text-decoration-none text-primary fs-7 fw-semibold">Clear All</a>
+                <div class="offcanvas-lg offcanvas-start catalog-filter-offcanvas" tabindex="-1" id="catalogFilterOffcanvas" aria-labelledby="catalogFilterOffcanvasLabel">
+                    <div class="offcanvas-header d-lg-none border-bottom p-3 bg-light">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-sliders text-primary fs-5"></i>
+                            <h5 class="offcanvas-title font-heading fw-bold mb-0" id="catalogFilterOffcanvasLabel">Filter Sarees</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#catalogFilterOffcanvas" aria-label="Close"></button>
                     </div>
-                    
-                    <form action="{% url 'shop:catalog' %}" method="GET">
+                    <div class="offcanvas-body p-0">
+                        <div class="card border-0 shadow-sm p-4 w-100" style="border-radius: 16px;">
+                            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                                <h4 class="font-heading fs-5 mb-0">Filters</h4>
+                                <a href="{% url 'shop:catalog' %}" class="text-decoration-none text-primary fs-7 fw-semibold">Clear All</a>
+                            </div>
+                            
+                            <form action="{% url 'shop:catalog' %}" method="GET" id="catalogFilterForm">
                         <!-- Keep search query if active -->
                         {% if current_filters.q %}
                         <input type="hidden" name="q" value="{{ current_filters.q }}">
                         {% endif %}
+
+                        <!-- Search by SKU ID -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold fs-7 text-uppercase text-muted mb-0" style="letter-spacing: 0.08em;">Search by SKU ID</h5>
+                                {% if current_filters.sku %}
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'sku' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="text-danger text-decoration-none fs-8 fw-semibold" title="Remove SKU Filter">
+                                    <i class="bi bi-x-circle me-1"></i>Clear
+                                </a>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="position-relative">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0 text-muted ps-2.5">
+                                        <i class="bi bi-upc-scan"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="sku" 
+                                           id="filterSkuInput" 
+                                           class="form-control border-start-0 border-end-0 bg-light fs-7 shadow-none" 
+                                           placeholder="e.g. SS-1500, DMS-001" 
+                                           value="{{ current_filters.sku|default:'' }}" 
+                                           autocomplete="off"
+                                           aria-label="Search by SKU ID">
+                                    <button class="btn btn-primary px-3 d-flex align-items-center justify-content-center" type="submit" id="skuFilterSubmit" title="Search SKU">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Fast Autocomplete / Live Suggestions Dropdown -->
+                                <div id="skuDropdown" class="dropdown-menu shadow-lg w-100 p-1 mt-1 border-0" style="display: none; max-height: 280px; overflow-y: auto; z-index: 1055; border-radius: 12px;">
+                                    <div id="skuSuggestionsList"></div>
+                                </div>
+                            </div>
+                            
+                            {% if current_filters.sku %}
+                            <div class="mt-2 p-2 bg-primary-subtle border border-primary-subtle rounded-3 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-1.5 overflow-hidden text-truncate">
+                                    <span class="badge bg-primary text-white rounded-pill px-2 py-0.5 fs-8">SKU</span>
+                                    <span class="fs-8 fw-semibold text-primary text-truncate">{{ current_filters.sku }}</span>
+                                </div>
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'sku' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="text-primary text-decoration-none ms-1 px-1" title="Clear SKU filter">
+                                    <i class="bi bi-x-lg fs-8"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
                         
                         <!-- Categories -->
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Category</h5>
                             {% for cat in categories %}
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if current_filters.category == cat.slug %}checked{% endif %} onchange="this.form.submit()">
+                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if current_filters.category == cat.slug or active_category.slug == cat.slug or category_param == cat.slug %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="form-check-label text-dark fs-7" for="cat-{{ cat.id }}">
                                     {{ cat.name }}
                                 </label>
@@ -302,78 +439,123 @@
                     </form>
                 </div>
             </div>
-
-            <!-- Product Grid -->
-            <div class="col-lg-9">
-                <!-- Sorting & Stats Bar -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 gap-2">
-                    <span class="text-muted fs-7">{{ products|length }} Sarees found</span>
-                    
-                    <div class="d-flex align-items-center gap-2">
-                        <label for="sortBy" class="text-muted fs-7 text-nowrap mb-0">Sort By:</label>
-                        <select id="sortBy" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;" onchange="location = this.value;">
-                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
-                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                            <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.category %}category={{ current_filters.category }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
-                        </select>
-                    </div>
-                </div>
-
-                {% if products %}
-                <div class="row g-4">
-                    {% for product in products %}
-                    <div class="col-6 col-md-4">
-                        {% include 'shop/components/product_card.html' with product=product %}
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if products.has_other_pages %}
-                <nav aria-label="Page navigation" class="mt-5">
-                    <ul class="pagination justify-content-center">
-                        {% if products.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        {% for num in products.paginator.page_range %}
-                        <li class="page-item {% if products.number == num %}active{% endif %}">
-                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
-                        </li>
-                        {% endfor %}
-                        
-                        {% if products.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-                {% else %}
-                <div class="text-center py-5">
-                    <i class="bi bi-inboxes text-muted display-4 mb-3"></i>
-                    <h3 class="font-heading">No Sarees Found</h3>
-                    <p class="text-muted">Try adjusting your filters or search query.</p>
-                    <a href="{% url 'shop:catalog' %}" class="btn btn-primary mt-3">Reset Catalog</a>
-                </div>
-                {% endif %}
-            </div>
-
         </div>
     </div>
+
+    <!-- Product Grid -->
+    <div class="col-lg-9">
+        <!-- Sorting & Stats Bar -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Mobile Filter Trigger Button -->
+                <button class="btn btn-outline-dark btn-sm d-lg-none d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1.5 shadow-xs bg-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#catalogFilterOffcanvas" aria-controls="catalogFilterOffcanvas">
+                    <i class="bi bi-sliders text-primary"></i>
+                    <span class="fw-semibold fs-7 text-dark">Filters</span>
+                    {% if has_filters %}
+                    <span class="badge bg-primary text-white rounded-pill ms-1" style="font-size: 0.65rem;">Active</span>
+                    {% endif %}
+                </button>
+
+                <span class="text-muted fs-7">
+                    {% if current_filters.sku %}
+                        {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} matching SKU "<strong>{{ current_filters.sku }}</strong>"
+                    {% elif active_category %}
+                        {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} in <strong>{{ active_category.name }}</strong>
+                    {% elif active_collection %}
+                        {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} in <strong>{{ active_collection.name }}</strong>
+                    {% else %}
+                        {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} found
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <label for="sortBy" class="text-muted fs-7 text-nowrap mb-0">Sort By:</label>
+                <select id="sortBy" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;" onchange="location = this.value;">
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
+                </select>
+            </div>
+        </div>
+
+        {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-6 col-md-4">
+                {% include 'shop/components/product_card.html' with product=product %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if products.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in products.paginator.page_range %}
+                <li class="page-item {% if products.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inboxes text-muted display-4 mb-3"></i>
+            <h3 class="font-heading">
+                {% if current_filters.sku %}
+                    No Sarees Found for SKU "{{ current_filters.sku }}"
+                {% elif active_category %}
+                    No Sarees in {{ active_category.name }} Currently
+                {% elif active_collection %}
+                    No Sarees in {{ active_collection.name }} Currently
+                {% else %}
+                    No Sarees Found
+                {% endif %}
+            </h3>
+            <p class="text-muted">
+                {% if current_filters.sku %}
+                    We couldn't find any saree matching SKU code "{{ current_filters.sku }}".
+                {% elif active_category %}
+                    We are currently weaving and curating authentic handloom sarees for {{ active_category.name }}. Explore other categories or check back soon!
+                {% else %}
+                    Try adjusting your filters or search query.
+                {% endif %}
+            </p>
+            {% if current_filters.sku %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'sku' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="btn btn-outline-primary rounded-pill px-4 mt-2 me-2">Clear SKU Filter</a>
+            {% endif %}
+            <a href="{% url 'shop:categories' %}" class="btn btn-primary rounded-pill px-4 mt-2">Explore Other Categories</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+</div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Dual Price Range Slider
         const minSlider = document.getElementById("minPriceSlider");
         const maxSlider = document.getElementById("maxPriceSlider");
         const minDisplay = document.getElementById("priceMinDisplay");
@@ -382,44 +564,131 @@
         const maxInput = document.getElementById("maxPriceInput");
         const track = document.getElementById("priceRangeSelectedTrack");
 
-        if (!minSlider || !maxSlider) return;
+        if (minSlider && maxSlider) {
+            const minGap = 200;
+            const minRangeVal = parseInt(minSlider.min) || 0;
+            const maxRangeVal = parseInt(maxSlider.max) || 100000;
 
-        const minGap = 200;
-        const minRangeVal = parseInt(minSlider.min) || 0;
-        const maxRangeVal = parseInt(maxSlider.max) || 100000;
+            function updatePriceSlider(e) {
+                let minVal = parseInt(minSlider.value);
+                let maxVal = parseInt(maxSlider.value);
 
-        function updatePriceSlider(e) {
-            let minVal = parseInt(minSlider.value);
-            let maxVal = parseInt(maxSlider.value);
-
-            if (maxVal - minVal < minGap) {
-                if (e && e.target === minSlider) {
-                    minSlider.value = maxVal - minGap;
-                    minVal = parseInt(minSlider.value);
-                } else if (e && e.target === maxSlider) {
-                    maxSlider.value = minVal + minGap;
-                    maxVal = parseInt(maxSlider.value);
+                if (maxVal - minVal < minGap) {
+                    if (e && e.target === minSlider) {
+                        minSlider.value = maxVal - minGap;
+                        minVal = parseInt(minSlider.value);
+                    } else if (e && e.target === maxSlider) {
+                        maxSlider.value = minVal + minGap;
+                        maxVal = parseInt(maxSlider.value);
+                    }
                 }
+
+                const totalRange = maxRangeVal - minRangeVal;
+                const leftPercent = totalRange > 0 ? ((minVal - minRangeVal) / totalRange) * 100 : 0;
+                const rightPercent = totalRange > 0 ? 100 - (((maxVal - minRangeVal) / totalRange) * 100) : 0;
+
+                if (track) {
+                    track.style.left = leftPercent + "%";
+                    track.style.right = rightPercent + "%";
+                }
+
+                if (minDisplay) minDisplay.textContent = minVal.toLocaleString('en-IN');
+                if (maxDisplay) maxDisplay.textContent = maxVal.toLocaleString('en-IN');
+                if (minInput) minInput.value = minVal;
+                if (maxInput) maxInput.value = maxVal;
             }
 
-            const totalRange = maxRangeVal - minRangeVal;
-            const leftPercent = totalRange > 0 ? ((minVal - minRangeVal) / totalRange) * 100 : 0;
-            const rightPercent = totalRange > 0 ? 100 - (((maxVal - minRangeVal) / totalRange) * 100) : 0;
-
-            if (track) {
-                track.style.left = leftPercent + "%";
-                track.style.right = rightPercent + "%";
-            }
-
-            if (minDisplay) minDisplay.textContent = minVal.toLocaleString('en-IN');
-            if (maxDisplay) maxDisplay.textContent = maxVal.toLocaleString('en-IN');
-            if (minInput) minInput.value = minVal;
-            if (maxInput) maxInput.value = maxVal;
+            minSlider.addEventListener("input", updatePriceSlider);
+            maxSlider.addEventListener("input", updatePriceSlider);
+            updatePriceSlider();
         }
 
-        minSlider.addEventListener("input", updatePriceSlider);
-        maxSlider.addEventListener("input", updatePriceSlider);
-        updatePriceSlider();
+        // Fast SKU Autocomplete & Quick Filter
+        const skuInput = document.getElementById("filterSkuInput");
+        const skuDropdown = document.getElementById("skuDropdown");
+        const skuSuggestionsList = document.getElementById("skuSuggestionsList");
+        let skuTimer = null;
+
+        if (skuInput && skuDropdown && skuSuggestionsList) {
+            skuInput.addEventListener("input", function () {
+                clearTimeout(skuTimer);
+                const query = skuInput.value.trim();
+                if (query.length < 1) {
+                    skuDropdown.style.display = "none";
+                    skuSuggestionsList.innerHTML = "";
+                    return;
+                }
+
+                skuTimer = setTimeout(function () {
+                    fetch(`{% url 'shop:sku_autocomplete_api' %}?q=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.results || data.results.length === 0) {
+                                skuSuggestionsList.innerHTML = `
+                                    <div class="p-3 text-center text-muted fs-8">
+                                        <i class="bi bi-search me-1"></i> No matching SKU found
+                                    </div>
+                                `;
+                                skuDropdown.style.display = "block";
+                                return;
+                            }
+
+                            let html = '<div class="list-group list-group-flush">';
+                            data.results.forEach(item => {
+                                const imgHtml = item.image 
+                                    ? `<img src="${item.image}" alt="${item.name}" class="rounded object-fit-cover" style="width: 36px; height: 46px;">`
+                                    : `<div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 36px; height: 46px;"><i class="bi bi-image text-muted"></i></div>`;
+
+                                html += `
+                                    <div class="list-group-item list-group-item-action p-2 d-flex align-items-center gap-2 border-0 rounded-2 mb-1 sku-suggestion-item" style="cursor: pointer;" data-sku="${item.sku}">
+                                        ${imgHtml}
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                                                <span class="badge bg-primary text-white font-monospace" style="font-size: 0.68rem;">${item.sku}</span>
+                                                <span class="fw-bold text-dark fs-8">₹${item.price}</span>
+                                            </div>
+                                            <div class="text-truncate text-muted fs-8">${item.name}</div>
+                                        </div>
+                                        <span class="badge bg-light text-primary border fs-8">Filter</span>
+                                    </div>
+                                `;
+                            });
+                            html += '</div>';
+                            skuSuggestionsList.innerHTML = html;
+                            skuDropdown.style.display = "block";
+
+                            // Click suggestion to instantly apply SKU filter
+                            skuSuggestionsList.querySelectorAll(".sku-suggestion-item").forEach(el => {
+                                el.addEventListener("click", function () {
+                                    const selectedSku = this.getAttribute("data-sku");
+                                    skuInput.value = selectedSku;
+                                    skuDropdown.style.display = "none";
+                                    if (skuInput.form) {
+                                        skuInput.form.submit();
+                                    }
+                                });
+                            });
+                        })
+                        .catch(() => {
+                            skuDropdown.style.display = "none";
+                        });
+                }, 180);
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener("click", function (e) {
+                if (!skuInput.contains(e.target) && !skuDropdown.contains(e.target)) {
+                    skuDropdown.style.display = "none";
+                }
+            });
+
+            // Close on escape key
+            skuInput.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    skuDropdown.style.display = "none";
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

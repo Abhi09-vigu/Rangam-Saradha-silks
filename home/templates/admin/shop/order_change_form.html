@@ -12,6 +12,8 @@
         margin-bottom: 24px;
         padding-bottom: 16px;
         border-bottom: 2px solid var(--border-color);
+        flex-wrap: wrap;
+        gap: 15px;
     }
     .order-header-left h1 {
         margin: 0 !important;
@@ -28,11 +30,13 @@
     .order-badges {
         display: flex;
         gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
     }
     
     .order-layout {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1.8fr 1.2fr;
         gap: 24px;
         align-items: start;
     }
@@ -48,7 +52,7 @@
         border: 1px solid var(--border-color);
         border-radius: 12px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         overflow: hidden;
     }
     
@@ -84,11 +88,11 @@
         text-transform: uppercase;
         color: var(--primary);
         border-bottom: 2px solid var(--border-color);
-        padding: 12px 16px;
+        padding: 12px 14px;
         text-align: left;
     }
     .order-items-table td {
-        padding: 16px;
+        padding: 12px 14px;
         border-bottom: 1px solid var(--border-color);
         vertical-align: middle;
     }
@@ -96,57 +100,73 @@
         border-bottom: none;
     }
     
-    .product-row-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    
-    .product-img-thumbnail {
-        width: 64px;
-        height: 64px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-    }
-    
-    .product-details {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .product-name-txt {
+    .order-item-title {
         font-weight: 600;
-        font-size: 14px;
-        color: var(--link-color);
+        color: #1a1a1a;
     }
-    
-    .product-sku-txt {
+    .order-item-sku {
         font-size: 11px;
         color: #888;
-        margin-top: 4px;
+        margin-top: 2px;
     }
-    
+    .order-item-price {
+        color: #555;
+    }
+    .order-item-total {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
     /* Order totals styling */
     .order-summary-block {
-        width: 340px;
+        width: 100%;
+        max-width: 480px;
         margin-left: auto;
-        margin-top: 20px;
     }
     .order-summary-row {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 8px 0;
         font-size: 13px;
         color: #555;
     }
+    .order-summary-row label {
+        font-weight: 600;
+        color: #444;
+        font-size: 13px;
+    }
     .order-summary-row.grand-total-row {
         border-top: 2px solid var(--border-color);
         margin-top: 8px;
-        padding-top: 16px;
-        font-size: 18px;
+        padding-top: 14px;
+        font-size: 16px;
         font-weight: 700;
         color: var(--primary);
+    }
+
+    .financial-amount-gst {
+        font-weight: 600;
+        color: #1565c0;
+    }
+    .financial-amount-free {
+        color: #16a34a;
+        font-weight: 600;
+    }
+    .financial-amount-grand {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    .protected-notice {
+        margin-top: 16px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
     }
     
     /* Status workflows and sidebar styles */
@@ -166,12 +186,19 @@
         margin-bottom: 8px;
     }
     .sidebar-form-group select {
-        width: 100%;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        font-size: 13px;
-        background: #fff;
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 8px 12px !important;
+        line-height: 1.5 !important;
+        box-sizing: border-box !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--border-color) !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        background-color: #ffffff;
+        color: #1a1a1a;
+        display: block !important;
     }
     
     .detail-info-item {
@@ -181,21 +208,41 @@
         margin-bottom: 0;
     }
     .detail-info-label {
+        display: block;
         font-size: 11px;
         text-transform: uppercase;
         color: #888;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
         font-weight: 600;
     }
-    .detail-info-val {
-        font-size: 14px;
-        color: var(--body-fg);
-        font-weight: 500;
-        line-height: 1.4;
+    .detail-info-item input[type="text"],
+    .detail-info-item input[type="email"],
+    .detail-info-item input[type="url"],
+    .detail-info-item select {
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 8px 12px !important;
+        line-height: 1.4 !important;
+        border-radius: 6px !important;
+        border: 1px solid var(--border-color) !important;
+        font-size: 13px !important;
+        color: #1a1a1a;
+        background: #ffffff;
+        box-sizing: border-box !important;
+        display: block !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .detail-info-item input:focus,
+    .detail-info-item select:focus,
+    .sidebar-form-group select:focus {
+        border-color: var(--secondary, #AE6F21) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(174, 111, 33, 0.2) !important;
     }
     
     .badge-status {
-        padding: 4px 10px;
+        padding: 6px 12px;
         border-radius: 12px;
         font-size: 11px;
         font-weight: 700;
@@ -217,23 +264,117 @@
     .badge-paid { background: #f1faf5; color: #1b8a53; border-color: #c7eed9; }
     .badge-failed { background: #fdf3f4; color: #AF0446; border-color: #fbd3d6; }
 
-    /* Dark Mode Theme Overrides */
+    .btn-invoice-print {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        color: var(--primary);
+        transition: all 0.2s ease;
+    }
+    .btn-invoice-print:hover {
+        background: var(--primary);
+        color: #ffffff;
+    }
+
+    /* DARK MODE PALETTE OVERRIDES */
     @media (prefers-color-scheme: dark) {
         .order-card {
-            background: #1c1114;
+            background: #1c1114 !important;
+            border-color: #3d1b24 !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
         }
         .order-card-header {
-            background: #221519;
+            background: #241419 !important;
+            border-bottom-color: #3d1b24 !important;
         }
-        .sidebar-form-group select {
-            background: #221519;
-            color: #f5ebe6;
+        .order-card-header h3 {
+            color: #f770a1 !important;
+        }
+        .order-header-left h1 {
+            color: #f770a1 !important;
+        }
+        .order-meta-info {
+            color: #b8a69e !important;
+        }
+        .order-items-table th {
+            color: #e5a452 !important;
+            border-bottom-color: #3d1b24 !important;
+        }
+        .order-items-table td {
+            border-bottom-color: #2b141b !important;
+        }
+        .order-item-title {
+            color: #f5ebe6 !important;
+        }
+        .order-item-sku {
+            color: #b8a69e !important;
+        }
+        .order-item-price {
+            color: #d2c5bf !important;
+        }
+        .order-item-total {
+            color: #f770a1 !important;
         }
         .order-summary-row {
-            color: #d2c5bf;
+            color: #d2c5bf !important;
         }
-        .detail-info-val {
-            color: #f5ebe6;
+        .order-summary-row label {
+            color: #f5ebe6 !important;
+        }
+        .order-summary-row.grand-total-row {
+            border-top-color: #3d1b24 !important;
+        }
+        .financial-amount-gst {
+            color: #60a5fa !important;
+        }
+        .financial-amount-free {
+            color: #4ade80 !important;
+        }
+        .financial-amount-grand {
+            color: #e5a452 !important;
+        }
+        .protected-notice {
+            background: rgba(174, 111, 33, 0.12) !important;
+            border-color: rgba(174, 111, 33, 0.3) !important;
+            color: #f5ebe6 !important;
+        }
+        .sidebar-form-group select {
+            background: #241419 !important;
+            color: #f5ebe6 !important;
+            border-color: #4a212c !important;
+        }
+        .detail-info-item input[type="text"],
+        .detail-info-item input[type="email"],
+        .detail-info-item input[type="url"],
+        .detail-info-item select {
+            background: #241419 !important;
+            color: #f5ebe6 !important;
+            border-color: #4a212c !important;
+        }
+        .detail-info-label {
+            color: #d2c5bf !important;
+        }
+        .btn-invoice-print {
+            background: #241419 !important;
+            border-color: #4a212c !important;
+            color: #f5ebe6 !important;
+        }
+        .btn-invoice-print:hover {
+            background: #4a011b !important;
+            color: #ffffff !important;
+        }
+        .sidebar-actions-card {
+            border-color: #e5a452 !important;
+        }
+        .sidebar-form-group label {
+            color: #e5a452 !important;
         }
     }
 </style>
@@ -247,16 +388,6 @@
         {% if is_popup %}<input type="hidden" name="_popup" value="1">{% endif %}
         {% if to_field %}<input type="hidden" name="_to_field" value="{{ to_field }}">{% endif %}
         
-        <!-- silently render django formset management forms and hidden fields -->
-        {% for inline_admin_formset in inline_admin_formsets %}
-            {{ inline_admin_formset.management_form }}
-            {% for form in inline_admin_formset.formset %}
-                {% for field in form.hidden_fields %}
-                    {{ field }}
-                {% endfor %}
-            {% endfor %}
-        {% endfor %}
-        
         {% if errors %}
             <p class="errornote">
                 {% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
@@ -266,179 +397,282 @@
 
         <div class="order-header">
             <div class="order-header-left">
-                <h1>Order #{{ original.order_number }}</h1>
-                <div class="order-meta-info">Placed on {{ original.created_at|date:"F d, Y \a\t H:i" }}</div>
+                <h1>Invoice / Order #{{ original.order_number }}</h1>
+                <div class="order-meta-info">Placed on {{ original.created_at|date:"F d, Y \a\t H:i" }} &bull; Customer: <strong>{{ original.full_name }}</strong></div>
             </div>
             <div class="order-badges">
                 <span class="badge-status badge-{{ original.order_status|lower }}">{{ original.get_order_status_display }}</span>
                 <span class="badge-status badge-{{ original.payment_status|lower }}">Payment: {{ original.get_payment_status_display }}</span>
+                <a href="{% url 'shop:order_detail' original.order_number %}" target="_blank" class="btn-invoice-print">
+                    🖨️ View / Print Customer Invoice
+                </a>
             </div>
         </div>
 
         <div class="order-layout">
-            <!-- Left Side: Order Items and Summary -->
+            <!-- Left Side: Order Items and Financial Summary -->
             <div class="order-left-column">
+                
+                <!-- Items Ordered (Read-Only) -->
                 <div class="order-card">
                     <div class="order-card-header">
-                        <h3>Items Ordered</h3>
+                        <h3>Ordered Items & Sarees</h3>
+                        <span style="font-size: 11px; color: #888;">Items purchased in this order</span>
                     </div>
-                    <div class="order-card-body" style="padding: 0;">
-                        <table class="order-items-table">
-                            <thead>
-                                <tr>
-                                    <th>Product Details</th>
-                                    <th>Quantity</th>
-                                    <th>Unit Price</th>
-                                    <th style="text-align: right;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in original.items.all %}
+                    <div class="order-card-body" style="padding: 16px;">
+                        {% for inline_admin_formset in inline_admin_formsets %}
+                            {{ inline_admin_formset.formset.management_form }}
+                            <table class="order-items-table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="product-row-info">
-                                                {% if item.product and item.product.images.all %}
-                                                    <img class="product-img-thumbnail" src="{{ item.product.images.all.0.image.url }}" alt="{{ item.product.name }}">
-                                                {% else %}
-                                                    <div class="product-img-thumbnail" style="display: flex; align-items: center; justify-content: center; background: #eee; font-size: 10px; color: #888;">No Image</div>
-                                                {% endif %}
-                                                <div class="product-details">
-                                                    <span class="product-name-txt" style="color: var(--body-fg);">{{ item.product.name|default:"Deleted Product" }}</span>
-                                                    <span class="product-sku-txt">SKU: {{ item.product.sku|default:"N/A" }}</span>
+                                        <th>Product / Saree</th>
+                                        <th style="width: 90px; text-align: center;">Qty</th>
+                                        <th style="width: 140px; text-align: right;">Unit Price (₹)</th>
+                                        <th style="width: 130px; text-align: right;">Item Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in inline_admin_formset.formset %}
+                                        {% if form.instance.pk %}
+                                        <tr>
+                                            <td>
+                                                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                                                <div class="order-item-title">
+                                                    {{ form.instance.product.name|default:"Product" }}
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>x {{ item.quantity }}</td>
-                                        <td>₹{{ item.price }}</td>
-                                        <td style="text-align: right; font-weight: 600;">₹{{ item.get_total_price }}</td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="4" style="padding: 24px; text-align: center;">No items found in this order.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                                {% if form.instance.product.sku %}
+                                                    <div class="order-item-sku">SKU: {{ form.instance.product.sku }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td style="text-align: center; font-weight: 600;">
+                                                {{ form.instance.quantity }}
+                                            </td>
+                                            <td style="text-align: right;" class="order-item-price">
+                                                ₹{{ form.instance.price|floatformat:2 }}
+                                            </td>
+                                            <td style="text-align: right;" class="order-item-total">
+                                                ₹{{ form.instance.get_total_price|floatformat:2 }}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4" style="text-align: center; color: #888; padding: 20px;">No items in this order.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
                     </div>
                 </div>
 
+                <!-- Financial & Invoice Breakdown (Locked / System-Calculated) -->
                 <div class="order-card">
                     <div class="order-card-header">
-                        <h3>Financial Summary</h3>
+                        <h3>Invoice Financial Breakdown</h3>
+                        <span style="font-size: 11px; color: #4ade80; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                            🔒 Amounts Locked
+                        </span>
                     </div>
                     <div class="order-card-body">
                         <div class="order-summary-block">
                             <div class="order-summary-row">
-                                <span>Subtotal</span>
-                                <span>₹{{ original.subtotal }}</span>
+                                <label>Subtotal:</label>
+                                <span style="font-weight: 600; font-size: 14px;">₹{{ original.subtotal|floatformat:2 }}</span>
                             </div>
+                            
                             <div class="order-summary-row">
-                                <span>GST (Tax)</span>
-                                <span>₹{{ original.tax_amount }}</span>
+                                <label>GST Tax Amount (5% Included):</label>
+                                <span class="financial-amount-gst">₹{{ original.tax_amount|floatformat:2 }}</span>
                             </div>
-                            {% if original.payment_method == 'COD' %}
-                                <div class="order-summary-row">
-                                    <span>COD Charge</span>
-                                    <span>₹{{ original.cod_charge }}</span>
-                                </div>
+                            <div class="order-summary-row" style="font-size: 11px; color: #888; padding-top: 0; padding-bottom: 4px;">
+                                <span>&bull; CGST (2.5%) / SGST (2.5%)</span>
+                                <span>5% Tax included in product price</span>
+                            </div>
+
+                            <div class="order-summary-row">
+                                <label>COD Charge:</label>
+                                <span>
+                                    {% if original.cod_charge > 0 %}
+                                        <strong style="color: #e5a452;">₹{{ original.cod_charge|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <span class="financial-amount-free">FREE (₹0.00)</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="order-summary-row">
+                                <label>Shipping Cost:</label>
+                                <span>
+                                    {% if original.shipping_cost > 0 %}
+                                        ₹{{ original.shipping_cost|floatformat:2 }}
+                                    {% else %}
+                                        <span class="financial-amount-free">FREE (₹0.00)</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="order-summary-row">
+                                <label>Coupon Discount:</label>
+                                <span>
+                                    {% if original.discount_amount > 0 %}
+                                        <span class="financial-amount-free">-₹{{ original.discount_amount|floatformat:2 }}</span>
+                                    {% else %}
+                                        ₹0.00
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            {% if original.coupon_used %}
+                            <div class="order-summary-row" style="font-size: 12px;">
+                                <label>Coupon Code:</label>
+                                <span style="background: rgba(174, 111, 33, 0.15); color: #e5a452; border: 1px solid rgba(174, 111, 33, 0.4); padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                                    {{ original.coupon_used.code }}
+                                </span>
+                            </div>
                             {% endif %}
-                            {% if original.discount_amount > 0 %}
-                                <div class="order-summary-row" style="color: #1b8a53; font-weight: 600;">
-                                    <span>Discount</span>
-                                    <span>-₹{{ original.discount_amount }}</span>
-                                </div>
-                            {% endif %}
-                            {% if original.shipping_cost > 0 %}
-                                <div class="order-summary-row">
-                                    <span>Shipping Cost</span>
-                                    <span>₹{{ original.shipping_cost }}</span>
-                                </div>
-                            {% endif %}
+
                             <div class="order-summary-row grand-total-row">
-                                <span>Grand Total</span>
-                                <span>₹{{ original.grand_total }}</span>
+                                <label>Grand Total (₹):</label>
+                                <span class="financial-amount-grand">₹{{ original.grand_total|floatformat:2 }}</span>
+                            </div>
+
+                            <div class="protected-notice">
+                                🔒 <strong>Protected Invoice Amounts:</strong> Subtotal, 5% GST, COD fees, and totals are computed strictly by store pricing rules to protect accounting and ledger integrity. Customer names, billing GST number, and shipping details can be edited on the right.
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Workflow & Customer Info -->
+            <!-- Right Side: Workflow, Customer Details & Shipping -->
             <div class="order-right-column">
+                
                 <!-- Status Actions Card -->
                 <div class="order-card sidebar-actions-card">
                     <div class="order-card-header">
-                        <h3>Fulfillment & Payment Workflow</h3>
+                        <h3>Fulfillment & Status</h3>
                     </div>
                     <div class="order-card-body">
                         <div class="sidebar-form-group">
-                            <label for="id_order_status">Order Status</label>
+                            <label for="{{ adminform.form.order_status.id_for_label }}">Order Status</label>
                             {{ adminform.form.order_status }}
+                            {% if adminform.form.order_status.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.order_status.errors }}</div>{% endif %}
                         </div>
                         <div class="sidebar-form-group">
-                            <label for="id_payment_status">Payment Status</label>
+                            <label for="{{ adminform.form.payment_status.id_for_label }}">Payment Status</label>
                             {{ adminform.form.payment_status }}
+                            {% if adminform.form.payment_status.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.payment_status.errors }}</div>{% endif %}
                         </div>
                         
                         <div style="margin-top: 24px;">
-                            <input type="submit" value="Save Status Changes" class="default" name="_save" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer;">
+                            <input type="submit" value="Save Billing & Order Changes" class="default" name="_save" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; border-radius: 8px;">
+                            <input type="submit" value="Save & Continue Editing" name="_continue" style="width: 100%; margin-top: 8px; padding: 9px; font-size: 12px; font-weight: 600; cursor: pointer; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
                         </div>
                     </div>
                 </div>
 
-                <!-- Customer Info Card -->
+                <!-- Shipment & Tracking Card (Editable) -->
                 <div class="order-card">
                     <div class="order-card-header">
-                        <h3>Customer Information</h3>
+                        <h3>Shipment & Tracking</h3>
+                        <span style="font-size: 11px; color: #2e7d32; font-weight: 600;">🚚 Live Tracking</span>
                     </div>
                     <div class="order-card-body">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Customer Name</div>
-                            <div class="detail-info-val">{{ original.full_name }}</div>
+                            <label class="detail-info-label" for="{{ adminform.form.tracking_link.id_for_label }}">Courier Tracking Link / URL</label>
+                            {{ adminform.form.tracking_link }}
+                            {% if adminform.form.tracking_link.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.tracking_link.errors }}</div>{% endif %}
+                            <div style="font-size: 11px; color: #888; margin-top: 4px;">Paste the full tracking URL (Delhivery, Blue Dart, DTDC, India Post, Shiprocket, etc.)</div>
                         </div>
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Phone Number</div>
-                            <div class="detail-info-val">{{ original.phone_number }}</div>
+                            <label class="detail-info-label" for="{{ adminform.form.tracking_number.id_for_label }}">AWB / Tracking Number (Optional)</label>
+                            {{ adminform.form.tracking_number }}
+                            {% if adminform.form.tracking_number.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.tracking_number.errors }}</div>{% endif %}
+                        </div>
+                        {% if original.tracking_link %}
+                        <div style="margin-top: 12px; padding: 10px 14px; background: rgba(30, 64, 175, 0.06); border: 1px solid rgba(30, 64, 175, 0.2); border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 12px; color: #1e40af; font-weight: 600;">Active Link Configured</span>
+                            <a href="{{ original.tracking_link }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #1e40af; text-decoration: none;">
+                                Open Tracking Page ↗
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Customer & Billing Details Card (Editable) -->
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Customer & Billing Details</h3>
+                        <span style="font-size: 11px; color: #2e7d32; font-weight: 600;">✏️ Editable</span>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="detail-info-item">
+                            <label class="detail-info-label" for="{{ adminform.form.full_name.id_for_label }}">Customer Name</label>
+                            {{ adminform.form.full_name }}
+                            {% if adminform.form.full_name.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.full_name.errors }}</div>{% endif %}
                         </div>
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Email Address</div>
-                            <div class="detail-info-val">{{ original.email }}</div>
+                            <label class="detail-info-label" for="{{ adminform.form.phone_number.id_for_label }}">Phone Number</label>
+                            {{ adminform.form.phone_number }}
+                            {% if adminform.form.phone_number.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.phone_number.errors }}</div>{% endif %}
+                        </div>
+                        <div class="detail-info-item">
+                            <label class="detail-info-label" for="{{ adminform.form.email.id_for_label }}">Email Address</label>
+                            {{ adminform.form.email }}
+                            {% if adminform.form.email.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.email.errors }}</div>{% endif %}
                         </div>
                     </div>
                 </div>
 
-                <!-- Shipping Address Card -->
+                <!-- Shipping Address Card (Editable) -->
                 <div class="order-card">
                     <div class="order-card-header">
-                        <h3>Shipping & Delivery</h3>
+                        <h3>Shipping & Delivery Address</h3>
+                        <span style="font-size: 11px; color: #2e7d32; font-weight: 600;">✏️ Editable</span>
                     </div>
                     <div class="order-card-body">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Full Address</div>
-                            <div class="detail-info-val">
-                                {{ original.address_line_1 }}<br>
-                                {% if original.address_line_2 %}{{ original.address_line_2 }}<br>{% endif %}
-                                {% if original.landmark %}Landmark: {{ original.landmark }}<br>{% endif %}
+                            <label class="detail-info-label" for="{{ adminform.form.address_line_1.id_for_label }}">Address Line 1</label>
+                            {{ adminform.form.address_line_1 }}
+                            {% if adminform.form.address_line_1.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.address_line_1.errors }}</div>{% endif %}
+                        </div>
+                        <div class="detail-info-item">
+                            <label class="detail-info-label" for="{{ adminform.form.address_line_2.id_for_label }}">Address Line 2 (Optional)</label>
+                            {{ adminform.form.address_line_2 }}
+                            {% if adminform.form.address_line_2.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.address_line_2.errors }}</div>{% endif %}
+                        </div>
+                        <div class="detail-info-item">
+                            <label class="detail-info-label" for="{{ adminform.form.landmark.id_for_label }}">Landmark (Optional)</label>
+                            {{ adminform.form.landmark }}
+                            {% if adminform.form.landmark.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.landmark.errors }}</div>{% endif %}
+                        </div>
+                        <div class="detail-info-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label class="detail-info-label" for="{{ adminform.form.city.id_for_label }}">City</label>
+                                {{ adminform.form.city }}
+                                {% if adminform.form.city.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.city.errors }}</div>{% endif %}
+                            </div>
+                            <div>
+                                <label class="detail-info-label" for="{{ adminform.form.pincode.id_for_label }}">Pincode</label>
+                                {{ adminform.form.pincode }}
+                                {% if adminform.form.pincode.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.pincode.errors }}</div>{% endif %}
                             </div>
                         </div>
                         <div class="detail-info-item">
-                            <div class="detail-info-label">City</div>
-                            <div class="detail-info-val">{{ original.city }}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">State</div>
-                            <div class="detail-info-val">{{ original.state }}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Pincode</div>
-                            <div class="detail-info-val">{{ original.pincode }}</div>
+                            <label class="detail-info-label" for="{{ adminform.form.state.id_for_label }}">State</label>
+                            {{ adminform.form.state }}
+                            {% if adminform.form.state.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.state.errors }}</div>{% endif %}
                         </div>
                         <div class="detail-info-item" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
-                            <div class="detail-info-label">Payment Method</div>
-                            <div class="detail-info-val" style="font-weight: 700; color: var(--secondary);">{{ original.get_payment_method_display }}</div>
+                            <label class="detail-info-label" for="{{ adminform.form.payment_method.id_for_label }}">Payment Method</label>
+                            {{ adminform.form.payment_method }}
+                            {% if adminform.form.payment_method.errors %}<div style="color: #AF0446; font-size: 11px;">{{ adminform.form.payment_method.errors }}</div>{% endif %}
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </form>

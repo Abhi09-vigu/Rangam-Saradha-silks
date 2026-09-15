@@ -3,12 +3,163 @@
 
 {% block meta_title %}Order Successful - {{ site_settings.website_name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm 12mm 10mm 12mm;
+    }
+
+    /* Hide all website navigation, chrome, headers, footers, and widgets */
+    header,
+    footer,
+    nav,
+    .navbar,
+    .breadcrumb,
+    .floating-contact-widget,
+    .order-tracking-card,
+    .no-print,
+    .btn,
+    button,
+    .premium-toast-container,
+    .modal,
+    .modal-backdrop,
+    #floatingBookCallModal,
+    #premiumQuickViewModal,
+    #promotionalFirstVisitModal,
+    .promotional-popup-backdrop,
+    .social-sidebar-item,
+    .footer-social-icons,
+    .social-sidebar {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    html, body {
+        background: #ffffff !important;
+        color: #111111 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+        font-size: 10pt !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: auto !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .section-luxury,
+    .container,
+    .row,
+    .col-lg-10 {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    /* Print Bill Container */
+    #printable-invoice {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 18px 24px !important;
+        border: 1.5px solid #c5a059 !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    #printable-invoice .font-heading,
+    #printable-invoice h3,
+    #printable-invoice h4 {
+        color: #8c1035 !important;
+        margin-bottom: 2px !important;
+    }
+
+    #printable-invoice h3 {
+        font-size: 14pt !important;
+        font-weight: 800 !important;
+    }
+
+    #printable-invoice table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 10px !important;
+        margin-bottom: 12px !important;
+        font-size: 9.5pt !important;
+    }
+
+    #printable-invoice thead th {
+        background-color: #faf7f2 !important;
+        color: #222222 !important;
+        border-top: 1px solid #c5a059 !important;
+        border-bottom: 1.5px solid #c5a059 !important;
+        padding: 6px 8px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        font-size: 8.5pt !important;
+    }
+
+    #printable-invoice tbody td {
+        border-bottom: 1px solid #e5e5e5 !important;
+        padding: 6px 8px !important;
+        color: #222222 !important;
+    }
+
+    #printable-invoice tbody tr:last-child td {
+        border-bottom: 1.5px solid #c5a059 !important;
+    }
+
+    #printable-invoice .badge {
+        display: inline-block !important;
+        padding: 3px 8px !important;
+        font-size: 8.5pt !important;
+        font-weight: 700 !important;
+        border: 1px solid #888888 !important;
+        background: #fdfdfd !important;
+        color: #222222 !important;
+        border-radius: 4px !important;
+    }
+
+    #printable-invoice .text-primary,
+    #printable-invoice .grand-total-amount {
+        color: #8c1035 !important;
+        font-weight: 800 !important;
+    }
+
+    .invoice-print-footer {
+        display: block !important;
+        margin-top: 16px !important;
+        padding-top: 10px !important;
+        border-top: 1px dashed #c5a059 !important;
+        text-align: center !important;
+        font-size: 8pt !important;
+        color: #666666 !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="section-luxury">
     <div class="container">
         
-        <!-- Success Message -->
-        <div class="text-center mb-5">
+        <!-- Success Message (Online Customer Screen Only) -->
+        <div class="text-center mb-5 no-print">
             <div class="d-inline-flex justify-content-center align-items-center bg-success text-white rounded-circle mb-4" style="width: 80px; height: 80px;">
                 <i class="bi bi-check-lg display-4"></i>
             </div>
@@ -18,18 +169,31 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- Invoice layout -->
-                <div class="card border border-light p-4 p-md-5 shadow-sm bg-white" style="border-radius: 20px;">
+                <!-- Printable Invoice Bill -->
+                <div class="card border border-light p-4 p-md-5 shadow-sm bg-white invoice-card" id="printable-invoice" style="border-radius: 20px;">
                     
                     <!-- Invoice Header -->
-                    <div class="row g-4 pb-4 mb-4 border-bottom">
-                        <div class="col-md-6">
-                            <h3 class="font-heading text-primary text-uppercase">{{ site_settings.website_name }}</h3>
+                    <div class="row g-4 pb-4 mb-4 border-bottom align-items-center">
+                        <div class="col-md-7 col-sm-6">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                {% if site_settings.logo %}
+                                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }}" style="max-height: 48px; width: auto; object-fit: contain;">
+                                {% endif %}
+                                <div>
+                                    <h3 class="font-heading text-primary text-uppercase mb-0" style="letter-spacing: 0.03em;">{{ site_settings.website_name }}</h3>
+                                    <span class="text-muted fs-8 fw-semibold" style="letter-spacing: 0.06em;">AUTHENTIC SILK WEAVERS</span>
+                                </div>
+                            </div>
                             <p class="text-muted fs-7 mb-0">{{ contact_info.address }}</p>
                             <p class="text-muted fs-7 mb-0">Phone: {{ contact_info.phone }} | Email: {{ contact_info.email }}</p>
+                            {% with invoice_gstin=order.gst_number|default:site_settings.gst_number %}
+                            {% if invoice_gstin %}
+                            <p class="text-muted fs-7 mb-0">GSTIN: <span class="fw-semibold text-dark">{{ invoice_gstin }}</span></p>
+                            {% endif %}
+                            {% endwith %}
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <h4 class="font-heading mb-2">INVOICE</h4>
+                        <div class="col-md-5 col-sm-6 text-md-end">
+                            <div class="d-inline-block px-3 py-1 mb-2 rounded-1 fw-bold fs-7" style="background: #fbf5e6; color: #8c5d1c; border: 1px solid #eedda6; letter-spacing: 0.08em;">TAX INVOICE</div>
                             <p class="text-muted fs-7 mb-1">Invoice Number: <span class="fw-semibold text-dark">{{ order.order_number }}</span></p>
                             <p class="text-muted fs-7 mb-1">Order Date: <span class="fw-semibold text-dark">{{ order.created_at|date:"d M Y, h:i A" }}</span></p>
                             <p class="text-muted fs-7 mb-0">Payment Method: <span class="fw-semibold text-dark">{{ order.get_payment_method_display }}</span></p>
@@ -37,9 +201,9 @@
                     </div>
 
                     <!-- Billing/Shipping details -->
-                    <div class="row g-4 mb-5">
+                    <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">Shipped To</h5>
+                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-2" style="letter-spacing: 0.05em;">Billed & Shipped To</h5>
                             <h6 class="fw-bold mb-1 text-dark">{{ order.full_name }}</h6>
                             <p class="text-muted fs-7 mb-1">{{ order.address_line_1 }}</p>
                             {% if order.address_line_2 %}
@@ -52,8 +216,18 @@
                             <p class="text-muted fs-7 mb-0">Phone: {{ order.phone_number }}</p>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-3" style="letter-spacing: 0.05em;">Order Status</h5>
+                            <h5 class="fw-bold text-muted fs-7 text-uppercase mb-2" style="letter-spacing: 0.05em;">Order Status</h5>
                             <span class="badge bg-warning text-dark fs-7 px-3 py-2 rounded-pill">{{ order.get_order_status_display }}</span>
+                            {% if order.tracking_number %}
+                            <div class="mt-2 text-muted fs-8">AWB / Tracking #: <span class="fw-semibold text-dark">{{ order.tracking_number }}</span></div>
+                            {% endif %}
+                            {% if order.tracking_link %}
+                            <div class="mt-2 no-print">
+                                <a href="{{ order.tracking_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fs-8 fw-semibold">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Track Shipment ↗
+                                </a>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -72,11 +246,11 @@
                                 {% for item in order.items.all %}
                                 <tr>
                                     <td>
-                                        <h6 class="fw-semibold mb-1">{{ item.product.name }}</h6>
+                                        <h6 class="fw-semibold mb-1 text-dark">{{ item.product.name }}</h6>
                                         <p class="text-muted fs-8 mb-0">SKU: {{ item.product.sku }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</p>
                                     </td>
                                     <td class="text-center fs-7">{{ site_settings.currency }}{{ item.price|floatformat:2 }}</td>
-                                    <td class="text-center fs-7">{{ item.quantity }}</td>
+                                    <td class="text-center fs-7 fw-semibold">{{ item.quantity }}</td>
                                     <td class="text-end fw-bold fs-7">{{ site_settings.currency }}{{ item.get_total_price|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}
@@ -86,7 +260,7 @@
 
                     <!-- Calculations Summary -->
                     <div class="row justify-content-end g-4">
-                        <div class="col-md-5">
+                        <div class="col-md-5 col-sm-6">
                             <div class="d-flex justify-content-between mb-2 fs-7">
                                 <span class="text-muted">Subtotal:</span>
                                 <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ order.subtotal|floatformat:2 }}</span>
@@ -99,13 +273,6 @@
                             </div>
                             {% endif %}
 
-                            {% if order.tax_amount > 0 %}
-                            <div class="d-flex justify-content-between mb-2 fs-7">
-                                <span class="text-muted">GST/Tax:</span>
-                                <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ order.tax_amount|floatformat:2 }}</span>
-                            </div>
-                            {% endif %}
-
                             {% if order.cod_charge > 0 %}
                             <div class="d-flex justify-content-between mb-2 fs-7">
                                 <span class="text-muted">COD Charge:</span>
@@ -113,29 +280,39 @@
                             </div>
                             {% endif %}
 
-
                             <div class="d-flex justify-content-between mb-3 fs-7 pb-2 border-bottom border-light">
                                 <span class="text-muted">Shipping Cost:</span>
                                 <span class="fw-semibold text-dark">
                                     {% if order.shipping_cost == 0 %}
-                                    <span class="text-success fw-bold">FREE</span>
+                                     <span class="text-success fw-bold">FREE</span>
                                     {% else %}
                                     {{ site_settings.currency }}{{ order.shipping_cost|floatformat:2 }}
                                     {% endif %}
                                 </span>
                             </div>
 
-                            <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
-                                <span>Grand Total:</span>
-                                <span class="text-primary">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</span>
+                            <div class="d-flex justify-content-between fs-5 fw-bold text-dark pt-1">
+                                <div>
+                                    <span>Grand Total:</span>
+                                    <div class="fs-8 fw-normal text-muted">(Inclusive of all taxes)</div>
+                                </div>
+                                <span class="text-primary grand-total-amount">{{ site_settings.currency }}{{ order.grand_total|floatformat:2 }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Button options -->
-                    <div class="d-flex justify-content-center gap-2 mt-5 border-top pt-4">
-                        <button onclick="window.print();" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-2"></i>Print Invoice</button>
-                        <a href="{% url 'shop:catalog' %}" class="btn btn-primary px-4">Continue Shopping</a>
+                    <!-- Computer Generated Invoice Footer -->
+                    <div class="invoice-print-footer mt-4 pt-3 border-top text-center text-muted fs-8">
+                        <p class="mb-1 fw-semibold text-dark">Thank you for shopping with {{ site_settings.website_name }}!</p>
+                        <p class="mb-0 text-muted fs-8">This is a computer-generated tax invoice and requires no physical signature.</p>
+                    </div>
+
+                    <!-- Button options (Hidden during printing) -->
+                    <div class="d-flex justify-content-center gap-2 mt-4 pt-3 border-top no-print">
+                        <button onclick="window.print();" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm fw-semibold">
+                            <i class="bi bi-printer me-2"></i>Print Invoice
+                        </button>
+                        <a href="{% url 'shop:catalog' %}" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">Continue Shopping</a>
                     </div>
 
                 </div>

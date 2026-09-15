@@ -1,7 +1,12 @@
+from django.db import transaction
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import Order
-from .email_service import send_order_confirmation_email, send_order_status_update_email
+from .email_service import (
+    send_order_confirmation_email,
+    send_order_status_update_email,
+    send_owner_order_notification_email,
+)
 
 @receiver(pre_save, sender=Order)
 def order_pre_save(sender, instance, **kwargs):
