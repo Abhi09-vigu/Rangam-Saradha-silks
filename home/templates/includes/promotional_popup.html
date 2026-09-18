@@ -87,6 +87,11 @@
                         <div id="rssBookingFormContainer">
                             <div id="rssBookingAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
 
+                            <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-2 small" style="background: rgba(175, 4, 70, 0.06); border: 1px dashed var(--primary, #AF0446);">
+                                <div><strong class="text-dark">Consultation Fee: ₹50</strong> <span class="text-muted small d-block">100% Adjustable on purchase</span></div>
+                                <span class="badge bg-primary text-white rounded-pill px-2 py-1">₹50 PAID</span>
+                            </div>
+
                             <form id="rssPopupCallForm" class="rss-popup-form" novalidate>
                                 {% csrf_token %}
                                 <div class="row g-2">
@@ -121,7 +126,7 @@
 
                                 <button type="submit" class="rss-popup-cta-btn primary-btn-luxury mt-3 w-100" id="rssSubmitBookingBtn">
                                     <span class="rss-btn-text">
-                                        <i class="bi bi-telephone-outbound me-2"></i>{{ active_popup.cta_text|default:"Book Video Saree Consultation" }}
+                                        <i class="bi bi-lock-fill me-2"></i>Pay ₹50 & Schedule Call
                                     </span>
                                     <span class="rss-btn-spinner d-none">
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -743,6 +748,7 @@
             formData.append('booking_date', date);
             formData.append('time_slot', slot);
             formData.append('saree_preference', saree);
+            formData.append('payment_method', 'UPI');
 
             const csrfTokenElement = callForm.querySelector('[name=csrfmiddlewaretoken]');
             const csrfToken = csrfTokenElement ? csrfTokenElement.value : (typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '');

@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import path
+from django.core.exceptions import PermissionDenied
 from django.utils.html import format_html
 from django.db.models import Prefetch
 from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem
@@ -190,6 +192,43 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     ordering = ['-created_at']
     change_form_template = 'admin/shop/order_change_form.html'
+    change_list_template = 'admin/shop/order/change_list.html'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'monthly-report/',
+                self.admin_site.admin_view(self.monthly_sales_report_view),
+                name='shop_order_monthly_report',
+            ),
+        ]
+        return custom_urls + urls
+
+    def monthly_sales_report_view(self, request):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            raise PermissionDenied("Only authenticated admin staff can download sales reports.")
+
+        from django.utils import timezone
+        from .reports import generate_monthly_sales_excel
+
+        now = timezone.localtime(timezone.now())
+        try:
+            year = int(request.GET.get('year', now.year))
+        except (ValueError, TypeError):
+            year = now.year
+
+        try:
+            month = int(request.GET.get('month', now.month))
+            if not (1 <= month <= 12):
+                month = now.month
+        except (ValueError, TypeError):
+            month = now.month
+
+        include_cancelled = request.GET.get('include_cancelled', 'false').lower() in ['true', '1', 'yes']
+
+        return generate_monthly_sales_excel(year=year, month=month, include_cancelled=include_cancelled)
+
 
     fieldsets = (
         ('Order Status & Payment Method', {
@@ -360,9 +399,9 @@ class CallSlotAdmin(admin.ModelAdmin):
     def effective_status_badge(self, obj):
         st = obj.get_effective_status()
         if st == 'BLOCKED':
-            return format_html('<span style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🔴 BLOCKED</span>')
+            return format_html('<span style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🔴 BLOCKED (Owner)</span>')
         elif st == 'BOOKED':
-            return format_html('<span style="background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">⚫ BOOKED</span>')
+            return format_html('<span style="background-color: #ffeeba; color: #856404; border: 1px solid #ffeeba; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🔒 BLOCKED (Booked)</span>')
         return format_html('<span style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11px;">🟢 AVAILABLE</span>')
 
     effective_status_badge.short_description = "Status"
@@ -397,10 +436,10 @@ class CallSlotAdmin(admin.ModelAdmin):
 
 
 class CallBookingAdmin(admin.ModelAdmin):
-    list_display = ['booking_reference', 'full_name', 'phone_number', 'email', 'saree_display', 'product_sku', 'booking_date', 'time_slot', 'status', 'created_at']
-    list_filter = ['status', 'booking_date', 'time_slot', 'product']
-    search_fields = ['booking_reference', 'full_name', 'email', 'phone_number', 'saree_preference', 'product__name', 'product__sku']
-    readonly_fields = ['booking_reference', 'created_at', 'updated_at']
+    list_display = ['booking_reference', 'full_name', 'phone_number', 'saree_display', 'product_sku', 'booking_date', 'time_slot', 'fee_amount', 'payment_status_badge', 'payment_method', 'status', 'created_at']
+    list_filter = ['payment_status', 'payment_method', 'status', 'booking_date', 'time_slot']
+    search_fields = ['booking_reference', 'full_name', 'email', 'phone_number', 'saree_preference', 'product__name', 'product__sku', 'payment_reference']
+    readonly_fields = ['booking_reference', 'payment_reference', 'created_at', 'updated_at']
     list_editable = ['status']
     ordering = ['-created_at']
     actions = ['mark_as_completed', 'mark_as_cancelled', 'mark_as_confirmed']
@@ -413,8 +452,17 @@ class CallBookingAdmin(admin.ModelAdmin):
 
     def product_sku(self, obj):
         return obj.product.sku if obj.product and obj.product.sku else "-"
-
     product_sku.short_description = "SKU"
+
+    def payment_status_badge(self, obj):
+        if obj.payment_status == 'PAID':
+            return format_html('<span style="background-color: #d1e7dd; color: #0f5132; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px;">PAID</span>')
+        elif obj.payment_status == 'PENDING':
+            return format_html('<span style="background-color: #fff3cd; color: #664d03; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px;">PENDING</span>')
+        elif obj.payment_status == 'FAILED':
+            return format_html('<span style="background-color: #f8d7da; color: #842029; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px;">FAILED</span>')
+        return format_html('<span style="background-color: #e2e3e5; color: #41464b; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px;">{}</span>', obj.payment_status)
+    payment_status_badge.short_description = "Payment"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -432,6 +480,20 @@ class CallBookingAdmin(admin.ModelAdmin):
                 time_slot=obj.time_slot,
                 defaults={'status': 'BOOKED'}
             )
+
+    def delete_model(self, request, obj):
+        booking_date = obj.booking_date
+        time_slot = obj.time_slot
+        super().delete_model(request, obj)
+        if not CallBooking.objects.filter(booking_date=booking_date, time_slot=time_slot, status__in=['CONFIRMED', 'COMPLETED']).exists():
+            CallSlot.objects.filter(date=booking_date, time_slot=time_slot, blocked_by_owner=False).update(status='AVAILABLE')
+
+    def delete_queryset(self, request, queryset):
+        slots_to_check = list(queryset.values_list('booking_date', 'time_slot').distinct())
+        super().delete_queryset(request, queryset)
+        for booking_date, time_slot in slots_to_check:
+            if not CallBooking.objects.filter(booking_date=booking_date, time_slot=time_slot, status__in=['CONFIRMED', 'COMPLETED']).exists():
+                CallSlot.objects.filter(date=booking_date, time_slot=time_slot, blocked_by_owner=False).update(status='AVAILABLE')
 
     def mark_as_completed(self, request, queryset):
         updated = queryset.update(status='COMPLETED')

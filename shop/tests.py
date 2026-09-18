@@ -455,3 +455,104 @@ class CatalogSkuFilterTest(TestCase):
         self.assertEqual(product_list[0].sku, 'BBS-202')
 
 
+class MonthlySalesReportTest(TestCase):
+    def setUp(self):
+        from accounts.models import CustomUser
+        self.admin_user = CustomUser.objects.create_superuser(
+            username="adminuser",
+            email="admin@example.com",
+            password="adminpassword123"
+        )
+        self.category = Category.objects.create(name="Kanjivaram", slug="kanjivaram")
+        self.product = Product.objects.create(
+            name="Bridal Red Kanjivaram Saree",
+            slug="bridal-red-kanjivaram-saree",
+            sku="BRK-999",
+            price=12500.00,
+            stock=15
+        )
+        self.product.categories.add(self.category)
+
+        # Create order in September 2026
+        self.order = Order.objects.create(
+            order_number="ORD-SEP-2026",
+            full_name="Lakshmi Narayanan",
+            phone_number="9876543219",
+            email="lakshmi@example.com",
+            address_line_1="45 Temple Street",
+            city="Chennai",
+            state="Tamil Nadu",
+            pincode="600001",
+            payment_method="ONLINE",
+            payment_status="PAID",
+            order_status="DELIVERED",
+            subtotal=12500.00,
+            grand_total=12500.00
+        )
+        self.order_item = OrderItem.objects.create(
+            order=self.order,
+            product=self.product,
+            quantity=2,
+            price=12500.00
+        )
+
+    def test_generate_monthly_sales_excel_direct(self):
+        import io
+        import openpyxl
+        from shop.reports import generate_monthly_sales_excel
+        from django.utils import timezone
+
+        now = timezone.localtime(self.order.created_at)
+        response = generate_monthly_sales_excel(now.year, now.month)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        self.assertIn('attachment;', response['Content-Disposition'])
+        self.assertIn('.xlsx', response['Content-Disposition'])
+
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        self.assertTrue(len(wb.sheetnames) > 0)
+        ws = wb.active
+        self.assertEqual(ws["A1"].value, "RANGAM SARADHA SILK SAREES")
+        self.assertIn("MONTHLY REVENUE & SALES REPORT", ws["A2"].value)
+
+        # Find our product row in data table
+        found_product = False
+        for row in range(9, ws.max_row + 1):
+            if ws.cell(row=row, column=3).value == "Bridal Red Kanjivaram Saree":
+                found_product = True
+                self.assertEqual(ws.cell(row=row, column=4).value, "BRK-999")
+                self.assertEqual(ws.cell(row=row, column=6).value, "Lakshmi Narayanan")
+                self.assertEqual(ws.cell(row=row, column=7).value, "9876543219")
+                self.assertEqual(ws.cell(row=row, column=9).value, 2)
+                self.assertEqual(ws.cell(row=row, column=10).value, 12500.0)
+                self.assertEqual(ws.cell(row=row, column=11).value, 25000.0)
+                break
+        self.assertTrue(found_product)
+
+    def test_admin_monthly_sales_report_permission(self):
+        from django.urls import reverse
+        from django.utils import timezone
+
+        now = timezone.localtime(timezone.now())
+        url = f"/admin/shop/order/monthly-report/?month={now.month}&year={now.year}"
+
+        # Anonymous user should be redirected to login
+        anon_resp = self.client.get(url)
+        self.assertEqual(anon_resp.status_code, 302)
+
+        # Staff admin user should get 200 Excel download
+        self.client.force_login(self.admin_user)
+        self.client.cookies['admin_sessionid'] = self.client.cookies['sessionid'].value
+        auth_resp = self.client.get(url)
+        self.assertEqual(auth_resp.status_code, 200)
+        self.assertEqual(
+            auth_resp['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+
+

@@ -288,9 +288,17 @@
 {% block content %}
 <div class="container-fluid p-0">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="dashboard-title m-0">Merchant Control Dashboard</h1>
-        <span class="text-muted fw-semibold">{% now "l, d F Y" %}</span>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="dashboard-title m-0">Merchant Control Dashboard</h1>
+            <span class="text-muted fw-semibold">{% now "l, d F Y" %}</span>
+        </div>
+        <div>
+            <button type="button" class="btn d-inline-flex align-items-center gap-2 fw-semibold px-3 py-2 shadow-sm" id="openDashSalesReportBtn" style="border-radius: 10px; border: 1px solid #C5A059; color: #721428; background: linear-gradient(135deg, #FFFFFF 0%, #FAF7F2 100%);">
+                <i class="bi bi-file-earmark-excel-fill" style="color: #107C41; font-size: 1.15rem;"></i>
+                <span>Download Monthly Sales Report</span>
+            </button>
+        </div>
     </div>
 
     <!-- Statistics Cards Grid -->
@@ -612,5 +620,136 @@
             }
         }
     });
+</script>
+
+<!-- Monthly Sales Report Modal on Dashboard -->
+<div id="dashSalesReportModal" class="sales-report-modal" aria-hidden="true" style="display: none; position: fixed; inset: 0; z-index: 100000; align-items: center; justify-content: center;">
+    <div class="sales-report-modal-backdrop" id="dashSalesReportBackdrop" style="position: absolute; inset: 0; background: rgba(15, 6, 9, 0.65); backdrop-filter: blur(4px);"></div>
+    <div class="sales-report-modal-card" role="dialog" aria-modal="true" style="position: relative; z-index: 2; width: 100%; max-width: 480px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(197, 160, 89, 0.3); overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: #FAF7F2; border-bottom: 1px solid #ECE3D4;">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: #fbebed; display: flex; align-items: center; justify-content: center; border: 1px solid #f2c7ce; flex-shrink: 0;">
+                    <i class="bi bi-file-earmark-excel-fill" style="color: #107C41; font-size: 1.25rem;"></i>
+                </div>
+                <div>
+                    <h4 style="font-family: 'Cambria', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: #721428; margin: 0;">Monthly Revenue & Sales Report</h4>
+                    <p style="font-size: 0.8rem; color: #666; margin: 3px 0 0 0;">Download detailed Excel sales report with images & KPIs</p>
+                </div>
+            </div>
+            <button type="button" id="closeDashSalesReportBtn" style="background: none; border: none; font-size: 26px; color: #888; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
+        </div>
+
+        <div style="padding: 24px;">
+            <div style="margin-bottom: 16px;">
+                <label for="dashReportMonthSelect" style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">Select Month:</label>
+                <select id="dashReportMonthSelect" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid #dcd3c5; background-color: #FAF8F5; padding: 0 14px; font-size: 0.95rem; color: #222;">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="dashReportYearSelect" style="display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;">Select Year:</label>
+                <select id="dashReportYearSelect" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid #dcd3c5; background-color: #FAF8F5; padding: 0 14px; font-size: 0.95rem; color: #222;">
+                    <option value="2027">2027</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 14px; margin-bottom: 18px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #444; cursor: pointer;">
+                    <input type="checkbox" id="dashReportIncludeCancelled" style="width: 16px; height: 16px; accent-color: #721428;">
+                    <span>Include Cancelled & Returned Orders</span>
+                </label>
+            </div>
+
+            <div style="background: #FDFBF8; border: 1px solid #ECE3D4; border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: #721428; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;">Report Content Includes:</div>
+                <ul style="margin: 0; padding-left: 18px; font-size: 0.8rem; color: #555; line-height: 1.5;">
+                    <li>Embedded saree / product photo thumbnails & SKU codes</li>
+                    <li>Customer name, phone number, purchase date & order numbers</li>
+                    <li>Quantity, selling price, and total amount paid</li>
+                    <li>Monthly revenue, total orders, and total items sold KPI cards</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: #FAF7F2; border-top: 1px solid #ECE3D4;">
+            <button type="button" id="cancelDashSalesReportBtn" style="background: #FFFFFF; border: 1px solid #D5C9B8; color: #555; padding: 9px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">Cancel</button>
+            <button type="button" id="downloadDashReportActionBtn" style="background: #107C41; border: 1px solid #0d6334; color: #FFFFFF; padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(16, 124, 65, 0.25);">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Download Excel (.xlsx)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('dashSalesReportModal');
+    var openBtn = document.getElementById('openDashSalesReportBtn');
+    var closeBtn = document.getElementById('closeDashSalesReportBtn');
+    var cancelBtn = document.getElementById('cancelDashSalesReportBtn');
+    var backdrop = document.getElementById('dashSalesReportBackdrop');
+    var downloadBtn = document.getElementById('downloadDashReportActionBtn');
+    var monthSelect = document.getElementById('dashReportMonthSelect');
+    var yearSelect = document.getElementById('dashReportYearSelect');
+    var includeCancelledCheckbox = document.getElementById('dashReportIncludeCancelled');
+
+    var now = new Date();
+    if (monthSelect) monthSelect.value = (now.getMonth() + 1).toString();
+    if (yearSelect) yearSelect.value = now.getFullYear().toString();
+
+    function openModal() {
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal() {
+        if (modal) {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function () {
+            var month = monthSelect ? monthSelect.value : (now.getMonth() + 1);
+            var year = yearSelect ? yearSelect.value : now.getFullYear();
+            var includeCancelled = (includeCancelledCheckbox && includeCancelledCheckbox.checked) ? 'true' : 'false';
+
+            var url = '/admin/shop/order/monthly-report/?month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year) + '&include_cancelled=' + encodeURIComponent(includeCancelled);
+            window.location.href = url;
+            closeModal();
+        });
+    }
+});
 </script>
 {% endblock %}

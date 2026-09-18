@@ -43,6 +43,10 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# Timezone & Localization (Indian Standard Time)
+TIME_ZONE = "Asia/Kolkata"
+USE_TZ = True
+
 
 # ============================================================
 # APPLICATIONS
@@ -198,7 +202,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 

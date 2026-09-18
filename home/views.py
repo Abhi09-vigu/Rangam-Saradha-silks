@@ -316,9 +316,13 @@ def popup_book_call_api(request):
     """
     import json
     import datetime
+    import uuid
+    from decimal import Decimal
     from django.db import transaction
     from django.http import JsonResponse
     from shop.models import CallBooking, CallSlot
+    from shop.views import parse_slot_start_time
+    from .models import WebsiteSetting
     
     try:
         if not request.user.is_authenticated:
@@ -361,8 +365,14 @@ def popup_book_call_api(request):
         except ValueError:
             return JsonResponse({'success': False, 'message': 'Invalid date format.'}, status=400)
 
-        if booking_date < timezone.now().date():
+        now_local = timezone.localtime()
+        today = now_local.date()
+        if booking_date < today:
             return JsonResponse({'success': False, 'message': 'Please select today or a future date.'}, status=400)
+        elif booking_date == today:
+            slot_start = parse_slot_start_time(time_slot)
+            if slot_start and slot_start <= now_local.time():
+                return JsonResponse({'success': False, 'message': 'This time slot has already passed for today. Please select an upcoming slot.'}, status=400)
 
         # Duplicate protection (same phone, date, slot within 5 mins)
         recent_cutoff = timezone.now() - datetime.timedelta(minutes=5)
@@ -380,6 +390,14 @@ def popup_book_call_api(request):
                 'booking_reference': existing_booking.booking_reference,
                 'message': f"We have already received your booking scheduled for {booking_date} at {time_slot} (Ref: #{existing_booking.booking_reference})."
             })
+
+        payment_method = (data.get('payment_method') or 'UPI').strip().upper()
+        if payment_method not in ['UPI', 'CARD', 'NETBANKING', 'ONLINE']:
+            payment_method = 'UPI'
+
+        settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+        call_booking_fee = getattr(settings_obj, 'call_booking_fee', Decimal('50.00')) or Decimal('50.00')
+        txn_ref = f"TXN-CALL-{uuid.uuid4().hex[:8].upper()}"
 
         # Atomic creation with slot availability verification
         with transaction.atomic():
@@ -416,6 +434,10 @@ def popup_book_call_api(request):
                 booking_date=booking_date,
                 time_slot=time_slot,
                 notes=notes,
+                fee_amount=call_booking_fee,
+                payment_status='PAID',
+                payment_method=payment_method,
+                payment_reference=txn_ref,
                 status='CONFIRMED',
             )
 
@@ -437,7 +459,11 @@ def popup_book_call_api(request):
             'success': True,
             'booking_ref': booking.booking_reference,
             'booking_reference': booking.booking_reference,
-            'message': f"🎉 Thank you, {full_name}! Your saree selection call is confirmed for {formatted_date} at {time_slot}."
+            'fee_amount': float(booking.fee_amount),
+            'payment_status': booking.payment_status,
+            'payment_method': booking.payment_method,
+            'payment_reference': booking.payment_reference,
+            'message': f"🎉 Thank you, {full_name}! Your saree selection call is confirmed for {formatted_date} at {time_slot} (Fee: ₹{booking.fee_amount:.0f} Paid)."
         })
     except Exception as e:
         logger.error(f"Error in popup_book_call_api: {str(e)}", exc_info=True)

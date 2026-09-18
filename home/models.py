@@ -14,6 +14,7 @@ class WebsiteSetting(models.Model):
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
     cod_charge = models.DecimalField(max_digits=10, decimal_places=2, default=49.00, help_text="Cash On Delivery fee for orders below the threshold")
     cod_max_limit = models.DecimalField(max_digits=10, decimal_places=2, default=2000.00, help_text="Orders at or above this amount receive FREE Cash On Delivery (₹0 COD fee)")
+    call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
 
     @property

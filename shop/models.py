@@ -364,6 +364,20 @@ class CallBooking(models.Model):
         ('CANCELLED', 'Cancelled'),
     )
 
+    PAYMENT_STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('PAID', 'Paid'),
+        ('FAILED', 'Failed'),
+        ('REFUNDED', 'Refunded'),
+    )
+
+    PAYMENT_METHOD_CHOICES = (
+        ('UPI', 'UPI / QR Code'),
+        ('CARD', 'Credit / Debit Card'),
+        ('NETBANKING', 'Net Banking'),
+        ('ONLINE', 'Online Payment'),
+    )
+
     booking_reference = models.CharField(max_length=20, unique=True, editable=False)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='call_bookings')
     saree_preference = models.CharField(max_length=255, blank=True, null=True, help_text="Saree or product of interest from general booking")
@@ -376,6 +390,12 @@ class CallBooking(models.Model):
     time_slot = models.CharField(max_length=50, choices=TIME_SLOT_CHOICES)
     notes = models.TextField(blank=True, null=True, help_text="Specific requirements or questions for the call")
     
+    # Payment / Fee Details (Nominal ₹50 reservation fee)
+    fee_amount = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Consultation fee in INR")
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PAID')
+    payment_method = models.CharField(max_length=30, choices=PAYMENT_METHOD_CHOICES, default='UPI')
+    payment_reference = models.CharField(max_length=100, blank=True, null=True, help_text="Payment transaction or UPI reference ID")
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='CONFIRMED')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -440,5 +460,28 @@ class CallSlot(models.Model):
 
     def __str__(self):
         return f"{self.date} ({self.time_slot}) - {self.get_status_display()}"
+
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+@receiver(post_delete, sender=CallBooking)
+def release_call_slot_on_booking_delete(sender, instance, **kwargs):
+    """
+    When a CallBooking is deleted (from admin, API, or shell),
+    check if any other active booking exists for the slot.
+    If not, release the CallSlot so it shows as AVAILABLE.
+    """
+    has_active = CallBooking.objects.filter(
+        booking_date=instance.booking_date,
+        time_slot=instance.time_slot,
+        status__in=['CONFIRMED', 'COMPLETED']
+    ).exists()
+    if not has_active:
+        CallSlot.objects.filter(
+            date=instance.booking_date,
+            time_slot=instance.time_slot,
+            blocked_by_owner=False
+        ).update(status='AVAILABLE')
 
 

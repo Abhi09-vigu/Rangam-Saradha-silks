@@ -33,7 +33,7 @@ def send_order_confirmation_email(order):
         'order': order,
         'items': order.items.all(),
         'site_settings': site_settings,
-        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhanasilks.com'),
+        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhasilks.com'),
     }
     
     subject = f"Thank you for your order! #{order.order_number} - Rangam Saradha Silks"
@@ -42,7 +42,7 @@ def send_order_confirmation_email(order):
         html_content = render_to_string('shop/emails/order_confirmation.html', context)
         text_content = strip_tags(html_content)
         
-        from_email = settings.DEFAULT_FROM_EMAIL or 'no-reply@rangamsaradhanasilks.com'
+        from_email = settings.DEFAULT_FROM_EMAIL or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
         to_email = [order.email]
         
         msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
@@ -87,7 +87,7 @@ def send_order_status_update_email(order, original_status):
         'status_display': order.get_order_status_display(),
         'status_message': status_message,
         'original_status_display': dict(order.STATUS_CHOICES).get(original_status, original_status),
-        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhanasilks.com'),
+        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhasilks.com'),
     }
     
     subject = f"Order #{order.order_number} Status Update: {order.get_order_status_display()} - Rangam Saradha Silks"
@@ -96,7 +96,7 @@ def send_order_status_update_email(order, original_status):
         html_content = render_to_string('shop/emails/order_status_update.html', context)
         text_content = strip_tags(html_content)
         
-        from_email = settings.DEFAULT_FROM_EMAIL or 'no-reply@rangamsaradhanasilks.com'
+        from_email = settings.DEFAULT_FROM_EMAIL or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
         to_email = [order.email]
         
         msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
@@ -140,7 +140,7 @@ def send_owner_order_notification_email(order):
         'total_gst_amount': total_gst_amount,
         'cgst_amount': cgst_amount,
         'sgst_amount': sgst_amount,
-        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhanasilks.com'),
+        'site_url': getattr(settings, 'SITE_URL', 'https://rangamsaradhasilks.com'),
     }
     
     subject = f"New Order Received: #{order.order_number} ({currency}{order.grand_total}) - Rangam Saradha Silks"
@@ -149,7 +149,7 @@ def send_owner_order_notification_email(order):
         html_content = render_to_string('shop/emails/admin_order_notification.html', context)
         text_content = strip_tags(html_content)
         
-        from_email = settings.DEFAULT_FROM_EMAIL or 'no-reply@rangamsaradhanasilks.com'
+        from_email = settings.DEFAULT_FROM_EMAIL or 'Rangam Saradha Silks <rangamsaradhasilks@gmail.com>'
         to_email = [admin_recipient]
         
         msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)

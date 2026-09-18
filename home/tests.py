@@ -379,6 +379,12 @@ class PageSEOAndStructuredDataTest(TestCase):
         self.assertIn('"name": "About Us"', content)
 
 
+@override_settings(
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+)
 class PopupManagementTests(TestCase):
     """
     Tests for the Promotional Popup Management System.
@@ -387,12 +393,16 @@ class PopupManagementTests(TestCase):
     def setUp(self):
         from home.models import Popup, WebsiteSetting, ContactInfo
         from django.utils import timezone
-        WebsiteSetting.objects.create(website_name="Rangam Saradha Silks")
+        from django.contrib.auth import get_user_model
+        WebsiteSetting.objects.create(website_name="Rangam Saradha Silks", call_booking_fee=50.00)
         ContactInfo.objects.create(
             phone="+91 98765 43210",
             email="contact@rangamsaradhasilks.com",
             address="123 Silk Street, Kanchipuram, Tamil Nadu",
         )
+        User = get_user_model()
+        self.user = User.objects.create_user(username='test_caller_popup', email='popup@example.com', password='password123', phone_number='+919876543210')
+        self.client.force_login(self.user)
 
     def test_popup_priority_and_context_processor(self):
         from home.models import Popup
@@ -494,6 +504,12 @@ class PopupManagementTests(TestCase):
         booking = CallBooking.objects.get(booking_reference=data['booking_reference'])
         self.assertEqual(booking.full_name, 'Meenakshi Sundaram')
         self.assertEqual(booking.saree_preference, 'Bridal Kanchipuram Pure Zari')
+        self.assertEqual(float(booking.fee_amount), 50.00)
+        self.assertEqual(booking.payment_status, 'PAID')
+        self.assertEqual(booking.payment_method, 'UPI')
+        self.assertTrue(booking.payment_reference.startswith('TXN-CALL-'))
+        self.assertEqual(data['fee_amount'], 50.0)
+        self.assertEqual(data['payment_status'], 'PAID')
         self.assertIsNone(booking.product)
 
         # 2. Duplicate booking within 5 minutes should return friendly message

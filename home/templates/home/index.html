@@ -399,6 +399,28 @@ collections. Explore our latest collections online.{% endblock %}
                 </a>
             </div>
             {% endfor %}
+            {# Duplicate loop to ensure continuous infinite horizontal scroll on all displays #}
+            {% for cat in categories %}
+            <div class="cat-showcase-item" aria-hidden="true">
+                <a href="{{ cat.get_absolute_url }}" class="cat-showcase-card" tabindex="-1">
+                    <div class="cat-circle-frame">
+                        {% if cat.image %}
+                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="cat-circle-img" loading="lazy"
+                            onerror="this.onerror=null; this.src='/static/images/categories/{{ cat.slug }}.jpg';">
+                        {% else %}
+                        <img src="{% static 'images/logo.jpg' %}" alt="{{ cat.name }}" class="cat-circle-img"
+                            loading="lazy">
+                        {% endif %}
+                    </div>
+                    <h3 class="cat-card-title">{{ cat.name }}</h3>
+                    <div class="cat-card-divider">
+                        <span class="divider-line"></span>
+                        <span class="divider-diamond">❖</span>
+                        <span class="divider-line"></span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
 
         <button type="button" class="cat-nav-arrow cat-nav-next" id="catSliderNext" aria-label="Next categories">
@@ -918,6 +940,25 @@ collections. Explore our latest collections online.{% endblock %}
                     </a>
                 </div>
                 {% endfor %}
+                {# Duplicate loop for seamless infinite scrolling #}
+                {% for product in new_arrivals %}
+                <div class="rss-new-arrivals-card" aria-hidden="true">
+                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none" tabindex="-1">
+                        <div class="rss-new-arrivals-img-wrap">
+                            {% if product.images.all %}
+                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="rss-new-arrivals-img" loading="lazy">
+                            {% else %}
+                            <img src="{% static 'images/categories/silk-sarees.jpg' %}" alt="{{ product.name }}" class="rss-new-arrivals-img" loading="lazy">
+                            {% endif %}
+                            <button type="button" class="rss-new-arrivals-wishlist-btn wishlist-btn" data-product-id="{{ product.id }}" title="Add to Wishlist" aria-label="Add to Wishlist" tabindex="-1">
+                                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
+                            </button>
+                        </div>
+                        <h3 class="rss-new-arrivals-name">{{ product.name }}</h3>
+                        <div class="rss-new-arrivals-price">&#8377;{{ product.price|floatformat:0|intcomma }}</div>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
 
             <button class="rss-new-arrivals-nav-btn next" id="newArrivalsNext" aria-label="Next Products">
@@ -926,22 +967,6 @@ collections. Explore our latest collections online.{% endblock %}
         </div>
     </div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var track = document.getElementById('newArrivalsTrack');
-    var prevBtn = document.getElementById('newArrivalsPrev');
-    var nextBtn = document.getElementById('newArrivalsNext');
-    if (track && prevBtn && nextBtn) {
-        prevBtn.addEventListener('click', function() {
-            track.scrollBy({ left: -260, behavior: 'smooth' });
-        });
-        nextBtn.addEventListener('click', function() {
-            track.scrollBy({ left: 260, behavior: 'smooth' });
-        });
-    }
-});
-</script>
 {% endif %}
 
 <!-- Bridal Collection Showcase (Full-Width Edge-to-Edge with Native Typography & Interactive CTA) -->
@@ -1358,195 +1383,160 @@ function handleNewsletterSubmit(form) {
 
 {% block extra_js %}
 <script>
-    class MarqueeCarousel {
-        constructor({ container, track, prevBtn, nextBtn, direction = 'ltr', baseSpeed = 0.7 }) {
-            this.container = typeof container === 'string' ? document.querySelector(container) : container;
-            this.track = typeof track === 'string' ? document.querySelector(track) : track;
-            this.prevBtn = typeof prevBtn === 'string' ? document.querySelector(prevBtn) : prevBtn;
-            this.nextBtn = typeof nextBtn === 'string' ? document.querySelector(nextBtn) : nextBtn;
+    function setupContinuousScroller({
+        trackId,
+        prevBtnId,
+        nextBtnId,
+        speed = 0.65,
+        stepAmount = 280
+    }) {
+        const track = document.getElementById(trackId);
+        if (!track) return;
+        const prevBtn = prevBtnId ? document.getElementById(prevBtnId) : null;
+        const nextBtn = nextBtnId ? document.getElementById(nextBtnId) : null;
 
-            if (!this.container || !this.track) return;
+        let isPaused = false;
+        let isDragging = false;
+        let startX = 0;
+        let scrollStart = 0;
+        let hasMoved = false;
+        let resumeTimer = null;
+        let animId = null;
 
-            this.direction = direction; // 'ltr' (+1) or 'rtl' (-1)
-            this.baseSpeed = baseSpeed;
-            this.currentX = 0;
-            this.targetX = 0;
-            this.isHovered = false;
-            this.isDragging = false;
-            this.startX = 0;
-            this.dragStartX = 0;
-            this.singleSetWidth = 0;
-            this.cardStep = 300;
-            this.animationFrameId = null;
+        const pauseFor = (ms = 2200) => {
+            isPaused = true;
+            clearTimeout(resumeTimer);
+            resumeTimer = setTimeout(() => {
+                isPaused = false;
+            }, ms);
+        };
 
-            this.init();
-        }
-
-        init() {
-            // Mark track as JS active to override static CSS keyframe animations
-            this.track.classList.add('js-marquee-active');
-
-            this.calculateSizes();
-
-            // Initial positioning for infinite seamless looping
-            if (this.direction === 'ltr') {
-                this.currentX = -this.singleSetWidth;
-                this.targetX = -this.singleSetWidth;
-            } else {
-                this.currentX = 0;
-                this.targetX = 0;
-            }
-            this.updateTransform();
-
-            this.bindEvents();
-            this.startLoop();
-        }
-
-        calculateSizes() {
-            const items = this.track.querySelectorAll('.product-marquee-item');
-            if (!items.length) return;
-
-            const totalItems = items.length;
-            const itemsPerSet = Math.max(1, Math.floor(totalItems / 3));
-
-            if (items[itemsPerSet] && items[0]) {
-                this.singleSetWidth = items[itemsPerSet].offsetLeft - items[0].offsetLeft;
-            } else {
-                let totalW = 0;
-                for (let i = 0; i < itemsPerSet; i++) {
-                    const style = window.getComputedStyle(items[i]);
-                    totalW += items[i].offsetWidth + parseFloat(style.marginRight || 0);
+        const checkInfiniteLoop = () => {
+            const half = track.scrollWidth / 2;
+            if (half > 20) {
+                if (track.scrollLeft >= half) {
+                    track.scrollLeft -= half;
+                } else if (track.scrollLeft <= 0) {
+                    track.scrollLeft += half;
                 }
-                this.singleSetWidth = totalW;
             }
+        };
 
-            if (items[1] && items[0]) {
-                this.cardStep = items[1].offsetLeft - items[0].offsetLeft;
-            } else if (items[0]) {
-                const style = window.getComputedStyle(items[0]);
-                this.cardStep = items[0].offsetWidth + parseFloat(style.marginRight || 0);
+        // Continuous silky smooth auto-scroll
+        const tick = () => {
+            if (!isPaused && !isDragging) {
+                track.scrollLeft += speed;
+                checkInfiniteLoop();
             }
-        }
+            animId = requestAnimationFrame(tick);
+        };
+        animId = requestAnimationFrame(tick);
 
-        bindEvents() {
-            const wrapper = this.container.closest('.product-marquee-wrapper') || this.container;
-            const hoverElements = [wrapper, this.container, this.prevBtn, this.nextBtn].filter(Boolean);
-            hoverElements.forEach(el => {
-                el.addEventListener('mouseenter', () => { this.isHovered = true; });
-                el.addEventListener('mouseleave', () => { this.isHovered = false; });
+        // Hover pause
+        track.addEventListener('mouseenter', () => { isPaused = true; });
+        track.addEventListener('mouseleave', () => {
+            if (!isDragging) isPaused = false;
+        });
+
+        // Touch swipe handling
+        track.addEventListener('touchstart', () => {
+            isPaused = true;
+            clearTimeout(resumeTimer);
+        }, { passive: true });
+        track.addEventListener('touchend', () => {
+            pauseFor(1600);
+        }, { passive: true });
+
+        // Mouse Drag-to-Scroll
+        track.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            isDragging = true;
+            hasMoved = false;
+            startX = e.pageX - track.offsetLeft;
+            scrollStart = track.scrollLeft;
+            track.classList.add('is-dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const x = e.pageX - track.offsetLeft;
+            const dist = x - startX;
+            if (Math.abs(dist) > 4) {
+                hasMoved = true;
+            }
+            track.scrollLeft = scrollStart - dist;
+            checkInfiniteLoop();
+        });
+
+        const endDrag = () => {
+            if (isDragging) {
+                isDragging = false;
+                track.classList.remove('is-dragging');
+                pauseFor(1400);
+            }
+        };
+        window.addEventListener('mouseup', endDrag);
+
+        // Prevent clicking inside cards while dragging
+        track.addEventListener('click', (e) => {
+            if (hasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                hasMoved = false;
+            }
+        }, true);
+
+        // Horizontal mouse wheel scrolling
+        track.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                track.scrollLeft += e.deltaY;
+                checkInfiniteLoop();
+                e.preventDefault();
+                pauseFor(1500);
+            }
+        }, { passive: false });
+
+        // Chevron Prev / Next buttons
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                pauseFor(2500);
+                track.scrollBy({ left: -stepAmount, behavior: 'smooth' });
+                setTimeout(checkInfiniteLoop, 350);
             });
+            prevBtn.addEventListener('mouseenter', () => { isPaused = true; });
+            prevBtn.addEventListener('mouseleave', () => { isPaused = false; });
+        }
 
-            if (this.prevBtn) {
-                this.prevBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.step('prev');
-                });
-            }
-
-            if (this.nextBtn) {
-                this.nextBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.step('next');
-                });
-            }
-
-            // Mobile Touch Drag Support
-            this.container.addEventListener('touchstart', (e) => {
-                this.isHovered = true;
-                this.isDragging = true;
-                this.startX = e.touches[0].clientX;
-                this.dragStartX = this.currentX;
-            }, { passive: true });
-
-            this.container.addEventListener('touchmove', (e) => {
-                if (!this.isDragging) return;
-                const diff = e.touches[0].clientX - this.startX;
-                this.currentX = this.dragStartX + diff;
-                this.targetX = this.currentX;
-                this.normalizeBounds();
-                this.updateTransform();
-            }, { passive: true });
-
-            const endTouch = () => {
-                if (this.isDragging) {
-                    this.isDragging = false;
-                    setTimeout(() => { this.isHovered = false; }, 800);
-                }
-            };
-            this.container.addEventListener('touchend', endTouch, { passive: true });
-            this.container.addEventListener('touchcancel', endTouch, { passive: true });
-
-            window.addEventListener('resize', () => {
-                this.calculateSizes();
-                this.normalizeBounds();
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                pauseFor(2500);
+                track.scrollBy({ left: stepAmount, behavior: 'smooth' });
+                setTimeout(checkInfiniteLoop, 350);
             });
-        }
-
-        step(action) {
-            const stepAmount = action === 'next' ? -this.cardStep : this.cardStep;
-            this.targetX += stepAmount;
-        }
-
-        normalizeBounds() {
-            if (!this.singleSetWidth) return;
-
-            while (this.currentX > 0) {
-                this.currentX -= this.singleSetWidth;
-                this.targetX -= this.singleSetWidth;
-            }
-            while (this.currentX < -this.singleSetWidth) {
-                this.currentX += this.singleSetWidth;
-                this.targetX += this.singleSetWidth;
-            }
-        }
-
-        updateTransform() {
-            this.track.style.transform = `translate3d(${this.currentX.toFixed(2)}px, 0, 0)`;
-        }
-
-        startLoop() {
-            const tick = () => {
-                if (!this.isDragging) {
-                    if (!this.isHovered) {
-                        const autoDelta = this.direction === 'ltr' ? this.baseSpeed : -this.baseSpeed;
-                        this.targetX += autoDelta;
-                    }
-
-                    const diff = this.targetX - this.currentX;
-                    if (Math.abs(diff) > 0.05) {
-                        this.currentX += diff * 0.14;
-                    } else {
-                        this.currentX = this.targetX;
-                    }
-
-                    this.normalizeBounds();
-                    this.updateTransform();
-                }
-                this.animationFrameId = requestAnimationFrame(tick);
-            };
-            this.animationFrameId = requestAnimationFrame(tick);
+            nextBtn.addEventListener('mouseenter', () => { isPaused = true; });
+            nextBtn.addEventListener('mouseleave', () => { isPaused = false; });
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Initialize New Arrivals Carousel (LTR)
-        new MarqueeCarousel({
-            container: '#newArrivalsContainer',
-            track: '#newArrivalsTrack',
-            prevBtn: '#newArrivalsPrev',
-            nextBtn: '#newArrivalsNext',
-            direction: 'ltr',
-            baseSpeed: 0.7
+        // Initialize Categories Showcase Continuous Scroller
+        setupContinuousScroller({
+            trackId: 'catShowcaseTrack',
+            prevBtnId: 'catSliderPrev',
+            nextBtnId: 'catSliderNext',
+            speed: 0.6,
+            stepAmount: 320
         });
 
-        // Initialize Best Sellers Carousel (RTL)
-        new MarqueeCarousel({
-            container: '#bestSellersContainer',
-            track: '#bestSellersTrack',
-            prevBtn: '#bestSellersPrev',
-            nextBtn: '#bestSellersNext',
-            direction: 'rtl',
-            baseSpeed: 0.7
+        // Initialize New Arrivals Continuous Scroller
+        setupContinuousScroller({
+            trackId: 'newArrivalsTrack',
+            prevBtnId: 'newArrivalsPrev',
+            nextBtnId: 'newArrivalsNext',
+            speed: 0.7,
+            stepAmount: 260
         });
     });
 
@@ -1604,26 +1594,6 @@ function handleNewsletterSubmit(form) {
                 });
             });
         }
-
-        // Traditional Saree Collections Showcase Slider Controls
-        const catSliderPrev = document.getElementById("catSliderPrev");
-        const catSliderNext = document.getElementById("catSliderNext");
-        const catTrack = document.getElementById("catShowcaseTrack");
-
-        if (catTrack) {
-            const scrollStep = 320;
-            if (catSliderPrev) {
-                catSliderPrev.addEventListener("click", function () {
-                    catTrack.scrollBy({ left: -scrollStep, behavior: "smooth" });
-                });
-            }
-            if (catSliderNext) {
-                catSliderNext.addEventListener("click", function () {
-                    catTrack.scrollBy({ left: scrollStep, behavior: "smooth" });
-                });
-            }
-        }
-
         // Featured Saree Collections Mobile Side-Scroll Slider Controls
         const featNavPrev = document.getElementById("featuredNavPrev");
         const featNavNext = document.getElementById("featuredNavNext");

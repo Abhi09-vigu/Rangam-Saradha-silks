@@ -21,6 +21,18 @@
                 <div id="floatBookingAlert" class="alert d-none py-2 px-3 fs-8 mb-3" role="alert"></div>
 
                 {% if user.is_authenticated %}
+                <!-- Consultation Fee Banner -->
+                <div class="d-flex align-items-center justify-content-between p-2.5 px-3 rounded-3 mb-3 shadow-none" style="background: rgba(175, 4, 70, 0.05); border: 1px dashed var(--primary, #AF0446);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-primary fs-5"></i>
+                        <div>
+                            <strong class="fs-8 text-dark d-block">Consultation Fee: ₹50</strong>
+                            <small class="text-muted" style="font-size: 0.76rem;">100% Adjustable against your saree order</small>
+                        </div>
+                    </div>
+                    <span class="badge rounded-pill px-2.5 py-1 fs-8 fw-bold" style="background-color: var(--primary, #AF0446); color: #fff;">₹50 PAID</span>
+                </div>
+
                 <!-- Booking Form -->
                 <form id="floatBookCallForm" action="/api/popup-book-call/" method="POST" onsubmit="return handleFloatBookCallSubmit(event);" novalidate>
                     {% csrf_token %}
@@ -43,23 +55,40 @@
                         <div class="col-sm-6">
                             <label for="fbcSlot" class="form-label fs-8 fw-semibold text-dark mb-1">Time Slot <span class="text-danger">*</span></label>
                             <select class="form-select" id="fbcSlot" name="time_slot" required style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;">
-                                <option value="" disabled selected>Select a slot</option>
-                                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                                <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                                <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                                <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
-                                <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                                <option value="" disabled selected>Select an available slot</option>
                             </select>
                         </div>
                         <div class="col-12">
                             <label for="fbcSaree" class="form-label fs-8 fw-semibold text-dark mb-1">Saree or Style of Interest <span class="text-muted fw-normal">(Optional)</span></label>
                             <input type="text" class="form-control" id="fbcSaree" name="saree_preference" placeholder="e.g. Bridal Kanchipuram, Pure Zari, Soft Silk" style="height: 46px; border-radius: 10px; border: 1.5px solid #dcdfe4;">
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fs-8 fw-semibold text-dark mb-1 d-flex justify-content-between">
+                                <span>Payment Method</span>
+                                <span class="text-success fw-normal fs-8"><i class="bi bi-shield-check"></i> Instant Online Payment</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="fbc_payment_method" id="fbc_pay_upi" value="UPI" checked>
+                                    <label class="btn btn-outline-secondary w-100 py-2 px-2 text-start rounded-3 fs-8 fw-medium shadow-none" for="fbc_pay_upi">
+                                        <div class="fw-bold text-dark"><i class="bi bi-qr-code text-primary me-1"></i>UPI Pay</div>
+                                        <small class="text-muted" style="font-size: 0.72rem;">GPay / PhonePe</small>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="fbc_payment_method" id="fbc_pay_card" value="CARD">
+                                    <label class="btn btn-outline-secondary w-100 py-2 px-2 text-start rounded-3 fs-8 fw-medium shadow-none" for="fbc_pay_card">
+                                        <div class="fw-bold text-dark"><i class="bi bi-credit-card text-primary me-1"></i>Card / NetBank</div>
+                                        <small class="text-muted" style="font-size: 0.72rem;">Debit / Credit</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button type="button" onclick="handleFloatBookCallSubmit(event)" class="btn w-100 mt-4 text-white fw-semibold py-2.5 rounded-pill shadow-sm" id="fbcSubmitBtn" style="background: linear-gradient(135deg, #AF0446 0%, #8c0338 100%); font-size: 0.95rem; letter-spacing: 0.3px;">
-                        <span class="fbc-btn-text"><i class="bi bi-calendar-check me-2"></i>Schedule Video Call</span>
-                        <span class="fbc-btn-spinner d-none"><span class="spinner-border spinner-border-sm me-2"></span>Scheduling...</span>
+                    <button type="button" onclick="handleFloatBookCallSubmit(event)" class="btn w-100 mt-4 text-white fw-semibold py-2.5 rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="fbcSubmitBtn" style="background: linear-gradient(135deg, #AF0446 0%, #8c0338 100%); font-size: 0.95rem; letter-spacing: 0.3px;">
+                        <span class="fbc-btn-text"><i class="bi bi-lock-fill me-1"></i>Pay ₹50 & Schedule Video Call</span>
+                        <span class="fbc-btn-spinner d-none"><span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...</span>
                     </button>
                 </form>
 
@@ -70,11 +99,15 @@
                     </div>
                     <h4 class="font-heading fw-bold mb-2">Video Call Scheduled!</h4>
                     <p class="text-muted fs-7 mb-3" id="fbcSuccessMsg">
-                        Thank you! Our saree expert will connect with you on your WhatsApp / phone number for your live video drape session.
+                        Thank you! Your ₹50 consultation fee has been paid successfully. Our saree expert will connect with you for your live video drape session.
                     </p>
-                    <div class="p-3 bg-light rounded-3 border mb-4">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
                         <small class="text-uppercase text-muted d-block fw-semibold" style="letter-spacing: 1px; font-size: 0.72rem;">Booking Reference</small>
                         <span class="fw-bold fs-5 text-dark" id="fbcSuccessRef">#RS-CALL</span>
+                        <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center fs-8">
+                            <span class="text-muted">Consultation Fee:</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">₹50 PAID</span>
+                        </div>
                     </div>
                     <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold" data-bs-dismiss="modal">Done</button>
                 </div>
@@ -127,28 +160,39 @@
             fbcSlotSelect.disabled = false;
 
             let hasAvailable = false;
+            let totalOptions = 0;
             if (data.slots && data.slots.length > 0) {
                 data.slots.forEach(s => {
+                    // 1. If time has crossed: remove completely (do NOT show in dropdown)
+                    if (s.status === 'TIME_PASSED') {
+                        return;
+                    }
+
                     const opt = document.createElement('option');
                     opt.value = s.time_slot;
-                    if (s.is_selectable) {
+                    totalOptions++;
+
+                    // 2. If user booked or owner blocked: show as Blocked (disabled)
+                    if (s.status === 'BOOKED' || s.status === 'BLOCKED') {
+                        opt.disabled = true;
+                        opt.textContent = `${s.time_slot} (Blocked)`;
+                        opt.style.color = '#dc3545';
+                        opt.style.backgroundColor = '#f8d7da';
+                        fbcSlotSelect.appendChild(opt);
+                    } else if (s.is_selectable) {
+                        // 3. Available upcoming slot
                         hasAvailable = true;
                         opt.textContent = `${s.time_slot} (Available)`;
                         if (s.time_slot === previousVal) {
                             opt.selected = true;
                         }
-                    } else {
-                        opt.disabled = true;
-                        opt.textContent = `${s.time_slot} — (${s.label || 'Already booked'})`;
-                        opt.style.color = '#888';
-                        opt.style.backgroundColor = '#f1f2f4';
+                        fbcSlotSelect.appendChild(opt);
                     }
-                    fbcSlotSelect.appendChild(opt);
                 });
             }
 
-            if (!hasAvailable) {
-                fbcSlotSelect.innerHTML = '<option value="" disabled selected>All slots booked on this date — Please pick another date</option>';
+            if (!hasAvailable && totalOptions === 0) {
+                fbcSlotSelect.innerHTML = '<option value="" disabled selected>No slots available for this date — Please select another date</option>';
             }
         } catch (err) {
             console.error('Failed to load slots:', err);
@@ -277,6 +321,8 @@
             const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
             const csrfVal = csrfInput ? csrfInput.value : (typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '');
 
+            const payMethod = form.querySelector('input[name="fbc_payment_method"]:checked')?.value || 'UPI';
+
             const res = await fetch('/api/popup-book-call/', {
                 method: 'POST',
                 headers: {
@@ -288,7 +334,8 @@
                     phone_number: cleanPhone,
                     booking_date: date,
                     time_slot: slot,
-                    saree_preference: saree
+                    saree_preference: saree,
+                    payment_method: payMethod
                 })
             });
 

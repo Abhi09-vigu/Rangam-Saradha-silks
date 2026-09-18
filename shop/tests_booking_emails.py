@@ -14,6 +14,11 @@ from shop.models import Product, CallBooking, CallSlot
 class CallBookingEmailTests(TestCase):
     def setUp(self):
         self.client = Client(HTTP_HOST='localhost')
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.user = User.objects.create_user(username='test_caller', email='buyer@example.com', password='password123', phone_number='+919876543210')
+        self.client.force_login(self.user)
+
         self.product = Product.objects.create(
             name="Kanchipuram Pure Silk Saree",
             slug="kanchipuram-pure-silk-saree",
@@ -31,6 +36,7 @@ class CallBookingEmailTests(TestCase):
             'phone_number': '+919876543210',
             'booking_date': self.booking_date,
             'time_slot': '10:00 AM - 11:00 AM',
+            'payment_method': 'UPI',
             'notes': 'Show pink saree zari live'
         }
         response = self.client.post(self.book_url, post_data, follow=True)
@@ -39,7 +45,11 @@ class CallBookingEmailTests(TestCase):
         booking = CallBooking.objects.filter(product=self.product, phone_number='+919876543210').first()
         self.assertIsNotNone(booking)
         self.assertEqual(booking.full_name, 'Priyanaka Verma')
-        self.assertEqual(booking.status, 'PENDING')
+        self.assertEqual(booking.status, 'CONFIRMED')
+        self.assertEqual(float(booking.fee_amount), 50.00)
+        self.assertEqual(booking.payment_status, 'PAID')
+        self.assertEqual(booking.payment_method, 'UPI')
+        self.assertTrue(booking.payment_reference.startswith('TXN-CALL-'))
         self.assertTrue(booking.booking_reference.startswith('BK-'))
 
     def test_2_customer_confirmation_email(self):
@@ -75,7 +85,8 @@ class CallBookingEmailTests(TestCase):
         self.client.post(self.book_url, post_data)
 
         owner_email = [m for m in mail.outbox if 'rangamsaradhasilks@gmail.com' in m.to][0]
-        self.assertEqual(owner_email.subject, 'New Call Booking - Kanchipuram Pure Silk Saree')
+        self.assertIn('New Call Booking - Kanchipuram Pure Silk Saree', owner_email.subject)
+        self.assertIn('Fee:', owner_email.subject)
         owner_text = owner_email.body
         self.assertIn('New customer call booking received', owner_text)
         self.assertIn('Ramesh Kumar', owner_text)
@@ -84,7 +95,8 @@ class CallBookingEmailTests(TestCase):
         self.assertIn('Kanchipuram Pure Silk Saree', owner_text)
         self.assertIn('KPS-101', owner_text)
         self.assertIn('Checking bridal silk options', owner_text)
-        self.assertIn('Customer has registered for a call regarding this particular saree.', owner_text)
+        self.assertIn('Customer has paid the booking fee', owner_text)
+        self.assertIn('Consultation Fee: ₹50.00', owner_text)
 
     def test_4_booking_remains_saved_if_email_fails(self):
         post_data = {
@@ -146,7 +158,8 @@ class CallBookingEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         owner_email = mail.outbox[0]
         self.assertIn('rangamsaradhasilks@gmail.com', owner_email.to)
-        self.assertEqual(owner_email.subject, 'New Call Booking - Kanchipuram Pure Silk Saree')
+        self.assertIn('New Call Booking - Kanchipuram Pure Silk Saree', owner_email.subject)
+        self.assertIn('Fee:', owner_email.subject)
         self.assertIn('Anand Rao', owner_email.body)
 
     def test_7_owner_blocked_slot_cannot_be_booked(self):
@@ -256,7 +269,7 @@ class CallBookingEmailTests(TestCase):
             phone_number='+919876566666',
             booking_date=self.booking_date,
             time_slot='11:00 AM - 12:00 PM',
-            status='PENDING'
+            status='CONFIRMED'
         )
 
         response = self.client.get(f'/shop/api/slot-availability/?date={self.booking_date}')

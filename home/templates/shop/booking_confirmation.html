@@ -64,6 +64,24 @@
                                 <span class="text-muted">Email:</span>
                                 <div class="fw-semibold text-dark">{{ booking.email }}</div>
                             </div>
+                            <div class="col-sm-6 mt-3 pt-2 border-top">
+                                <span class="text-muted">Consultation Fee:</span>
+                                <div class="fw-bold fs-6 text-primary">{{ site_settings.currency|default:"₹" }}{{ booking.fee_amount|floatformat:2 }}</div>
+                            </div>
+                            <div class="col-sm-6 mt-3 pt-2 border-top">
+                                <span class="text-muted">Payment Status:</span>
+                                <div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fs-8 fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-1"></i>PAID ({{ booking.get_payment_method_display }})
+                                    </span>
+                                </div>
+                            </div>
+                            {% if booking.payment_reference %}
+                            <div class="col-12 mt-2">
+                                <span class="text-muted fs-8">Payment Reference / Txn ID:</span>
+                                <div class="fw-semibold text-secondary font-monospace fs-8">{{ booking.payment_reference }}</div>
+                            </div>
+                            {% endif %}
                             {% if booking.notes %}
                             <div class="col-12 mt-2">
                                 <span class="text-muted">Notes:</span>

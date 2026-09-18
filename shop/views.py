@@ -641,46 +641,74 @@ def compare_page(request):
     return render(request, 'shop/compare.html', context)
 
 
+def parse_slot_start_time(slot_str):
+    """
+    Parses start time from a slot string like '10:00 AM - 11:00 AM' or '02:00 PM - 03:00 PM'.
+    Returns datetime.time object or None.
+    """
+    if not slot_str:
+        return None
+    try:
+        start_part = slot_str.split('-')[0].strip()
+        return datetime.datetime.strptime(start_part, '%I:%M %p').time()
+    except Exception:
+        return None
+
+
 def get_slots_status_for_date(target_date):
     """
     Returns list of dicts for each standard time slot for target_date:
     [
         {
             'time_slot': '10:00 AM - 11:00 AM',
-            'status': 'AVAILABLE' | 'BOOKED' | 'BLOCKED',
+            'status': 'AVAILABLE' | 'BOOKED' | 'BLOCKED' | 'TIME_PASSED',
             'is_selectable': True | False,
-            'label': 'Available' | 'Already booked' | 'Owner unavailable',
+            'label': 'Available' | 'Already booked' | 'Owner unavailable' | 'Time passed',
         }, ...
     ]
     """
-    today = timezone.now().date()
-    is_past = target_date < today
+    now_local = timezone.localtime()
+    today = now_local.date()
+    current_time = now_local.time()
+    is_past_date = target_date < today
+    is_today = target_date == today
 
+    # Blocked by owner
     blocked_slots = set(
         CallSlot.objects.filter(date=target_date).filter(
             Q(blocked_by_owner=True) | Q(status='BLOCKED')
         ).values_list('time_slot', flat=True)
     )
 
+    # Booked slots are strictly determined by active confirmed or completed bookings
     booked_slots = set(
         CallBooking.objects.filter(
             booking_date=target_date,
             status__in=['CONFIRMED', 'COMPLETED']
         ).values_list('time_slot', flat=True)
-    ) | set(
-        CallSlot.objects.filter(
-            date=target_date,
-            status='BOOKED'
-        ).values_list('time_slot', flat=True)
     )
+
+    # Auto-heal any stale CallSlot where status is BOOKED but booking was deleted or cancelled
+    CallSlot.objects.filter(
+        date=target_date,
+        status='BOOKED',
+        blocked_by_owner=False
+    ).exclude(time_slot__in=booked_slots).update(status='AVAILABLE')
 
     result = []
     valid_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
     for slot_str in valid_slots:
-        if is_past:
-            status = 'BLOCKED'
+        slot_start = parse_slot_start_time(slot_str)
+        is_slot_passed = False
+        if is_past_date:
+            is_slot_passed = True
+        elif is_today and slot_start and slot_start <= current_time:
+            is_slot_passed = True
+
+        if is_slot_passed:
+            status = 'TIME_PASSED'
             is_selectable = False
-            label = 'Past date unavailable'
+            label = 'Time passed'
         elif slot_str in blocked_slots:
             status = 'BLOCKED'
             is_selectable = False
@@ -763,6 +791,7 @@ def send_booking_notification_email(booking):
 
     # 1. CUSTOMER CONFIRMATION EMAIL
     product_label = booking.product.name if booking.product else (booking.saree_preference or "General Saree Selection")
+    fee_display = f"₹{booking.fee_amount:.2f}" if booking.fee_amount else "₹50.00"
 
     if booking.email and str(booking.email).strip():
         try:
@@ -770,12 +799,15 @@ def send_booking_notification_email(booking):
             customer_text = (
                 f"Dear {booking.full_name},\n\n"
                 f"Thank you for booking a call with Rangam Saradha Silks.\n\n"
-                f"Your call booking has been successfully received.\n\n"
+                f"Your call booking and consultation fee payment have been successfully received.\n\n"
                 f"Booking Details:\n\n"
                 f"Booking ID: {booking.booking_reference}\n"
                 f"Product: {product_label}\n"
                 f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"
                 f"Time Slot: {booking.time_slot}\n"
+                f"Consultation Fee Paid: {fee_display} (Status: {booking.payment_status})\n"
+                f"Payment Method: {booking.get_payment_method_display()}\n"
+                f"Transaction Reference: {booking.payment_reference or 'N/A'}\n"
                 f"Phone: {booking.phone_number}\n"
                 f"Email: {booking.email}\n\n"
                 f"Our team will reach out to you during your selected time slot.\n\n"
@@ -800,7 +832,7 @@ def send_booking_notification_email(booking):
 
     # 2. ADMIN / OWNER NOTIFICATION EMAIL
     try:
-        owner_subject = f"New Call Booking - {product_label}"
+        owner_subject = f"New Call Booking - {product_label} (Fee: {fee_display} Paid)"
         created_str = booking.created_at.strftime('%Y-%m-%d %H:%M:%S') if booking.created_at else datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         sku_str = (booking.product.sku if booking.product.sku else str(booking.product.id)) if booking.product else "N/A"
         notes_str = booking.notes if booking.notes else "None"
@@ -824,11 +856,14 @@ def send_booking_notification_email(booking):
             f"Price: {price_str}\n\n"
             f"Date: {booking.booking_date.strftime('%Y-%m-%d')}\n"
             f"Time Slot: {booking.time_slot}\n\n"
+            f"Consultation Fee: {fee_display} (Status: {booking.payment_status})\n"
+            f"Payment Method: {booking.get_payment_method_display()}\n"
+            f"Transaction ID: {booking.payment_reference or 'N/A'}\n\n"
             f"Message:\n"
             f"{notes_str}\n\n"
-            f"Status: {booking.get_status_display()}\n"
+            f"Booking Status: {booking.get_status_display()}\n"
             f"Created At: {created_str}\n\n"
-            f"Note: Customer has registered for a call regarding this particular saree."
+            f"Note: Customer has paid the booking fee of {fee_display} for this video consultation."
         )
 
         owner_html = render_to_string('shop/emails/admin_call_booking_notification.html', {'booking': booking})
@@ -848,8 +883,11 @@ def send_booking_notification_email(booking):
 @login_required(login_url='accounts:login')
 def book_call(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+    call_booking_fee = getattr(settings_obj, 'call_booking_fee', Decimal('50.00')) or Decimal('50.00')
     
-    today = timezone.now().date()
+    now_local = timezone.localtime()
+    today = now_local.date()
     available_dates = [today + datetime.timedelta(days=i) for i in range(0, 8)]
     valid_time_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
 
@@ -860,6 +898,9 @@ def book_call(request, slug):
         booking_date_str = request.POST.get('booking_date', '').strip()
         time_slot = request.POST.get('time_slot', '').strip()
         notes = request.POST.get('notes', '').strip()
+        payment_method = request.POST.get('payment_method', 'UPI').strip().upper()
+        if payment_method not in ['UPI', 'CARD', 'NETBANKING', 'ONLINE']:
+            payment_method = 'UPI'
 
         errors = []
         if not full_name:
@@ -877,6 +918,10 @@ def book_call(request, slug):
                 booking_date = datetime.datetime.strptime(booking_date_str, '%Y-%m-%d').date()
                 if booking_date < today:
                     errors.append("Booking date cannot be in the past.")
+                elif booking_date == today and time_slot:
+                    slot_start = parse_slot_start_time(time_slot)
+                    if slot_start and slot_start <= now_local.time():
+                        errors.append("This time slot has already passed for today. Please select an upcoming slot.")
             except ValueError:
                 errors.append("Invalid date format.")
 
@@ -910,7 +955,10 @@ def book_call(request, slug):
                 'selected_date': selected_date.strftime('%Y-%m-%d'),
                 'today': today,
                 'slots_data': slots_data,
+                'available_slots_count': sum(1 for s in slots_data if s.get('is_selectable')),
                 'form_data': request.POST,
+                'call_booking_fee': call_booking_fee,
+                'site_settings': settings_obj,
             })
 
         # Duplicate protection check (same product, phone, date, slot in last 5 mins)
@@ -926,6 +974,8 @@ def book_call(request, slug):
         if existing_booking:
             return redirect('shop:booking_confirmation', booking_ref=existing_booking.booking_reference)
 
+        txn_ref = f"TXN-CALL-{uuid.uuid4().hex[:8].upper()}"
+
         with transaction.atomic():
             booking = CallBooking.objects.create(
                 product=product,
@@ -936,6 +986,10 @@ def book_call(request, slug):
                 booking_date=booking_date,
                 time_slot=time_slot,
                 notes=notes,
+                fee_amount=call_booking_fee,
+                payment_status='PAID',
+                payment_method=payment_method,
+                payment_reference=txn_ref,
                 status='CONFIRMED',
             )
 
@@ -943,7 +997,10 @@ def book_call(request, slug):
             CallSlot.objects.update_or_create(
                 date=booking_date,
                 time_slot=time_slot,
-                defaults={'status': 'BOOKED'}
+                defaults={
+                    'status': 'BOOKED',
+                    'notes': f'Booked by {booking.full_name} ({booking.phone_number})'
+                }
             )
 
         try:
@@ -980,13 +1037,18 @@ def book_call(request, slug):
         'selected_date': selected_date.strftime('%Y-%m-%d'),
         'today': today,
         'slots_data': slots_data,
+        'available_slots_count': sum(1 for s in slots_data if s.get('is_selectable')),
         'form_data': form_data,
+        'call_booking_fee': call_booking_fee,
+        'site_settings': settings_obj,
     })
 
 
 def booking_confirmation(request, booking_ref):
     booking = get_object_or_404(CallBooking, booking_reference=booking_ref)
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
     return render(request, 'shop/booking_confirmation.html', {
         'booking': booking,
+        'site_settings': settings_obj,
     })
 

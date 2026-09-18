@@ -4088,10 +4088,23 @@ h6,
     justify-content: flex-start;
     gap: 24px;
     overflow-x: auto;
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding: 15px 4px 15px 4px;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.cat-showcase-track:active,
+.cat-showcase-track.is-dragging {
+    cursor: grabbing;
+}
+
+.cat-showcase-track.is-dragging * {
+    pointer-events: none;
+    user-select: none;
 }
 
 .cat-showcase-track::-webkit-scrollbar {
@@ -5844,11 +5857,23 @@ h6,
     display: flex;
     gap: 16px;
     overflow-x: auto;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
+    scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding: 8px 4px 14px 4px;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.rss-new-arrivals-track:active,
+.rss-new-arrivals-track.is-dragging {
+    cursor: grabbing;
+}
+
+.rss-new-arrivals-track.is-dragging * {
+    pointer-events: none;
+    user-select: none;
 }
 
 .rss-new-arrivals-track::-webkit-scrollbar {
@@ -5856,9 +5881,9 @@ h6,
 }
 
 .rss-new-arrivals-card {
-    flex: 0 0 calc((100% - 5 * 16px) / 6);
-    min-width: 175px;
-    scroll-snap-align: start;
+    flex: 0 0 240px;
+    min-width: 240px;
+    max-width: 240px;
     display: flex;
     flex-direction: column;
 }
@@ -6611,8 +6636,7 @@ h6,
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        scroll-behavior: smooth !important;
-        scroll-snap-type: x mandatory !important;
+        scroll-behavior: auto !important;
         -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none !important;
         gap: 12px !important;
@@ -6624,9 +6648,9 @@ h6,
     }
 
     .rss-new-arrivals-card {
-        flex: 0 0 155px !important;
-        min-width: 145px !important;
-        scroll-snap-align: start !important;
+        flex: 0 0 170px !important;
+        min-width: 170px !important;
+        max-width: 170px !important;
     }
 
     .rss-new-arrivals-img-wrap {
