@@ -538,9 +538,9 @@
             const btn = e.target.closest('.toggle-password-visibility');
             if (!btn) return;
             e.preventDefault();
-            const wrapper = btn.closest('.password-field-wrapper');
+            const wrapper = btn.closest('.password-field-wrapper') || btn.closest('.form-input-container') || btn.parentElement;
             if (!wrapper) return;
-            const input = wrapper.querySelector('input');
+            const input = wrapper.querySelector('input[type="password"], input[type="text"]') || wrapper.querySelector('input');
             if (!input) return;
 
             const icon = btn.querySelector('i');

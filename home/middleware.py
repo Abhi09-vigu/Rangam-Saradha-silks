@@ -78,20 +78,28 @@ class CustomMiddleware:
                 return redirect('accounts:login')
             return self.get_response(request)
 
-        # Prompt customer users without phone number (e.g. Google sign-in) to enter phone number
+        # Prompt customer users without phone number or usable password (e.g. Google sign-in) to complete profile
         if request.user.is_authenticated and not request.user.is_staff:
+            exempt_prefixes = [
+                '/accounts/complete-phone/',
+                '/accounts/set-password/',
+                '/accounts/logout/',
+                '/static/',
+                '/media/',
+                '/admin/',
+                '/api/',
+            ]
             if not getattr(request.user, 'phone_number', None):
-                exempt_prefixes = [
-                    '/accounts/complete-phone/',
-                    '/accounts/logout/',
-                    '/static/',
-                    '/media/',
-                    '/admin/',
-                    '/api/',
-                ]
                 if not any(request.path.startswith(prefix) for prefix in exempt_prefixes) and request.path not in ['/robots.txt', '/sitemap.xml', '/favicon.ico']:
                     from django.urls import reverse
                     redirect_target = reverse('accounts:complete_phone')
+                    if request.path not in ['/', '/accounts/login/', '/accounts/register/']:
+                        redirect_target += f"?next={request.path}"
+                    return redirect(redirect_target)
+            elif not request.user.has_usable_password():
+                if not any(request.path.startswith(prefix) for prefix in exempt_prefixes) and request.path not in ['/robots.txt', '/sitemap.xml', '/favicon.ico']:
+                    from django.urls import reverse
+                    redirect_target = reverse('accounts:set_password')
                     if request.path not in ['/', '/accounts/login/', '/accounts/register/']:
                         redirect_target += f"?next={request.path}"
                     return redirect(redirect_target)

@@ -3,65 +3,227 @@
 
 {% block meta_title %}Complete Your Profile - {{ site_settings.website_name }}{% endblock %}
 
+{% block extra_css %}
+<!-- Google Fonts for Luxury Editorial Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    .complete-profile-section {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 16px;
+        background: radial-gradient(circle at 50% 15%, #FFFDF9 0%, #F8F3EA 100%);
+    }
+
+    .complete-profile-card {
+        width: 100%;
+        max-width: 480px;
+        background: #FFFFFF;
+        border-radius: 26px;
+        box-shadow: 0 24px 70px rgba(114, 20, 40, 0.1), 0 6px 24px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(197, 160, 89, 0.38);
+        padding: 38px 36px 32px 36px;
+        text-align: center;
+        position: relative;
+    }
+
+    .complete-profile-icon-wrapper {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background: #FBECEF;
+        color: #8B1932;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 18px;
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        box-shadow: 0 6px 18px rgba(139, 25, 50, 0.12);
+    }
+
+    .complete-profile-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1E060D;
+        margin-bottom: 6px;
+        letter-spacing: -0.3px;
+    }
+
+    .complete-profile-subtitle {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        color: #666666;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+
+    .user-email-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #FDFBF8;
+        border: 1px solid #E5DFD6;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        color: #4A4A4A;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
+
+    .user-email-badge i {
+        color: #8B1932;
+    }
+
+    .form-field-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-field-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #333333;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-field-label .req-star {
+        color: #8B1932;
+    }
+
+    .btn-complete-submit {
+        width: 100%;
+        height: 48px;
+        background: #8B1932;
+        border: none;
+        border-radius: 50px;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(139, 25, 50, 0.28);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+
+    .btn-complete-submit:hover {
+        background: #721428;
+        box-shadow: 0 8px 24px rgba(114, 20, 40, 0.38);
+        transform: translateY(-1.5px);
+        color: #FFFFFF;
+    }
+
+    .signout-link {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        color: #71717A;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 22px;
+        transition: color 0.15s;
+    }
+
+    .signout-link:hover {
+        color: #8B1932;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 520px) {
+        .complete-profile-card {
+            padding: 30px 22px 26px 22px;
+        }
+
+        .complete-profile-title {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="section-luxury py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="card border-0 shadow-lg p-4 p-md-5 text-center" style="border-radius: 24px;">
-                    <div class="mb-3">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
-                             style="width: 72px; height: 72px; background: rgba(175, 4, 70, 0.08); color: var(--primary, #AF0446);">
-                            <i class="bi bi-phone fs-1"></i>
-                        </div>
-                    </div>
-                    <h2 class="font-heading mb-2">Complete Your Profile</h2>
-                    <p class="text-muted fs-7 mb-3">
-                        Welcome, <strong>{{ request.user.first_name|default:request.user.username }}</strong>!<br>
-                        Please enter your mobile number to continue.
-                    </p>
+<section class="complete-profile-section">
+    <div class="complete-profile-card">
+        <!-- Top Icon -->
+        <div class="complete-profile-icon-wrapper">
+            <i class="bi bi-phone"></i>
+        </div>
 
-                    {% if request.user.email %}
-                    <div class="d-inline-block mb-4">
-                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill fs-8">
-                            <i class="bi bi-envelope me-1"></i> {{ request.user.email }}
-                        </span>
-                    </div>
-                    {% endif %}
+        <!-- Title & Subtitle -->
+        <h1 class="complete-profile-title">Complete Your Profile</h1>
+        <p class="complete-profile-subtitle">
+            Welcome, <strong>{{ request.user.first_name|default:request.user.username }}</strong>!<br>
+            Please enter your mobile number to continue.
+        </p>
 
-                    <form action="{% url 'accounts:complete_phone' %}" method="POST" class="text-start">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ next_url }}">
+        {% if request.user.email %}
+        <div class="user-email-badge">
+            <i class="bi bi-envelope"></i> {{ request.user.email }}
+        </div>
+        {% endif %}
 
-                        <div class="mb-3">
-                            <label for="{{ form.phone_number.id_for_label }}" class="form-label text-dark fw-medium fs-7 mb-1">
-                                {{ form.phone_number.label }} <span class="text-danger">*</span>
-                            </label>
-                            {{ form.phone_number }}
-                            {% if form.phone_number.help_text %}
-                            <small class="form-text text-muted fs-8 mt-1 d-block" style="font-size: 0.78rem;">
-                                {{ form.phone_number.help_text }}
-                            </small>
-                            {% endif %}
-                            {% for error in form.phone_number.errors %}
-                            <div class="text-danger fs-8 mt-1 fw-medium">{{ error }}</div>
-                            {% endfor %}
-                        </div>
+        <form action="{% url 'accounts:complete_phone' %}" method="POST" id="completePhoneForm" class="text-start">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
 
-                        <button type="submit"
-                            class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">
-                            Continue
-                        </button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <a href="{% url 'accounts:logout' %}" class="text-muted fs-8 text-decoration-none">
-                            <i class="bi bi-box-arrow-left me-1"></i> Sign out and use a different account
-                        </a>
-                    </div>
-                </div>
+            <div class="form-field-group">
+                <label for="{{ form.phone_number.id_for_label }}" class="form-field-label">
+                    Mobile Number <span class="req-star">*</span>
+                </label>
+                {{ form.phone_number }}
+                {% if form.phone_number.help_text %}
+                <small class="form-text text-muted mt-1 d-block" style="font-size: 11.5px;">
+                    {{ form.phone_number.help_text }}
+                </small>
+                {% endif %}
+                {% for error in form.phone_number.errors %}
+                <div class="text-danger mt-1 fw-medium" style="font-size: 11.5px;">{{ error }}</div>
+                {% endfor %}
             </div>
+
+            <button type="submit" class="btn-complete-submit" id="submitPhoneBtn">
+                <span>Continue</span>
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </form>
+
+        <div class="text-center">
+            <a href="{% url 'accounts:logout' %}" class="signout-link">
+                <i class="bi bi-box-arrow-left"></i> Sign out and use a different account
+            </a>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("completePhoneForm");
+        if (form) {
+            form.addEventListener("submit", function () {
+                const btn = document.getElementById("submitPhoneBtn");
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving Mobile Number...`;
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

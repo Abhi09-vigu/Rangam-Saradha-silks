@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser, Address
 from phonenumber_field.formfields import PhoneNumberField
 
@@ -60,38 +61,60 @@ class CountryCodePhoneWidget(forms.Widget):
         return ''
 
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True, label="Email Address")
+    first_name = forms.CharField(
+        max_length=150, 
+        required=True, 
+        label="First Name",
+        widget=forms.TextInput(attrs={'placeholder': 'Enter first name', 'class': 'form-input-control', 'required': True})
+    )
+    last_name = forms.CharField(
+        max_length=150, 
+        required=False, 
+        label="Last Name",
+        widget=forms.TextInput(attrs={'placeholder': 'Enter last name', 'class': 'form-input-control'})
+    )
+    email = forms.EmailField(
+        required=True, 
+        label="Email Address",
+        widget=forms.EmailInput(attrs={'placeholder': 'Enter your email address', 'class': 'form-input-control', 'required': True})
+    )
     phone_number = PhoneNumberField(
         required=True, 
-        label="Phone Number", 
+        label="Mobile Number", 
         help_text="Mobile number is mandatory for order updates and verification.",
         widget=CountryCodePhoneWidget(attrs={'required': True}),
-        error_messages={'required': 'Phone number is mandatory.'}
+        error_messages={'required': 'Mobile number is mandatory.'}
+    )
+    agree_terms = forms.BooleanField(
+        required=True, 
+        error_messages={'required': 'You must agree to the Terms & Conditions and Privacy Policy.'}
     )
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'phone_number')
+        fields = ('username', 'first_name', 'last_name', 'email', 'phone_number')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            if field_name != 'phone_number':
-                field.widget.attrs['class'] = 'form-control px-3 py-2'
-            if field_name == 'username':
-                field.widget.attrs['placeholder'] = 'Choose a unique username'
-                field.label = 'Username'
-            elif field_name == 'email':
-                field.widget.attrs['placeholder'] = 'name@example.com'
-                field.label = 'Email Address'
-            elif field_name == 'phone_number':
-                field.label = 'Phone Number'
-            elif field_name == 'password1':
-                field.widget.attrs['placeholder'] = 'Create a strong password'
-                field.label = 'Password'
-            elif field_name == 'password2':
-                field.widget.attrs['placeholder'] = 'Confirm your password'
-                field.label = 'Confirm Password'
+        if 'username' in self.fields:
+            self.fields['username'].required = False
+            self.fields['username'].widget.attrs['placeholder'] = 'Choose a unique username'
+        if 'password1' in self.fields:
+            self.fields['password1'].widget.attrs['placeholder'] = 'Create a password'
+            self.fields['password1'].widget.attrs['class'] = 'form-input-control'
+            self.fields['password1'].label = 'Password'
+        if 'password2' in self.fields:
+            self.fields['password2'].widget.attrs['placeholder'] = 'Confirm your password'
+            self.fields['password2'].widget.attrs['class'] = 'form-input-control'
+            self.fields['password2'].label = 'Confirm Password'
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        if username:
+            if CustomUser.objects.filter(username__iexact=username).exists():
+                raise forms.ValidationError("A user with that username already exists.")
+            return username
+        return ''
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
@@ -104,7 +127,7 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
         if not phone_number:
-            raise forms.ValidationError("Phone number is mandatory.")
+            raise forms.ValidationError("Mobile number is mandatory.")
         
         phone_str = str(phone_number).strip()
         digits = ''.join(c for c in phone_str if c.isdigit())
@@ -129,6 +152,28 @@ class CustomUserCreationForm(UserCreationForm):
                 existing_user = CustomUser.objects.filter(phone_number__endswith=digits[-10:]).first()
             if existing_user:
                 self.add_error('phone_number', "An account already exists with this mobile number.")
+
+        username = cleaned_data.get('username')
+        email = cleaned_data.get('email')
+        first_name = cleaned_data.get('first_name', '')
+        if not username:
+            import re, uuid
+            base = ''
+            if email:
+                base = email.split('@')[0].lower()
+                base = re.sub(r'[^a-zA-Z0-9_]', '', base)
+            if not base and first_name:
+                base = re.sub(r'[^a-zA-Z0-9_]', '', first_name.lower().replace(' ', ''))
+            if not base:
+                base = 'customer'
+            candidate = base
+            while CustomUser.objects.filter(username__iexact=candidate).exists():
+                candidate = f"{base}_{uuid.uuid4().hex[:4]}"
+            cleaned_data['username'] = candidate
+            self.cleaned_data['username'] = candidate
+            if hasattr(self, '_errors') and 'username' in self._errors:
+                del self._errors['username']
+
         return cleaned_data
 
 class CustomUserChangeForm(UserChangeForm):
@@ -300,5 +345,49 @@ class CompletePhoneForm(forms.Form):
                 )
 
         return phone_number
+
+
+class SetAccountPasswordForm(forms.Form):
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input-control',
+            'placeholder': 'Create account password',
+            'required': True
+        })
+    )
+    confirm_password = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input-control',
+            'placeholder': 'Confirm your password',
+            'required': True
+        })
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password, self.user)
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match. Please re-enter.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        password = self.cleaned_data['password']
+        self.user.set_password(password)
+        if commit:
+            self.user.save(update_fields=['password'])
+        return self.user
 
 

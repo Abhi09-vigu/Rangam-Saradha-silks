@@ -1,111 +1,1094 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}Register - {{ site_settings.website_name }}{% endblock %}
+{% block meta_title %}Create Your Account - {{ site_settings.website_name }}{% endblock %}
 
 {% block extra_css %}
+<!-- Google Fonts for Luxury Editorial Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-    .btn-google {
-        background-color: #ffffff !important;
-        color: #3c4043 !important;
-        border: 1px solid #dadce0 !important;
-        box-shadow: 0 2px 6px rgba(60, 64, 67, 0.12) !important;
-        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-        letter-spacing: 0.02em;
+    /* ==========================================================
+       LUXURY SPLIT-SCREEN SIGNUP PAGE (MATCHING MOCKUP EXACTLY)
+       ========================================================== */
+    .luxury-signup-section {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px 50px 16px;
+        background: radial-gradient(circle at 50% 15%, #FFFDF9 0%, #F8F3EA 100%);
     }
 
-    .btn-google:hover {
-        background-color: #f8f9fa !important;
-        border-color: #d2e3fc !important;
-        color: #1a73e8 !important;
-        box-shadow: 0 4px 12px rgba(60, 64, 67, 0.2) !important;
+    .luxury-signup-card {
+        width: 100%;
+        max-width: 1220px;
+        background: #FAF8F5;
+        border-radius: 28px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 75px rgba(114, 20, 40, 0.12), 0 6px 24px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(197, 160, 89, 0.38);
+        position: relative;
+    }
+
+    /* Split Main Content Area */
+    .signup-split-row {
+        display: flex;
+        width: 100%;
+        min-height: 670px;
+    }
+
+    /* ----------------------------------------------------------
+       LEFT: HERITAGE VISUAL STORY PANE (SAREE PHOTO + REAL TYPOGRAPHY)
+       ---------------------------------------------------------- */
+    .signup-visual-pane {
+        flex: 0 0 46%;
+        width: 46%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 48px 44px;
+        color: #FFFFFF;
+        overflow: hidden;
+    }
+
+    .signup-visual-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('{% static "images/signup-heritage-saree.jpg" %}');
+        background-size: cover;
+        background-position: center center;
+        transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
+        z-index: 0;
+    }
+
+    .luxury-signup-card:hover .signup-visual-bg {
+        transform: scale(1.035);
+    }
+
+    /* Dramatic Vignette Overlay for Crisp Real Text Contrast */
+    .signup-visual-overlay {
+        position: absolute;
+        inset: 0;
+        background: 
+            linear-gradient(180deg, rgba(16, 4, 9, 0.72) 0%, rgba(16, 4, 9, 0.35) 35%, rgba(16, 4, 9, 0.88) 100%),
+            linear-gradient(90deg, rgba(16, 4, 9, 0.68) 0%, transparent 65%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .signup-visual-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    /* Top Heritage Brand Tag */
+    .visual-brand-tag {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .visual-brand-line {
+        width: 32px;
+        height: 1.5px;
+        background: #C5A059;
+        display: inline-block;
+    }
+
+    .visual-brand-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        color: #E5C378;
+        text-transform: uppercase;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Main Hero Typography */
+    .visual-hero-titles {
+        margin-bottom: 8px;
+    }
+
+    .visual-title-where {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 38px;
+        font-weight: 600;
+        color: #FFFFFF;
+        line-height: 1.12;
+        margin: 0;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+    }
+
+    .visual-title-meets {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 46px;
+        font-style: italic;
+        font-weight: 600;
+        color: #E8C87A;
+        line-height: 1.12;
+        margin: 0;
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+    }
+
+    .visual-subtitle-desc {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 400;
+        color: #E2D7C5;
+        line-height: 1.5;
+        margin-top: 14px;
+        max-width: 380px;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 4 Feature Highlights Stack */
+    .visual-features-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 28px 0 20px 0;
+    }
+
+    .visual-feature-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .visual-feature-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(22, 6, 12, 0.45);
+        border: 1px solid rgba(232, 200, 122, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(4px);
+    }
+
+    .visual-feature-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #FFFFFF;
+        line-height: 1.25;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Bottom Heritage Quote */
+    .visual-tradition-block {
+        display: flex;
+        flex-direction: column;
+        padding-top: 20px;
+    }
+
+    .visual-tradition-line {
+        width: 30px;
+        height: 1.5px;
+        background: #C5A059;
+        margin-bottom: 8px;
+    }
+
+    .visual-tradition-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        color: #E5DAC9;
+        line-height: 1.45;
+        text-transform: uppercase;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* ----------------------------------------------------------
+       RIGHT: SIGN-UP CONTENT AREA & MEMBER PERKS
+       ---------------------------------------------------------- */
+    .signup-content-pane {
+        flex: 0 0 54%;
+        width: 54%;
+        position: relative;
+        background: #FAF8F5;
+        padding: 36px 36px 32px 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        overflow: hidden;
+    }
+
+    /* Top Right Delicate Corner Lace Watermark */
+    .form-corner-mandala {
+        position: absolute;
+        top: 0;
+        right: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.6;
+    }
+
+    /* Center White Form Card */
+    .signup-form-card {
+        flex: 1;
+        max-width: 440px;
+        background: #FFFFFF;
+        border-radius: 22px;
+        border: 1px solid rgba(226, 217, 207, 0.75);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.035);
+        padding: 28px 28px 24px 28px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .signup-form-header {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+
+    .signup-form-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 27px;
+        font-weight: 700;
+        color: #1E060D;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.3px;
+    }
+
+    .signup-form-subtitle {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12.5px;
+        color: #71717A;
+        margin: 0;
+    }
+
+    /* Inputs and Controls */
+    .form-row-two-col {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .form-row-two-col .form-field-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .form-field-group {
+        margin-bottom: 12px;
+    }
+
+    .form-field-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #333333;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .form-field-label .req-star {
+        color: #8B1932;
+    }
+
+    .form-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: #FFFFFF;
+        border: 1px solid #E2D9CF;
+        border-radius: 9px;
+        height: 40px;
+        padding: 0 12px;
+        transition: all 0.22s ease;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-input-container:focus-within {
+        border-color: #8B1932;
+        box-shadow: 0 0 0 3px rgba(139, 25, 50, 0.12);
+        background: #FFFFFF;
+    }
+
+    .form-input-container.password-field-wrapper input {
+        padding-right: 0 !important;
+    }
+
+    .form-input-icon {
+        color: #8C827A;
+        font-size: 14px;
+        margin-right: 9px;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .form-input-control {
+        border: none !important;
+        background: transparent !important;
+        outline: none !important;
+        width: 100%;
+        height: 100%;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12.5px;
+        color: #1E060D;
+        padding: 0;
+        box-shadow: none !important;
+    }
+
+    .form-input-control::placeholder {
+        color: #A1A1AA;
+        font-size: 12px;
+    }
+
+    .toggle-password-btn {
+        background: transparent;
+        border: none;
+        color: #8C827A;
+        cursor: pointer;
+        padding: 0 4px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s ease, transform 0.15s ease;
+        transform: none !important;
+    }
+
+    .toggle-password-btn:hover {
+        color: #8B1932 !important;
+        transform: scale(1.1) !important;
+    }
+
+    /* Terms Checkbox */
+    .terms-checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 10px 0 14px 0;
+    }
+
+    .terms-checkbox-input {
+        margin-top: 3px;
+        accent-color: #8B1932;
+        cursor: pointer;
+        width: 14px;
+        height: 14px;
+    }
+
+    .terms-checkbox-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11.5px;
+        color: #555555;
+        line-height: 1.35;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .terms-checkbox-label a {
+        color: #8B1932;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .terms-checkbox-label a:hover {
+        text-decoration: underline;
+    }
+
+    /* Primary Submit Button */
+    .btn-signup-submit {
+        width: 100%;
+        height: 44px;
+        background: #8B1932;
+        border: none;
+        border-radius: 50px;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(139, 25, 50, 0.28);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+
+    .btn-signup-submit:hover {
+        background: #721428;
+        box-shadow: 0 8px 24px rgba(114, 20, 40, 0.38);
+        transform: translateY(-1.5px);
+        color: #FFFFFF;
+    }
+
+    .btn-signup-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(114, 20, 40, 0.3);
+    }
+
+    /* OR Divider */
+    .luxury-divider {
+        display: flex;
+        align-items: center;
+        margin: 14px 0;
+        color: #A1A1AA;
+    }
+
+    .luxury-divider hr {
+        flex-grow: 1;
+        margin: 0;
+        border-color: #E7E0D6;
+        opacity: 0.8;
+    }
+
+    .luxury-divider-text {
+        padding: 0 12px;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        color: #8C827A;
+        text-transform: uppercase;
+    }
+
+    /* Google Button */
+    .btn-google-luxury {
+        width: 100%;
+        height: 42px;
+        background: #FFFFFF !important;
+        border: 1px solid #E4DFD7 !important;
+        border-radius: 50px !important;
+        color: #374151 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+        transition: all 0.25s ease !important;
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+    .btn-google-luxury:hover {
+        background: #FDFBF8 !important;
+        border-color: #C5A059 !important;
+        color: #1E060D !important;
+        box-shadow: 0 4px 14px rgba(197, 160, 89, 0.18) !important;
         transform: translateY(-1px);
     }
 
-    .btn-google:active {
-        transform: translateY(0);
-        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15) !important;
+    /* Login Link Prompt */
+    .login-prompt {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12.5px;
+        color: #666666;
+        text-align: center;
+        margin: 14px 0 0 0;
+    }
+
+    .login-prompt-link {
+        color: #8B1932;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+
+    .login-prompt-link:hover {
+        color: #630C1E;
+        text-decoration: underline;
+    }
+
+    /* ----------------------------------------------------------
+       RIGHT SIDEBAR: MEMBER PERKS & CALLIGRAPHY
+       ---------------------------------------------------------- */
+    .signup-perks-column {
+        flex: 0 0 160px;
+        width: 160px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .perks-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        width: 100%;
+    }
+
+    .perk-badge-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .perk-badge-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #FBECEF;
+        color: #8B1932;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        box-shadow: 0 4px 12px rgba(139, 25, 50, 0.08);
+        transition: transform 0.25s ease;
+    }
+
+    .perk-badge-item:hover .perk-badge-icon {
+        transform: translateY(-2px);
+    }
+
+    .perk-badge-label {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4A4A4A;
+        line-height: 1.3;
+        max-width: 130px;
+    }
+
+    .perks-calligraphy-wrap {
+        margin-top: 36px;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .perks-cursive-script {
+        font-family: 'Alex Brush', cursive;
+        font-size: 34px;
+        color: #5D534A;
+        line-height: 1.1;
+        text-align: right;
+        transform: rotate(-6deg);
+        user-select: none;
+        white-space: nowrap;
+    }
+
+    .perks-cursive-line {
+        width: 42px;
+        height: 1.5px;
+        background: #C5A059;
+        margin-top: 4px;
+        margin-right: 6px;
+    }
+
+    /* ----------------------------------------------------------
+       BOTTOM BAR: FULL WIDTH TRUST RIBBON
+       ---------------------------------------------------------- */
+    .signup-trust-bar {
+        width: 100%;
+        background: #FFFFFF;
+        border-top: 1px solid #ECE3D4;
+        padding: 16px 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .trust-items-row {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        flex-wrap: wrap;
+    }
+
+    .trust-ribbon-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .trust-ribbon-icon {
+        font-size: 22px;
+        color: #8B1932;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .trust-ribbon-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #333333;
+        line-height: 1.25;
+    }
+
+    .trust-ribbon-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+    }
+
+    .tradition-ribbon-line {
+        width: 32px;
+        height: 1px;
+        background: #C5A059;
+        opacity: 0.7;
+    }
+
+    .tradition-ribbon-diamond {
+        color: #C5A059;
+        font-size: 11px;
+    }
+
+    .tradition-ribbon-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #8A6E3B;
+        text-transform: uppercase;
+    }
+
+    /* ----------------------------------------------------------
+       RESPONSIVENESS
+       ---------------------------------------------------------- */
+    @media (max-width: 1080px) {
+        .signup-split-row {
+            flex-direction: column;
+            min-height: auto;
+        }
+
+        .signup-visual-pane {
+            width: 100%;
+            flex: 0 0 auto;
+            min-height: 380px;
+            padding: 34px 28px;
+        }
+
+        .signup-content-pane {
+            width: 100%;
+            flex: 0 0 auto;
+            flex-direction: column;
+            padding: 32px 24px;
+        }
+
+        .signup-form-card {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .signup-perks-column {
+            width: 100%;
+            flex: 0 0 auto;
+            flex-direction: row;
+            justify-content: space-around;
+            padding: 24px 0 10px 0;
+        }
+
+        .perks-list {
+            flex-direction: row;
+            justify-content: space-around;
+            width: auto;
+            gap: 20px;
+        }
+
+        .perks-calligraphy-wrap {
+            display: none;
+        }
+
+        .trust-items-row {
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .signup-trust-bar {
+            flex-direction: column;
+            padding: 20px 24px;
+            gap: 16px;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .form-row-two-col {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .visual-title-where {
+            font-size: 30px;
+        }
+
+        .visual-title-meets {
+            font-size: 36px;
+        }
+
+        .visual-features-stack {
+            display: none;
+        }
+
+        .signup-form-card {
+            padding: 22px 18px;
+        }
+
+        .signup-perks-column {
+            display: none;
+        }
+
+        .trust-items-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="section-luxury">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
-                    <h2 class="font-heading mb-4 text-center">Create Your Account</h2>
+<section class="luxury-signup-section">
+    <div class="luxury-signup-card">
+        <!-- Main Top Split Row -->
+        <div class="signup-split-row">
+            <!-- ====================================================
+                 LEFT SIDE: HERITAGE VISUAL STORY PANE
+                 ==================================================== -->
+            <div class="signup-visual-pane">
+                <div class="signup-visual-bg"></div>
+                <div class="signup-visual-overlay"></div>
 
-                    <!-- Google Authentication Button -->
-                    <div class="google-auth-container mb-3 d-flex justify-content-center">
-                        <div id="googleSignInBtnContainer" class="w-100">
-                            <button type="button"
-                                class="btn btn-google w-100 py-2.5 rounded-pill d-flex align-items-center justify-content-center gap-2 fw-semibold fs-7"
-                                id="googleSignInBtn" title="Continue with Google">
-                                <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
-                                    <path fill="#4285F4"
-                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                                    <path fill="#34A853"
-                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                                    <path fill="#FBBC05"
-                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                                    <path fill="#EA4335"
-                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                <div class="signup-visual-content">
+                    <!-- Top Brand Tag -->
+                    <div class="visual-brand-tag">
+                        <span class="visual-brand-line"></span>
+                        <span class="visual-brand-text">JOIN OUR FAMILY</span>
+                    </div>
+
+                    <!-- Main Hero Typography -->
+                    <div class="visual-hero-titles">
+                        <h1 class="visual-title-where">Where Tradition</h1>
+                        <h2 class="visual-title-meets">Meets You</h2>
+                        <p class="visual-subtitle-desc">
+                            Create your account and begin a beautiful saree journey with Rangam Saradha Silks.
+                        </p>
+                    </div>
+
+                    <!-- 4 Feature Highlights -->
+                    <div class="visual-features-stack">
+                        <div class="visual-feature-item">
+                            <div class="visual-feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C87A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="5" width="14" height="12" rx="1"/>
+                                    <path d="M15 8h4l3 3v6h-7V8z"/>
+                                    <circle cx="5" cy="18" r="2"/>
+                                    <circle cx="18" cy="18" r="2"/>
                                 </svg>
-                                <span class="btn-text">Continue with Google</span>
-                            </button>
+                            </div>
+                            <div class="visual-feature-text">
+                                Pan India Shipping
+                            </div>
+                        </div>
+
+                        <div class="visual-feature-item">
+                            <div class="visual-feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C87A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="m9 12 2 2 4-4"/>
+                                </svg>
+                            </div>
+                            <div class="visual-feature-text">
+                                100% Authentic Silks
+                            </div>
+                        </div>
+
+                        <div class="visual-feature-item">
+                            <div class="visual-feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C87A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </div>
+                            <div class="visual-feature-text">
+                                Trusted by Thousands
+                            </div>
+                        </div>
+
+                        <div class="visual-feature-item">
+                            <div class="visual-feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8C87A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 12 20 22 4 22 4 12"/>
+                                    <rect x="2" y="7" width="20" height="5"/>
+                                    <line x1="12" y1="22" x2="12" y2="7"/>
+                                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                                </svg>
+                            </div>
+                            <div class="visual-feature-text">
+                                Exclusive Offers & Updates
+                            </div>
                         </div>
                     </div>
 
-                    <!-- OR Divider -->
-                    <div class="auth-divider mb-4 d-flex align-items-center text-muted">
-                        <hr class="flex-grow-1 my-0 border-secondary-subtle">
-                        <span class="px-3 fs-8 text-uppercase tracking-wider fw-semibold text-muted">OR</span>
-                        <hr class="flex-grow-1 my-0 border-secondary-subtle">
+                    <!-- Bottom Heritage Quote -->
+                    <div class="visual-tradition-block">
+                        <div class="visual-tradition-line"></div>
+                        <span class="visual-tradition-text">
+                            MORE THAN SAREES,<br>A PART OF YOUR STORY
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 RIGHT SIDE: SIGNUP FORM CARD & PERKS
+                 ==================================================== -->
+            <div class="signup-content-pane">
+                <!-- Corner Mandala Lace Watermark -->
+                <svg class="form-corner-mandala" width="140" height="140" viewBox="0 0 140 140" fill="none" aria-hidden="true">
+                    <path d="M140 0C140 77.3199 77.3199 140 0 140V130C71.797 130 130 71.797 130 0H140Z" fill="url(#mandalaGoldReg)"/>
+                    <circle cx="140" cy="0" r="100" stroke="#C5A059" stroke-width="0.8" stroke-dasharray="3 3"/>
+                    <circle cx="140" cy="0" r="70" stroke="#C5A059" stroke-width="0.8"/>
+                    <circle cx="140" cy="0" r="40" stroke="#C5A059" stroke-width="0.8" stroke-dasharray="2 2"/>
+                    <defs>
+                        <linearGradient id="mandalaGoldReg" x1="0" y1="140" x2="140" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#C5A059" stop-opacity="0.32"/>
+                            <stop offset="1" stop-color="#C5A059" stop-opacity="0.03"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <!-- Center White Form Card -->
+                <div class="signup-form-card">
+                    <div class="signup-form-header">
+                        <h2 class="signup-form-title">Create Your Account</h2>
+                        <p class="signup-form-subtitle">Join Rangam Saradha Silks and be a part of our tradition.</p>
                     </div>
 
                     <form action="{% url 'accounts:register' %}" method="POST" id="registerForm" class="auth-form">
                         {% csrf_token %}
-                        {% for field in form %}
-                        <div class="mb-3 text-start">
-                            <label for="{{ field.id_for_label }}" class="form-label text-dark fw-medium fs-7 mb-1">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="text-danger" title="Required field">*</span>{% endif %}
-                            </label>
-                            {% if field.field.widget.input_type == 'password' %}
-                            <div class="position-relative password-field-wrapper">
-                                {{ field }}
-                                <button type="button" 
-                                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted pe-3 p-0 toggle-password-visibility border-0 shadow-none" 
-                                        style="z-index: 10; cursor: pointer; text-decoration: none;" 
-                                        aria-label="Toggle password visibility" 
-                                        tabindex="-1"
-                                        title="Show password">
-                                    <i class="bi bi-eye fs-6"></i>
+                        <!-- Auto-synced username fallback -->
+                        <input type="hidden" name="username" id="hidden_username" value="">
+
+                        <!-- Row: First Name & Last Name -->
+                        <div class="form-row-two-col">
+                            <div class="form-field-group">
+                                <label for="first_name" class="form-field-label">First Name <span class="req-star">*</span></label>
+                                <div class="form-input-container">
+                                    <span class="form-input-icon"><i class="bi bi-person"></i></span>
+                                    <input type="text" name="first_name" id="first_name" class="form-input-control"
+                                        placeholder="Enter first name" value="{{ form.first_name.value|default:'' }}" required>
+                                </div>
+                                {% if form.first_name.errors %}
+                                <div class="text-danger mt-1" style="font-size: 11px;">{{ form.first_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-field-group">
+                                <label for="last_name" class="form-field-label">Last Name <span class="req-star">*</span></label>
+                                <div class="form-input-container">
+                                    <span class="form-input-icon"><i class="bi bi-person"></i></span>
+                                    <input type="text" name="last_name" id="last_name" class="form-input-control"
+                                        placeholder="Enter last name" value="{{ form.last_name.value|default:'' }}">
+                                </div>
+                                {% if form.last_name.errors %}
+                                <div class="text-danger mt-1" style="font-size: 11px;">{{ form.last_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Row: Email Address -->
+                        <div class="form-field-group">
+                            <label for="email" class="form-field-label">Email Address <span class="req-star">*</span></label>
+                            <div class="form-input-container">
+                                <span class="form-input-icon"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" id="email" class="form-input-control"
+                                    placeholder="Enter your email address" value="{{ form.email.value|default:'' }}" required>
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="text-danger mt-1" style="font-size: 11px;">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Row: Mobile Number -->
+                        <div class="form-field-group">
+                            <label for="phone_number" class="form-field-label">Mobile Number <span class="req-star">*</span></label>
+                            <div class="form-input-container">
+                                <span class="form-input-icon"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" name="phone_number" id="phone_number" class="form-input-control"
+                                    placeholder="Enter your mobile number" value="{{ form.phone_number.value|default:'' }}" required>
+                            </div>
+                            {% if form.phone_number.errors %}
+                            <div class="text-danger mt-1" style="font-size: 11px;">{{ form.phone_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Row: Password -->
+                        <div class="form-field-group">
+                            <label for="password" class="form-field-label">Password <span class="req-star">*</span></label>
+                            <div class="form-input-container password-field-wrapper">
+                                <span class="form-input-icon"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password1" id="password" class="form-input-control"
+                                    placeholder="Create a password" required>
+                                <button type="button" class="toggle-password-btn toggle-password-visibility"
+                                    aria-label="Toggle password visibility" title="Show password" tabindex="-1">
+                                    <i class="bi bi-eye"></i>
                                 </button>
                             </div>
-                            {% else %}
-                            {{ field }}
+                            {% if form.password1.errors %}
+                            <div class="text-danger mt-1" style="font-size: 11px;">{{ form.password1.errors.0 }}</div>
                             {% endif %}
-                            {% if field.help_text %}
-                            <small class="form-text text-muted fs-8 mt-1 d-block" style="font-size: 0.78rem;">{{ field.help_text }}</small>
-                            {% endif %}
-                            {% for error in field.errors %}
-                            <div class="text-danger fs-8 mt-1 fw-medium">{{ error }}</div>
-                            {% endfor %}
                         </div>
-                        {% endfor %}
 
-                        <button type="submit"
-                            class="btn btn-primary w-100 py-2.5 mt-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Register</button>
+                        <!-- Row: Confirm Password -->
+                        <div class="form-field-group">
+                            <label for="confirm_password" class="form-field-label">Confirm Password <span class="req-star">*</span></label>
+                            <div class="form-input-container password-field-wrapper">
+                                <span class="form-input-icon"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password2" id="confirm_password" class="form-input-control"
+                                    placeholder="Confirm your password" required>
+                                <button type="button" class="toggle-password-btn toggle-password-visibility"
+                                    aria-label="Toggle password visibility" title="Show password" tabindex="-1">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password2.errors %}
+                            <div class="text-danger mt-1" style="font-size: 11px;">{{ form.password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Checkbox: Terms & Conditions -->
+                        <div class="terms-checkbox-group">
+                            <input type="checkbox" name="agree_terms" id="agree_terms" class="terms-checkbox-input" checked required>
+                            <label for="agree_terms" class="terms-checkbox-label">
+                                I agree to the <a href="{% url 'home:cms_page' slug='terms-conditions' %}">Terms & Conditions</a> and <a href="{% url 'home:cms_page' slug='privacy-policy' %}">Privacy Policy</a>.
+                            </label>
+                        </div>
+                        {% if form.agree_terms.errors %}
+                        <div class="text-danger mb-2" style="font-size: 11px;">{{ form.agree_terms.errors.0 }}</div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-signup-submit" id="submitRegBtn">
+                            <span>Create Account</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
                     </form>
 
-                    <div class="text-center mt-4">
-                        <p class="text-muted fs-7 mb-0">Already have an account? <a href="{% url 'accounts:login' %}"
-                                class="text-primary text-decoration-none fw-semibold">Login</a></p>
+                    <!-- OR Divider -->
+                    <div class="luxury-divider">
+                        <hr>
+                        <span class="luxury-divider-text">OR</span>
+                        <hr>
+                    </div>
+
+                    <!-- Google Authentication Button -->
+                    <div class="google-auth-container">
+                        <div id="googleSignInBtnContainer" class="w-100">
+                            <button type="button" class="btn-google-luxury" id="googleSignInBtn" title="Continue with Google">
+                                <svg class="google-icon" width="19" height="19" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>Continue with Google</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Already have an account? Login Now -->
+                    <p class="login-prompt">
+                        Already have an account? <a href="{% url 'accounts:login' %}" class="login-prompt-link">Login Now</a>
+                    </p>
+                </div>
+
+                <!-- Right Perks Column -->
+                <div class="signup-perks-column">
+                    <div class="perks-list">
+                        <div class="perk-badge-item">
+                            <div class="perk-badge-icon">
+                                <i class="bi bi-gift"></i>
+                            </div>
+                            <span class="perk-badge-label">Exclusive Member Offers</span>
+                        </div>
+
+                        <div class="perk-badge-item">
+                            <div class="perk-badge-icon">
+                                <i class="bi bi-heart"></i>
+                            </div>
+                            <span class="perk-badge-label">Wishlist Your Favorites</span>
+                        </div>
+
+                        <div class="perk-badge-item">
+                            <div class="perk-badge-icon">
+                                <i class="bi bi-bell"></i>
+                            </div>
+                            <span class="perk-badge-label">Early Access to New Collections</span>
+                        </div>
+                    </div>
+
+                    <div class="perks-calligraphy-wrap">
+                        <div class="perks-cursive-script">
+                            Beautiful<br>Beginnings<br>Await
+                        </div>
+                        <div class="perks-cursive-line"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             BOTTOM FULL-WIDTH TRUST RIBBON
+             ==================================================== -->
+        <div class="signup-trust-bar">
+            <div class="trust-items-row">
+                <div class="trust-ribbon-item">
+                    <div class="trust-ribbon-icon"><i class="bi bi-truck"></i></div>
+                    <span class="trust-ribbon-text">Free Shipping<br>Across India</span>
+                </div>
+
+                <div class="trust-ribbon-item">
+                    <div class="trust-ribbon-icon"><i class="bi bi-shield-check"></i></div>
+                    <span class="trust-ribbon-text">100% Authentic<br>Products</span>
+                </div>
+
+                <div class="trust-ribbon-item">
+                    <div class="trust-ribbon-icon"><i class="bi bi-credit-card-2-front"></i></div>
+                    <span class="trust-ribbon-text">Secure<br>Payments</span>
+                </div>
+
+                <div class="trust-ribbon-item">
+                    <div class="trust-ribbon-icon"><i class="bi bi-headset"></i></div>
+                    <span class="trust-ribbon-text">Dedicated<br>Customer Support</span>
+                </div>
+            </div>
+
+            <div class="trust-ribbon-right">
+                <span class="tradition-ribbon-line"></span>
+                <span class="tradition-ribbon-diamond">❖</span>
+                <span class="tradition-ribbon-text">TRADITION LIVES ON</span>
             </div>
         </div>
     </div>
@@ -117,6 +1100,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Initialize Firebase Web SDK if API key exists
@@ -137,22 +1121,26 @@
             }
         }
 
-        document.querySelectorAll('form input').forEach(input => {
-            if (input.type !== 'checkbox' && input.type !== 'submit' && input.type !== 'hidden' && !input.closest('.phone-input-group')) {
-                input.classList.add('form-control');
-                input.classList.add('px-3');
-                input.classList.add('py-2');
-            }
-        });
-
-        // Form submit spinner
+        // Auto-generate username from email / first name before submission
         const regForm = document.getElementById("registerForm");
         if (regForm) {
-            regForm.addEventListener("submit", function () {
-                const btn = this.querySelector('button[type="submit"]');
+            regForm.addEventListener("submit", function (e) {
+                const emailInput = document.getElementById("email");
+                const firstNameInput = document.getElementById("first_name");
+                const hiddenUsername = document.getElementById("hidden_username");
+                if (hiddenUsername && (!hiddenUsername.value || hiddenUsername.value.trim() === '')) {
+                    if (emailInput && emailInput.value) {
+                        const emailPrefix = emailInput.value.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
+                        hiddenUsername.value = emailPrefix || (firstNameInput ? firstNameInput.value.replace(/\s+/g, '').toLowerCase() : 'user');
+                    } else if (firstNameInput && firstNameInput.value) {
+                        hiddenUsername.value = firstNameInput.value.replace(/\s+/g, '').toLowerCase();
+                    }
+                }
+
+                const btn = document.getElementById("submitRegBtn");
                 if (btn) {
                     btn.disabled = true;
-                    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...`;
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creating Account...`;
                 }
             });
         }
@@ -166,7 +1154,7 @@
                 overlay.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:9999999;opacity:0;transition:opacity 0.18s ease;";
                 overlay.innerHTML = `
                     <div style="background:rgba(255,255,255,0.98);border:1.5px solid rgba(197,160,89,0.45);border-radius:24px;padding:28px 36px;box-shadow:0 24px 55px rgba(0,0,0,0.25);display:flex;flex-direction:column;align-items:center;gap:14px;max-width:340px;text-align:center;">
-                        <div class="spinner-border" style="width:2.75rem;height:2.75rem;color:#AF0446!important;border-width:3.5px;" role="status">
+                        <div class="spinner-border" style="width:2.75rem;height:2.75rem;color:#8B1932!important;border-width:3.5px;" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                         <div id="fastAuthOverlayText" style="font-weight:700;font-size:1.05rem;color:#1f2937;letter-spacing:0.01em;">
@@ -307,135 +1295,63 @@
             if (googleBtn) {
                 googleBtn.disabled = false;
                 googleBtn.innerHTML = `
-                    <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+                    <svg class="google-icon" width="19" height="19" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span class="btn-text">Continue with Google</span>
+                    <span>Continue with Google</span>
                 `;
             }
         }
 
-        function ensureGoogleSdk(callback) {
-            if (typeof google !== "undefined" && google.accounts) {
-                callback();
-                return;
-            }
-
-            let script = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
-            if (!script) {
-                script = document.createElement('script');
-                script.src = "https://accounts.google.com/gsi/client";
-                script.async = true;
-                script.defer = true;
-                document.head.appendChild(script);
-            }
-
-            let attempts = 0;
-            const timer = setInterval(() => {
-                attempts++;
-                if (typeof google !== "undefined" && google.accounts) {
-                    clearInterval(timer);
-                    callback();
-                } else if (attempts >= 40) {
-                    clearInterval(timer);
-                    resetGoogleBtn();
-                }
-            }, 100);
-        }
-
-        const clientId = "{{ google_client_id|default:'' }}";
-
-        function handleCredentialResponse(response) {
-            if (response && response.credential) {
-                showFastAuthOverlay("Verified with Google! Creating account & loading...");
-                sendTokenToBackend(response.credential);
-            } else {
-                hideFastAuthOverlay();
-                resetGoogleBtn();
-            }
-        }
-
-        // Auto-initialize Google Identity Services if Client ID is present
-        if (clientId) {
-            ensureGoogleSdk(() => {
-                try {
-                    if (typeof google !== "undefined" && google.accounts && google.accounts.id) {
-                        google.accounts.id.initialize({
-                            client_id: clientId,
-                            callback: handleCredentialResponse,
-                            auto_select: false,
-                            cancel_on_tap_outside: true
-                        });
-
-                        const googleBtnContainer = document.getElementById("googleSignInBtnContainer");
-                        if (googleBtnContainer) {
-                            google.accounts.id.renderButton(googleBtnContainer, {
-                                type: "standard",
-                                shape: "pill",
-                                theme: "outline",
-                                text: "continue_with",
-                                size: "large",
-                                width: "100%"
-                            });
-                        }
-                    }
-                } catch (e) {
-                    console.warn("Google Accounts ID Init notice:", e);
-                }
-            });
-        }
-
         if (googleBtn) {
-            googleBtn.addEventListener("click", function () {
-                const hasFirebaseKey = "{{ firebase_config.apiKey|default:'' }}";
+            googleBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const googleClientId = "{{ google_client_id }}";
 
-                if (googleBtn.disabled) return;
-
-                if (clientId) {
-                    ensureGoogleSdk(() => {
-                        if (typeof google !== "undefined" && google.accounts && google.accounts.id) {
-                            googleBtn.disabled = true;
-                            googleBtn.innerHTML = `
-                                <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
-                                <span>Connecting to Google...</span>
-                            `;
-
-                            google.accounts.id.prompt((notification) => {
-                                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                                    resetGoogleBtn();
+                if (typeof google !== "undefined" && google.accounts && google.accounts.oauth2 && googleClientId) {
+                    try {
+                        const tokenClient = google.accounts.oauth2.initTokenClient({
+                            client_id: googleClientId,
+                            scope: 'email profile openid',
+                            callback: (tokenResponse) => {
+                                if (tokenResponse && tokenResponse.access_token) {
+                                    sendTokenToBackend(null, tokenResponse.access_token);
                                 }
-                            });
-                        }
-                    });
-                    return;
+                            }
+                        });
+                        tokenClient.requestAccessToken();
+                        return;
+                    } catch (e) {
+                        console.warn("Google OAuth2 error, falling back to Firebase:", e);
+                    }
                 }
 
-                if (hasFirebaseKey && typeof firebase !== "undefined" && firebase.auth) {
-                    googleBtn.disabled = true;
-                    googleBtn.innerHTML = `
-                        <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
-                        <span>Connecting to Google...</span>
-                    `;
-
+                if (typeof firebase !== "undefined" && firebase.auth) {
+                    showFastAuthOverlay("Opening Google Sign-In...");
                     const provider = new firebase.auth.GoogleAuthProvider();
                     provider.addScope('email');
                     provider.addScope('profile');
-
                     firebase.auth().signInWithPopup(provider)
-                        .then(result => result.user.getIdToken())
-                        .then(idToken => sendFirebaseTokenToBackend(idToken))
-                        .catch(error => {
-                            console.error("Firebase Sign-In Error:", error);
+                        .then((result) => {
+                            return result.user.getIdToken();
+                        })
+                        .then((idToken) => {
+                            sendFirebaseTokenToBackend(idToken);
+                        })
+                        .catch((error) => {
+                            hideFastAuthOverlay();
+                            if (error.code !== "auth/popup-closed-by-user") {
+                                alert("Google Sign-In failed: " + error.message);
+                            }
                             resetGoogleBtn();
                         });
                     return;
                 }
 
-                alert("Google Client ID is missing. Please check settings.");
-                resetGoogleBtn();
+                alert("Google Sign-In is not configured properly. Please use manual registration.");
             });
         }
     });
