@@ -414,12 +414,147 @@ h6,
     color: #b91c1c !important;
 }
 
-@media (max-width: 576px) {
+/* Mobile Navigation Profile Experience */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        position: relative !important;
+        padding-top: 10px;
+    }
+
+    /* Mobile User Profile Card inside Drawer */
+    .mobile-nav-profile-card {
+        background: radial-gradient(circle at 10% 20%, #FFFDF9 0%, #FAF6EE 100%);
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        border-radius: 18px;
+        padding: 14px 16px;
+        margin: 6px 0 16px 0;
+        box-shadow: 0 4px 16px rgba(114, 20, 40, 0.05);
+    }
+
+    .mobile-nav-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #C5A059;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .mobile-nav-avatar-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #8B1932;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.15rem;
+        border: 2px solid #C5A059;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(139, 25, 50, 0.2);
+    }
+
+    .mobile-nav-user-name {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1E060D;
+        line-height: 1.2;
+    }
+
+    .mobile-nav-user-email {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.8rem;
+        color: #71717A;
+        line-height: 1.3;
+        margin-top: 2px;
+    }
+
+    .mobile-nav-account-section {
+        border-top: 1px solid #ECE3D4;
+        padding-top: 14px;
+        margin-top: 14px;
+    }
+
+    .mobile-nav-section-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #8A6E3B;
+        margin-bottom: 8px;
+        padding-left: 6px;
+    }
+
+    .mobile-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        color: #374151;
+        text-decoration: none;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+
+    .mobile-nav-link i {
+        font-size: 1.15rem;
+        color: #8C827A;
+        width: 22px;
+        text-align: center;
+    }
+
+    .mobile-nav-link:hover,
+    .mobile-nav-link:active {
+        background: #FDFBF8;
+        color: #8B1932;
+    }
+
+    .mobile-nav-link:hover i {
+        color: #8B1932;
+    }
+
+    .mobile-nav-link.text-danger {
+        color: #dc2626 !important;
+    }
+
+    .mobile-nav-link.text-danger i {
+        color: #dc2626 !important;
+    }
+
+    /* Fixed Full-Width Dropdown Position on Mobile so it NEVER clips */
+    .user-profile-dropdown {
+        position: static !important;
+    }
+
     .user-profile-dropdown .profile-normal-menu {
-        right: -6px !important;
-        width: 230px !important;
-        min-width: 230px !important;
-        max-width: 230px !important;
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        min-width: unset !important;
+        max-width: calc(100vw - 16px) !important;
+        border-radius: 18px !important;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.18), 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid rgba(197, 160, 89, 0.4) !important;
+        z-index: 1080 !important;
+    }
+
+    .profile-normal-menu .profile-header-wrap {
+        padding: 14px 16px !important;
+    }
+
+    .profile-normal-menu .dropdown-item {
+        padding: 10px 14px !important;
+        font-size: 0.92rem !important;
     }
 }
 
