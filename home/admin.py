@@ -15,8 +15,12 @@ class SingletonAdmin(admin.ModelAdmin):
         return False
 
 class WebsiteSettingAdmin(SingletonAdmin):
-    list_display = ['website_name', 'gst_number', 'tax_percentage', 'call_booking_fee', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit', 'maintenance_mode']
+    list_display = ['website_name', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit']
     fieldsets = (
+        ('🌟 TEMP POPUP: Mandatory Full-Screen Launch Overlay', {
+            'fields': ('launch_mode_active', 'launch_datetime', 'launch_title', 'launch_tagline_1', 'launch_tagline_2'),
+            'description': 'Control the mandatory full-screen launch overlay. Turn OFF "TEMP POPUP Active" anytime to open the website early without touching code. While ON, normal visitors see the full-screen countdown overlay until the launch date/time is reached. Staff/Superusers can always access and test the website normally.',
+        }),
         ('General Website Settings', {
             'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), ('cod_charge', 'cod_max_limit', 'call_booking_fee'), 'maintenance_mode'),
         }),

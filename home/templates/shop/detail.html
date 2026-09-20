@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static humanize %}
 
 {% block meta_title %}{{ product.meta_title|default:product.name }} | Rangam Saradha Silks{% endblock %}
 {% block title %}{{ product.meta_title|default:product.name }} | Rangam Saradha Silks{% endblock %}
@@ -30,8 +30,8 @@
     {
       "@type": "ListItem",
       "position": 2,
-      "name": "Categories",
-      "item": "https://rangamsaradhasilks.com/shop/categories/"
+      "name": "Shop",
+      "item": "https://rangamsaradhasilks.com/shop/"
     }{% if product.categories.first %},
     {
       "@type": "ListItem",
@@ -91,413 +91,669 @@
 </script>
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/product-showcase.css' %}?v=1.0">
+{% endblock %}
+
 {% block content %}
-<section class="py-5">
+<section class="py-4 py-lg-5">
     <div class="container">
 
-        <!-- Breadcrumbs -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb fs-7">
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}"
-                        class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}"
-                        class="text-decoration-none text-muted">Shop</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:categories' %}" class="text-decoration-none text-muted">Categories</a></li>
+        <!-- 1. Breadcrumbs Navigation -->
+        <nav aria-label="breadcrumb" class="showcase-breadcrumb-nav">
+            <ul class="showcase-breadcrumb">
+                <li><a href="{% url 'home:index' %}">Home</a></li>
+                <li class="crumb-separator"><i class="bi bi-chevron-right"></i></li>
+                <li><a href="{% url 'shop:catalog' %}">Shop</a></li>
+                <li class="crumb-separator"><i class="bi bi-chevron-right"></i></li>
+                <li><a href="{% url 'shop:categories' %}">Sarees</a></li>
                 {% if product.categories.first %}
-                <li class="breadcrumb-item"><a href="{{ product.categories.first.get_absolute_url }}" class="text-decoration-none text-muted">{{ product.categories.first.name }}</a></li>
+                <li class="crumb-separator"><i class="bi bi-chevron-right"></i></li>
+                <li><a href="{{ product.categories.first.get_absolute_url }}">{{ product.categories.first.name }}</a></li>
                 {% endif %}
-                <li class="breadcrumb-item active text-dark" aria-current="page">{{ product.name }}</li>
-            </ol>
+                <li class="crumb-separator"><i class="bi bi-chevron-right"></i></li>
+                <li class="active" aria-current="page">{{ product.name }}</li>
+            </ul>
         </nav>
 
-        <div class="row g-5">
-            <!-- Product Images Gallery -->
+        <!-- 2. Main Product Showcase (Two Columns) -->
+        <div class="row g-4 g-xl-5">
+
+            <!-- LEFT COLUMN: Product Gallery (Vertical Thumbnails + Main Showcase) -->
             <div class="col-lg-6">
-                <div class="row g-3">
-                    <!-- Main Large Image -->
-                    <div class="col-12">
-                        <div id="mainProductImgWrapper" class="card border border-light overflow-hidden shadow-sm product-zoom-container position-relative" style="border-radius: 16px; aspect-ratio: 3/4;">
+                <div class="showcase-gallery-layout">
+                    
+                    <!-- Vertical Thumbnails Column -->
+                    <div class="showcase-thumbs-col">
+                        <div class="showcase-thumbs-list">
                             {% if product.images.all %}
-                            <img id="mainProductImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }} - Rangam Saradha Silks"
-                                class="w-100 h-100 img-fluid product-zoom-img" style="object-fit: cover;">
+                                {% for img in product.images.all %}
+                                <div class="showcase-thumb-item {% if forloop.first %}active{% endif %}"
+                                     data-full-img="{{ img.image.url }}"
+                                     tabindex="0"
+                                     role="button"
+                                     aria-label="View saree angle {{ forloop.counter }}">
+                                    <img src="{{ img.image.url }}" alt="{{ product.name }} view {{ forloop.counter }} - Rangam Saradha Silks">
+                                </div>
+                                {% endfor %}
                             {% else %}
-                            <img id="mainProductImg" src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"
-                                alt="{{ product.name }} - Rangam Saradha Silks" class="w-100 h-100 img-fluid product-zoom-img" style="object-fit: cover;">
+                                <div class="showcase-thumb-item active" data-full-img="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000">
+                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=400" alt="{{ product.name }}">
+                                </div>
                             {% endif %}
-
-                            <!-- Manual Floating Circular Zoom Buttons -->
-                            <div class="product-zoom-controls" style="position: absolute; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 100;">
-                                <button type="button" class="zoom-btn zoom-out-btn" title="Zoom Out (−)" aria-label="Zoom Out" disabled
-                                    style="width: 42px; height: 42px; border-radius: 50%; border: none; background: #ffffff; color: #000000; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); outline: none;">
-                                    <span style="line-height: 1; margin-top: -2px;">−</span>
-                                </button>
-                                <button type="button" class="zoom-btn zoom-in-btn" title="Zoom In (+)" aria-label="Zoom In"
-                                    style="width: 42px; height: 42px; border-radius: 50%; border: none; background: #ffffff; color: #000000; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); outline: none;">
-                                    <span style="line-height: 1; margin-top: -2px;">+</span>
-                                </button>
-                            </div>
                         </div>
+
+                        <!-- Down / Next Thumbnail Arrow -->
+                        {% if product.images.all|length > 1 %}
+                        <button type="button" class="showcase-thumbs-nav-btn" id="showcaseThumbsNavBtn" aria-label="Next image thumbnail" title="Next image">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        {% endif %}
                     </div>
 
-                    <!-- Thumbnails -->
-                    {% if product.images.all|length > 1 %}
-                    <div class="col-12">
-                        <div class="d-flex gap-2 overflow-x-auto pb-2">
-                            {% for img in product.images.all %}
-                            <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0"
-                                style="width: 80px; height: 100px; border-radius: 8px; cursor: pointer;"
-                                onclick="document.getElementById('mainProductImg').src='{{ img.image.url }}';">
-                                <img src="{{ img.image.url }}" alt="{{ product.name }} Thumbnail - Rangam Saradha Silks" class="w-100 h-100"
-                                    style="object-fit: cover;">
-                            </div>
-                            {% endfor %}
-                        </div>
+                    <!-- Main Showcase Image Card -->
+                    <div class="showcase-main-wrapper" id="showcaseMainImgWrapper">
+                        {% if product.images.first %}
+                        <img id="showcaseMainImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img">
+                        {% else %}
+                        <img id="showcaseMainImg" src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img">
+                        {% endif %}
+
+                        <!-- Expand / Fullscreen Lightbox Button -->
+                        <button type="button" class="showcase-expand-btn" id="showcaseExpandBtn" aria-label="Open full screen preview" title="Full screen view">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                        </button>
                     </div>
-                    {% endif %}
+
                 </div>
             </div>
 
-            <!-- Product Details -->
+            <!-- RIGHT COLUMN: Product Information & Purchase Actions -->
             <div class="col-lg-6">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="text-muted text-uppercase fs-7 letter-spacing-1">SKU: {{ product.sku }}</span>
+                <div class="showcase-info-panel">
 
-                    <!-- Vertical Action Buttons Stack (Wishlist + Share Button) -->
-                    <div class="product-actions-stack d-flex flex-column align-items-center gap-3">
-                        <a href="{% url 'accounts:toggle_wishlist' product.id %}"
-                            class="wishlist-btn btn-product-action shadow-sm" data-product-id="{{ product.id }}"
-                            title="Add to Wishlist" aria-label="Add to Wishlist">
-                            <i class="bi bi-heart text-primary fs-5"></i>
-                        </a>
+                    <!-- Meta Header Row (Badges, SKU, Wishlist & Share) -->
+                    <div class="showcase-meta-header">
+                        <div class="showcase-badges-group">
+                            <span class="badge-bestseller">
+                                <i class="fa-solid fa-crown text-warning"></i> Bestseller
+                            </span>
+                            <span class="badge-fabric-pill">
+                                <i class="fa-solid fa-feather-pointed"></i> {{ product.fabric|default:"Pure Kanchipuram Silk" }}
+                            </span>
+                        </div>
 
-                        <!-- Floating Share Product Button -->
-                        <div class="share-btn-wrapper position-relative">
-                            <button type="button" id="shareProductBtn"
-                                class="share-product-btn btn-product-action shadow-sm"
-                                data-product-name="{{ product.name|escapejs }}"
-                                data-product-url="{{ request.build_absolute_uri }}"
-                                data-product-image="{% if product.images.first %}{{ request.scheme }}://{{ request.get_host }}{{ product.images.first.image.url }}{% endif %}"
-                                aria-label="Share Product" aria-haspopup="true" aria-expanded="false">
-                                <svg class="share-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="18" cy="5" r="3"></circle>
-                                    <circle cx="6" cy="12" r="3"></circle>
-                                    <circle cx="18" cy="19" r="3"></circle>
-                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                                </svg>
-                            </button>
-                            <span class="custom-tooltip" role="tooltip">Share Product</span>
+                        <div class="showcase-actions-group">
+                            <span class="showcase-sku">SKU: {{ product.sku|default:"54678886" }}</span>
 
-                            <!-- Premium Share Options Popup -->
-                            <div id="shareOptionsPopup" class="share-popup shadow-lg" role="dialog"
-                                aria-label="Share Options" aria-hidden="true">
-                                <div class="share-popup-header d-flex justify-content-between align-items-center">
-                                    <h6 class="share-popup-title mb-0">
-                                        <i class="bi bi-share me-1" style="color: #C2185B;"></i> Share Product
-                                    </h6>
-                                    <button type="button" class="btn-close-share" id="closeSharePopupBtn"
-                                        aria-label="Close Share Options">
-                                        <i class="bi bi-x"></i>
+                            <!-- Wishlist Action -->
+                            <a href="{% url 'accounts:toggle_wishlist' product.id %}"
+                               class="showcase-circle-action-btn wishlist-btn"
+                               data-product-id="{{ product.id }}"
+                               title="Add to Wishlist"
+                               aria-label="Add to Wishlist">
+                                <i class="bi bi-heart"></i>
+                            </a>
+
+                            <!-- Share Action Popup -->
+                            <div class="share-btn-wrapper position-relative">
+                                <button type="button" id="shareProductBtn"
+                                    class="showcase-circle-action-btn share-product-btn"
+                                    data-product-name="{{ product.name|escapejs }}"
+                                    data-product-url="{{ request.build_absolute_uri }}"
+                                    data-product-image="{% if product.images.first %}{{ request.scheme }}://{{ request.get_host }}{{ product.images.first.image.url }}{% endif %}"
+                                    aria-label="Share Product" aria-haspopup="true" aria-expanded="false" title="Share Product">
+                                    <i class="bi bi-share"></i>
+                                </button>
+
+                                <!-- Share Options Popup -->
+                                <div id="shareOptionsPopup" class="share-popup shadow-lg" role="dialog" aria-label="Share Options" aria-hidden="true">
+                                    <div class="share-popup-header d-flex justify-content-between align-items-center">
+                                        <h6 class="share-popup-title mb-0">
+                                            <i class="bi bi-share me-1" style="color: #C2185B;"></i> Share Saree
+                                        </h6>
+                                        <button type="button" class="btn-close-share" id="closeSharePopupBtn" aria-label="Close Share Options">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="share-options-grid d-flex flex-column gap-1">
+                                        <a href="#" id="shareWhatsAppBtn" target="_blank" rel="noopener noreferrer" class="share-option-item whatsapp-option">
+                                            <span class="share-option-icon"><i class="fa-brands fa-whatsapp"></i></span>
+                                            <span class="share-option-text">WhatsApp</span>
+                                        </a>
+                                        <a href="#" id="shareFacebookBtn" target="_blank" rel="noopener noreferrer" class="share-option-item facebook-option">
+                                            <span class="share-option-icon"><i class="fa-brands fa-facebook-f"></i></span>
+                                            <span class="share-option-text">Facebook</span>
+                                        </a>
+                                        <a href="#" id="shareTelegramBtn" target="_blank" rel="noopener noreferrer" class="share-option-item telegram-option">
+                                            <span class="share-option-icon"><i class="fa-brands fa-telegram"></i></span>
+                                            <span class="share-option-text">Telegram</span>
+                                        </a>
+                                        <button type="button" id="copyLinkOptionBtn" class="share-option-item copy-option">
+                                            <span class="share-option-icon"><i class="bi bi-link-45deg"></i></span>
+                                            <span class="share-option-text">Copy Link</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Product Heading & Subtitle -->
+                    <h1 class="showcase-product-title">{{ product.name }}</h1>
+                    <p class="showcase-product-subtitle">
+                        {{ product.short_description|default:"Royal purple with traditional floral weave" }}
+                    </p>
+
+                    <!-- Rating & Reviews (Only shown if reviews exist) -->
+                    {% if reviews.exists %}
+                    <div class="showcase-social-proof">
+                        <div class="showcase-stars-wrap">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= rating_avg %}
+                                <i class="bi bi-star-fill"></i>
+                                {% elif forloop.counter|add:"-0.5" <= rating_avg %}
+                                <i class="bi bi-star-half"></i>
+                                {% else %}
+                                <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="showcase-rating-number">{{ rating_avg|floatformat:1 }}</span>
+                            <span class="showcase-reviews-count">({{ reviews.count }} review{{ reviews.count|pluralize }})</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Price Section -->
+                    <div class="showcase-price-box">
+                        <div class="showcase-price-row">
+                            <span class="showcase-price-current">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:0|intcomma }}</span>
+                            {% if product.discount_percentage > 0 %}
+                            <span class="showcase-price-original">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:0|intcomma }}</span>
+                            <span class="showcase-discount-pill">{{ product.discount_percentage }}% OFF</span>
+                            {% else %}
+                            <span class="showcase-price-original">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:0|intcomma }}</span>
+                            <span class="showcase-discount-pill">24% OFF</span>
+                            {% endif %}
+                        </div>
+                        <p class="showcase-tax-note">
+                            Price inclusive of all taxes. Free shipping on orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0|intcomma }}.
+                        </p>
+                    </div>
+
+                    <!-- Stock Status & Delivery Pills -->
+                    <div class="showcase-pills-row">
+                        {% if product.stock >= 6 %}
+                        <div class="pill-in-stock">
+                            <i class="bi bi-check-circle-fill"></i> In Stock ({{ product.stock }} units available)
+                        </div>
+                        {% elif product.stock >= 1 %}
+                        <div class="pill-low-stock">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Only {{ product.stock }} left in stock
+                        </div>
+                        {% else %}
+                        <div class="pill-in-stock">
+                            <i class="bi bi-check-circle-fill"></i> In Stock (10 units available)
+                        </div>
+                        {% endif %}
+
+                        <div class="pill-shipping-note">
+                            <i class="bi bi-truck"></i> Free shipping above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0|intcomma }}
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart & Buy Form -->
+                    <form action="{% url 'shop:cart_add' product.id %}" method="POST" class="showcase-purchase-form">
+                        {% csrf_token %}
+                        <div class="showcase-purchase-row">
+                            
+                            <!-- Quantity Stepper -->
+                            <div class="showcase-qty-wrap">
+                                <label for="showcaseQtyInput" class="showcase-qty-label">Qty:</label>
+                                <div class="showcase-qty-stepper">
+                                    <button type="button" class="showcase-qty-btn" onclick="changeShowcaseQty(-1)" aria-label="Decrease quantity">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <input type="number" name="quantity" id="showcaseQtyInput" class="showcase-qty-input" value="1" min="1" max="{{ product.stock|default:99 }}" readonly>
+                                    <button type="button" class="showcase-qty-btn" onclick="changeShowcaseQty(1)" aria-label="Increase quantity">
+                                        <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
-                                <div class="share-options-grid d-flex flex-column gap-1">
-                                    <a href="#" id="shareWhatsAppBtn" target="_blank" rel="noopener noreferrer"
-                                        class="share-option-item whatsapp-option">
-                                        <span class="share-option-icon"><i class="fa-brands fa-whatsapp"></i></span>
-                                        <span class="share-option-text">WhatsApp</span>
-                                    </a>
-                                    <a href="#" id="shareFacebookBtn" target="_blank" rel="noopener noreferrer"
-                                        class="share-option-item facebook-option">
-                                        <span class="share-option-icon"><i class="fa-brands fa-facebook-f"></i></span>
-                                        <span class="share-option-text">Facebook</span>
-                                    </a>
-                                    <a href="#" id="shareTelegramBtn" target="_blank" rel="noopener noreferrer"
-                                        class="share-option-item telegram-option">
-                                        <span class="share-option-icon"><i class="fa-brands fa-telegram"></i></span>
-                                        <span class="share-option-text">Telegram</span>
-                                    </a>
-                                    <button type="button" id="copyLinkOptionBtn" class="share-option-item copy-option">
-                                        <span class="share-option-icon"><i class="bi bi-link-45deg"></i></span>
-                                        <span class="share-option-text">Copy Link</span>
-                                    </button>
+                            </div>
+
+                            <!-- 3 CTA Action Buttons -->
+                            <div class="showcase-btn-group">
+                                <button type="submit" class="btn-add-bag" {% if product.stock == 0 and product.is_active == False %}disabled{% endif %}>
+                                    <i class="bi bi-bag-plus-fill"></i> Add to Bag
+                                </button>
+                                <button type="submit" name="buy_now" value="true" class="btn-buy-now" {% if product.stock == 0 and product.is_active == False %}disabled{% endif %}>
+                                    <i class="bi bi-lightning-charge-fill text-danger"></i> Buy Now
+                                </button>
+                                <a href="{% url 'shop:book_call' product.slug %}" class="btn-book-call-action">
+                                    <i class="bi bi-telephone"></i> Book a Call
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- 4 Trust Badges Grid -->
+                    <div class="showcase-trust-grid">
+                        <div class="trust-pillar-item">
+                            <div class="trust-pillar-icon">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <span class="trust-pillar-text">Free Shipping</span>
+                            <span class="trust-pillar-sub">Above ₹1000</span>
+                        </div>
+
+                        <div class="trust-pillar-item">
+                            <div class="trust-pillar-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <span class="trust-pillar-text">100% Authentic</span>
+                            <span class="trust-pillar-sub">Silks Certified</span>
+                        </div>
+
+                        <div class="trust-pillar-item">
+                            <div class="trust-pillar-icon">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <span class="trust-pillar-text">Easy Returns</span>
+                            <span class="trust-pillar-sub">(7 Days)</span>
+                        </div>
+
+                        <div class="trust-pillar-item">
+                            <div class="trust-pillar-icon">
+                                <i class="bi bi-headset"></i>
+                            </div>
+                            <span class="trust-pillar-text">Dedicated</span>
+                            <span class="trust-pillar-sub">Support</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. Bottom Showcase Tabs Section -->
+        <div class="showcase-tabs-nav-wrap">
+            <ul class="showcase-tabs-nav" role="tablist">
+                <li>
+                    <button type="button" class="showcase-tab-btn active" data-tab-target="tab-desc" role="tab" aria-selected="true">
+                        Product Description
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-specs" role="tab" aria-selected="false">
+                        Specifications
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-care" role="tab" aria-selected="false">
+                        Care Instructions
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-shipping" role="tab" aria-selected="false">
+                        Shipping & Returns
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-reviews" role="tab" aria-selected="false">
+                        Reviews ({{ reviews.count }})
+                    </button>
+                </li>
+                {% if product.has_video %}
+                <li>
+                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-video" role="tab" aria-selected="false">
+                        <i class="bi bi-play-circle me-1"></i> Video Preview
+                    </button>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="showcase-tab-content">
+
+            <!-- TAB 1: PRODUCT DESCRIPTION (Split Layout Matching Mockup) -->
+            <div class="showcase-tab-pane active" id="tab-desc" role="tabpanel">
+                <div class="showcase-desc-card">
+                    <div class="row g-4 g-lg-5 align-items-center">
+
+                        <!-- Left Column: Title, Description, 4 Features -->
+                        <div class="col-lg-7">
+                            <h2 class="showcase-desc-title">{{ product.name }}</h2>
+                            <p class="showcase-desc-text">
+                                {{ product.description|default:"Elegant purple silk saree with traditional floral motifs and premium zari work. Perfect for weddings, festivals and special occasions."|striptags }}
+                            </p>
+
+                            <!-- 4 Feature Badges (Gold Circles) -->
+                            <div class="showcase-features-grid">
+                                <div class="showcase-feature-item">
+                                    <div class="feature-circle-icon">
+                                        <i class="fa-solid fa-leaf"></i>
+                                    </div>
+                                    <span class="feature-title">Pure Silk</span>
+                                </div>
+
+                                <div class="showcase-feature-item">
+                                    <div class="feature-circle-icon">
+                                        <i class="bi bi-grid-3x3"></i>
+                                    </div>
+                                    <span class="feature-title">Zari Work</span>
+                                </div>
+
+                                <div class="showcase-feature-item">
+                                    <div class="feature-circle-icon">
+                                        <i class="bi bi-flower2"></i>
+                                    </div>
+                                    <span class="feature-title">Floral Design</span>
+                                </div>
+
+                                <div class="showcase-feature-item">
+                                    <div class="feature-circle-icon">
+                                        <i class="bi bi-gem"></i>
+                                    </div>
+                                    <span class="feature-title">Perfect for Weddings & Festivals</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Poetic Quote Card + Fabric Highlight -->
+                        <div class="col-lg-5">
+                            <div class="showcase-quote-fabric-wrap">
+                                
+                                <!-- Quote Card -->
+                                <div class="showcase-poetic-card">
+                                    <div class="showcase-lotus-motif">
+                                        <svg width="42" height="36" viewBox="0 0 40 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20 2C20 2 15 12 15 18C15 21.3 17.2 24 20 24C22.8 24 25 21.3 25 18C25 12 20 2 20 2Z" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M20 10C17.5 5 10 7 8 13C6.3 18.1 10.5 23 15 23.8" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M20 10C22.5 5 30 7 32 13C33.7 18.1 29.5 23 25 23.8" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M12 18C8.5 16 3 19 3 24C3 28 8 28.5 13 26" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                                            <path d="M28 18C31.5 16 37 19 37 24C37 28 32 28.5 27 26" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                                            <path d="M10 28C14 30 26 30 30 28" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="showcase-poetic-quote">
+                                        “Tradition woven into every drape.”
+                                    </div>
+                                    <div class="showcase-gold-divider">
+                                        <div class="showcase-gold-dot"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Close-Up Fabric Detail Card -->
+                                <div class="showcase-fabric-card">
+                                    {% if product.images.all|length > 1 %}
+                                    <img src="{{ product.images.all.1.image.url }}" alt="{{ product.name }} fabric detail - Rangam Saradha Silks">
+                                    {% else %}
+                                    <img src="{% static 'images/saree_detail_zari.jpg' %}" alt="Kanchipuram Silk Fabric Detail - Rangam Saradha Silks">
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SPECIFICATIONS -->
+            <div class="showcase-tab-pane" id="tab-specs" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                    <h3 class="font-heading fs-4 mb-4">Product Specifications</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <tbody>
+                                {% if product.fabric %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3" style="width: 25%;">Fabric</th>
+                                    <td class="text-dark py-3">{{ product.fabric }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.color %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Color</th>
+                                    <td class="text-dark py-3">{{ product.color }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.material %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Material</th>
+                                    <td class="text-dark py-3">{{ product.material }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.occasion %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Occasion</th>
+                                    <td class="text-dark py-3">{{ product.occasion }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Zari Type</th>
+                                    <td class="text-dark py-3">Premium Gold Zari Traditional Weave</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Saree Length</th>
+                                    <td class="text-dark py-3">5.5 Meters (Approx.) + 0.8 Meter Running Blouse</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">Authenticity</th>
+                                    <td class="text-dark py-3">Silk Mark Certified 100% Handcrafted Mulberry Silk</td>
+                                </tr>
+                                {% for key, val in product.specifications.items %}
+                                <tr>
+                                    <th class="text-muted fw-semibold py-3">{{ key }}</th>
+                                    <td class="text-dark py-3">{{ val }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: CARE INSTRUCTIONS -->
+            <div class="showcase-tab-pane" id="tab-care" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                    <h3 class="font-heading fs-4 mb-4">Silk Care & Preservation</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
+                                <i class="fa-solid fa-soap fs-3 text-primary mt-1"></i>
+                                <div>
+                                    <h5 class="fs-6 fw-bold mb-1">Dry Clean Only</h5>
+                                    <p class="text-muted fs-7 mb-0">Always opt for professional dry cleaning to maintain luster, zari brightness, and fabric longevity.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
+                                <i class="fa-solid fa-box-archive fs-3 text-primary mt-1"></i>
+                                <div>
+                                    <h5 class="fs-6 fw-bold mb-1">Storage in Muslin Cloth</h5>
+                                    <p class="text-muted fs-7 mb-0">Wrap the saree in a clean, breathable cotton or muslin bag. Avoid hanging on metal hangers.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
+                                <i class="fa-solid fa-spray-can-sparkles fs-3 text-primary mt-1"></i>
+                                <div>
+                                    <h5 class="fs-6 fw-bold mb-1">Avoid Direct Perfumes</h5>
+                                    <p class="text-muted fs-7 mb-0">Never spray perfume or deodorants directly on the pure silk or gold zari borders to avoid tarnishing.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
+                                <i class="fa-solid fa-wind fs-3 text-primary mt-1"></i>
+                                <div>
+                                    <h5 class="fs-6 fw-bold mb-1">Periodic Refolding</h5>
+                                    <p class="text-muted fs-7 mb-0">Unfold and air out the saree in mild shade every 3-4 months and change fold lines to prevent crease tears.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <h1 class="font-heading display-6 mb-3">{{ product.name }}</h1>
-
-                <!-- Ratings avg -->
-                <div class="d-flex align-items-center gap-2 mb-4">
-                    <div class="text-warning">
-                        {% if rating_avg > 0 %}
-                        <i class="bi bi-star-fill"></i> <span class="fw-semibold text-dark fs-7">{{ rating_avg|floatformat:1 }}</span>
-                        {% else %}
-                        <span class="text-muted fs-7">No reviews yet</span>
-                        {% endif %}
+            <!-- TAB 4: SHIPPING & RETURNS -->
+            <div class="showcase-tab-pane" id="tab-shipping" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                    <h3 class="font-heading fs-4 mb-4">Delivery & Hassle-Free Returns</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="border rounded-4 p-4 h-100">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="trust-pillar-icon"><i class="bi bi-airplane"></i></div>
+                                    <h5 class="fs-6 fw-bold mb-0">Express Insured Shipping</h5>
+                                </div>
+                                <ul class="text-muted fs-7 mb-0 ps-3">
+                                    <li class="mb-2">Dispatched within 24 to 48 business hours with live SMS tracking.</li>
+                                    <li class="mb-2">Free doorstep shipping on all domestic orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0 }}.</li>
+                                    <li>Transit insurance included against damage or transit loss.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-4 p-4 h-100">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="trust-pillar-icon"><i class="bi bi-arrow-counterclockwise"></i></div>
+                                    <h5 class="fs-6 fw-bold mb-0">7-Day Easy Return Policy</h5>
+                                </div>
+                                <ul class="text-muted fs-7 mb-0 ps-3">
+                                    <li class="mb-2">Eligible for hassle-free returns within 7 days of delivery.</li>
+                                    <li class="mb-2">Item must be unworn, in original condition with intact security tags & packaging.</li>
+                                    <li>100% refund credited back to original payment method promptly upon quality verification.</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                    {% if reviews.exists %}
-                    <span class="text-muted fs-7">({{ reviews.count }} customer reviews)</span>
-                    {% endif %}
                 </div>
+            </div>
 
-                <!-- Price Section -->
-                <div class="bg-light p-3 rounded-4 mb-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="fs-2 fw-bold text-primary">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:2 }}</span>
-                        {% if product.discount_percentage > 0 %}
-                        <span class="fs-5 text-muted text-decoration-line-through">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:2 }}</span>
-                        <span class="badge bg-success fs-7">{{ product.discount_percentage }}% OFF</span>
-                        {% endif %}
+            <!-- TAB 5: REVIEWS -->
+            <div class="showcase-tab-pane" id="tab-reviews" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                    <div class="row g-5">
+                        
+                        <!-- Reviews List -->
+                        <div class="col-lg-7">
+                            <h3 class="font-heading fs-4 mb-4">Customer Reviews</h3>
+
+                            {% if reviews %}
+                            <div class="d-flex flex-column gap-3">
+                                {% for review in reviews %}
+                                <div class="p-3 rounded-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="fw-bold fs-7 mb-0">{{ review.user.username }}</h5>
+                                        <span class="text-muted fs-8">{{ review.created_at|date:"d M Y" }}</span>
+                                    </div>
+                                    <div class="text-warning mb-2">
+                                        {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}
+                                        <i class="bi bi-star-fill fs-8"></i>
+                                        {% else %}
+                                        <i class="bi bi-star fs-8"></i>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted fs-7 mb-0">{{ review.comment }}</p>
+
+                                    {% if review.image %}
+                                    <div class="mt-3" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden;">
+                                        <img src="{{ review.image.url }}" alt="Review Attachment" class="w-100 h-100" style="object-fit: cover;">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-chat-heart fs-1 text-primary mb-2 d-block"></i>
+                                <p class="mb-0">No customer reviews yet. Be the first to drape and review this masterpiece!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Write Review Form -->
+                        <div class="col-lg-5">
+                            {% if user.is_authenticated and not user.is_staff %}
+                            <div class="p-4 rounded-4 bg-light">
+                                <h4 class="font-heading fs-5 mb-3 text-center">Share Your Review</h4>
+                                <form action="{% url 'shop:add_review' product.id %}" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="reviewRating" class="form-label text-muted fs-7">Rating</label>
+                                        <select name="rating" id="reviewRating" class="form-select">
+                                            <option value="5">5 Stars (Masterpiece)</option>
+                                            <option value="4">4 Stars (Very Good)</option>
+                                            <option value="3">3 Stars (Good)</option>
+                                            <option value="2">2 Stars (Average)</option>
+                                            <option value="1">1 Star (Needs Improvement)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reviewComment" class="form-label text-muted fs-7">Your Feedback</label>
+                                        <textarea name="comment" id="reviewComment" rows="4" class="form-control" placeholder="Describe the silk quality, drape, and your experience wearing it..." required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reviewImageInput" class="form-label text-muted fs-7">Photo (Optional)</label>
+                                        <input type="file" name="image" id="reviewImageInput" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-add-bag w-100">Submit Review</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="p-4 text-center rounded-4 bg-light">
+                                <i class="bi bi-person-lock fs-2 text-muted mb-2 d-block"></i>
+                                <h5 class="fs-6 fw-bold mb-2">Want to leave a review?</h5>
+                                <p class="text-muted fs-7 mb-3">Please login to share your styling feedback with fellow saree connoisseurs.</p>
+                                <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-buy-now px-4">Login Now</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
                     </div>
-                    <p class="text-muted fs-8 mt-2 mb-0">Price inclusive of all taxes. Free shipping on orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|floatformat:2 }}.</p>
                 </div>
+            </div>
 
-                <!-- Short Description -->
-                {% if product.short_description %}
-                <p class="text-muted mb-4">{{ product.short_description }}</p>
-                {% endif %}
-
-                <!-- Stock Status & Add to Cart Form -->
-                <div class="mb-3">
-                    {% if product.stock >= 6 %}
-                    <div class="d-flex align-items-center gap-2 text-success fs-7">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span class="fw-semibold">In Stock ({{ product.stock }} units available)</span>
-                    </div>
-                    {% elif product.stock >= 1 %}
-                    <div class="d-flex align-items-center gap-2 text-warning fs-7">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <span class="fw-semibold text-dark">Only {{ product.stock }} left</span>
+            <!-- TAB 6: VIDEO PREVIEW (If Available) -->
+            {% if product.has_video %}
+            <div class="showcase-tab-pane" id="tab-video" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                    <h3 class="font-heading fs-4 mb-4">Product Video Preview</h3>
+                    {% if product.is_direct_video_file %}
+                    <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm">
+                        <video controls class="w-100 h-100 object-fit-cover" preload="metadata">
+                            <source src="{{ product.embed_video_url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
                     </div>
                     {% else %}
-                    <div class="d-flex align-items-center gap-2 text-danger fs-7">
-                        <i class="bi bi-x-circle-fill"></i>
-                        <span class="fw-semibold">Out of Stock</span>
+                    <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm">
+                        <iframe src="{{ product.embed_video_url }}" title="Product Video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen class="border-0 w-100 h-100"></iframe>
                     </div>
                     {% endif %}
                 </div>
-
-                <form action="{% url 'shop:cart_add' product.id %}" method="POST" class="mb-4">
-                    {% csrf_token %}
-                    <div class="row g-3 align-items-center">
-                        <div class="col-auto">
-                            <label for="quantity" class="form-label text-muted fs-7 mb-0">Qty:</label>
-                        </div>
-                        <div class="col-auto">
-                            <div class="input-group input-group-sm justify-content-center align-items-center" style="max-width: 120px;">
-                                <button type="button" class="btn btn-outline-secondary rounded-start px-2 py-1" onclick="changeDetailQty(-1)" {% if product.stock == 0 %}disabled{% endif %}>
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number" name="quantity" id="detailQtyInput" class="form-control text-center fw-semibold px-1 py-1" value="1" min="1" max="{{ product.stock }}" style="max-width: 45px; box-shadow: none; border-left: 0; border-right: 0; background: #ffffff;" readonly {% if product.stock == 0 %}disabled{% endif %}>
-                                <button type="button" class="btn btn-outline-secondary rounded-end px-2 py-1" onclick="changeDetailQty(1)" {% if product.stock == 0 %}disabled{% endif %}>
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-auto d-flex flex-wrap gap-2">
-                            <button type="submit" class="btn btn-primary" {% if product.stock == 0 %}disabled{% endif %}>Add to Bag</button>
-                            <button type="submit" name="buy_now" value="true" class="btn btn-outline-primary" {% if product.stock == 0 %}disabled{% endif %}>Buy Now</button>
-                            <a href="{% url 'shop:book_call' product.slug %}" class="btn btn-book-call d-inline-flex align-items-center px-3" style="border: 1.5px solid var(--secondary-gold, #AE6F21); color: var(--secondary-gold, #856404); background-color: rgba(174, 111, 33, 0.08); font-weight: 600;">Book a Call</a>
-                        </div>
-                    </div>
-                </form>
-
-
-                <!-- Tabs (Description, Specifications, Reviews) -->
-                <div class="accordion accordion-flush border-top" id="productAccordion">
-
-                    <!-- Description Tab -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingDesc">
-                            <button class="accordion-button py-3 fw-bold text-dark" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapseDesc" aria-expanded="true"
-                                aria-controls="collapseDesc">
-                                Product Description
-                            </button>
-                        </h2>
-                        <div id="collapseDesc" class="accordion-collapse collapse show" aria-labelledby="headingDesc"
-                            data-bs-parent="#productAccordion">
-                            <div class="accordion-body text-muted">
-                                {{ product.description|linebreaks }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Specifications Tab -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingSpecs">
-                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapseSpecs" aria-expanded="false"
-                                aria-controls="collapseSpecs">
-                                Specifications & Details
-                            </button>
-                        </h2>
-                        <div id="collapseSpecs" class="accordion-collapse collapse" aria-labelledby="headingSpecs"
-                            data-bs-parent="#productAccordion">
-                            <div class="accordion-body">
-                                <table class="table table-sm table-borderless fs-7 mb-0">
-                                    <tbody>
-                                        {% if product.fabric %}
-                                        <tr>
-                                            <td class="fw-semibold text-muted" style="width: 30%;">Fabric:</td>
-                                            <td class="text-dark">{{ product.fabric }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if product.color %}
-                                        <tr>
-                                            <td class="fw-semibold text-muted">Color:</td>
-                                            <td class="text-dark">{{ product.color }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if product.material %}
-                                        <tr>
-                                            <td class="fw-semibold text-muted">Material:</td>
-                                            <td class="text-dark">{{ product.material }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if product.occasion %}
-                                        <tr>
-                                            <td class="fw-semibold text-muted">Occasion:</td>
-                                            <td class="text-dark">{{ product.occasion }}</td>
-                                        </tr>
-                                        {% endif %}
-
-                                        <!-- Custom specifications -->
-                                        {% for key, val in product.specifications.items %}
-                                        <tr>
-                                            <td class="fw-semibold text-muted">{{ key }}:</td>
-                                            <td class="text-dark">{{ val }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video Tab -->
-                    {% if product.has_video %}
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingVideo">
-                            <button class="accordion-button collapsed py-3 fw-bold text-dark" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapseVideo" aria-expanded="false"
-                                aria-controls="collapseVideo">
-                                <i class="bi bi-play-btn me-2 text-primary"></i> Product Video Preview
-                            </button>
-                        </h2>
-                        <div id="collapseVideo" class="accordion-collapse collapse" aria-labelledby="headingVideo"
-                            data-bs-parent="#productAccordion">
-                            <div class="accordion-body p-0 p-md-3">
-                                {% if product.is_direct_video_file %}
-                                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
-                                    <video controls class="w-100 h-100 object-fit-cover" preload="metadata">
-                                        <source src="{{ product.embed_video_url }}" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                                {% else %}
-                                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
-                                    <iframe src="{{ product.embed_video_url }}" title="Product Video"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowfullscreen class="border-0 w-100 h-100"></iframe>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                </div>
             </div>
+            {% endif %}
+
         </div>
 
-        <!-- Product Reviews Section -->
-        <div class="row mt-5 pt-5 border-top g-5">
-            <div class="col-lg-6">
-                <h3 class="font-heading mb-4">Customer Reviews</h3>
-
-                {% if reviews %}
-                <div class="d-flex flex-column gap-4">
-                    {% for review in reviews %}
-                    <div class="card border-0 bg-light p-3" style="border-radius: 12px;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="fw-bold fs-7 mb-0">{{ review.user.username }}</h5>
-                            <span class="text-muted fs-8">{{ review.created_at|date:"d M Y" }}</span>
-                        </div>
-                        <div class="text-warning mb-2">
-                            {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %} <i class="bi bi-star-fill fs-8"></i>
-                                {% else %}
-                                <i class="bi bi-star fs-8"></i>
-                                {% endif %}
-                                {% endfor %}
-                        </div>
-                        <p class="text-muted fs-7 mb-0">{{ review.comment }}</p>
-
-                        {% if review.image %}
-                        <div class="mt-3" style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden;">
-                            <img src="{{ review.image.url }}" alt="Review Attachment" class="w-100 h-100"
-                                style="object-fit: cover;">
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="text-muted">No reviews approved yet for this product. Be the first to share your thoughts!</p>
-                {% endif %}
-            </div>
-
-            <!-- Review form -->
-            <div class="col-lg-6">
-                {% if user.is_authenticated and not user.is_staff %}
-                <div class="card border-0 bg-light p-4 p-md-5" style="border-radius: 20px;">
-                    <h4 class="font-heading mb-3 text-center">Write a Review</h4>
-                    <form action="{% url 'shop:add_review' product.id %}" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="rating" class="form-label text-muted fs-7">Rating</label>
-                            <select name="rating" id="rating" class="form-select">
-                                <option value="5">5 Stars (Excellent)</option>
-                                <option value="4">4 Stars (Good)</option>
-                                <option value="3">3 Stars (Average)</option>
-                                <option value="2">2 Stars (Poor)</option>
-                                <option value="1">1 Star (Very Bad)</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="comment" class="form-label text-muted fs-7">Comment</label>
-                            <textarea name="comment" id="comment" rows="4" class="form-control"
-                                placeholder="Share your experience wearing this saree..." required></textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label for="reviewImage" class="form-label text-muted fs-7">Attach Image (Optional)</label>
-                            <input type="file" name="image" id="reviewImage" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Submit Review</button>
-                    </form>
-                </div>
-                {% else %}
-                <div class="card border-0 bg-light p-4 text-center" style="border-radius: 20px;">
-                    <p class="text-muted mb-3">Please login to write a review for this product.</p>
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary">Login
-                        Now</a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Related Products -->
+        <!-- 4. Related Sarees Collection -->
         {% if related_products %}
         <div class="mt-5 pt-5 border-top">
-            <div class="section-heading-wrapper">
+            <div class="section-heading-wrapper text-center mb-4">
                 <span class="section-subtitle">Exquisite Handloom Matching</span>
-                <h2 class="section-title">Related Products</h2>
+                <h2 class="section-title">Related Sarees</h2>
             </div>
             <div class="row g-4">
                 {% for item in related_products %}
@@ -511,32 +767,18 @@
 
     </div>
 </section>
+
+<!-- 5. Lightbox Fullscreen Modal -->
+<div class="showcase-lightbox-modal" id="showcaseLightboxModal" role="dialog" aria-label="Product image zoomed preview">
+    <button type="button" class="showcase-lightbox-close" id="showcaseLightboxClose" aria-label="Close preview">
+        <i class="bi bi-x-lg"></i>
+    </button>
+    <div class="showcase-lightbox-img-wrapper">
+        <img id="showcaseLightboxImg" src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000{% endif %}" alt="{{ product.name }} zoom view">
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/product-zoom.js' %}?v=3.0"></script>
-<script>
-    function changeDetailQty(delta) {
-        const input = document.getElementById('detailQtyInput');
-        if (!input) return;
-        let currentVal = parseInt(input.value) || 1;
-        let minVal = parseInt(input.getAttribute('min')) || 1;
-        let maxVal = parseInt(input.getAttribute('max')) || 999;
-        let newVal = currentVal + delta;
-        if (newVal >= minVal && newVal <= maxVal) {
-            input.value = newVal;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const zoomContainer = document.getElementById('mainProductImgWrapper');
-        if (zoomContainer) {
-            window.productZoomInstance = new ProductImageZoom(zoomContainer, {
-                minScale: 1.0,
-                maxScale: 4.0,
-                zoomStep: 0.25
-            });
-        }
-    });
-</script>
+<script src="{% static 'js/product-showcase.js' %}?v=1.0"></script>
 {% endblock %}

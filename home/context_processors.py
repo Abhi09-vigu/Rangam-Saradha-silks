@@ -100,6 +100,62 @@ def global_context(request):
     except Exception:
         active_popup = None
 
+    # Mandatory TEMP POPUP / Launch Lock evaluation
+    is_staff = False
+    if hasattr(request, 'user') and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+        is_staff = True
+    else:
+        admin_session_key = request.COOKIES.get('admin_sessionid')
+        if admin_session_key:
+            from django.contrib.sessions.backends.db import SessionStore
+            from django.contrib.auth import get_user_model
+            try:
+                session = SessionStore(session_key=admin_session_key)
+                user_id = session.get('_auth_user_id')
+                if user_id:
+                    User = get_user_model()
+                    admin_user = User.objects.filter(pk=user_id).first()
+                    if admin_user and (admin_user.is_staff or admin_user.is_superuser):
+                        is_staff = True
+            except Exception:
+                pass
+
+    show_temp_popup = False
+    temp_popup_target_ms = 0
+    temp_popup_iso = ""
+    temp_popup_days = "00"
+    temp_popup_hours = "00"
+    temp_popup_minutes = "00"
+    temp_popup_seconds = "00"
+
+    # Only show to non-staff and outside Django admin
+    if not is_staff and not request.path.startswith('/admin/'):
+        override = getattr(settings, 'LAUNCH_MODE_OVERRIDE', None) or os.environ.get('LAUNCH_MODE_OVERRIDE')
+        is_active_now = False
+        if override == 'launched':
+            is_active_now = False
+        elif override == 'locked':
+            is_active_now = True
+        elif settings_obj and getattr(settings_obj, 'is_temp_popup_active', False):
+            is_active_now = True
+
+        if is_active_now or request.GET.get('preview_temp_popup') == '1':
+            show_temp_popup = True
+            from zoneinfo import ZoneInfo
+            from datetime import datetime
+            kolkata = ZoneInfo("Asia/Kolkata")
+            target_dt = getattr(settings_obj, 'launch_datetime', None) or datetime(2026, 9, 25, 10, 30, 0, tzinfo=kolkata)
+            temp_popup_target_ms = int(target_dt.timestamp() * 1000)
+            temp_popup_iso = target_dt.isoformat()
+
+            from django.utils import timezone
+            diff = target_dt - timezone.now()
+            total_sec = max(0, int(diff.total_seconds()))
+            temp_popup_days = f"{total_sec // 86400:02d}"
+            temp_popup_hours = f"{(total_sec % 86400) // 3600:02d}"
+            temp_popup_minutes = f"{(total_sec % 3600) // 60:02d}"
+            temp_popup_seconds = f"{total_sec % 60:02d}"
+
     return {
         "site_settings": settings_obj,
         "contact_info": contact_obj,
@@ -110,4 +166,11 @@ def global_context(request):
         "google_client_id": google_client_id,
         "firebase_config": firebase_config,
         "active_popup": active_popup,
+        "show_temp_popup": show_temp_popup,
+        "temp_popup_target_ms": temp_popup_target_ms,
+        "temp_popup_iso": temp_popup_iso,
+        "temp_popup_days": temp_popup_days,
+        "temp_popup_hours": temp_popup_hours,
+        "temp_popup_minutes": temp_popup_minutes,
+        "temp_popup_seconds": temp_popup_seconds,
     }

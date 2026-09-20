@@ -1,0 +1,516 @@
+{% load static %}
+<!-- ==========================================================================
+     Rangam Saradha Silks - Mandatory Full-Screen Launch Overlay (TEMP POPUP)
+     Prevents background clicks, links, navbar, search, cart, and scrolling.
+     Dismissal disabled (no close button, no ESC, no backdrop click).
+     Automatically lifts when launch datetime arrives or when disabled in Admin.
+     ========================================================================== -->
+<div id="tempLaunchOverlay" class="temp-launch-backdrop" role="dialog" aria-modal="true" aria-labelledby="tempLaunchTitle">
+    
+    <!-- Background Radiant Aura -->
+    <div class="temp-launch-aura"></div>
+
+    <div class="temp-launch-container">
+        <div class="temp-launch-card">
+            
+            <!-- Ornate Inner Gold Border -->
+            <div class="temp-launch-frame"></div>
+            <div class="temp-corner temp-corner-tl"></div>
+            <div class="temp-corner temp-corner-tr"></div>
+            <div class="temp-corner temp-corner-bl"></div>
+            <div class="temp-corner temp-corner-br"></div>
+
+            <!-- Brand Logo & Lotus Motif -->
+            <div class="temp-launch-brand">
+                {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="Rangam Saradha Silks Logo" class="temp-brand-logo">
+                {% else %}
+                <div class="temp-lotus-motif">
+                    <svg width="44" height="38" viewBox="0 0 40 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 2C20 2 15 12 15 18C15 21.3 17.2 24 20 24C22.8 24 25 21.3 25 18C25 12 20 2 20 2Z" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20 10C17.5 5 10 7 8 13C6.3 18.1 10.5 23 15 23.8" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M20 10C22.5 5 30 7 32 13C33.7 18.1 29.5 23 25 23.8" stroke="#AE6F21" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M12 18C8.5 16 3 19 3 24C3 28 8 28.5 13 26" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M28 18C31.5 16 37 19 37 24C37 28 32 28.5 27 26" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M10 28C14 30 26 30 30 28" stroke="#AE6F21" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                {% endif %}
+                <h1 class="temp-brand-name">RANGAM SARADHA SILKS</h1>
+            </div>
+
+            <!-- Main Headline: "Grand Opening Soon" -->
+            <h2 id="tempLaunchTitle" class="temp-headline">{{ site_settings.launch_title|default:"Grand Opening Soon" }}</h2>
+
+            <!-- Subtitle: "Something beautiful is about to begin." -->
+            <p class="temp-subheadline">“{{ site_settings.launch_tagline_1|default:"Something beautiful is about to begin." }}”</p>
+
+            <!-- Filigree Divider -->
+            <div class="temp-filigree">
+                <div class="temp-filigree-line"></div>
+                <div class="temp-filigree-diamond"></div>
+                <div class="temp-filigree-line"></div>
+            </div>
+
+            <!-- Dynamic Live Countdown -->
+            <div class="temp-countdown-grid" id="tempCountdownGrid" aria-label="Grand opening countdown timer">
+                
+                <!-- DAYS -->
+                <div class="temp-count-box">
+                    <div class="temp-count-val" id="tempDaysVal">{{ temp_popup_days|default:"00" }}</div>
+                    <div class="temp-count-label">DAYS</div>
+                </div>
+
+                <div class="temp-count-colon">:</div>
+
+                <!-- HOURS -->
+                <div class="temp-count-box">
+                    <div class="temp-count-val" id="tempHoursVal">{{ temp_popup_hours|default:"00" }}</div>
+                    <div class="temp-count-label">HOURS</div>
+                </div>
+
+                <div class="temp-count-colon">:</div>
+
+                <!-- MINUTES -->
+                <div class="temp-count-box">
+                    <div class="temp-count-val" id="tempMinutesVal">{{ temp_popup_minutes|default:"00" }}</div>
+                    <div class="temp-count-label">MINUTES</div>
+                </div>
+
+                <div class="temp-count-colon">:</div>
+
+                <!-- SECONDS -->
+                <div class="temp-count-box">
+                    <div class="temp-count-val" id="tempSecondsVal">{{ temp_popup_seconds|default:"00" }}</div>
+                    <div class="temp-count-label">SECONDS</div>
+                </div>
+
+            </div>
+
+            <!-- Date & Time Announcement -->
+            <div class="temp-date-badge">
+                <i class="bi bi-calendar3 me-1 text-warning"></i>
+                <span>{{ site_settings.launch_datetime|date:"d F Y"|default:"25 September 2026" }} • {{ site_settings.launch_datetime|time:"g:i A"|default:"10:30 AM" }} IST</span>
+            </div>
+
+            <!-- Bottom Tagline: "Tradition in Every Weave" -->
+            <p class="temp-bottom-tagline">“{{ site_settings.launch_tagline_2|default:"Tradition in Every Weave" }}”</p>
+
+            <!-- Subtle Handloom Border Detail -->
+            <div class="temp-handloom-bar">
+                <div class="temp-bar-line"></div>
+                <span class="temp-bar-text">Pure Handloom Silk Heritage</span>
+                <div class="temp-bar-line"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Prevent background scrolling and interaction when TEMP POPUP is active */
+    html.temp-popup-active,
+    body.temp-popup-active {
+        overflow: hidden !important;
+        height: 100vh !important;
+        touch-action: none !important;
+    }
+
+    body.temp-popup-active > *:not(#tempLaunchOverlay):not(script):not(style) {
+        pointer-events: none !important;
+        user-select: none !important;
+        filter: blur(4px) !important;
+        transition: filter 0.4s ease;
+    }
+
+    /* Fixed Full-Screen Backdrop */
+    .temp-launch-backdrop {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 2147483647 !important; /* Highest possible layer */
+        background: rgba(26, 7, 14, 0.82) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+        padding: 24px 16px !important;
+        pointer-events: auto !important;
+        cursor: default !important;
+        animation: tempOverlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes tempOverlayFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .temp-launch-aura {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(197, 160, 89, 0.18) 0%, rgba(175, 4, 70, 0.1) 45%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(40px);
+        animation: tempAuraBreath 7s ease-in-out infinite alternate;
+    }
+
+    @keyframes tempAuraBreath {
+        0% { transform: scale(0.92); opacity: 0.8; }
+        100% { transform: scale(1.08); opacity: 1; }
+    }
+
+    .temp-launch-container {
+        width: 100%;
+        max-width: 760px;
+        position: relative;
+        z-index: 1;
+        margin: auto;
+    }
+
+    /* Luxury Cream & Maroon Card */
+    .temp-launch-card {
+        background: #FFFDF9;
+        border: 1.5px solid rgba(197, 160, 89, 0.45);
+        border-radius: 24px;
+        padding: 48px 36px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 28px 70px rgba(0, 0, 0, 0.35),
+            0 10px 24px rgba(110, 0, 30, 0.18),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .temp-launch-frame {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        border-radius: 16px;
+        pointer-events: none;
+    }
+
+    .temp-corner {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        pointer-events: none;
+    }
+    .temp-corner-tl { top: 16px; left: 16px; border-top: 2px solid #C5A059; border-left: 2px solid #C5A059; }
+    .temp-corner-tr { top: 16px; right: 16px; border-top: 2px solid #C5A059; border-right: 2px solid #C5A059; }
+    .temp-corner-bl { bottom: 16px; left: 16px; border-bottom: 2px solid #C5A059; border-left: 2px solid #C5A059; }
+    .temp-corner-br { bottom: 16px; right: 16px; border-bottom: 2px solid #C5A059; border-right: 2px solid #C5A059; }
+
+    .temp-brand-logo {
+        max-height: 70px;
+        width: auto;
+        object-fit: contain;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    .temp-lotus-motif {
+        width: 44px;
+        height: 38px;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .temp-brand-name {
+        font-family: 'Cinzel', serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #6E001E;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        line-height: 1.3;
+    }
+
+    .temp-headline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: #6E001E;
+        margin-bottom: 8px;
+        letter-spacing: -0.01em;
+        line-height: 1.18;
+    }
+
+    .temp-subheadline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-size: 1.25rem;
+        color: #AE6F21;
+        margin-bottom: 22px;
+        font-weight: 500;
+    }
+
+    .temp-filigree {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin: 0 auto 26px;
+        max-width: 220px;
+    }
+
+    .temp-filigree-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #C5A059, transparent);
+    }
+
+    .temp-filigree-diamond {
+        width: 7px;
+        height: 7px;
+        background: #AE6F21;
+        transform: rotate(45deg);
+    }
+
+    /* Countdown Grid */
+    .temp-countdown-grid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin: 0 auto 28px;
+        max-width: 580px;
+    }
+
+    .temp-count-box {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(197, 160, 89, 0.4);
+        border-radius: 14px;
+        padding: 16px 8px 12px;
+        flex: 1;
+        min-width: 90px;
+        box-shadow: 
+            0 8px 20px rgba(110, 0, 30, 0.05),
+            0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .temp-count-val {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.85rem;
+        font-weight: 700;
+        color: #6E001E;
+        line-height: 1;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .temp-count-label {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #AE6F21;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+    }
+
+    .temp-count-colon {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #C5A059;
+        margin-top: -14px;
+        opacity: 0.7;
+    }
+
+    .temp-date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(197, 160, 89, 0.12);
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        color: #6E001E;
+        padding: 7px 22px;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 22px;
+        letter-spacing: 0.03em;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .temp-bottom-tagline {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2B1810;
+        margin-bottom: 20px;
+    }
+
+    .temp-handloom-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 6px;
+    }
+
+    .temp-bar-line {
+        flex: 1;
+        max-width: 120px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.4), transparent);
+    }
+
+    .temp-bar-text {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #7A6258;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 600px) {
+        .temp-launch-card {
+            padding: 36px 18px 28px;
+            border-radius: 18px;
+        }
+
+        .temp-brand-name {
+            font-size: 1.15rem;
+            letter-spacing: 0.16em;
+        }
+
+        .temp-headline {
+            font-size: 2.2rem;
+        }
+
+        .temp-subheadline {
+            font-size: 1.05rem;
+            margin-bottom: 18px;
+        }
+
+        .temp-countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .temp-count-colon {
+            display: none;
+        }
+
+        .temp-count-box {
+            min-width: 0;
+            padding: 10px 4px 8px;
+            border-radius: 10px;
+        }
+
+        .temp-count-val {
+            font-size: 1.75rem;
+        }
+
+        .temp-count-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+        }
+
+        .temp-date-badge {
+            font-size: 0.85rem;
+            padding: 6px 16px;
+            margin-bottom: 18px;
+        }
+
+        .temp-bottom-tagline {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        const overlay = document.getElementById('tempLaunchOverlay');
+        if (!overlay) return;
+
+        // Apply lock class to html and body immediately to freeze background
+        document.documentElement.classList.add('temp-popup-active');
+        document.body.classList.add('temp-popup-active');
+
+        // Prevent ESC key from dismissing the popup
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        // Prevent click events on the overlay from bubbling to the background
+        overlay.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Dynamic countdown timer
+        const targetTimestamp = {{ temp_popup_target_ms|default:1790312400000 }};
+        const daysEl = document.getElementById('tempDaysVal');
+        const hoursEl = document.getElementById('tempHoursVal');
+        const minutesEl = document.getElementById('tempMinutesVal');
+        const secondsEl = document.getElementById('tempSecondsVal');
+
+        function unlockWebsite() {
+            // Remove overlay and restore full website interaction
+            overlay.style.transition = 'opacity 0.6s ease';
+            overlay.style.opacity = '0';
+            setTimeout(function () {
+                overlay.remove();
+                document.documentElement.classList.remove('temp-popup-active');
+                document.body.classList.remove('temp-popup-active');
+            }, 600);
+        }
+
+        function updateCountdown() {
+            const now = Date.now();
+            const diff = targetTimestamp - now;
+
+            if (diff <= 0) {
+                if (daysEl) daysEl.textContent = "00";
+                if (hoursEl) hoursEl.textContent = "00";
+                if (minutesEl) minutesEl.textContent = "00";
+                if (secondsEl) secondsEl.textContent = "00";
+                unlockWebsite();
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+            if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+            if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+            if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        const timerInterval = setInterval(function () {
+            const now = Date.now();
+            if (targetTimestamp - now <= 0) {
+                clearInterval(timerInterval);
+                unlockWebsite();
+            } else {
+                updateCountdown();
+            }
+        }, 1000);
+    })();
+</script>

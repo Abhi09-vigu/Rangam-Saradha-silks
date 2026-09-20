@@ -138,3 +138,4 @@ class CustomMiddleware:
             return render(request, 'home/maintenance.html', status=503)
 
         return self.get_response(request)
+

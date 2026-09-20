@@ -1,5 +1,9 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from django.db import models
 from django.utils.text import slugify
+
+DEFAULT_LAUNCH_DT = datetime(2026, 9, 25, 10, 30, 0, tzinfo=ZoneInfo("Asia/Kolkata"))
 
 class WebsiteSetting(models.Model):
     website_name = models.CharField(max_length=100, default="Rangam Saradha Silk Sarees")
@@ -16,6 +20,45 @@ class WebsiteSetting(models.Model):
     cod_max_limit = models.DecimalField(max_digits=10, decimal_places=2, default=2000.00, help_text="Orders at or above this amount receive FREE Cash On Delivery (₹0 COD fee)")
     call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
+
+    # Mandatory TEMP POPUP / Launch Lock Settings
+    launch_mode_active = models.BooleanField(
+        default=True,
+        verbose_name="TEMP POPUP Active (Enable/Disable)",
+        help_text="Turn OFF anytime to immediately open the site early without touching code. When ON, normal visitors see the mandatory full-screen launch overlay until the launch date/time arrives."
+    )
+    launch_datetime = models.DateTimeField(
+        default=DEFAULT_LAUNCH_DT,
+        verbose_name="Grand Opening Date & Time (Asia/Kolkata)",
+        help_text="Target launch date & time in Asia/Kolkata (e.g. 25 September 2026 at 10:30 AM). The overlay automatically disappears when this time arrives."
+    )
+    launch_title = models.CharField(
+        max_length=150,
+        default="Grand Opening Soon",
+        verbose_name="Popup Headline",
+        help_text="Headline displayed on the mandatory launch overlay."
+    )
+    launch_tagline_1 = models.CharField(
+        max_length=200,
+        default="Something beautiful is about to begin.",
+        verbose_name="Popup Subtitle",
+        help_text="Subtitle displayed right below the brand title."
+    )
+    launch_tagline_2 = models.CharField(
+        max_length=200,
+        default="Tradition in Every Weave",
+        verbose_name="Popup Tagline",
+        help_text="Tagline displayed below the countdown timer."
+    )
+
+    @property
+    def is_temp_popup_active(self):
+        if not self.launch_mode_active:
+            return False
+        from django.utils import timezone
+        now = timezone.now()
+        target = self.launch_datetime or DEFAULT_LAUNCH_DT
+        return now < target
 
     @property
     def cod_free_threshold(self):
