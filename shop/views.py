@@ -11,14 +11,18 @@ from django.template.loader import render_to_string
 import datetime
 import uuid
 import logging
+import json
 from decimal import Decimal
 
 from django.db import transaction
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
 from accounts.models import Address
 from home.models import WebsiteSetting
 from .pricing import calculate_order_pricing
 from .email_service import send_owner_order_notification_email
+from .razorpay_service import create_razorpay_order, verify_payment_signature
 
 logger = logging.getLogger(__name__)
 
@@ -390,6 +394,7 @@ def checkout(request):
         'default_payment_method': default_payment,
         'grand_total': pricing['grand_total'],
         'site_settings': settings_obj,
+        'razorpay_key_id': getattr(settings, 'RAZORPAY_KEY_ID', '') or os.environ.get('RAZORPAY_KEY_ID', ''),
     }
     return render(request, 'shop/checkout.html', context)
 
@@ -519,6 +524,286 @@ def order_create(request):
             return redirect('shop:cart_detail')
             
     return redirect('shop:checkout')
+
+
+@customer_required
+@require_POST
+def razorpay_create_order(request):
+    """
+    Authoritatively calculates final order total on the Django backend
+    and creates a pending Order along with a Razorpay Order ID.
+    Inventory is NOT deducted and cart is NOT cleared until payment verification succeeds.
+    """
+    cart = _get_or_create_cart(request)
+    if not cart.items.exists():
+        return JsonResponse({'success': False, 'error': 'Your cart is empty.'}, status=400)
+
+    # Support both JSON payload and standard form-data
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            data = request.POST
+    except Exception:
+        data = request.POST
+
+    address_id = data.get('address_id')
+    if not address_id:
+        return JsonResponse({'success': False, 'error': 'Please select a delivery address.'}, status=400)
+
+    try:
+        address = Address.objects.get(id=address_id, user=request.user)
+    except Address.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Selected address was not found.'}, status=400)
+
+    cart_items = list(cart.items.select_related('product').all())
+
+    # Check product stock and active status
+    for item in cart_items:
+        product = item.product
+        if not product or not product.is_active:
+            return JsonResponse({'success': False, 'error': f"Product '{item.product.name if item.product else 'Item'}' is no longer active."}, status=400)
+        if product.stock < item.quantity:
+            return JsonResponse({'success': False, 'error': f"Product '{product.name}' has insufficient stock. Only {product.stock} left."}, status=400)
+
+    # Authoritative calculation of pricing directly on server - NEVER trust frontend amount
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+    subtotal = sum(item.get_total_price() for item in cart_items)
+
+    # Coupon
+    coupon_code = request.session.get('coupon_code')
+    coupon = None
+    discount = Decimal('0.00')
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(code=coupon_code, is_active=True)
+            if coupon.is_valid(subtotal):
+                discount = coupon.calculate_discount(subtotal)
+        except Coupon.DoesNotExist:
+            pass
+
+    pricing = calculate_order_pricing(subtotal, discount=discount, payment_method='RAZORPAY', settings_obj=settings_obj)
+    grand_total = pricing['grand_total']
+
+    # Generate unique Order Number
+    order_number = f"RS-{uuid.uuid4().hex[:8].upper()}"
+
+    try:
+        rzp_order = create_razorpay_order(
+            amount_in_inr=grand_total,
+            receipt=order_number,
+            notes={
+                'order_number': order_number,
+                'user_id': str(request.user.id),
+                'customer_email': request.user.email,
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error creating Razorpay order: {e}", exc_info=True)
+        err_msg = str(e)
+        if hasattr(e, 'message'):
+            err_msg = e.message
+        return JsonResponse({
+            'success': False,
+            'error': f"Online payment gateway error: {err_msg}"
+        }, status=400)
+
+    # Create pending Order record in Django DB
+    with transaction.atomic():
+        order = Order.objects.create(
+            user=request.user,
+            order_number=order_number,
+            full_name=address.full_name,
+            phone_number=str(address.phone_number),
+            email=request.user.email,
+            address_line_1=address.address_line_1,
+            address_line_2=address.address_line_2,
+            city=address.city,
+            state=address.state,
+            pincode=address.pincode,
+            landmark=address.landmark,
+            payment_method='RAZORPAY',
+            payment_status='PENDING',
+            order_status='PENDING',
+            subtotal=pricing['subtotal'],
+            shipping_cost=pricing['shipping'],
+            tax_amount=pricing['tax_amount'],
+            cod_charge=pricing['cod_charge'],
+            discount_amount=pricing['discount'],
+            grand_total=grand_total,
+            coupon_used=coupon,
+            razorpay_order_id=rzp_order['id'],
+        )
+
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.get_unit_price_with_tax()
+            )
+
+    key_id = getattr(settings, 'RAZORPAY_KEY_ID', '') or os.environ.get('RAZORPAY_KEY_ID', '')
+    if not key_id or 'placeholder' in key_id:
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(settings.BASE_DIR / ".env", override=True)
+            key_id = os.environ.get('RAZORPAY_KEY_ID', '')
+        except Exception:
+            pass
+
+    return JsonResponse({
+        'success': True,
+        'razorpay_order_id': rzp_order['id'],
+        'amount': rzp_order['amount'],  # in paise
+        'currency': rzp_order.get('currency', 'INR'),
+        'key_id': key_id,
+        'order_number': order_number,
+        'customer_name': address.full_name,
+        'customer_email': request.user.email,
+        'customer_phone': str(address.phone_number),
+    })
+
+
+@customer_required
+@require_POST
+def razorpay_verify_payment(request):
+    """
+    Verifies Razorpay HMAC signature on Django backend.
+    Only after successful verification:
+    - Mark payment as PAID
+    - Confirm order
+    - Save razorpay_payment_id and razorpay_signature
+    - Deduct inventory exactly once (idempotent)
+    - Increment coupon usage
+    - Clear customer's cart
+    - Dispatch confirmation emails
+    """
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            data = request.POST
+    except Exception:
+        data = request.POST
+
+    razorpay_order_id = data.get('razorpay_order_id')
+    razorpay_payment_id = data.get('razorpay_payment_id')
+    razorpay_signature = data.get('razorpay_signature')
+
+    if not razorpay_order_id or not razorpay_payment_id or not razorpay_signature:
+        return JsonResponse({'success': False, 'error': 'Missing required payment verification details.'}, status=400)
+
+    # Verify Razorpay signature using official SDK
+    is_valid = verify_payment_signature(razorpay_order_id, razorpay_payment_id, razorpay_signature)
+    if not is_valid:
+        logger.warning(f"Invalid signature received for Razorpay order {razorpay_order_id}")
+        # Update order status to FAILED
+        Order.objects.filter(razorpay_order_id=razorpay_order_id, user=request.user).update(payment_status='FAILED')
+        return JsonResponse({
+            'success': False,
+            'error': 'Payment verification failed. Invalid digital signature.'
+        }, status=400)
+
+    # Signature is valid! Process order confirmation inside atomic transaction
+    with transaction.atomic():
+        try:
+            order = Order.objects.select_for_update().get(
+                razorpay_order_id=razorpay_order_id,
+                user=request.user
+            )
+        except Order.DoesNotExist:
+            logger.error(f"Order with razorpay_order_id={razorpay_order_id} not found for user {request.user.id}")
+            return JsonResponse({'success': False, 'error': 'Order not found.'}, status=404)
+
+        # Idempotency check: if already paid, do not decrement inventory again
+        if order.payment_status == 'PAID':
+            logger.info(f"Order #{order.order_number} already marked as PAID. Skipping duplicate deduction.")
+            redirect_url = reverse('shop:order_success', kwargs={'order_number': order.order_number})
+            return JsonResponse({'success': True, 'redirect_url': redirect_url, 'order_number': order.order_number})
+
+        # Decrement inventory exactly once
+        order_items = list(order.items.select_related('product').all())
+        product_ids = [item.product_id for item in order_items if item.product_id]
+        locked_products = {p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)}
+
+        for item in order_items:
+            if item.product_id and item.product_id in locked_products:
+                product = locked_products[item.product_id]
+                product.stock = max(0, product.stock - item.quantity)
+                product.save()
+
+        # Mark order as PAID and CONFIRMED
+        order.payment_status = 'PAID'
+        order.order_status = 'CONFIRMED'
+        order.razorpay_payment_id = razorpay_payment_id
+        order.razorpay_signature = razorpay_signature
+        order.paid_at = timezone.now()
+        order.save()
+
+        # Update coupon usage
+        if order.coupon_used:
+            order.coupon_used.used_count += 1
+            order.coupon_used.save()
+            if 'coupon_code' in request.session:
+                del request.session['coupon_code']
+
+        # Clear customer cart
+        cart = _get_or_create_cart(request)
+        cart.items.all().delete()
+
+        # Send owner order notification email
+        send_owner_order_notification_email(order)
+
+    # Success! Redirect to order success page
+    redirect_url = reverse('shop:order_success', kwargs={'order_number': order.order_number})
+    messages.success(request, f"Online payment verified! Order #{order.order_number} placed successfully.")
+    return JsonResponse({
+        'success': True,
+        'order_number': order.order_number,
+        'redirect_url': redirect_url
+    })
+
+
+@customer_required
+@require_POST
+def razorpay_payment_failed(request):
+    """
+    Handles payment cancellation, window closure, or payment gateway failures.
+    Does NOT mark order as paid. Does NOT deduct stock. Does NOT delete cart.
+    Allows customer to retry safely.
+    """
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            data = request.POST
+    except Exception:
+        data = request.POST
+
+    razorpay_order_id = data.get('razorpay_order_id')
+    error_reason = data.get('reason', 'Payment cancelled or dismissed by customer')
+
+    if razorpay_order_id:
+        Order.objects.filter(
+            razorpay_order_id=razorpay_order_id,
+            user=request.user,
+            payment_status='PENDING'
+        ).update(payment_status='FAILED')
+        logger.info(f"Payment marked FAILED for razorpay_order_id={razorpay_order_id}. Reason: {error_reason}")
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Payment was not completed. Your order has not been confirmed.'
+    })
+
+
+@customer_required
+def order_success(request, order_number):
+    """Order confirmation and printable invoice page."""
+    order = get_object_or_404(Order.objects.prefetch_related('items__product'), order_number=order_number, user=request.user)
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+    return render(request, 'shop/order_success.html', {'order': order, 'site_settings': settings_obj})
 
 
 @customer_required

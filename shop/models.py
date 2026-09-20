@@ -266,7 +266,9 @@ class Order(models.Model):
     
     PAYMENT_METHODS = (
         ('COD', 'Cash On Delivery'),
-        ('ONLINE', 'Online Payment (Placeholder)'),
+        ('RAZORPAY', 'Pay Online (Razorpay)'),
+        ('ONLINE', 'Online Payment (Razorpay)'),
+        ('OFFLINE', 'Offline Store'),
     )
 
     PAYMENT_STATUS_CHOICES = (
@@ -298,9 +300,15 @@ class Order(models.Model):
     landmark = models.CharField(max_length=100, blank=True, null=True)
     
     # Payment / Order Details
-    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='COD')
-    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='COD')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     order_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    
+    # Razorpay Payment Details
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True, db_index=True, verbose_name="Razorpay Order ID")
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True, db_index=True, verbose_name="Razorpay Payment ID")
+    razorpay_signature = models.CharField(max_length=255, blank=True, null=True, verbose_name="Razorpay Signature")
+    paid_at = models.DateTimeField(blank=True, null=True, verbose_name="Paid At")
     
     # Shipment Tracking
     tracking_link = models.URLField(

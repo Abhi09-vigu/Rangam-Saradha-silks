@@ -175,20 +175,26 @@ class OrderAdmin(admin.ModelAdmin):
         'order_number',
         'full_name',
         'phone_number',
-        'payment_method',
+        'payment_method_badge',
         'payment_status_badge',
+        'razorpay_payment_id',
+        'razorpay_order_id',
         'order_status_badge',
         'grand_total',
         'created_at'
     ]
     list_display_links = ['order_number']
     list_filter = ['order_status', 'payment_status', 'payment_method', 'created_at']
-    search_fields = ['order_number', 'full_name', 'phone_number', 'tracking_number', 'items__product__name']
+    search_fields = [
+        'order_number', 'full_name', 'phone_number', 'tracking_number', 
+        'items__product__name', 'razorpay_order_id', 'razorpay_payment_id'
+    ]
     inlines = [OrderItemInline]
     readonly_fields = [
         'order_number', 'user', 'created_at', 'updated_at',
         'subtotal', 'shipping_cost', 'tax_amount', 'cod_charge', 
-        'discount_amount', 'grand_total', 'coupon_used', 'gst_number'
+        'discount_amount', 'grand_total', 'coupon_used', 'gst_number',
+        'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature', 'paid_at'
     ]
     ordering = ['-created_at']
     change_form_template = 'admin/shop/order_change_form.html'
@@ -234,6 +240,10 @@ class OrderAdmin(admin.ModelAdmin):
         ('Order Status & Payment Method', {
             'fields': ('order_status', 'payment_status', 'payment_method'),
             'description': 'Update fulfillment state, payment settlement, and payment method.'
+        }),
+        ('Razorpay & Online Payment Details', {
+            'fields': ('razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature', 'paid_at'),
+            'description': 'Razorpay payment gateway IDs, cryptographic signature, and payment completion timestamp.'
         }),
         ('Shipment & Tracking', {
             'fields': ('tracking_link', 'tracking_number'),
@@ -383,6 +393,31 @@ class OrderAdmin(admin.ModelAdmin):
         )
     payment_status_badge.short_description = "Payment Status"
     payment_status_badge.admin_order_field = 'payment_status'
+
+    def payment_method_badge(self, obj):
+        """
+        Render payment method with distinct badge distinguishing COD, Razorpay, and Offline orders.
+        """
+        method = obj.payment_method
+        if method == 'COD':
+            return format_html(
+                '<span style="background-color: #fff8eb; color: #b45309; border: 1px solid #fde68a; padding: 3px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; white-space: nowrap;">Cash On Delivery</span>'
+            )
+        elif method in ['RAZORPAY', 'ONLINE']:
+            return format_html(
+                '<span style="background-color: #fdf2f4; color: #8c1035; border: 1px solid #fbcfe8; padding: 3px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; white-space: nowrap;">Razorpay Online</span>'
+            )
+        elif method == 'OFFLINE':
+            return format_html(
+                '<span style="background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; white-space: nowrap;">Offline Store</span>'
+            )
+        else:
+            return format_html(
+                '<span style="background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; padding: 3px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; white-space: nowrap;">{}</span>',
+                obj.get_payment_method_display() or method
+            )
+    payment_method_badge.short_description = "Payment Method"
+    payment_method_badge.admin_order_field = 'payment_method'
 
 from django.utils.html import format_html
 from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot

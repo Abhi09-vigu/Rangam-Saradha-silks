@@ -16,7 +16,11 @@ urlpatterns = [
     path('coupon/remove/', views.remove_coupon, name='coupon_remove'),
     path('checkout/', views.checkout, name='checkout'),
     path('order/create/', views.order_create, name='order_create'),
+    path('order-success/<str:order_number>/', views.order_success, name='order_success'),
     path('order/<str:order_number>/', views.order_detail, name='order_detail'),
+    path('razorpay/create-order/', views.razorpay_create_order, name='razorpay_create_order'),
+    path('razorpay/verify-payment/', views.razorpay_verify_payment, name='razorpay_verify_payment'),
+    path('razorpay/payment-failed/', views.razorpay_payment_failed, name='razorpay_payment_failed'),
     path('review/add/<int:product_id>/', views.add_review, name='add_review'),
     
     # Compare and Quick View URLs
