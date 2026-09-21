@@ -6,4 +6,6 @@ class ShopConfig(AppConfig):
 
     def ready(self):
         import shop.signals
+        from shop.image_utils import setup_universal_image_handling
+        setup_universal_image_handling()
 
