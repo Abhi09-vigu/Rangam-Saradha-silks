@@ -12,7 +12,7 @@
            name="{{ widget.name }}_mobile" 
            id="{{ widget.attrs.id }}_mobile" 
            class="form-control border-0 bg-transparent py-2 px-3 mobile-number-input" 
-           placeholder="9876543210" 
+           placeholder="{{ widget.attrs.placeholder|default:'XXXXXXXXXX' }}" 
            value="{{ widget.mobile_number }}" 
            maxlength="15"
            {% if widget.attrs.required %}required{% endif %}

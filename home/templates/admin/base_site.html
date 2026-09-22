@@ -12,6 +12,120 @@
         localStorage.setItem('theme', 'dark');
         localStorage.setItem('django.admin.theme', 'dark');
     } catch (e) {}
+
+    // Preserve scroll position across admin page reloads and prevent jumping to top
+    (function () {
+        const savedScrollY = sessionStorage.getItem('admin_scroll_y');
+        if (savedScrollY !== null) {
+            window.addEventListener('load', function () {
+                window.scrollTo({ top: parseInt(savedScrollY), behavior: 'instant' });
+                sessionStorage.removeItem('admin_scroll_y');
+            });
+            window.scrollTo({ top: parseInt(savedScrollY), behavior: 'instant' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Restore sidebar scroll position
+            const savedNavScroll = sessionStorage.getItem('admin_nav_scroll');
+            const navSidebar = document.getElementById('nav-sidebar');
+            if (savedNavScroll !== null && navSidebar) {
+                navSidebar.scrollTop = parseInt(savedNavScroll);
+                sessionStorage.removeItem('admin_nav_scroll');
+            }
+
+            const savedFilterScroll = sessionStorage.getItem('admin_filter_scroll');
+            const changelistFilter = document.getElementById('changelist-filter');
+            if (savedFilterScroll !== null && changelistFilter) {
+                changelistFilter.scrollTop = parseInt(savedFilterScroll);
+                sessionStorage.removeItem('admin_filter_scroll');
+            }
+
+            // Save scroll position when clicking any sidebar or filter link
+            document.addEventListener('click', function (e) {
+                const link = e.target.closest('#changelist-filter a, #nav-sidebar a');
+                if (link && link.href && !link.href.startsWith('javascript:')) {
+                    sessionStorage.setItem('admin_scroll_y', window.scrollY);
+                    if (navSidebar) {
+                        sessionStorage.setItem('admin_nav_scroll', navSidebar.scrollTop);
+                    }
+                    if (changelistFilter) {
+                        sessionStorage.setItem('admin_filter_scroll', changelistFilter.scrollTop);
+                    }
+                }
+            });
+
+            // In-place AJAX live filtering ONLY for sidebar filter links (prevents jumping to top)
+            let adminFilterAbort = null;
+            document.addEventListener('click', function (e) {
+                const filterLink = e.target.closest('#changelist-filter a');
+                if (!filterLink || !filterLink.href || filterLink.href.startsWith('javascript:')) return;
+
+                const changelistForm = document.getElementById('changelist-form');
+                const filterSidebar = document.getElementById('changelist-filter');
+                if (!changelistForm || !filterSidebar) return; // Not on a changelist page
+
+                e.preventDefault();
+                const targetUrl = filterLink.href;
+
+                if (adminFilterAbort) adminFilterAbort.abort();
+                adminFilterAbort = new AbortController();
+
+                // Smooth visual feedback on table
+                changelistForm.style.transition = 'opacity 0.18s ease';
+                changelistForm.style.opacity = '0.45';
+                changelistForm.style.pointerEvents = 'none';
+
+                fetch(targetUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: adminFilterAbort.signal
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Network error');
+                    return res.text();
+                })
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const newForm = doc.getElementById('changelist-form');
+                    const newFilter = doc.getElementById('changelist-filter');
+
+                    if (newForm && newFilter) {
+                        changelistForm.innerHTML = newForm.innerHTML;
+                        filterSidebar.innerHTML = newFilter.innerHTML;
+
+                        // Update browser address bar without reloading
+                        window.history.pushState({ url: targetUrl }, '', targetUrl);
+
+                        // Re-initialize action checkboxes if available in Django admin
+                        if (window.Actions) {
+                            try {
+                                window.Actions();
+                            } catch (err) {}
+                        }
+                    } else {
+                        // Fallback to normal navigation
+                        window.location.href = targetUrl;
+                    }
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        window.location.href = targetUrl;
+                    }
+                })
+                .finally(() => {
+                    changelistForm.style.opacity = '1';
+                    changelistForm.style.pointerEvents = 'auto';
+                });
+            });
+
+            window.addEventListener('popstate', function () {
+                if (document.getElementById('changelist-form') && document.getElementById('changelist-filter')) {
+                    window.location.reload();
+                }
+            });
+        });
+    })();
 </script>
 {% endblock %}
 
@@ -311,6 +425,17 @@
     #changelist-filter {
         background-color: #1c1114 !important;
         border-left: 1px solid #3d1b24 !important;
+        position: sticky !important;
+        top: 20px !important;
+        max-height: calc(100vh - 40px) !important;
+        overflow-y: auto !important;
+    }
+
+    #nav-sidebar {
+        position: sticky !important;
+        top: 0 !important;
+        max-height: 100vh !important;
+        overflow-y: auto !important;
     }
 
     #changelist-filter h2 {

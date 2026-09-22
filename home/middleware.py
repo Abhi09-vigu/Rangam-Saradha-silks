@@ -96,13 +96,6 @@ class CustomMiddleware:
                     if request.path not in ['/', '/accounts/login/', '/accounts/register/']:
                         redirect_target += f"?next={request.path}"
                     return redirect(redirect_target)
-            elif not request.user.has_usable_password():
-                if not any(request.path.startswith(prefix) for prefix in exempt_prefixes) and request.path not in ['/robots.txt', '/sitemap.xml', '/favicon.ico']:
-                    from django.urls import reverse
-                    redirect_target = reverse('accounts:set_password')
-                    if request.path not in ['/', '/accounts/login/', '/accounts/register/']:
-                        redirect_target += f"?next={request.path}"
-                    return redirect(redirect_target)
             
         # Bypass maintenance check for static and media files, as well as robots.txt and sitemap XML
         if (

@@ -837,15 +837,10 @@ def google_login_view(request):
         if not next_url or next_url.startswith('/admin'):
             next_url = '/'
 
-        # If user has no phone number or password, prompt them to complete profile
+        # If user has no phone number, prompt them to complete profile
         if not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
-            if next_url != '/':
-                redirect_url += f"?next={next_url}"
-        elif not user.has_usable_password():
-            from django.urls import reverse
-            redirect_url = reverse('accounts:set_password')
             if next_url != '/':
                 redirect_url += f"?next={next_url}"
         else:
@@ -971,15 +966,10 @@ def firebase_login_view(request):
         if not next_url or next_url.startswith('/admin'):
             next_url = '/'
 
-        # If user has no phone number or password, prompt them to complete profile
+        # If user has no phone number, prompt them to complete profile
         if not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
-            if next_url != '/':
-                redirect_url += f"?next={next_url}"
-        elif not user.has_usable_password():
-            from django.urls import reverse
-            redirect_url = reverse('accounts:set_password')
             if next_url != '/':
                 redirect_url += f"?next={next_url}"
         else:
@@ -1009,17 +999,11 @@ def complete_phone_view(request):
     Prompts users who registered/logged in via Google (or any provider without a phone number)
     to provide their mobile number before continuing.
     """
-    from django.urls import reverse
     next_url = request.GET.get('next') or request.POST.get('next') or 'home:index'
     if not next_url or next_url.startswith('/admin'):
         next_url = 'home:index'
 
     if request.user.phone_number:
-        if not request.user.has_usable_password():
-            set_pass_url = reverse('accounts:set_password')
-            if next_url not in ['home:index', '/']:
-                set_pass_url += f"?next={next_url}"
-            return redirect(set_pass_url)
         return redirect(next_url)
 
     if request.method == 'POST':
@@ -1027,15 +1011,7 @@ def complete_phone_view(request):
         if form.is_valid():
             request.user.phone_number = form.cleaned_data['phone_number']
             request.user.save(update_fields=['phone_number'])
-            messages.success(request, "Mobile number saved successfully!")
-
-            # After submission of phone, ask password to set account password
-            if not request.user.has_usable_password():
-                set_pass_url = reverse('accounts:set_password')
-                if next_url not in ['home:index', '/']:
-                    set_pass_url += f"?next={next_url}"
-                return redirect(set_pass_url)
-
+            messages.success(request, f"Welcome to Rangam Saradha Silks, {request.user.first_name or request.user.username}! Mobile number saved successfully.")
             return redirect(next_url)
     else:
         form = CompletePhoneForm(user=request.user)
@@ -1049,39 +1025,12 @@ def complete_phone_view(request):
 @login_required
 def set_account_password_view(request):
     """
-    Prompts users who registered via Google/social to set an account password
-    after submitting their phone number, enabling direct password login anytime.
+    Legacy view preserved for backwards compatibility; immediately redirects onwards.
     """
-    from django.urls import reverse
     next_url = request.GET.get('next') or request.POST.get('next') or 'home:index'
     if not next_url or next_url.startswith('/admin'):
         next_url = 'home:index'
-
-    # If the user already has a usable password, redirect them onwards
-    if request.user.has_usable_password():
-        return redirect(next_url)
-
-    # Must complete mobile number first
-    if not request.user.phone_number:
-        phone_url = reverse('accounts:complete_phone')
-        if next_url not in ['home:index', '/']:
-            phone_url += f"?next={next_url}"
-        return redirect(phone_url)
-
-    if request.method == 'POST':
-        form = SetAccountPasswordForm(request.POST, user=request.user)
-        if form.is_valid():
-            form.save()
-            update_session_auth_hash(request, request.user)
-            messages.success(request, f"Password created successfully! Welcome to Rangam Saradha Silks, {request.user.first_name or request.user.username}.")
-            return redirect(next_url)
-    else:
-        form = SetAccountPasswordForm(user=request.user)
-
-    return render(request, 'accounts/set_password.html', {
-        'form': form,
-        'next_url': next_url,
-    })
+    return redirect(next_url)
 
 
 

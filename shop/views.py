@@ -52,6 +52,142 @@ def categories_list(request):
     }
     return render(request, 'shop/categories.html', context)
 
+# Stop words / generic words for saree shopping
+SEARCH_STOP_WORDS = {
+    'saree', 'sarees', 'sari', 'saris', 'collection', 'wear', 'for', 'in',
+    'and', 'the', 'of', 'with', 'a', 'an', 'shop', 'all', 'buy', 'online',
+    'pure', 'authentic', 'traditional'
+}
+
+# Domain-specific synonym mappings (weaves, fabrics, occasions)
+SEARCH_SYNONYMS = {
+    'banaras': ['banaras', 'banarasi', 'benarasi', 'benaras'],
+    'banarasi': ['banaras', 'banarasi', 'benarasi', 'benaras'],
+    'benarasi': ['banaras', 'banarasi', 'benarasi', 'benaras'],
+    'benaras': ['banaras', 'banarasi', 'benarasi', 'benaras'],
+
+    'kanchi': ['kanchi', 'kanchipuram', 'kanjivaram', 'kanjeevaram'],
+    'kanchipuram': ['kanchi', 'kanchipuram', 'kanjivaram', 'kanjeevaram'],
+    'kanjivaram': ['kanchi', 'kanchipuram', 'kanjivaram', 'kanjeevaram'],
+    'kanjeevaram': ['kanchi', 'kanchipuram', 'kanjivaram', 'kanjeevaram'],
+
+    'silk': ['silk', 'silks', 'pattu'],
+    'silks': ['silk', 'silks', 'pattu'],
+    'pattu': ['silk', 'silks', 'pattu'],
+
+    'cotton': ['cotton', 'cottons', 'suti'],
+    'cottons': ['cotton', 'cottons', 'suti'],
+
+    'bridal': ['bridal', 'wedding', 'bride', 'marriage', 'vivah', 'trousseau'],
+    'wedding': ['bridal', 'wedding', 'bride', 'marriage', 'vivah', 'trousseau'],
+    'bride': ['bridal', 'wedding', 'bride', 'marriage', 'vivah'],
+    'marriage': ['bridal', 'wedding', 'bride', 'marriage', 'vivah'],
+
+    'party': ['party', 'partywear', 'party wear'],
+    'partywear': ['party', 'party wear', 'partywear'],
+
+    'handloom': ['handloom', 'handcrafted', 'handwoven', 'hand woven'],
+
+    'chanderi': ['chanderi'],
+    'tussar': ['tussar', 'tusser', 'tassar'],
+    'paithani': ['paithani'],
+    'organza': ['organza'],
+    'georgette': ['georgette'],
+    'chiffon': ['chiffon'],
+    'crepe': ['crepe'],
+    'bandhani': ['bandhani', 'bandhej'],
+    'patola': ['patola'],
+    'mysore': ['mysore'],
+    'uppada': ['uppada'],
+    'gadwal': ['gadwal'],
+    'pochampally': ['pochampally', 'ikkat', 'ikat'],
+    'dharmavaram': ['dharmavaram'],
+    'zari': ['zari', 'jari', 'brocade', 'gold zari', 'silver zari'],
+    'brocade': ['brocade', 'zari'],
+}
+
+SEARCH_PRIMARY_WEAVES = {
+    'banaras', 'banarasi', 'benarasi', 'benaras',
+    'kanchi', 'kanchipuram', 'kanjivaram', 'kanjeevaram',
+    'chanderi', 'paithani', 'patola', 'bandhani', 'bandhej',
+    'tussar', 'tusser', 'organza', 'georgette', 'cotton', 'linen'
+}
+
+def _build_search_term_q(term):
+    """Matches a single keyword across all relevant product fields."""
+    return (
+        Q(name__icontains=term) |
+        Q(categories__name__icontains=term) |
+        Q(categories__slug__icontains=term) |
+        Q(description__icontains=term) |
+        Q(short_description__icontains=term) |
+        Q(fabric__icontains=term) |
+        Q(material__icontains=term) |
+        Q(tags__icontains=term) |
+        Q(sku__icontains=term) |
+        Q(color__icontains=term) |
+        Q(occasion__icontains=term) |
+        Q(zari_type__icontains=term) |
+        Q(meta_keywords__icontains=term) |
+        Q(meta_title__icontains=term)
+    )
+
+def filter_products_by_search(queryset, raw_query):
+    query_str = (raw_query or '').strip()
+    if not query_str:
+        return queryset
+
+    # Check for direct exact SKU match first
+    sku_match = queryset.filter(sku__iexact=query_str).distinct()
+    if sku_match.exists():
+        return sku_match
+
+    import re
+    # Tokenize input into alphanumeric words
+    tokens = [t.lower() for t in re.findall(r'[\w\d]+', query_str)]
+    if not tokens:
+        return queryset.none()
+
+    # Content tokens excluding generic words
+    content_tokens = [t for t in tokens if t not in SEARCH_STOP_WORDS]
+    if not content_tokens:
+        content_tokens = tokens
+
+    # Strategy 1: Multi-term intersection (AND logic across all search concepts)
+    # E.g., "silk saree banaras" -> matches products that satisfy "silk" AND "banaras"
+    and_q = Q()
+    for token in content_tokens:
+        variants = SEARCH_SYNONYMS.get(token, [token])
+        token_q = Q()
+        for v in variants:
+            token_q |= _build_search_term_q(v)
+        and_q &= token_q
+
+    and_matches = queryset.filter(and_q).distinct()
+    if and_matches.exists():
+        return and_matches
+
+    # Strategy 2: If primary weave keyword is specified, filter strictly on that weave
+    weave_tokens = [t for t in content_tokens if t in SEARCH_PRIMARY_WEAVES]
+    if weave_tokens:
+        weave_q = Q()
+        for wt in weave_tokens:
+            for v in SEARCH_SYNONYMS.get(wt, [wt]):
+                weave_q |= _build_search_term_q(v)
+        weave_matches = queryset.filter(weave_q).distinct()
+        if weave_matches.exists():
+            return weave_matches
+
+    # Strategy 3: Fallback to OR across content tokens
+    or_q = Q()
+    for token in content_tokens:
+        variants = SEARCH_SYNONYMS.get(token, [token])
+        for v in variants:
+            or_q |= _build_search_term_q(v)
+
+    return queryset.filter(or_q).distinct()
+
+
 def catalog(request, category_slug=None):
     products = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
     
@@ -60,15 +196,10 @@ def catalog(request, category_slug=None):
     if sku_param:
         products = products.filter(sku__icontains=sku_param)
 
-    # Query / Search
+    # Query / Search (Smart multi-keyword + synonym search)
     query = request.GET.get('q')
     if query:
-        products = products.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query) |
-            Q(tags__icontains=query) |
-            Q(sku__icontains=query)
-        )
+        products = filter_products_by_search(products, query)
         
     # Filters
     category_param = request.GET.get('category') or category_slug
