@@ -17,7 +17,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
+from .models import Category, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
 from accounts.models import Address
 from home.models import WebsiteSetting
 from .pricing import calculate_order_pricing
@@ -72,18 +72,20 @@ def catalog(request, category_slug=None):
         
     # Filters
     category_param = request.GET.get('category') or category_slug
+    active_category = None
     if category_param:
         if isinstance(category_param, str) and category_param.isdigit():
             products = products.filter(categories__id=category_param)
+            active_category = Category.objects.filter(id=category_param, is_active=True).first()
         else:
-            products = products.filter(categories__slug=category_param)
-        
-    collection_param = request.GET.get('collection')
-    if collection_param:
-        if collection_param.isdigit():
-            products = products.filter(collection_id=collection_param)
-        else:
-            products = products.filter(collection__slug=collection_param)
+            cat_obj = Category.objects.filter(slug=category_param, is_active=True).first()
+            if not cat_obj and category_param == 'bridal':
+                cat_obj = Category.objects.filter(slug='bridal-collection', is_active=True).first()
+            if cat_obj:
+                products = products.filter(categories=cat_obj)
+                active_category = cat_obj
+            else:
+                products = products.filter(categories__slug=category_param)
         
     color = request.GET.get('color')
     if color:
@@ -128,7 +130,6 @@ def catalog(request, category_slug=None):
 
     # Categories and filters for Sidebar UI
     categories = Category.objects.filter(is_active=True)
-    collections = Collection.objects.filter(is_active=True)
     
     # Get distinct attribute values for filters
     colors = Product.objects.filter(is_active=True, stock__gt=0).values_list('color', flat=True).distinct()
@@ -140,25 +141,9 @@ def catalog(request, category_slug=None):
     fabrics = [f for f in fabrics if f]
     occasions = [o for o in occasions if o]
 
-    # Active filter objects for header
-    active_category = None
-    if category_param:
-        if category_param.isdigit():
-            active_category = Category.objects.filter(id=category_param, is_active=True).first()
-        else:
-            active_category = Category.objects.filter(slug=category_param, is_active=True).first()
-
-    active_collection = None
-    if collection_param:
-        if collection_param.isdigit():
-            active_collection = Collection.objects.filter(id=collection_param, is_active=True).first()
-        else:
-            active_collection = Collection.objects.filter(slug=collection_param, is_active=True).first()
-
     # Determine if any filter / query parameter is active in URL
     has_filters = bool(
         category_param or 
-        collection_param or 
         any(v for v in request.GET.values() if v and str(v).strip())
     )
 
@@ -186,16 +171,13 @@ def catalog(request, category_slug=None):
     context = {
         'products': page_obj,
         'categories': categories,
-        'collections': collections,
         'colors': colors,
         'fabrics': fabrics,
         'occasions': occasions,
         'current_filters': request.GET,
         'category_param': category_param,
-        'collection_param': collection_param,
         'has_filters': has_filters,
         'active_category': active_category,
-        'active_collection': active_collection,
         'min_catalog_price': min_catalog_price,
         'max_catalog_price': max_catalog_price,
     }
@@ -254,11 +236,11 @@ def cart_detail(request):
     if coupon_code:
         try:
             coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-            if coupon.is_valid(subtotal):
-                discount = coupon.calculate_discount(subtotal)
+            if coupon.is_valid(subtotal, cart=cart):
+                discount = coupon.calculate_discount(subtotal, cart=cart)
             else:
                 del request.session['coupon_code']
-                messages.warning(request, "Coupon became invalid.")
+                messages.warning(request, "Coupon became invalid for your current cart items.")
         except Coupon.DoesNotExist:
             del request.session['coupon_code']
             
@@ -333,28 +315,44 @@ def cart_remove(request, item_id):
     return redirect('shop:cart_detail')
 
 def apply_coupon(request):
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'shop:checkout'
     if request.method == 'POST':
-        code = request.POST.get('coupon_code')
+        code = request.POST.get('coupon_code', '').strip()
         cart = _get_or_create_cart(request)
         subtotal = sum(item.get_total_price() for item in cart.items.all())
         
         try:
-            coupon = Coupon.objects.get(code=code, is_active=True)
-            if coupon.is_valid(subtotal):
+            coupon = Coupon.objects.get(code__iexact=code, is_active=True)
+            today = datetime.date.today()
+            if coupon.start_date and coupon.start_date > today:
+                messages.error(request, f"Coupon '{code}' is not active yet (starts on {coupon.start_date.strftime('%d-%m-%Y')}).")
+            elif coupon.expiry_date and coupon.expiry_date < today:
+                messages.error(request, f"Coupon '{code}' has expired.")
+            elif coupon.used_count >= coupon.usage_limit:
+                messages.error(request, f"Coupon '{code}' usage limit has been reached.")
+            elif subtotal < coupon.min_purchase:
+                messages.error(request, f"Minimum purchase amount of ₹{coupon.min_purchase:.0f} required to apply this coupon.")
+            elif coupon.apply_to in ('CATEGORIES', 'PRODUCTS') and not coupon.get_eligible_items(cart):
+                if coupon.apply_to == 'CATEGORIES':
+                    messages.error(request, f"Coupon '{code}' applies only to selected categories. None are in your cart.")
+                else:
+                    messages.error(request, f"Coupon '{code}' applies only to specific products. None are in your cart.")
+            elif coupon.is_valid(subtotal, cart=cart):
                 request.session['coupon_code'] = coupon.code
-                messages.success(request, f"Coupon '{code}' applied successfully!")
+                messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
             else:
-                messages.error(request, "Coupon is expired, fully used, or minimum purchase amount not met.")
+                messages.error(request, "Coupon could not be applied to your current cart.")
         except Coupon.DoesNotExist:
             messages.error(request, "Invalid coupon code.")
             
-    return redirect('shop:cart_detail')
+    return redirect(next_url)
 
 def remove_coupon(request):
     if 'coupon_code' in request.session:
         del request.session['coupon_code']
         messages.success(request, "Coupon removed.")
-    return redirect('shop:cart_detail')
+    next_url = request.GET.get('next') or request.POST.get('next') or request.META.get('HTTP_REFERER') or 'shop:checkout'
+    return redirect(next_url)
 
 @customer_required
 def checkout(request):
@@ -389,8 +387,8 @@ def checkout(request):
     if coupon_code:
         try:
             coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-            if coupon.is_valid(subtotal):
-                discount = coupon.calculate_discount(subtotal)
+            if coupon.is_valid(subtotal, cart=cart):
+                discount = coupon.calculate_discount(subtotal, cart=cart)
         except Coupon.DoesNotExist:
             pass
             
@@ -468,8 +466,8 @@ def order_create(request):
                 if coupon_code:
                     try:
                         coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-                        if coupon.is_valid(subtotal):
-                            discount = coupon.calculate_discount(subtotal)
+                        if coupon.is_valid(subtotal, cart=cart):
+                            discount = coupon.calculate_discount(subtotal, cart=cart)
                     except Coupon.DoesNotExist:
                         pass
                         
@@ -599,8 +597,8 @@ def razorpay_create_order(request):
     if coupon_code:
         try:
             coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-            if coupon.is_valid(subtotal):
-                discount = coupon.calculate_discount(subtotal)
+            if coupon.is_valid(subtotal, cart=cart):
+                discount = coupon.calculate_discount(subtotal, cart=cart)
         except Coupon.DoesNotExist:
             pass
 
@@ -874,12 +872,11 @@ def product_quick_view(request, product_id):
         highlights.append(f"Color: {product.color}")
     if product.material:
         highlights.append(f"Material: {product.material}")
-    if product.occasion:
-        highlights.append(f"Occasion: {product.occasion}")
-    if isinstance(product.specifications, dict):
-        for key, val in product.specifications.items():
-            if len(highlights) < 6:
-                highlights.append(f"{key}: {val}")
+    if product.zari_type and len(highlights) < 6:
+        highlights.append(f"Zari: {product.zari_type}")
+    for item in product.parsed_specifications:
+        if len(highlights) < 6:
+            highlights.append(f"{item[0]}: {item[1]}")
             
     in_wishlist = False
     if request.user.is_authenticated and not request.user.is_staff:

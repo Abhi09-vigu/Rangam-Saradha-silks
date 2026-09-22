@@ -264,6 +264,34 @@
                             {% endfor %}
                         </div>
                         
+                        <!-- Promo Coupon Box -->
+                        <div class="mb-3 pb-3 border-bottom border-light">
+                            <label class="form-label fw-semibold fs-8 text-uppercase text-muted mb-2" style="letter-spacing: 0.05em;">
+                                <i class="bi bi-tag-fill me-1 text-primary"></i> Apply Promo Coupon
+                            </label>
+                            {% if coupon %}
+                            <div class="d-flex justify-content-between align-items-center p-2 px-3 rounded-3" style="background: #eefbf4; border: 1px solid #c3e6cb;">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-success" style="font-size: 0.68rem;">APPLIED</span>
+                                        <span class="fw-bold text-dark fs-7">{{ coupon.code }}</span>
+                                    </div>
+                                    <span class="text-success fs-8 fw-semibold">
+                                        {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0 }}% Off{% else %}{{ site_settings.currency }}{{ coupon.discount_value }} Off{% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url 'shop:coupon_remove' %}?next={{ request.path }}" class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 rounded-pill">Remove</a>
+                            </div>
+                            {% else %}
+                            <form action="{% url 'shop:apply_coupon' %}" method="POST" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <input type="text" name="coupon_code" class="form-control form-control-sm rounded-pill px-3" placeholder="Enter coupon code (e.g. SILK10)" required style="font-size: 0.85rem; text-transform: uppercase;">
+                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Apply</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        
                         <!-- Calculation List -->
                         <div class="d-flex justify-content-between mb-2 fs-7">
                             <span class="text-muted">Subtotal:</span>

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
+import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
@@ -34,27 +35,11 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class Collection(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, blank=True)
-    description = models.TextField(blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='collections/', blank=True, null=True, help_text="Cover image for this collection on the homepage.")
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
 class Product(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     sku = models.CharField(max_length=50, unique=True)
     categories = models.ManyToManyField(Category, related_name='products')
-    collection = models.ForeignKey(Collection, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     
     short_description = models.TextField(max_length=500, blank=True, null=True)
     description = models.TextField()
@@ -79,7 +64,10 @@ class Product(models.Model):
     color = models.CharField(max_length=100, blank=True, null=True)
     occasion = models.CharField(max_length=100, blank=True, null=True)
     fabric = models.CharField(max_length=100, blank=True, null=True)
-    specifications = models.JSONField(default=dict, blank=True, help_text="Key-value specifications (e.g., {'Zari Type': 'Pure Gold', 'Blouse': 'Contrast'})")
+    zari_type = models.CharField(max_length=150, blank=True, default="Premium Gold Zari Traditional Weave", help_text="Zari specification (e.g., Premium Gold Zari Traditional Weave)")
+    saree_length = models.CharField(max_length=150, blank=True, default="5.5 Meters (Approx.) + 0.8 Meter Running Blouse", help_text="Length specification (e.g., 5.5 Meters + 0.8 Meter Running Blouse)")
+    authenticity = models.CharField(max_length=200, blank=True, default="Silk Mark Certified 100% Handcrafted Mulberry Silk", help_text="Certification / Authenticity (e.g., Silk Mark Certified)")
+    specifications = models.TextField(blank=True, default="", help_text="Additional specifications in plain text (enter one per line, e.g., 'Blouse: Contrast Brocade' or 'Border: Temple Border')")
     
     # SEO
     meta_title = models.CharField(max_length=150, blank=True, null=True)
@@ -95,20 +83,50 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        if self.offer_price is None:
-            if self.discount_percentage > 0:
-                price_decimal = Decimal(str(self.price))
-                self.offer_price = price_decimal - (price_decimal * Decimal(self.discount_percentage) / Decimal('100'))
-            else:
-                self.offer_price = self.price
+        if self.price is not None:
+            price_decimal = Decimal(str(self.price))
+            if price_decimal > Decimal('0'):
+                if self.offer_price is not None:
+                    offer_decimal = Decimal(str(self.offer_price))
+                    if offer_decimal < price_decimal:
+                        calculated_discount = ((price_decimal - offer_decimal) / price_decimal) * Decimal('100')
+                        self.discount_percentage = int(calculated_discount.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+                    else:
+                        self.discount_percentage = 0
+                        self.offer_price = price_decimal
+                elif self.discount_percentage > 0:
+                    disc_decimal = Decimal(str(self.discount_percentage))
+                    calc_offer = price_decimal - (price_decimal * disc_decimal / Decimal('100'))
+                    self.offer_price = calc_offer.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                else:
+                    self.offer_price = price_decimal
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('shop:product_detail', kwargs={'slug': self.slug})
 
-    def __str__(self):
-        return self.name
+    @property
+    def parsed_specifications(self):
+        """
+        Parses text specifications into a list of (label, value) tuples.
+        Supports 'Key: Value' format or plain descriptive lines.
+        """
+        if not self.specifications:
+            return []
+        if isinstance(self.specifications, dict):
+            return list(self.specifications.items())
+        items = []
+        for line in str(self.specifications).splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if ':' in line:
+                key, val = line.split(':', 1)
+                items.append((key.strip(), val.strip()))
+            else:
+                items.append(('Specification', line))
+        return items
 
     @property
     def has_video(self):
@@ -190,6 +208,12 @@ class Review(models.Model):
         return f"{self.user.username} - {self.product.name} ({self.rating} Stars)"
 
 class Coupon(models.Model):
+    APPLY_TO_CHOICES = (
+        ('ALL', 'All Products'),
+        ('CATEGORIES', 'Specific Categories'),
+        ('PRODUCTS', 'Specific Products'),
+    )
+
     code = models.CharField(max_length=50, unique=True)
     discount_type = models.CharField(max_length=10, choices=(('PERCENT', 'Percentage'), ('FIXED', 'Fixed Amount')), default='PERCENT')
     discount_value = models.DecimalField(max_digits=10, decimal_places=2)
@@ -197,29 +221,96 @@ class Coupon(models.Model):
     max_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Maximum discount for Percentage type")
     usage_limit = models.IntegerField(default=100)
     used_count = models.IntegerField(default=0)
+    start_date = models.DateField(default=datetime.date.today, null=True, blank=True, help_text="Start date from which this coupon becomes valid")
     expiry_date = models.DateField()
     is_active = models.BooleanField(default=True)
 
-    def is_valid(self, cart_total):
-        import datetime
+    # Targeting
+    apply_to = models.CharField(max_length=20, choices=APPLY_TO_CHOICES, default='ALL', help_text="Choose where this coupon can be applied")
+    categories = models.ManyToManyField(Category, blank=True, related_name='coupons', help_text="Categories eligible for this coupon")
+    products = models.ManyToManyField(Product, blank=True, related_name='coupons', help_text="Products eligible for this coupon")
+
+    def get_eligible_items(self, cart):
+        """
+        Returns a list of CartItem instances from the cart that are eligible for this coupon.
+        """
+        if not cart:
+            return []
+
+        if hasattr(cart, 'items'):
+            items = list(cart.items.select_related('product').prefetch_related('product__categories').all())
+        elif isinstance(cart, (list, tuple)):
+            items = list(cart)
+        else:
+            return []
+
+        if self.apply_to == 'ALL':
+            return [item for item in items if item.product and item.product.is_active and item.product.stock > 0]
+
+        elif self.apply_to == 'CATEGORIES':
+            eligible_cat_ids = set(self.categories.values_list('id', flat=True))
+            eligible = []
+            for item in items:
+                if not item.product or not item.product.is_active or item.product.stock <= 0:
+                    continue
+                product_cat_ids = set(item.product.categories.values_list('id', flat=True))
+                if eligible_cat_ids & product_cat_ids:
+                    eligible.append(item)
+            return eligible
+
+        elif self.apply_to == 'PRODUCTS':
+            eligible_prod_ids = set(self.products.values_list('id', flat=True))
+            eligible = [
+                item for item in items
+                if item.product and item.product_id in eligible_prod_ids and item.product.is_active and item.product.stock > 0
+            ]
+            return eligible
+
+        return items
+
+    def is_valid(self, cart_total, cart=None):
+        today = datetime.date.today()
+        start = self.start_date.date() if isinstance(self.start_date, datetime.datetime) else self.start_date
+        expiry = self.expiry_date.date() if isinstance(self.expiry_date, datetime.datetime) else self.expiry_date
         if not self.is_active:
             return False
-        if self.expiry_date < datetime.date.today():
+        if start and start > today:
+            return False
+        if expiry and expiry < today:
             return False
         if self.used_count >= self.usage_limit:
             return False
-        if cart_total < self.min_purchase:
+        if Decimal(str(cart_total or 0)) < Decimal(str(self.min_purchase or 0)):
             return False
+        if cart is not None and self.apply_to in ('CATEGORIES', 'PRODUCTS'):
+            eligible_items = self.get_eligible_items(cart)
+            if not eligible_items:
+                return False
         return True
 
-    def calculate_discount(self, cart_total):
-        if self.discount_type == 'PERCENT':
-            discount = cart_total * (self.discount_value / Decimal('100'))
-            if self.max_discount and discount > self.max_discount:
-                discount = self.max_discount
-            return discount
+    def calculate_discount(self, cart_total, cart=None):
+        cart_total = Decimal(str(cart_total or 0))
+
+        if cart is not None and self.apply_to in ('CATEGORIES', 'PRODUCTS'):
+            eligible_items = self.get_eligible_items(cart)
+            if not eligible_items:
+                return Decimal('0.00')
+            discount_base = sum(Decimal(str(item.get_total_price())) for item in eligible_items)
         else:
-            return min(self.discount_value, cart_total)
+            discount_base = cart_total
+
+        if discount_base <= Decimal('0.00'):
+            return Decimal('0.00')
+
+        if self.discount_type == 'PERCENT':
+            disc_rate = Decimal(str(self.discount_value)) / Decimal('100.00')
+            discount = (discount_base * disc_rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            if self.max_discount and discount > Decimal(str(self.max_discount)):
+                discount = Decimal(str(self.max_discount))
+            return min(discount, discount_base)
+        else:
+            fixed_val = Decimal(str(self.discount_value))
+            return min(fixed_val, discount_base)
 
     def __str__(self):
         return self.code
@@ -491,5 +582,78 @@ def release_call_slot_on_booking_delete(sender, instance, **kwargs):
             time_slot=instance.time_slot,
             blocked_by_owner=False
         ).update(status='AVAILABLE')
+
+
+class BulkStockProduct(models.Model):
+    STATUS_CHOICES = (
+        ('DRAFT', 'Draft'),
+        ('REVIEW', 'Under Review'),
+        ('PUBLISHED', 'Published'),
+    )
+
+    name = models.CharField(max_length=200, blank=True, default='')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='bulk_stock_products')
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    discount_percentage = models.IntegerField(default=0)
+    sku = models.CharField(max_length=50, blank=True, default='')
+    stock = models.IntegerField(default=1)
+    image = models.ImageField(upload_to='bulk_stock/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    # Marketing Flags
+    is_featured = models.BooleanField(default=False)
+    is_trending = models.BooleanField(default=False)
+    is_new_arrival = models.BooleanField(default=False)
+    is_best_seller = models.BooleanField(default=False)
+    is_today_deal = models.BooleanField(default=False)
+
+    # Media & Tags
+    video_url = models.URLField(max_length=500, blank=True, null=True)
+    tags = models.CharField(max_length=255, blank=True, default='')
+
+    # Product Specifications & Details
+    short_description = models.TextField(max_length=500, blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    fabric = models.CharField(max_length=100, blank=True, default='')
+    color = models.CharField(max_length=100, blank=True, default='')
+    material = models.CharField(max_length=100, blank=True, default='')
+    occasion = models.CharField(max_length=100, blank=True, default='')
+    zari_type = models.CharField(max_length=150, blank=True, default="Premium Gold Zari Traditional Weave")
+    saree_length = models.CharField(max_length=150, blank=True, default="5.5 Meters (Approx.) + 0.8 Meter Running Blouse")
+    authenticity = models.CharField(max_length=200, blank=True, default="Silk Mark Certified 100% Handcrafted Mulberry Silk")
+    specifications = models.TextField(blank=True, default='')
+
+    # SEO Metadata
+    meta_title = models.CharField(max_length=150, blank=True, default='')
+    meta_description = models.TextField(blank=True, default='')
+    meta_keywords = models.CharField(max_length=255, blank=True, default='')
+
+    # Status and User Tracking
+    status = models.CharField(max_length=20, default='DRAFT', choices=STATUS_CHOICES)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='bulk_stock_items')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Bulk Stock"
+        verbose_name_plural = "Bulk Stock"
+        ordering = ['id']
+
+    def __str__(self):
+        return self.name or f"Draft #{self.id}"
+
+
+class BulkStockProductImage(models.Model):
+    bulk_product = models.ForeignKey(BulkStockProduct, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='bulk_stock/')
+    display_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return f"Image for {self.bulk_product}"
+
 
 

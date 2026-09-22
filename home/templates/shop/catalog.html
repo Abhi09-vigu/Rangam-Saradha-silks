@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block meta_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
-{% block meta_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% elif active_collection %}{{ active_collection.description|default:"Explore our exclusive "|add:active_collection.name|add:" collection of pure silk sarees at Rangam Saradha Silks." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
+{% block meta_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif request.GET.q %}Search: "{{ request.GET.q }}" | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block meta_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
 {% block meta_keywords %}{% if active_category %}{{ active_category.meta_keywords|default:active_category.name|add:", silk sarees, Rangam Saradha Silks" }}{% else %}Shop All Sarees, Rangam Saradha Silks shop, pure silk sarees online, Kanchipuram silk sarees, traditional sarees buy online{% endif %}{% endblock %}
 {% block canonical %}{% if active_category %}https://rangamsaradhasilks.com{{ active_category.get_absolute_url }}{% else %}https://rangamsaradhasilks.com/shop/{% endif %}{% endblock %}
 {% block og_url %}{% if active_category %}https://rangamsaradhasilks.com{{ active_category.get_absolute_url }}{% else %}https://rangamsaradhasilks.com/shop/{% endif %}{% endblock %}
-{% block og_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block og_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
 {% block og_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
-{% block twitter_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% elif active_collection %}{{ active_collection.name }} Collection | Rangam Saradha Silks{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
+{% block twitter_title %}{% if active_category %}{{ active_category.meta_title|default:active_category.name|add:" Sarees | Rangam Saradha Silks" }}{% else %}Shop All Sarees | Rangam Saradha Silks{% endif %}{% endblock %}
 {% block twitter_description %}{% if active_category %}{{ active_category.meta_description|default:"Explore authentic handwoven "|add:active_category.name|add:" sarees at Rangam Saradha Silks. Discover pure silk craftsmanship, traditional designs, and rich weaves." }}{% else %}Browse our complete collection of handwoven pure silk sarees, Kanchipuram sarees, bridal silk sarees, and traditional sarees at Rangam Saradha Silks.{% endif %}{% endblock %}
 
 {% block extra_head %}
@@ -93,48 +93,6 @@
     </div>
 </section>
 
-{% elif active_collection %}
-<!-- Dedicated Luxury Collection Header -->
-<section class="section-luxury bg-light py-4 border-bottom position-relative">
-    <div class="container">
-        <nav aria-label="breadcrumb" class="mb-2">
-            <ol class="breadcrumb fs-8 mb-0">
-                <li class="breadcrumb-item"><a href="{% url 'home:index' %}" class="text-decoration-none text-muted">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'shop:catalog' %}" class="text-decoration-none text-muted">Shop</a></li>
-                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">{{ active_collection.name }}</li>
-            </ol>
-        </nav>
-        
-        <div class="row align-items-center g-4">
-            <div class="col-lg-8 col-md-7">
-                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border border-light text-primary fs-8 fw-semibold mb-2 shadow-xs">
-                    <i class="bi bi-stars"></i> Curated Collection
-                </div>
-                <h1 class="font-heading display-5 text-dark mb-2 fw-bold">
-                    {{ active_collection.name }}
-                </h1>
-                <p class="text-muted fs-6 mb-3" style="max-width: 650px;">
-                    {{ active_collection.description|default:"Explore our exclusive handwoven saree collection curated for memorable moments." }}
-                </p>
-                <div class="d-flex flex-wrap align-items-center gap-3">
-                    <span class="badge rounded-pill px-3 py-2 fs-8 fw-semibold" style="background: rgba(175, 4, 70, 0.1); color: var(--primary);">
-                        <i class="bi bi-tag-fill me-1"></i> {{ products.paginator.count }} {{ products.paginator.count|pluralize:'Saree,Sarees' }} Found
-                    </span>
-                    <a href="{% url 'shop:catalog' %}" class="text-muted fs-8 text-decoration-none hover-primary">
-                        <i class="bi bi-grid-3x3-gap me-1"></i> View All Sarees
-                    </a>
-                </div>
-            </div>
-            {% if active_collection.image %}
-            <div class="col-lg-4 col-md-5 d-none d-md-block text-end">
-                <div class="category-header-thumbnail position-relative d-inline-block rounded-4 overflow-hidden shadow-sm" style="max-width: 240px; height: 160px; border: 2px solid rgba(197, 160, 89, 0.35);">
-                    <img src="{{ active_collection.image.url }}" alt="{{ active_collection.name }}" class="w-100 h-100 object-fit-cover">
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</section>
 
 {% elif has_filters %}
 <!-- Compact Filtered Navigation Header (Search / Attributes) -->
@@ -349,7 +307,7 @@
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Category</h5>
                             {% for cat in categories %}
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if current_filters.category == cat.slug or active_category.slug == cat.slug or category_param == cat.slug %}checked{% endif %} onchange="this.form.submit()">
+                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if category_param == cat.slug or current_filters.category == cat.slug %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="form-check-label text-dark fs-7" for="cat-{{ cat.id }}">
                                     {{ cat.name }}
                                 </label>
@@ -455,8 +413,6 @@
                         {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} matching SKU "<strong>{{ current_filters.sku }}</strong>"
                     {% elif active_category %}
                         {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} in <strong>{{ active_category.name }}</strong>
-                    {% elif active_collection %}
-                        {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} in <strong>{{ active_collection.name }}</strong>
                     {% else %}
                         {{ products.paginator.count }} {{ products.paginator.count|pluralize:"Saree,Sarees" }} found
                     {% endif %}
@@ -466,10 +422,10 @@
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <label for="sortBy" class="text-muted fs-7 text-nowrap mb-0">Sort By:</label>
                 <select id="sortBy" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;" onchange="location = this.value;">
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if current_filters.category or active_category %}category={{ current_filters.category|default:active_category.slug }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
                 </select>
             </div>
         </div>
@@ -518,8 +474,6 @@
                     No Sarees Found for SKU "{{ current_filters.sku }}"
                 {% elif active_category %}
                     No Sarees in {{ active_category.name }} Currently
-                {% elif active_collection %}
-                    No Sarees in {{ active_collection.name }} Currently
                 {% else %}
                     No Sarees Found
                 {% endif %}

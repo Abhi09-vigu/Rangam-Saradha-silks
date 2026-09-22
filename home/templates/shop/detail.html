@@ -533,22 +533,28 @@
                                     <td class="text-dark py-3">{{ product.occasion }}</td>
                                 </tr>
                                 {% endif %}
+                                {% if product.zari_type %}
                                 <tr>
                                     <th class="text-muted fw-semibold py-3">Zari Type</th>
-                                    <td class="text-dark py-3">Premium Gold Zari Traditional Weave</td>
+                                    <td class="text-dark py-3">{{ product.zari_type }}</td>
                                 </tr>
+                                {% endif %}
+                                {% if product.saree_length %}
                                 <tr>
                                     <th class="text-muted fw-semibold py-3">Saree Length</th>
-                                    <td class="text-dark py-3">5.5 Meters (Approx.) + 0.8 Meter Running Blouse</td>
+                                    <td class="text-dark py-3">{{ product.saree_length }}</td>
                                 </tr>
+                                {% endif %}
+                                {% if product.authenticity %}
                                 <tr>
                                     <th class="text-muted fw-semibold py-3">Authenticity</th>
-                                    <td class="text-dark py-3">Silk Mark Certified 100% Handcrafted Mulberry Silk</td>
+                                    <td class="text-dark py-3">{{ product.authenticity }}</td>
                                 </tr>
-                                {% for key, val in product.specifications.items %}
+                                {% endif %}
+                                {% for item in product.parsed_specifications %}
                                 <tr>
-                                    <th class="text-muted fw-semibold py-3">{{ key }}</th>
-                                    <td class="text-dark py-3">{{ val }}</td>
+                                    <th class="text-muted fw-semibold py-3">{{ item.0 }}</th>
+                                    <td class="text-dark py-3">{{ item.1 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -628,9 +634,56 @@
                                 </div>
                                 <ul class="text-muted fs-7 mb-0 ps-3">
                                     <li class="mb-2">Eligible for hassle-free returns within 7 days of delivery.</li>
+                                    <li class="mb-2"><strong>Mandatory Video Proof:</strong> An uncut 360° unboxing video is required for any return, exchange, or damage claim.</li>
                                     <li class="mb-2">Item must be unworn, in original condition with intact security tags & packaging.</li>
                                     <li>100% refund credited back to original payment method promptly upon quality verification.</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mandatory Unboxing Video Proof Policy Callout -->
+                    <div class="mt-4 p-4 rounded-4 border" style="background: linear-gradient(135deg, rgba(255, 248, 235, 0.95), rgba(254, 243, 199, 0.5)); border-color: rgba(197, 160, 89, 0.4) !important;">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 shadow-xs" style="width: 44px; height: 44px; background: #c5a059; color: #fff; font-size: 1.25rem;">
+                                <i class="bi bi-camera-video-fill"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                                    <h5 class="fw-bold fs-6 mb-0 text-dark">
+                                        Mandatory Unboxing Video Proof Policy
+                                    </h5>
+                                    <span class="badge rounded-pill bg-warning text-dark fs-8 fw-semibold px-2 py-1">Required for All Claims</span>
+                                </div>
+                                <p class="text-muted fs-7 mb-3">
+                                    To protect our valued patrons and ensure authentic claims for pure handwoven silk sarees, a continuous, uncut unboxing video is mandatory for returns, exchanges, or reporting transit damages:
+                                </p>
+                                <div class="row g-2 text-dark fs-8">
+                                    <div class="col-sm-6 col-lg-3">
+                                        <div class="d-flex align-items-start gap-2 bg-white bg-opacity-75 p-2 rounded-3 border border-warning-subtle h-100">
+                                            <i class="bi bi-box-seam text-primary fs-7 mt-1"></i>
+                                            <span><strong>Step 1:</strong> Show sealed package with shipping label clearly visible</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-3">
+                                        <div class="d-flex align-items-start gap-2 bg-white bg-opacity-75 p-2 rounded-3 border border-warning-subtle h-100">
+                                            <i class="bi bi-camera-video text-primary fs-7 mt-1"></i>
+                                            <span><strong>Step 2:</strong> Single uncut video take without any pauses or edits</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-3">
+                                        <div class="d-flex align-items-start gap-2 bg-white bg-opacity-75 p-2 rounded-3 border border-warning-subtle h-100">
+                                            <i class="bi bi-search text-primary fs-7 mt-1"></i>
+                                            <span><strong>Step 3:</strong> Unfold saree on camera & inspect borders/tags</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-3">
+                                        <div class="d-flex align-items-start gap-2 bg-white bg-opacity-75 p-2 rounded-3 border border-warning-subtle h-100">
+                                            <i class="bi bi-clock-history text-primary fs-7 mt-1"></i>
+                                            <span><strong>Step 4:</strong> Share video with support within 48 hours of delivery</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

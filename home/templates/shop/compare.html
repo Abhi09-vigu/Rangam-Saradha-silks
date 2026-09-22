@@ -102,11 +102,12 @@
                                 {% if product.color %}<li><strong>Color:</strong> {{ product.color }}</li>{% endif %}
                                 {% if product.material %}<li><strong>Material:</strong> {{ product.material }}</li>{% endif %}
                                 {% if product.occasion %}<li><strong>Occasion:</strong> {{ product.occasion }}</li>{% endif %}
-                                {% if product.specifications %}
-                                    {% for key, val in product.specifications.items %}
-                                    <li><strong>{{ key }}:</strong> {{ val }}</li>
-                                    {% endfor %}
-                                {% endif %}
+                                {% if product.zari_type %}<li><strong>Zari:</strong> {{ product.zari_type }}</li>{% endif %}
+                                {% if product.saree_length %}<li><strong>Length:</strong> {{ product.saree_length }}</li>{% endif %}
+                                {% if product.authenticity %}<li><strong>Authenticity:</strong> {{ product.authenticity }}</li>{% endif %}
+                                {% for item in product.parsed_specifications %}
+                                <li><strong>{{ item.0 }}:</strong> {{ item.1 }}</li>
+                                {% endfor %}
                             </ul>
                         </td>
                         {% endfor %}

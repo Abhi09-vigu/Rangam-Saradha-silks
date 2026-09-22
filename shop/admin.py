@@ -1,9 +1,11 @@
+import json
+from django import forms
 from django.contrib import admin
 from django.urls import path
 from django.core.exceptions import PermissionDenied
 from django.utils.html import format_html
 from django.db.models import Prefetch
-from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem
 
 class StockStatusFilter(admin.SimpleListFilter):
     title = 'Stock Status'
@@ -32,7 +34,7 @@ class ProductImageInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'stock_status', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
     list_display_links = ['name']
-    list_filter = [StockStatusFilter, 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories', 'collection']
+    list_filter = [StockStatusFilter, 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline]
@@ -40,7 +42,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'slug', 'sku', 'categories', 'collection', 'is_active')
+            'fields': ('name', 'slug', 'sku', 'categories', 'is_active')
         }),
         ('Pricing & Inventory', {
             'fields': ('price', 'discount_percentage', 'offer_price', 'stock')
@@ -52,13 +54,16 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal')
         }),
         ('Specifications & Details', {
-            'fields': ('video_url', 'video_file', 'tags', 'material', 'color', 'occasion', 'fabric', 'specifications')
+            'fields': ('video_url', 'video_file', 'tags', 'fabric', 'color', 'material', 'occasion', 'zari_type', 'saree_length', 'authenticity', 'specifications')
         }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),
             'classes': ('collapse',)
         }),
     )
+
+    class Media:
+        js = ('js/admin_pricing_calc.js',)
 
     def get_queryset(self, request):
         """
@@ -117,11 +122,6 @@ class CategoryAdmin(admin.ModelAdmin):
         return format_html('<span style="color: #999;">No Image</span>')
     category_thumbnail.short_description = "Preview"
 
-class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active']
-    list_filter = ['is_active']
-    search_fields = ['name']
-    prepopulated_fields = {'slug': ('name',)}
 
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'user', 'rating', 'is_approved', 'created_at']
@@ -137,10 +137,106 @@ class ReviewAdmin(admin.ModelAdmin):
         queryset.update(is_approved=False)
     reject_reviews.short_description = "Reject selected reviews"
 
+class CouponAdminForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = [
+            'code', 'discount_type', 'discount_value', 'min_purchase', 'max_discount',
+            'usage_limit', 'used_count', 'start_date', 'expiry_date', 'is_active',
+            'apply_to', 'categories', 'products'
+        ]
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['categories'].required = False
+        self.fields['products'].required = False
+        self.fields['max_discount'].required = False
+        self.fields['start_date'].required = False
+        self.fields['used_count'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        apply_to = cleaned_data.get('apply_to')
+        categories = cleaned_data.get('categories')
+        products = cleaned_data.get('products')
+
+        if apply_to == 'CATEGORIES' and not categories:
+            self.add_error('categories', "Please select at least one category when applying coupon to Specific Categories.")
+        elif apply_to == 'PRODUCTS' and not products:
+            self.add_error('products', "Please select at least one product when applying coupon to Specific Products.")
+
+        return cleaned_data
+
+
 class CouponAdmin(admin.ModelAdmin):
-    list_display = ['code', 'discount_type', 'discount_value', 'min_purchase', 'usage_limit', 'used_count', 'expiry_date', 'is_active']
-    list_filter = ['discount_type', 'is_active']
+    form = CouponAdminForm
+    change_form_template = 'admin/shop/coupon/change_form.html'
+    list_display = ['code', 'discount_type', 'discount_value', 'apply_to', 'min_purchase', 'usage_limit', 'used_count', 'start_date', 'expiry_date', 'is_active']
+    list_filter = ['apply_to', 'discount_type', 'is_active']
     search_fields = ['code']
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+
+        # All active categories
+        categories = Category.objects.filter(is_active=True).order_by('name')
+        categories_data = [
+            {'id': cat.id, 'name': cat.name, 'slug': cat.slug}
+            for cat in categories
+        ]
+
+        # All active products
+        products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories').order_by('name')
+        products_data = []
+        for p in products:
+            first_img = p.images.first()
+            thumb = first_img.image.url if first_img and first_img.image else ''
+            cat_names = [c.name for c in p.categories.all()]
+            products_data.append({
+                'id': p.id,
+                'name': p.name,
+                'sku': p.sku,
+                'price': f"₹{p.offer_price or p.price:,.0f}",
+                'raw_price': float(p.offer_price or p.price),
+                'category': ', '.join(cat_names) if cat_names else 'General',
+                'thumb': thumb,
+            })
+
+        # Selected IDs if editing existing coupon
+        selected_category_ids = []
+        selected_product_ids = []
+        current_apply_to = 'ALL'
+
+        if object_id:
+            try:
+                coupon_obj = Coupon.objects.prefetch_related('categories', 'products').get(pk=object_id)
+                selected_category_ids = list(coupon_obj.categories.values_list('id', flat=True))
+                selected_product_ids = list(coupon_obj.products.values_list('id', flat=True))
+                current_apply_to = coupon_obj.apply_to or 'ALL'
+            except Coupon.DoesNotExist:
+                pass
+
+        if request.method == 'POST':
+            current_apply_to = request.POST.get('apply_to', current_apply_to)
+            selected_category_ids = [int(x) for x in request.POST.getlist('categories') if str(x).isdigit()]
+            selected_product_ids = [int(x) for x in request.POST.getlist('products') if str(x).isdigit()]
+
+        extra_context['all_categories_json'] = json.dumps(categories_data)
+        extra_context['all_products_json'] = json.dumps(products_data)
+        extra_context['selected_category_ids_json'] = json.dumps(selected_category_ids)
+        extra_context['selected_product_ids_json'] = json.dumps(selected_product_ids)
+        extra_context['current_apply_to'] = current_apply_to
+
+        return super().changeform_view(request, object_id, form_url, extra_context=extra_context)
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        if 'adminform' in context and 'form' not in context:
+            context['form'] = context['adminform'].form
+        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -420,7 +516,7 @@ class OrderAdmin(admin.ModelAdmin):
     payment_method_badge.admin_order_field = 'payment_method'
 
 from django.utils.html import format_html
-from .models import Category, Collection, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
+from .models import Category, Product, ProductImage, Review, Coupon, Cart, CartItem, Order, OrderItem, CallBooking, CallSlot
 
 
 class CallSlotAdmin(admin.ModelAdmin):
@@ -563,10 +659,12 @@ class CallBookingAdmin(admin.ModelAdmin):
 
 
 from rangam_saradha_silk.admin import custom_admin_site
+from .models import BulkStockProduct
+from .admin_bulk_stock import BulkStockAdmin
 
 custom_admin_site.register(Category, CategoryAdmin)
-custom_admin_site.register(Collection, CollectionAdmin)
 custom_admin_site.register(Product, ProductAdmin)
+custom_admin_site.register(BulkStockProduct, BulkStockAdmin)
 custom_admin_site.register(Review, ReviewAdmin)
 custom_admin_site.register(Coupon, CouponAdmin)
 custom_admin_site.register(Order, OrderAdmin)

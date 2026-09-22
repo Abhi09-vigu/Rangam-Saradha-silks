@@ -1,0 +1,2591 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Bulk Stock | {{ site_title|default:_('Rangam Saradha Silk Sarees Admin') }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --bs-bg-dark: #14080e;
+        --bs-panel-bg: #210813;
+        --bs-card-bg: #2a0a19;
+        --bs-card-hover: #360d21;
+        --bs-border: #4a152d;
+        --bs-accent-gold: #d4af37;
+        --bs-accent-magenta: #e91e63;
+        --bs-accent-magenta-hover: #c2185b;
+        --bs-text-light: #f5ebe6;
+        --bs-text-muted: #a38c96;
+        --bs-input-bg: #18060f;
+        --bs-input-border: #521832;
+        --bs-badge-draft: #856404;
+        --bs-badge-draft-bg: #fff3cd;
+    }
+
+    body, #content {
+        background-color: var(--bs-bg-dark) !important;
+        color: var(--bs-text-light) !important;
+    }
+
+    .rss-bulk-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3rem 1rem;
+        font-family: var(--font-family-sans-serif, 'Inter', sans-serif);
+    }
+
+    /* Breadcrumbs */
+    .rss-bulk-breadcrumbs {
+        font-size: 0.82rem;
+        color: var(--bs-text-muted);
+        margin-bottom: 1.25rem;
+    }
+    .rss-bulk-breadcrumbs a {
+        color: var(--bs-accent-gold) !important;
+        text-decoration: none;
+    }
+    .rss-bulk-breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    /* Header Bar */
+    .rss-bulk-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .rss-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .rss-header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #421026 0%, #200612 100%);
+        border: 1px solid var(--bs-accent-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-accent-gold);
+        font-size: 1.75rem;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+    }
+    .rss-header-title {
+        font-family: var(--font-family-serif, 'Cormorant Garamond', Georgia, serif);
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+    .rss-header-subtitle {
+        color: var(--bs-text-muted);
+        font-size: 0.88rem;
+        margin: 0.2rem 0 0 0;
+    }
+
+    /* Top Counter Card */
+    .rss-counter-card {
+        background: var(--bs-card-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: 12px;
+        padding: 0.85rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.15rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .rss-counter-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-accent-gold);
+        font-size: 1.4rem;
+    }
+    .rss-counter-meta .counter-label {
+        font-size: 0.75rem;
+        color: var(--bs-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 2px;
+    }
+    .rss-counter-meta .counter-number {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #ffffff;
+        line-height: 1;
+    }
+    .rss-counter-meta .counter-status {
+        font-size: 0.72rem;
+        color: #ff9ebb;
+    }
+
+    /* 3-Step Visual Cards */
+    .rss-steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 850px) {
+        .rss-steps-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .rss-step-card {
+        background: var(--bs-panel-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: 12px;
+        padding: 1.1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .rss-step-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    .step-icon-pink {
+        background: rgba(233, 30, 99, 0.15);
+        color: #ff4081;
+        border: 1px solid rgba(233, 30, 99, 0.35);
+    }
+    .step-icon-purple {
+        background: rgba(156, 39, 176, 0.15);
+        color: #ce93d8;
+        border: 1px solid rgba(156, 39, 176, 0.35);
+    }
+    .step-icon-teal {
+        background: rgba(0, 150, 136, 0.15);
+        color: #4db6ac;
+        border: 1px solid rgba(0, 150, 136, 0.35);
+    }
+    .rss-step-info h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .rss-step-info p {
+        margin: 0.2rem 0 0 0;
+        font-size: 0.78rem;
+        color: var(--bs-text-muted);
+    }
+
+    /* Tabs Bar */
+    .rss-tabs-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 2px solid var(--bs-border);
+        padding-bottom: 0.5rem;
+    }
+    .rss-tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--bs-text-muted);
+        font-size: 0.92rem;
+        font-weight: 600;
+        padding: 0.65rem 1.25rem;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    .rss-tab-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .rss-tab-btn.active {
+        background: var(--bs-accent-magenta);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.35);
+    }
+
+    /* Main Card Container */
+    .rss-main-card {
+        background: var(--bs-panel-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+        margin-bottom: 2rem;
+    }
+
+    .rss-section-title-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .rss-section-title-bar h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .rss-section-title-bar p {
+        margin: 0.2rem 0 0 0;
+        font-size: 0.8rem;
+        color: var(--bs-text-muted);
+    }
+
+    .rss-btn-add-row-top {
+        background: transparent;
+        border: 1px solid var(--bs-accent-magenta);
+        color: #ff80ab !important;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+    .rss-btn-add-row-top:hover {
+        background: var(--bs-accent-magenta);
+        color: #ffffff !important;
+    }
+
+    /* Table Styles */
+    .rss-table-wrapper {
+        overflow-x: auto;
+        border: 1px solid var(--bs-border);
+        border-radius: 10px;
+        background: var(--bs-input-bg);
+        margin-bottom: 1.25rem;
+    }
+    .rss-bulk-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.86rem;
+    }
+    .rss-bulk-table th {
+        background: #2b0b1a;
+        color: #fce4ec;
+        font-weight: 600;
+        padding: 0.75rem 0.7rem;
+        border-bottom: 1px solid var(--bs-border);
+        white-space: nowrap;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .rss-bulk-table th .required-star {
+        color: #ff4081;
+    }
+    .rss-bulk-table td {
+        padding: 0.65rem 0.7rem;
+        border-bottom: 1px solid rgba(74, 21, 45, 0.4);
+        vertical-align: middle;
+    }
+    .rss-bulk-table tr:hover td {
+        background: rgba(233, 30, 99, 0.04);
+    }
+
+    /* Inputs Inside Table */
+    .table-input,
+    .table-select {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 38px !important;
+        background: #10040a !important;
+        border: 1px solid var(--bs-input-border) !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        font-size: 0.85rem !important;
+        padding: 0 0.65rem !important;
+        outline: none !important;
+        transition: border-color 0.2s;
+    }
+    .table-input:focus,
+    .table-select:focus {
+        border-color: var(--bs-accent-magenta) !important;
+        box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.25) !important;
+    }
+    .table-select {
+        cursor: pointer !important;
+    }
+    .table-select option {
+        background: #200612 !important;
+        color: #ffffff !important;
+    }
+
+    /* Thumbnail Box */
+    .rss-thumb-box {
+        width: 48px;
+        height: 56px;
+        border-radius: 6px;
+        border: 1px solid var(--bs-border);
+        background: #1c0611;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .rss-thumb-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .rss-thumb-box .upload-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        opacity: 0;
+        transition: opacity 0.2s;
+        font-size: 1.1rem;
+    }
+    .rss-thumb-box:hover .upload-overlay {
+        opacity: 1;
+    }
+
+    /* Status Badge */
+    .badge-draft {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.4);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Actions Icon Buttons */
+    .rss-row-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .rss-action-icon-btn {
+        background: none;
+        border: none;
+        color: var(--bs-text-muted);
+        font-size: 0.95rem;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.15s;
+    }
+    .rss-action-icon-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .rss-action-icon-btn.btn-delete:hover {
+        color: #ff3366;
+        background: rgba(255, 51, 102, 0.15);
+    }
+
+    /* Add Another Product Button (Row) */
+    .rss-add-row-bar {
+        text-align: center;
+        padding: 0.85rem;
+        border: 1px dashed var(--bs-border);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        cursor: pointer;
+        color: #ff80ab;
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        margin-bottom: 1.5rem;
+    }
+    .rss-add-row-bar:hover {
+        background: rgba(233, 30, 99, 0.08);
+        border-color: var(--bs-accent-magenta);
+        color: #ffffff;
+    }
+
+    /* Action Footer Bar */
+    .rss-action-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-top: 0.5rem;
+    }
+    .rss-btn-draft {
+        background: #250614;
+        border: 1px solid var(--bs-border);
+        color: #f5ebe6 !important;
+        font-size: 0.88rem;
+        font-weight: 600;
+        padding: 0.65rem 1.4rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .rss-btn-draft:hover {
+        background: #360d21;
+        border-color: var(--bs-accent-magenta);
+    }
+    .rss-btn-publish-selected {
+        background: var(--bs-accent-magenta);
+        border: none;
+        color: #ffffff !important;
+        font-size: 0.92rem;
+        font-weight: 700;
+        padding: 0.7rem 1.6rem;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+        transition: all 0.2s;
+    }
+    .rss-btn-publish-selected:hover {
+        background: var(--bs-accent-magenta-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(233, 30, 99, 0.55);
+    }
+
+    /* Quick Actions 4 Cards */
+    .rss-quick-actions-section {
+        margin-top: 2.5rem;
+    }
+    .rss-quick-actions-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+    .rss-quick-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 1024px) {
+        .rss-quick-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 600px) {
+        .rss-quick-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .rss-quick-card {
+        background: var(--bs-panel-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: 12px;
+        padding: 1.15rem;
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+    }
+    .rss-quick-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .quick-card-gold {
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+    .quick-card-gold:hover {
+        border-color: var(--bs-accent-gold);
+        background: #2b1a0d;
+    }
+    .quick-card-pink {
+        border-color: rgba(233, 30, 99, 0.4);
+    }
+    .quick-card-pink:hover {
+        border-color: var(--bs-accent-magenta);
+        background: #2d0b1d;
+    }
+    .quick-card-red {
+        border-color: rgba(220, 53, 69, 0.4);
+    }
+    .quick-card-red:hover {
+        border-color: #dc3545;
+        background: #2b080f;
+    }
+    .quick-card-purple {
+        border-color: rgba(103, 58, 183, 0.4);
+    }
+    .quick-card-purple:hover {
+        border-color: #7e57c2;
+        background: #1e102d;
+    }
+
+    .quick-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .quick-gold-icon {
+        background: rgba(212, 175, 55, 0.15);
+        color: var(--bs-accent-gold);
+    }
+    .quick-pink-icon {
+        background: rgba(233, 30, 99, 0.15);
+        color: #ff4081;
+    }
+    .quick-red-icon {
+        background: rgba(220, 53, 69, 0.15);
+        color: #ff6b81;
+    }
+    .quick-purple-icon {
+        background: rgba(103, 58, 183, 0.15);
+        color: #b39ddb;
+    }
+    .quick-card-info {
+        flex-grow: 1;
+    }
+    .quick-card-info h5 {
+        margin: 0;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .quick-card-info p {
+        margin: 0.2rem 0 0 0;
+        font-size: 0.74rem;
+        color: var(--bs-text-muted);
+    }
+    .quick-card-arrow {
+        color: var(--bs-text-muted);
+        font-size: 1.1rem;
+        transition: transform 0.2s;
+    }
+    .rss-quick-card:hover .quick-card-arrow {
+        transform: translateX(4px);
+        color: #ffffff;
+    }
+
+    /* Tip Banner */
+    .rss-tip-banner {
+        background: #0d1e2b;
+        border: 1px solid #1a3c57;
+        border-radius: 10px;
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.84rem;
+        color: #8ac1eb;
+        margin-top: 1.5rem;
+    }
+
+    /* Custom Toast / Notification */
+    #rssToast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #240816;
+        color: #ffffff;
+        border: 1px solid var(--bs-accent-gold);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        display: none;
+        z-index: 99999;
+        font-size: 0.9rem;
+    }
+
+    /* Modal Backdrop & Panel */
+    .rss-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 99990;
+        padding: 1.5rem;
+    }
+    .rss-modal-panel {
+        background: var(--bs-panel-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: 14px;
+        width: 100%;
+        max-width: 680px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 1.75rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        color: #ffffff;
+    }
+    .rss-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--bs-border);
+        padding-bottom: 0.75rem;
+    }
+    .rss-modal-header h4 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--bs-accent-gold);
+    }
+    .rss-modal-close {
+        background: none;
+        border: none;
+        color: var(--bs-text-muted);
+        font-size: 1.3rem;
+        cursor: pointer;
+    }
+    .rss-modal-close:hover {
+        color: #ffffff;
+    }
+
+    /* Modal Layout */
+    .rss-modal-panel-large {
+        max-width: 860px !important;
+        width: 100% !important;
+    }
+    .rss-modal-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--bs-border);
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    .rss-modal-tab-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--bs-border);
+        color: var(--bs-text-muted);
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        transition: all 0.2s;
+    }
+    .rss-modal-tab-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.09);
+    }
+    .rss-modal-tab-btn.active {
+        background: var(--bs-accent-magenta);
+        border-color: var(--bs-accent-magenta);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.35);
+    }
+
+    .modal-step-section {
+        display: none;
+    }
+    .modal-step-section.active {
+        display: block;
+    }
+
+    .form-group-custom {
+        margin-bottom: 0.9rem;
+    }
+    .form-group-custom label {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--bs-text-muted);
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+    .form-group-custom label .required-star {
+        color: #ff4081;
+    }
+    .form-group-custom input[type="text"],
+    .form-group-custom input[type="number"],
+    .form-group-custom input[type="url"],
+    .form-group-custom select,
+    .form-group-custom textarea {
+        width: 100%;
+        background: var(--bs-input-bg) !important;
+        border: 1px solid var(--bs-input-border) !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        font-size: 0.86rem !important;
+        padding: 0.5rem 0.75rem !important;
+        outline: none !important;
+    }
+    .form-group-custom input:focus,
+    .form-group-custom select:focus,
+    .form-group-custom textarea:focus {
+        border-color: var(--bs-accent-magenta) !important;
+        box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.25) !important;
+    }
+    .form-group-custom select option {
+        background: #200612 !important;
+        color: #ffffff !important;
+    }
+
+    /* Images grid in modal */
+    .rss-modal-images-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    @media (max-width: 768px) {
+        .rss-modal-images-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    .rss-img-slot-card {
+        background: #12040b;
+        border: 1.5px dashed var(--bs-border);
+        border-radius: 10px;
+        padding: 0.75rem;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    .rss-img-slot-card:hover {
+        border-color: var(--bs-accent-magenta);
+        background: rgba(233, 30, 99, 0.05);
+    }
+    .rss-img-slot-card.has-img {
+        border-style: solid;
+        border-color: var(--bs-accent-gold);
+        padding: 0;
+        overflow: hidden;
+    }
+    .rss-img-slot-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .rss-img-slot-title {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--bs-accent-gold);
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .rss-img-slot-desc {
+        font-size: 0.7rem;
+        color: var(--bs-text-muted);
+        margin-top: 0.15rem;
+    }
+    .rss-img-remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #ff3366;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        z-index: 10;
+    }
+    .rss-img-remove-btn:hover {
+        background: #ff3366;
+        color: #ffffff;
+    }
+
+    /* Marketing flags checkboxes */
+    .rss-flags-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+    @media (max-width: 600px) {
+        .rss-flags-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .rss-flag-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--bs-border);
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: all 0.15s;
+    }
+    .rss-flag-box:hover {
+        border-color: var(--bs-accent-gold);
+        background: rgba(212, 175, 55, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='shop' %}">Shop</a>
+    &rsaquo; Bulk Stock
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="rss-bulk-wrapper">
+    <!-- Header -->
+    <div class="rss-bulk-header">
+        <div class="rss-header-left">
+            <div class="rss-header-icon">
+                <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <div>
+                <h1 class="rss-header-title">Bulk Stock</h1>
+                <p class="rss-header-subtitle">Add new stock in bulk and publish products when ready.</p>
+            </div>
+        </div>
+
+        <!-- Counter Card -->
+        <div class="rss-counter-card">
+            <div class="rss-counter-icon">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <div class="rss-counter-meta">
+                <div class="counter-label">Total in Bulk</div>
+                <div class="counter-number" id="topCounterNumber">{{ total_bulk_count }}</div>
+                <div class="counter-status">Pending Products</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3-Step Visual Cards -->
+    <div class="rss-steps-grid">
+        <div class="rss-step-card">
+            <div class="rss-step-icon step-icon-pink">
+                <i class="bi bi-bag-plus-fill"></i>
+            </div>
+            <div class="rss-step-info">
+                <h4>1 &nbsp; Add Products</h4>
+                <p>Create multiple products in bulk</p>
+            </div>
+        </div>
+
+        <div class="rss-step-card">
+            <div class="rss-step-icon step-icon-purple">
+                <i class="bi bi-eye-fill"></i>
+            </div>
+            <div class="rss-step-info">
+                <h4>2 &nbsp; Review</h4>
+                <p>Check and edit before publishing</p>
+            </div>
+        </div>
+
+        <div class="rss-step-card">
+            <div class="rss-step-icon step-icon-teal">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="rss-step-info">
+                <h4>3 &nbsp; Publish</h4>
+                <p>Move to live products with one click</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Bar -->
+    <div class="rss-tabs-nav">
+        <button type="button" class="rss-tab-btn active" id="tabAddManage">
+            <i class="bi bi-plus-lg"></i> Add / Manage Stock
+        </button>
+        <button type="button" class="rss-tab-btn" id="tabReviewPublish">
+            <i class="bi bi-eye"></i> Review &amp; Publish (<span id="tabPendingCount">{{ total_bulk_count }}</span>)
+        </button>
+    </div>
+
+    <!-- Main Card Container -->
+    <div class="rss-main-card">
+        <div class="rss-section-title-bar">
+            <div>
+                <h3>Add Products to Bulk Stock</h3>
+                <p>Add multiple products. You can save as draft and publish to live products later.</p>
+            </div>
+            <button type="button" class="rss-btn-add-row-top" id="btnAddNewRowTop">
+                <i class="bi bi-plus-lg"></i> Add New Row
+            </button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="rss-table-wrapper">
+            <table class="rss-bulk-table" id="bulkTable">
+                <thead>
+                    <tr>
+                        <th style="width: 36px; text-align: center;">
+                            <input type="checkbox" id="selectAllCheckbox" style="accent-color: var(--bs-accent-magenta); cursor: pointer;">
+                        </th>
+                        <th style="width: 36px; text-align: center;">#</th>
+                        <th style="width: 64px; text-align: center;">Image</th>
+                        <th style="min-width: 220px;">Product Name <span class="required-star">*</span></th>
+                        <th style="min-width: 180px;">Category <span class="required-star">*</span></th>
+                        <th style="width: 110px;">Price (₹) <span class="required-star">*</span></th>
+                        <th style="width: 120px;">SKU</th>
+                        <th style="width: 90px;">Stock</th>
+                        <th style="width: 90px; text-align: center;">Status</th>
+                        <th style="width: 110px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bulkTableBody">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Another Product Full-Width Button -->
+        <div class="rss-add-row-bar" id="btnAddAnotherRowBottom">
+            <i class="bi bi-plus-circle-fill fs-5"></i> Add Another Product
+        </div>
+
+        <!-- Action Footer -->
+        <div class="rss-action-footer">
+            <button type="button" class="rss-btn-draft" id="btnSaveDraft">
+                <i class="bi bi-save me-1"></i> Save as Draft
+            </button>
+            <button type="button" class="rss-btn-publish-selected" id="btnPublishSelected">
+                <i class="bi bi-play-fill fs-5"></i> Publish Selected to Products
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="rss-quick-actions-section">
+        <h4 class="rss-quick-actions-title">Quick Actions</h4>
+        <div class="rss-quick-cards-grid">
+            <!-- 1. Publish All -->
+            <div class="rss-quick-card quick-card-gold" id="cardQuickPublishAll">
+                <div class="quick-icon-box quick-gold-icon">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+                <div class="quick-card-info">
+                    <h5>Publish All</h5>
+                    <p>Move all pending products to live products</p>
+                </div>
+                <div class="quick-card-arrow"><i class="bi bi-arrow-right"></i></div>
+            </div>
+
+            <!-- 2. Preview Products -->
+            <div class="rss-quick-card quick-card-pink" id="cardQuickPreviewProducts">
+                <div class="quick-icon-box quick-pink-icon">
+                    <i class="bi bi-eye-fill"></i>
+                </div>
+                <div class="quick-card-info">
+                    <h5>Preview Products</h5>
+                    <p>Review all products before publishing</p>
+                </div>
+                <div class="quick-card-arrow"><i class="bi bi-arrow-right"></i></div>
+            </div>
+
+            <!-- 3. Clear All -->
+            <div class="rss-quick-card quick-card-red" id="cardQuickClearAll">
+                <div class="quick-icon-box quick-red-icon">
+                    <i class="bi bi-trash-fill"></i>
+                </div>
+                <div class="quick-card-info">
+                    <h5>Clear All</h5>
+                    <p>Remove all products from bulk stock</p>
+                </div>
+                <div class="quick-card-arrow"><i class="bi bi-arrow-right"></i></div>
+            </div>
+
+            <!-- 4. Stock Summary -->
+            <div class="rss-quick-card quick-card-purple" id="cardQuickStockSummary">
+                <div class="quick-icon-box quick-purple-icon">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <div class="quick-card-info">
+                    <h5>Stock Summary</h5>
+                    <p>View total count and details</p>
+                </div>
+                <div class="quick-card-arrow"><i class="bi bi-arrow-right"></i></div>
+            </div>
+        </div>
+
+        <!-- Tip Banner -->
+        <div class="rss-tip-banner">
+            <i class="bi bi-info-circle-fill fs-5 text-info flex-shrink-0"></i>
+            <div>Tip: You can add products with different categories. Each product can belong to a different category.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden File Input for Image Uploads -->
+<input type="file" id="rowImageFileInput" accept="image/*" style="display: none;">
+
+<!-- Comprehensive Product Modal (First, Second, Third, Fourth, and Images) -->
+<div class="rss-modal-backdrop" id="productFormModal">
+    <div class="rss-modal-panel rss-modal-panel-large">
+        <div class="rss-modal-header">
+            <h4 id="productModalTitle"><i class="bi bi-box-seam me-2"></i>Add Product to Bulk Stock</h4>
+            <button type="button" class="rss-modal-close" onclick="closeProductModal()">&times;</button>
+        </div>
+
+        <!-- 5 Tabs Navigation -->
+        <div class="rss-modal-tabs">
+            <button type="button" class="rss-modal-tab-btn active" data-step="1">
+                <i class="bi bi-1-circle-fill"></i> First (Basic &amp; Pricing)
+            </button>
+            <button type="button" class="rss-modal-tab-btn" data-step="2">
+                <i class="bi bi-2-circle-fill"></i> Second (Description &amp; Flags)
+            </button>
+            <button type="button" class="rss-modal-tab-btn" data-step="3">
+                <i class="bi bi-3-circle-fill"></i> Third (Specifications)
+            </button>
+            <button type="button" class="rss-modal-tab-btn" data-step="4">
+                <i class="bi bi-4-circle-fill"></i> Fourth (Details &amp; SEO)
+            </button>
+            <button type="button" class="rss-modal-tab-btn" data-step="5">
+                <i class="bi bi-images"></i> Images (<span id="modalImagesCount">0</span>)
+            </button>
+        </div>
+
+        <form id="productModalForm">
+            <input type="hidden" id="modalRowIndex" value="">
+
+            <!-- STEP 1: First (Basic Information & Pricing) -->
+            <div class="modal-step-section active" id="modalStep1">
+                <div class="row g-3">
+                    <div class="col-md-6 form-group-custom">
+                        <label>Name <span class="required-star">*</span></label>
+                        <input type="text" id="modalName" placeholder="e.g. Pure Kanchipuram Crimson Silk Saree" required>
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>SKU (Stock Keeping Unit)</label>
+                        <input type="text" id="modalSku" placeholder="e.g. RS-KANCHI-001 (auto if empty)">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Category <span class="required-star">*</span></label>
+                        <select id="modalCategory" required>
+                            <option value="">-- Select Category --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group-custom d-flex align-items-center pt-3">
+                        <label class="d-flex align-items-center gap-2 cursor-pointer m-0">
+                            <input type="checkbox" id="modalIsActive" checked style="accent-color: var(--bs-accent-magenta); width: 18px; height: 18px;">
+                            <span class="fs-7 fw-semibold text-light">Is Active (Visible on Live Store when published)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-3 mt-3 rounded border border-secondary" style="background: rgba(0,0,0,0.25);">
+                    <div class="text-warning fw-bold fs-7 mb-2 text-uppercase letter-spacing-1">
+                        <i class="bi bi-cash-stack me-1"></i> Pricing &amp; Inventory
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-3 form-group-custom">
+                            <label>Price (₹) <span class="required-star">*</span></label>
+                            <input type="number" step="0.01" id="modalPrice" placeholder="e.g. 18500" required>
+                        </div>
+                        <div class="col-md-3 form-group-custom">
+                            <label>Discount Percentage (%)</label>
+                            <input type="number" id="modalDiscount" placeholder="e.g. 15" value="0">
+                        </div>
+                        <div class="col-md-3 form-group-custom">
+                            <label>Offer Price (₹)</label>
+                            <input type="number" step="0.01" id="modalOfferPrice" placeholder="Auto-calculated">
+                        </div>
+                        <div class="col-md-3 form-group-custom">
+                            <label>Stock Quantity</label>
+                            <input type="number" id="modalStock" value="10" placeholder="10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Second (Product Description & Marketing Flags) -->
+            <div class="modal-step-section" id="modalStep2">
+                <div class="form-group-custom">
+                    <label>Short Description</label>
+                    <textarea id="modalShortDesc" rows="2" placeholder="Brief summary of the saree (highlights, weave summary)..."></textarea>
+                </div>
+                <div class="form-group-custom">
+                    <label>Full Description</label>
+                    <textarea id="modalDescription" rows="4" placeholder="Detailed product story, craftsmanship, styling tips, weave authenticity..."></textarea>
+                </div>
+
+                <div class="mt-4">
+                    <label class="fs-7 fw-bold text-warning text-uppercase mb-2 d-block">
+                        <i class="bi bi-tags-fill me-1"></i> Marketing &amp; Flags
+                    </label>
+                    <div class="rss-flags-grid">
+                        <label class="rss-flag-box">
+                            <input type="checkbox" id="modalIsFeatured" style="accent-color: var(--bs-accent-magenta); width: 17px; height: 17px;">
+                            <span>Is Featured</span>
+                        </label>
+                        <label class="rss-flag-box">
+                            <input type="checkbox" id="modalIsTrending" style="accent-color: var(--bs-accent-magenta); width: 17px; height: 17px;">
+                            <span>Is Trending</span>
+                        </label>
+                        <label class="rss-flag-box">
+                            <input type="checkbox" id="modalIsNewArrival" style="accent-color: var(--bs-accent-magenta); width: 17px; height: 17px;">
+                            <span>Is New Arrival</span>
+                        </label>
+                        <label class="rss-flag-box">
+                            <input type="checkbox" id="modalIsBestSeller" style="accent-color: var(--bs-accent-magenta); width: 17px; height: 17px;">
+                            <span>Is Best Seller</span>
+                        </label>
+                        <label class="rss-flag-box">
+                            <input type="checkbox" id="modalIsTodayDeal" style="accent-color: var(--bs-accent-magenta); width: 17px; height: 17px;">
+                            <span>Is Today Deal</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Third (Specifications & Details) -->
+            <div class="modal-step-section" id="modalStep3">
+                <div class="row g-3">
+                    <div class="col-md-6 form-group-custom">
+                        <label>Fabric</label>
+                        <input type="text" id="modalFabric" placeholder="e.g. Pure Mulberry Silk / Katan Silk">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Color</label>
+                        <input type="text" id="modalColor" placeholder="e.g. Wine Red &amp; Antique Gold">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Material</label>
+                        <input type="text" id="modalMaterial" placeholder="e.g. Pure Handloom Silk">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Occasion</label>
+                        <input type="text" id="modalOccasion" placeholder="e.g. Bridal / Wedding / Festive">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Zari Type</label>
+                        <input type="text" id="modalZari" placeholder="e.g. Premium Gold Zari Traditional Weave">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Video URL</label>
+                        <input type="url" id="modalVideoUrl" placeholder="External video URL (YouTube, Vimeo, Cloudinary, etc.)">
+                    </div>
+                    <div class="col-12 form-group-custom">
+                        <label>Tags</label>
+                        <input type="text" id="modalTags" placeholder="Comma-separated tags (e.g. bridal, kanchi, gold zari, silk mark)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Fourth (Saree Length, Authenticity, Plain Text Specs & SEO) -->
+            <div class="modal-step-section" id="modalStep4">
+                <div class="row g-3">
+                    <div class="col-md-6 form-group-custom">
+                        <label>Saree Length</label>
+                        <input type="text" id="modalLength" placeholder="e.g. 5.5 Meters (Approx.) + 0.8 Meter Running Blouse">
+                    </div>
+                    <div class="col-md-6 form-group-custom">
+                        <label>Authenticity / Certification</label>
+                        <input type="text" id="modalAuthenticity" placeholder="e.g. Silk Mark Certified 100% Handcrafted Mulberry Silk">
+                    </div>
+                </div>
+
+                <div class="form-group-custom mt-2">
+                    <label>Specifications (Plain Text - one per line, e.g. 'Blouse: Contrast Brocade')</label>
+                    <textarea id="modalSpecifications" rows="3" placeholder="Blouse: Contrast Brocade&#10;Border: Temple Zari Border&#10;Weave: Traditional Jacquard Handloom"></textarea>
+                </div>
+
+                <div class="p-3 mt-3 rounded border border-secondary" style="background: rgba(0,0,0,0.2);">
+                    <div class="text-warning fw-bold fs-7 mb-2 text-uppercase letter-spacing-1">
+                        <i class="bi bi-search me-1"></i> SEO Metadata
+                    </div>
+                    <div class="form-group-custom">
+                        <label>SEO Meta Title</label>
+                        <input type="text" id="modalMetaTitle" placeholder="SEO Title Tag for Google Search">
+                    </div>
+                    <div class="form-group-custom">
+                        <label>SEO Meta Description</label>
+                        <textarea id="modalMetaDescription" rows="2" placeholder="SEO description tag..."></textarea>
+                    </div>
+                    <div class="form-group-custom mb-0">
+                        <label>SEO Meta Keywords</label>
+                        <input type="text" id="modalMetaKeywords" placeholder="saree, silk saree, wedding saree, bridal collection">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Images (First, Second, Third, Fourth, Extra Images) -->
+            <div class="modal-step-section" id="modalStep5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="fw-bold fs-6 text-light">Product Images</div>
+                        <div class="fs-8 text-muted">Upload product photos. Slot 1 is the primary cover image.</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-warning" id="btnAddExtraImgSlot">
+                        <i class="bi bi-plus-lg me-1"></i> Add Another Image
+                    </button>
+                </div>
+
+                <!-- 4 Default Image Slots Grid -->
+                <div class="rss-modal-images-grid" id="modalImagesGrid">
+                    <!-- Slot 0: First Image (Primary) -->
+                    <div class="rss-img-slot-card" id="imgSlotCard_0" onclick="triggerSlotUpload(0)">
+                        <input type="file" id="slotFileInput_0" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, 0)">
+                        <div class="slot-empty-content" id="slotEmpty_0">
+                            <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                            <div class="rss-img-slot-title">First Image</div>
+                            <div class="rss-img-slot-desc">Primary Cover / Front</div>
+                        </div>
+                        <div class="slot-preview-content d-none" id="slotPreview_0">
+                            <img src="" alt="First Image" id="slotImg_0">
+                            <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, 0)" title="Remove image">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Slot 1: Second Image -->
+                    <div class="rss-img-slot-card" id="imgSlotCard_1" onclick="triggerSlotUpload(1)">
+                        <input type="file" id="slotFileInput_1" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, 1)">
+                        <div class="slot-empty-content" id="slotEmpty_1">
+                            <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                            <div class="rss-img-slot-title">Second Image</div>
+                            <div class="rss-img-slot-desc">Pallu / Back View</div>
+                        </div>
+                        <div class="slot-preview-content d-none" id="slotPreview_1">
+                            <img src="" alt="Second Image" id="slotImg_1">
+                            <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, 1)" title="Remove image">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Slot 2: Third Image -->
+                    <div class="rss-img-slot-card" id="imgSlotCard_2" onclick="triggerSlotUpload(2)">
+                        <input type="file" id="slotFileInput_2" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, 2)">
+                        <div class="slot-empty-content" id="slotEmpty_2">
+                            <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                            <div class="rss-img-slot-title">Third Image</div>
+                            <div class="rss-img-slot-desc">Pleats / Body View</div>
+                        </div>
+                        <div class="slot-preview-content d-none" id="slotPreview_2">
+                            <img src="" alt="Third Image" id="slotImg_2">
+                            <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, 2)" title="Remove image">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Slot 3: Fourth Image -->
+                    <div class="rss-img-slot-card" id="imgSlotCard_3" onclick="triggerSlotUpload(3)">
+                        <input type="file" id="slotFileInput_3" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, 3)">
+                        <div class="slot-empty-content" id="slotEmpty_3">
+                            <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                            <div class="rss-img-slot-title">Fourth Image</div>
+                            <div class="rss-img-slot-desc">Blouse / Border Close-up</div>
+                        </div>
+                        <div class="slot-preview-content d-none" id="slotPreview_3">
+                            <img src="" alt="Fourth Image" id="slotImg_3">
+                            <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, 3)" title="Remove image">&times;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-outline-light px-3" onclick="closeProductModal()">
+                    Cancel
+                </button>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="btnModalPrevStep" style="display:none;">
+                        <i class="bi bi-chevron-left me-1"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light px-3" id="btnModalNextStep">
+                        Next <i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary px-3" id="btnModalSaveAndAnother">
+                        <i class="bi bi-plus-circle me-1"></i> Save &amp; Add Another
+                    </button>
+                    <button type="button" class="rss-btn-publish-selected py-2 px-3 fs-7" id="btnModalSaveAndClose">
+                        <i class="bi bi-check2-circle me-1 fs-6"></i> Save to Bulk Stock
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 2: Saree Live Card Preview Modal -->
+<div class="rss-modal-backdrop" id="previewModal">
+    <div class="rss-modal-panel" style="max-width: 480px; text-align: center;">
+        <div class="rss-modal-header">
+            <h4><i class="bi bi-eye-fill me-2"></i>Product Live Preview</h4>
+            <button type="button" class="rss-modal-close" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div id="previewCardContent" class="py-2">
+            <!-- Rendered via JS -->
+        </div>
+        <div class="pt-3 border-top border-secondary mt-3">
+            <button type="button" class="btn btn-sm btn-outline-light px-4" onclick="closePreviewModal()">Close Preview</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: Stock Summary Modal -->
+<div class="rss-modal-backdrop" id="summaryModal">
+    <div class="rss-modal-panel" style="max-width: 520px;">
+        <div class="rss-modal-header">
+            <h4><i class="bi bi-boxes me-2"></i>Bulk Stock Summary</h4>
+            <button type="button" class="rss-modal-close" onclick="closeSummaryModal()">&times;</button>
+        </div>
+        <div id="summaryModalContent">
+            <!-- Rendered via JS -->
+        </div>
+        <div class="d-flex justify-content-end pt-3 border-top border-secondary mt-3">
+            <button type="button" class="btn btn-sm btn-primary px-4" onclick="closeSummaryModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="rssToast"></div>
+
+<!-- Raw Data from Backend -->
+<script id="categoriesData" type="application/json">{{ categories_json|safe }}</script>
+<script id="bulkProductsData" type="application/json">{{ bulk_products_json|safe }}</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    const URL_SAVE_DRAFT = "{% url 'admin:shop_bulkstock_save_draft' %}";
+    const URL_PUBLISH = "{% url 'admin:shop_bulkstock_publish' %}";
+    const URL_DELETE_ROWS = "{% url 'admin:shop_bulkstock_delete_rows' %}";
+    const URL_CLEAR_ALL = "{% url 'admin:shop_bulkstock_clear_all' %}";
+    const URL_UPLOAD_IMAGE = "{% url 'admin:shop_bulkstock_upload_image' %}";
+
+    const allCategories = JSON.parse(document.getElementById('categoriesData').textContent || '[]');
+    const initialBulkProducts = JSON.parse(document.getElementById('bulkProductsData').textContent || '[]');
+
+    let rowsData = [];
+    let currentRowImageTargetIndex = null;
+
+    // Load existing items or start empty (no fake default items)
+    if (initialBulkProducts.length > 0) {
+        rowsData = initialBulkProducts.map((item, idx) => ({
+            ...item,
+            temp_id: item.id ? null : 'temp_' + Date.now() + '_' + idx,
+            selected: false,
+        }));
+    } else {
+        rowsData = [];
+    }
+
+    function createEmptyRow(index, categoryId = '') {
+        return {
+            id: null,
+            temp_id: 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            name: '',
+            category_id: categoryId || '',
+            category_name: '',
+            price: '',
+            offer_price: '',
+            discount_percentage: 0,
+            sku: '',
+            stock: 10,
+            image_url: '',
+            image_file: null,
+            extra_images: [],
+            slot_files: {},
+            status: 'Draft',
+            is_active: true,
+            is_featured: false,
+            is_trending: false,
+            is_new_arrival: false,
+            is_best_seller: false,
+            is_today_deal: false,
+            video_url: '',
+            tags: '',
+            fabric: 'Pure Silk',
+            color: '',
+            material: 'Mulberry Silk',
+            occasion: 'Festive / Wedding',
+            zari_type: 'Premium Gold Zari Traditional Weave',
+            saree_length: '5.5 Meters (Approx.) + 0.8 Meter Running Blouse',
+            authenticity: 'Silk Mark Certified 100% Handcrafted Mulberry Silk',
+            short_description: '',
+            description: '',
+            specifications: '',
+            meta_title: '',
+            meta_description: '',
+            meta_keywords: '',
+            selected: false,
+        };
+    }
+
+    // Render Table
+    const tableBody = document.getElementById('bulkTableBody');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    function renderTable() {
+        tableBody.innerHTML = '';
+        if (rowsData.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center py-5" style="color: var(--bs-text-muted);">
+                        <div style="font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--bs-accent-gold);"><i class="bi bi-inbox"></i></div>
+                        <div style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin-bottom: 0.35rem;">Bulk Stock is empty</div>
+                        <div style="font-size: 0.84rem; margin-bottom: 1.25rem;">No pending products in draft. Click below to add new stock.</div>
+                        <button type="button" class="rss-btn-add-row-top" onclick="window.openProductModal(null)" style="font-size: 0.88rem; padding: 0.55rem 1.2rem;">
+                            <i class="bi bi-plus-lg me-1"></i> Add First Product
+                        </button>
+                    </td>
+                </tr>
+            `;
+            updateCounts();
+            return;
+        }
+
+        rowsData.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            tr.dataset.index = idx;
+            tr.style.cursor = 'pointer';
+
+            // Categories options
+            let catOptions = `<option value="">-- Select Category --</option>`;
+            allCategories.forEach(cat => {
+                const isSelected = String(cat.id) === String(row.category_id) ? 'selected' : '';
+                catOptions += `<option value="${cat.id}" ${isSelected}>${escapeHtml(cat.name)}</option>`;
+            });
+
+            tr.innerHTML = `
+                <td style="text-align: center;">
+                    <input type="checkbox" class="row-checkbox" data-index="${idx}" ${row.selected ? 'checked' : ''} style="accent-color: var(--bs-accent-magenta); cursor: pointer;">
+                </td>
+                <td style="text-align: center; color: var(--bs-text-muted); font-weight: 600;">${idx + 1}</td>
+                <td style="text-align: center;">
+                    <div class="rss-thumb-box" data-index="${idx}" title="Click to upload/change image">
+                        ${row.image_url ? `<img src="${row.image_url}" alt="Product">` : `<i class="bi bi-image fs-5 text-muted"></i>`}
+                        <div class="upload-overlay"><i class="bi bi-camera-fill"></i></div>
+                    </div>
+                </td>
+                <td>
+                    <input type="text" class="table-input row-name" data-index="${idx}" value="${escapeHtml(row.name)}" placeholder="Enter product name..." required>
+                </td>
+                <td>
+                    <select class="table-select row-category" data-index="${idx}">
+                        ${catOptions}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="table-input row-price" data-index="${idx}" value="${row.price}" placeholder="e.g. 12999" required>
+                </td>
+                <td>
+                    <input type="text" class="table-input row-sku" data-index="${idx}" value="${escapeHtml(row.sku)}" placeholder="e.g. RS001">
+                </td>
+                <td>
+                    <input type="number" class="table-input row-stock" data-index="${idx}" value="${row.stock !== undefined ? row.stock : 10}" min="0" placeholder="10">
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge-draft">Draft</span>
+                </td>
+                <td style="text-align: center;">
+                    <div class="rss-row-actions">
+                        <button type="button" class="rss-action-icon-btn btn-edit-product" data-index="${idx}" title="Edit Full Product (First, Second, Third, Fourth & Images)">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button type="button" class="rss-action-icon-btn btn-preview" data-index="${idx}" title="Preview Product">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="rss-action-icon-btn btn-duplicate" data-index="${idx}" title="Duplicate Row">
+                            <i class="bi bi-copy"></i>
+                        </button>
+                        <button type="button" class="rss-action-icon-btn btn-delete" data-index="${idx}" title="Delete Row">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            // Bind input changes to state
+            tr.querySelector('.row-checkbox').addEventListener('change', function () {
+                row.selected = this.checked;
+                updateSelectAllState();
+            });
+
+            tr.querySelector('.row-name').addEventListener('input', function () {
+                row.name = this.value;
+            });
+
+            tr.querySelector('.row-category').addEventListener('change', function () {
+                row.category_id = this.value;
+                const cat = allCategories.find(c => String(c.id) === String(this.value));
+                row.category_name = cat ? cat.name : '';
+            });
+
+            tr.querySelector('.row-price').addEventListener('input', function () {
+                row.price = this.value;
+            });
+
+            tr.querySelector('.row-sku').addEventListener('input', function () {
+                row.sku = this.value;
+            });
+
+            tr.querySelector('.row-stock').addEventListener('input', function () {
+                row.stock = this.value;
+            });
+
+            // Thumbnail Click -> Upload File
+            tr.querySelector('.rss-thumb-box').addEventListener('click', function (e) {
+                e.stopPropagation();
+                currentRowImageTargetIndex = idx;
+                document.getElementById('rowImageFileInput').click();
+            });
+
+            // Action Buttons
+            tr.querySelector('.btn-edit-product').addEventListener('click', function (e) {
+                e.stopPropagation();
+                openProductModal(idx);
+            });
+
+            tr.querySelector('.btn-preview').addEventListener('click', function (e) {
+                e.stopPropagation();
+                openPreviewModal(idx);
+            });
+
+            tr.querySelector('.btn-duplicate').addEventListener('click', function (e) {
+                e.stopPropagation();
+                duplicateRow(idx);
+            });
+
+            tr.querySelector('.btn-delete').addEventListener('click', function (e) {
+                e.stopPropagation();
+                deleteRow(idx);
+            });
+
+            // Double-click row to open full product modal
+            tr.addEventListener('dblclick', function (e) {
+                if (!['INPUT', 'SELECT', 'BUTTON', 'A', 'I'].includes(e.target.tagName)) {
+                    openProductModal(idx);
+                }
+            });
+
+            tableBody.appendChild(tr);
+        });
+
+        updateSelectAllState();
+        updateCounts();
+    }
+
+    // Image Upload Handling
+    const rowImageFileInput = document.getElementById('rowImageFileInput');
+    rowImageFileInput.addEventListener('change', function () {
+        if (!this.files || !this.files[0] || currentRowImageTargetIndex === null) return;
+        const file = this.files[0];
+        const row = rowsData[currentRowImageTargetIndex];
+        if (!row) return;
+
+        // Preview locally immediately
+        row.image_url = URL.createObjectURL(file);
+        row.image_file = file;
+
+        // Upload asynchronously if item has an ID or save draft
+        const formData = new FormData();
+        formData.append('image', file);
+        if (row.id) {
+            formData.append('product_id', row.id);
+        }
+
+        fetch(URL_UPLOAD_IMAGE, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                row.image_url = data.image_url;
+                row.image_path = data.image_path;
+                showToast('Image uploaded successfully.');
+                renderTable();
+            }
+        })
+        .catch(() => {
+            renderTable();
+        });
+
+        this.value = '';
+    });
+
+    // Select All Checkbox
+    selectAllCheckbox.addEventListener('change', function () {
+        const isChecked = this.checked;
+        rowsData.forEach(r => r.selected = isChecked);
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = isChecked);
+    });
+
+    function updateSelectAllState() {
+        const allChecked = rowsData.length > 0 && rowsData.every(r => r.selected);
+        selectAllCheckbox.checked = allChecked;
+    }
+
+    function updateCounts() {
+        const count = rowsData.length;
+        document.getElementById('topCounterNumber').textContent = count;
+        document.getElementById('tabPendingCount').textContent = count;
+    }
+
+    // Add New Row / Add Product Modal
+    function addNewRow() {
+        openProductModal(null);
+    }
+    window.addNewRow = addNewRow;
+
+    document.getElementById('btnAddNewRowTop').addEventListener('click', function () {
+        openProductModal(null);
+    });
+    document.getElementById('btnAddAnotherRowBottom').addEventListener('click', function () {
+        openProductModal(null);
+    });
+
+    // Duplicate Row
+    function duplicateRow(idx) {
+        const orig = rowsData[idx];
+        const copy = JSON.parse(JSON.stringify(orig));
+        copy.id = null;
+        copy.temp_id = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        copy.name = orig.name ? `${orig.name} (Copy)` : '';
+        copy.sku = orig.sku ? `${orig.sku}-COPY` : '';
+        copy.selected = false;
+        rowsData.splice(idx + 1, 0, copy);
+        renderTable();
+        showToast('Row duplicated.');
+    }
+
+    // Delete Row
+    function deleteRow(idx) {
+        const row = rowsData[idx];
+        if (row.id) {
+            if (!confirm(`Delete '${row.name || 'this draft'}' from Bulk Stock?`)) return;
+            fetch(URL_DELETE_ROWS, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({ product_ids: [row.id] })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    rowsData.splice(idx, 1);
+                    renderTable();
+                    showToast(data.message);
+                } else {
+                    alert(data.error || 'Failed to delete row.');
+                }
+            });
+        } else {
+            rowsData.splice(idx, 1);
+            renderTable();
+            showToast('Draft row removed.');
+        }
+    }
+
+    // Save as Draft
+    document.getElementById('btnSaveDraft').addEventListener('click', function () {
+        saveDraft();
+    });
+
+    function saveDraft(onSuccessCallback = null) {
+        const formData = new FormData();
+        const payload = rowsData.map(r => ({
+            id: r.id,
+            temp_id: r.temp_id,
+            name: r.name,
+            category_id: r.category_id,
+            price: r.price,
+            offer_price: r.offer_price,
+            discount_percentage: r.discount_percentage || 0,
+            sku: r.sku,
+            stock: r.stock,
+            is_active: r.is_active !== undefined ? r.is_active : true,
+            is_featured: Boolean(r.is_featured),
+            is_trending: Boolean(r.is_trending),
+            is_new_arrival: Boolean(r.is_new_arrival),
+            is_best_seller: Boolean(r.is_best_seller),
+            is_today_deal: Boolean(r.is_today_deal),
+            video_url: r.video_url || '',
+            tags: r.tags || '',
+            fabric: r.fabric,
+            color: r.color,
+            material: r.material,
+            occasion: r.occasion,
+            zari_type: r.zari_type,
+            saree_length: r.saree_length,
+            authenticity: r.authenticity,
+            short_description: r.short_description,
+            description: r.description,
+            specifications: r.specifications,
+            meta_title: r.meta_title,
+            meta_description: r.meta_description,
+            meta_keywords: r.meta_keywords,
+        }));
+
+        formData.append('products_data', JSON.stringify(payload));
+
+        // Append pending file objects
+        rowsData.forEach(r => {
+            const key = r.temp_id || (r.id ? String(r.id) : null);
+            if (!key) return;
+            if (r.image_file) {
+                formData.append(`image_${key}_0`, r.image_file);
+                formData.append(`image_${key}`, r.image_file);
+            }
+            if (r.slot_files) {
+                Object.keys(r.slot_files).forEach(slotKey => {
+                    const slot = parseInt(slotKey);
+                    if (slot > 0 && r.slot_files[slot] && r.slot_files[slot].file) {
+                        formData.append(`image_${key}_${slot}`, r.slot_files[slot].file);
+                    }
+                });
+            }
+        });
+
+        const btn = document.getElementById('btnSaveDraft');
+        const origText = btn.innerHTML;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
+        btn.disabled = true;
+
+        fetch(URL_SAVE_DRAFT, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            if (data.success) {
+                showToast(data.message);
+                // Update rows with new database IDs
+                if (data.saved_items) {
+                    data.saved_items.forEach(saved => {
+                        const match = rowsData.find(r => (r.temp_id && r.temp_id === saved.temp_id) || (r.id && r.id === saved.id));
+                        if (match) {
+                            match.id = saved.id;
+                            match.temp_id = null;
+                            match.image_url = saved.image_url || match.image_url;
+                            match.image_file = null;
+                            if (saved.extra_images) {
+                                match.extra_images = saved.extra_images;
+                            }
+                            match.slot_files = {};
+                        }
+                    });
+                }
+                renderTable();
+                if (onSuccessCallback) onSuccessCallback();
+            } else {
+                alert(data.error || 'Failed to save drafts.');
+            }
+        })
+        .catch(err => {
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            alert('Error saving draft: ' + err);
+        });
+    }
+
+    // Publish Selected
+    document.getElementById('btnPublishSelected').addEventListener('click', function () {
+        const selectedRows = rowsData.filter(r => r.selected);
+        if (selectedRows.length === 0) {
+            alert('Please select at least one product row to publish.');
+            return;
+        }
+
+        // Validate required fields client-side before sending
+        for (let i = 0; i < selectedRows.length; i++) {
+            const r = selectedRows[i];
+            if (!r.name || !r.name.trim()) {
+                alert(`Row #${rowsData.indexOf(r) + 1} is missing a Product Name.`);
+                return;
+            }
+            if (!r.price || parseFloat(r.price) <= 0) {
+                alert(`Row #${rowsData.indexOf(r) + 1} (${r.name}) requires a valid Price greater than ₹0.`);
+                return;
+            }
+            if (!r.category_id) {
+                alert(`Row #${rowsData.indexOf(r) + 1} (${r.name}) requires a Category.`);
+                return;
+            }
+        }
+
+        // Save drafts first to ensure any unsaved edits/new rows are in DB, then publish
+        saveDraft(function () {
+            const idsToPublish = selectedRows.map(r => r.id).filter(id => Boolean(id));
+            if (idsToPublish.length === 0) {
+                alert('No valid product IDs found to publish.');
+                return;
+            }
+
+            if (!confirm(`Publish ${idsToPublish.length} selected product(s) to live website?`)) {
+                return;
+            }
+
+            const pubBtn = document.getElementById('btnPublishSelected');
+            const origText = pubBtn.innerHTML;
+            pubBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Publishing...`;
+            pubBtn.disabled = true;
+
+            fetch(URL_PUBLISH, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({ product_ids: idsToPublish })
+            })
+            .then(res => res.json())
+            .then(data => {
+                pubBtn.innerHTML = origText;
+                pubBtn.disabled = false;
+                if (data.success) {
+                    // Remove successfully published items from local table
+                    rowsData = rowsData.filter(r => !data.published_ids.includes(r.id));
+                    renderTable();
+                    let msg = `Successfully published ${data.published_count} product(s) to live products!`;
+                    if (data.errors && data.errors.length > 0) {
+                        msg += `\n\nWarnings/Errors:\n` + data.errors.join('\n');
+                    }
+                    alert(msg);
+                } else {
+                    let errMsg = data.error || 'Failed to publish products.';
+                    if (data.errors && data.errors.length > 0) {
+                        errMsg += '\n\n' + data.errors.join('\n');
+                    }
+                    alert(errMsg);
+                }
+            })
+            .catch(err => {
+                pubBtn.innerHTML = origText;
+                pubBtn.disabled = false;
+                alert('Publish error: ' + err);
+            });
+        });
+    });
+
+    // Quick Actions
+    // 1. Publish All
+    document.getElementById('cardQuickPublishAll').addEventListener('click', function () {
+        if (rowsData.length === 0) {
+            alert('No products in bulk stock to publish.');
+            return;
+        }
+        rowsData.forEach(r => r.selected = true);
+        renderTable();
+        document.getElementById('btnPublishSelected').click();
+    });
+
+    // 2. Preview Products
+    document.getElementById('cardQuickPreviewProducts').addEventListener('click', function () {
+        if (rowsData.length === 0) {
+            alert('No products to preview.');
+            return;
+        }
+        openPreviewModal(0);
+    });
+
+    // 3. Clear All
+    document.getElementById('cardQuickClearAll').addEventListener('click', function () {
+        if (rowsData.length === 0) {
+            alert('Bulk stock is already empty.');
+            return;
+        }
+        if (!confirm('Are you sure you want to remove ALL products from Bulk Stock? This cannot be undone.')) {
+            return;
+        }
+
+        fetch(URL_CLEAR_ALL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                rowsData = [];
+                renderTable();
+                showToast(data.message);
+            }
+        });
+    });
+
+    // 4. Stock Summary
+    document.getElementById('cardQuickStockSummary').addEventListener('click', function () {
+        openSummaryModal();
+    });
+
+    // Tabs
+    const tabAddManage = document.getElementById('tabAddManage');
+    const tabReviewPublish = document.getElementById('tabReviewPublish');
+
+    tabAddManage.addEventListener('click', function () {
+        tabAddManage.classList.add('active');
+        tabReviewPublish.classList.remove('active');
+        // Unfilter all
+        renderTable();
+    });
+
+    tabReviewPublish.addEventListener('click', function () {
+        tabReviewPublish.classList.add('active');
+        tabAddManage.classList.remove('active');
+        // Select all for quick publish review
+        rowsData.forEach(r => r.selected = true);
+        renderTable();
+        showToast('All pending products selected for review and publishing.');
+    });
+
+    // Helper: Toast Message
+    function showToast(msg) {
+        const toast = document.getElementById('rssToast');
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3500);
+    }
+
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // =========================================================================
+    // COMPREHENSIVE PRODUCT MODAL SYSTEM (Steps 1 to 5 + Images)
+    // =========================================================================
+    let currentModalStep = 1;
+    let modalSlotFiles = {};
+    let nextExtraSlotIndex = 4;
+
+    // 1. Step Navigation
+    function switchModalStep(step) {
+        if (step < 1) step = 1;
+        if (step > 5) step = 5;
+        currentModalStep = step;
+
+        // Update tab buttons
+        document.querySelectorAll('.rss-modal-tab-btn').forEach(btn => {
+            if (parseInt(btn.dataset.step) === step) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Update step panels
+        for (let i = 1; i <= 5; i++) {
+            const sec = document.getElementById('modalStep' + i);
+            if (sec) {
+                if (i === step) {
+                    sec.classList.add('active');
+                } else {
+                    sec.classList.remove('active');
+                }
+            }
+        }
+
+        // Update Prev / Next buttons
+        const prevBtn = document.getElementById('btnModalPrevStep');
+        const nextBtn = document.getElementById('btnModalNextStep');
+        if (prevBtn) prevBtn.style.display = (step > 1) ? 'inline-flex' : 'none';
+        if (nextBtn) nextBtn.style.display = (step < 5) ? 'inline-flex' : 'none';
+    }
+    window.switchModalStep = switchModalStep;
+
+    document.querySelectorAll('.rss-modal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const s = parseInt(this.dataset.step);
+            if (s) switchModalStep(s);
+        });
+    });
+
+    const prevStepBtn = document.getElementById('btnModalPrevStep');
+    if (prevStepBtn) {
+        prevStepBtn.addEventListener('click', function () {
+            switchModalStep(currentModalStep - 1);
+        });
+    }
+
+    const nextStepBtn = document.getElementById('btnModalNextStep');
+    if (nextStepBtn) {
+        nextStepBtn.addEventListener('click', function () {
+            switchModalStep(currentModalStep + 1);
+        });
+    }
+
+    // 2. Bidirectional Price & Discount Calculations
+    const modalPriceInput = document.getElementById('modalPrice');
+    const modalDiscountInput = document.getElementById('modalDiscount');
+    const modalOfferPriceInput = document.getElementById('modalOfferPrice');
+
+    function calculateOfferFromDiscount() {
+        const price = parseFloat(modalPriceInput.value) || 0;
+        const discount = parseFloat(modalDiscountInput.value) || 0;
+        if (price > 0) {
+            const offer = price - (price * discount / 100);
+            modalOfferPriceInput.value = offer > 0 ? offer.toFixed(2) : '';
+        } else {
+            modalOfferPriceInput.value = '';
+        }
+    }
+
+    function calculateDiscountFromOffer() {
+        const price = parseFloat(modalPriceInput.value) || 0;
+        const offer = parseFloat(modalOfferPriceInput.value) || 0;
+        if (price > 0 && offer <= price) {
+            const discount = Math.round(((price - offer) / price) * 100);
+            modalDiscountInput.value = discount >= 0 ? discount : 0;
+        } else if (offer > price) {
+            modalDiscountInput.value = 0;
+        }
+    }
+
+    if (modalPriceInput) modalPriceInput.addEventListener('input', calculateOfferFromDiscount);
+    if (modalDiscountInput) modalDiscountInput.addEventListener('input', calculateOfferFromDiscount);
+    if (modalOfferPriceInput) modalOfferPriceInput.addEventListener('input', calculateDiscountFromOffer);
+
+    // 3. Image Slots & Upload Handling
+    window.triggerSlotUpload = function (slot) {
+        const fi = document.getElementById('slotFileInput_' + slot);
+        if (fi) fi.click();
+    };
+
+    window.handleSlotFileChange = function (event, slot) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        modalSlotFiles[slot] = { file: file, url: url, isDeleted: false };
+
+        const img = document.getElementById('slotImg_' + slot);
+        const emp = document.getElementById('slotEmpty_' + slot);
+        const prev = document.getElementById('slotPreview_' + slot);
+
+        if (img) img.src = url;
+        if (emp) emp.classList.add('d-none');
+        if (prev) prev.classList.remove('d-none');
+
+        updateModalImagesCount();
+    };
+
+    window.removeSlotImage = function (event, slot) {
+        if (event) event.stopPropagation();
+
+        modalSlotFiles[slot] = { file: null, url: '', isDeleted: true };
+
+        const fi = document.getElementById('slotFileInput_' + slot);
+        if (fi) fi.value = '';
+
+        const img = document.getElementById('slotImg_' + slot);
+        const emp = document.getElementById('slotEmpty_' + slot);
+        const prev = document.getElementById('slotPreview_' + slot);
+
+        if (img) img.src = '';
+        if (prev) prev.classList.add('d-none');
+        if (emp) emp.classList.remove('d-none');
+
+        updateModalImagesCount();
+    };
+
+    function updateModalImagesCount() {
+        let count = 0;
+        Object.keys(modalSlotFiles).forEach(k => {
+            if (modalSlotFiles[k] && modalSlotFiles[k].url && !modalSlotFiles[k].isDeleted) {
+                count++;
+            }
+        });
+        const badge = document.getElementById('modalImagesCount');
+        if (badge) badge.textContent = count;
+    }
+
+    const btnAddExtraSlot = document.getElementById('btnAddExtraImgSlot');
+    if (btnAddExtraSlot) {
+        btnAddExtraSlot.addEventListener('click', function () {
+            const slot = nextExtraSlotIndex++;
+            const grid = document.getElementById('modalImagesGrid');
+            const card = document.createElement('div');
+            card.className = 'rss-img-slot-card';
+            card.id = 'imgSlotCard_' + slot;
+            card.setAttribute('onclick', `triggerSlotUpload(${slot})`);
+
+            card.innerHTML = `
+                <input type="file" id="slotFileInput_${slot}" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, ${slot})">
+                <div class="slot-empty-content" id="slotEmpty_${slot}">
+                    <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                    <div class="rss-img-slot-title">Extra Image #${slot}</div>
+                    <div class="rss-img-slot-desc">Additional Gallery Angle</div>
+                </div>
+                <div class="slot-preview-content d-none" id="slotPreview_${slot}">
+                    <img src="" alt="Extra Image ${slot}" id="slotImg_${slot}">
+                    <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, ${slot})" title="Remove image">&times;</button>
+                </div>
+            `;
+            grid.appendChild(card);
+            triggerSlotUpload(slot);
+        });
+    }
+
+    // 4. Open Product Modal
+    window.openProductModal = function (idx = null) {
+        const modal = document.getElementById('productFormModal');
+        const titleEl = document.getElementById('productModalTitle');
+        modalSlotFiles = {};
+
+        // Remove any dynamic extra slots beyond initial 4
+        const grid = document.getElementById('modalImagesGrid');
+        const extraCards = grid.querySelectorAll('.rss-img-slot-card');
+        extraCards.forEach(card => {
+            const sNum = parseInt(card.id.replace('imgSlotCard_', ''));
+            if (sNum >= 4) card.remove();
+        });
+        nextExtraSlotIndex = 4;
+
+        // Reset default 4 slots UI
+        for (let s = 0; s < 4; s++) {
+            const fi = document.getElementById('slotFileInput_' + s);
+            if (fi) fi.value = '';
+            const img = document.getElementById('slotImg_' + s);
+            if (img) img.src = '';
+            const prev = document.getElementById('slotPreview_' + s);
+            if (prev) prev.classList.add('d-none');
+            const emp = document.getElementById('slotEmpty_' + s);
+            if (emp) emp.classList.remove('d-none');
+        }
+
+        if (idx !== null && rowsData[idx]) {
+            // Edit Mode
+            const row = rowsData[idx];
+            document.getElementById('modalRowIndex').value = idx;
+            titleEl.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Edit Product: ${escapeHtml(row.name || 'Untitled Saree')}`;
+
+            // Step 1: Basic & Pricing
+            document.getElementById('modalName').value = row.name || '';
+            document.getElementById('modalSku').value = row.sku || '';
+            document.getElementById('modalCategory').value = row.category_id || '';
+            document.getElementById('modalIsActive').checked = row.is_active !== undefined ? Boolean(row.is_active) : true;
+            document.getElementById('modalPrice').value = row.price || '';
+            document.getElementById('modalDiscount').value = row.discount_percentage || 0;
+            document.getElementById('modalOfferPrice').value = row.offer_price || '';
+            document.getElementById('modalStock').value = row.stock !== undefined ? row.stock : 10;
+
+            // Step 2: Description & Marketing Flags
+            document.getElementById('modalShortDesc').value = row.short_description || '';
+            document.getElementById('modalDescription').value = row.description || '';
+            document.getElementById('modalIsFeatured').checked = Boolean(row.is_featured);
+            document.getElementById('modalIsTrending').checked = Boolean(row.is_trending);
+            document.getElementById('modalIsNewArrival').checked = Boolean(row.is_new_arrival);
+            document.getElementById('modalIsBestSeller').checked = Boolean(row.is_best_seller);
+            document.getElementById('modalIsTodayDeal').checked = Boolean(row.is_today_deal);
+
+            // Step 3: Specifications
+            document.getElementById('modalFabric').value = row.fabric || '';
+            document.getElementById('modalColor').value = row.color || '';
+            document.getElementById('modalMaterial').value = row.material || '';
+            document.getElementById('modalOccasion').value = row.occasion || '';
+            document.getElementById('modalZari').value = row.zari_type || '';
+            document.getElementById('modalVideoUrl').value = row.video_url || '';
+            document.getElementById('modalTags').value = row.tags || '';
+
+            // Step 4: Details & SEO
+            document.getElementById('modalLength').value = row.saree_length || '';
+            document.getElementById('modalAuthenticity').value = row.authenticity || '';
+            document.getElementById('modalSpecifications').value = row.specifications || '';
+            document.getElementById('modalMetaTitle').value = row.meta_title || '';
+            document.getElementById('modalMetaDescription').value = row.meta_description || '';
+            document.getElementById('modalMetaKeywords').value = row.meta_keywords || '';
+
+            // Step 5: Images
+            // Primary image -> Slot 0
+            if (row.image_url) {
+                modalSlotFiles[0] = { file: row.image_file || null, url: row.image_url, isDeleted: false };
+                document.getElementById('slotImg_0').src = row.image_url;
+                document.getElementById('slotEmpty_0').classList.add('d-none');
+                document.getElementById('slotPreview_0').classList.remove('d-none');
+            }
+
+            // Extra images -> Slot 1, 2, 3...
+            const extras = row.extra_images || [];
+            extras.forEach((extUrl, eIdx) => {
+                const slot = eIdx + 1;
+                if (slot < 4) {
+                    modalSlotFiles[slot] = { file: null, url: extUrl, isDeleted: false };
+                    document.getElementById('slotImg_' + slot).src = extUrl;
+                    document.getElementById('slotEmpty_' + slot).classList.add('d-none');
+                    document.getElementById('slotPreview_' + slot).classList.remove('d-none');
+                } else {
+                    const card = document.createElement('div');
+                    card.className = 'rss-img-slot-card';
+                    card.id = 'imgSlotCard_' + slot;
+                    card.setAttribute('onclick', `triggerSlotUpload(${slot})`);
+                    card.innerHTML = `
+                        <input type="file" id="slotFileInput_${slot}" accept="image/*" class="d-none" onchange="handleSlotFileChange(event, ${slot})">
+                        <div class="slot-empty-content d-none" id="slotEmpty_${slot}">
+                            <i class="bi bi-camera fs-2 text-muted mb-2"></i>
+                            <div class="rss-img-slot-title">Extra Image #${slot}</div>
+                            <div class="rss-img-slot-desc">Additional Gallery Angle</div>
+                        </div>
+                        <div class="slot-preview-content" id="slotPreview_${slot}">
+                            <img src="${extUrl}" alt="Extra Image ${slot}" id="slotImg_${slot}">
+                            <button type="button" class="rss-img-remove-btn" onclick="removeSlotImage(event, ${slot})" title="Remove image">&times;</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                    modalSlotFiles[slot] = { file: null, url: extUrl, isDeleted: false };
+                    nextExtraSlotIndex = slot + 1;
+                }
+            });
+        } else {
+            // New Product Mode
+            document.getElementById('modalRowIndex').value = '';
+            titleEl.innerHTML = `<i class="bi bi-box-seam me-2"></i>Add Product to Bulk Stock`;
+
+            // Step 1 defaults
+            document.getElementById('modalName').value = '';
+            document.getElementById('modalSku').value = '';
+            document.getElementById('modalCategory').value = allCategories.length > 0 ? allCategories[0].id : '';
+            document.getElementById('modalIsActive').checked = true;
+            document.getElementById('modalPrice').value = '';
+            document.getElementById('modalDiscount').value = '0';
+            document.getElementById('modalOfferPrice').value = '';
+            document.getElementById('modalStock').value = '10';
+
+            // Step 2 defaults
+            document.getElementById('modalShortDesc').value = '';
+            document.getElementById('modalDescription').value = '';
+            document.getElementById('modalIsFeatured').checked = false;
+            document.getElementById('modalIsTrending').checked = false;
+            document.getElementById('modalIsNewArrival').checked = false;
+            document.getElementById('modalIsBestSeller').checked = false;
+            document.getElementById('modalIsTodayDeal').checked = false;
+
+            // Step 3 defaults
+            document.getElementById('modalFabric').value = 'Pure Silk';
+            document.getElementById('modalColor').value = '';
+            document.getElementById('modalMaterial').value = 'Mulberry Silk';
+            document.getElementById('modalOccasion').value = 'Festive / Wedding';
+            document.getElementById('modalZari').value = 'Premium Gold Zari Traditional Weave';
+            document.getElementById('modalVideoUrl').value = '';
+            document.getElementById('modalTags').value = '';
+
+            // Step 4 defaults
+            document.getElementById('modalLength').value = '5.5 Meters (Approx.) + 0.8 Meter Running Blouse';
+            document.getElementById('modalAuthenticity').value = 'Silk Mark Certified 100% Handcrafted Mulberry Silk';
+            document.getElementById('modalSpecifications').value = '';
+            document.getElementById('modalMetaTitle').value = '';
+            document.getElementById('modalMetaDescription').value = '';
+            document.getElementById('modalMetaKeywords').value = '';
+        }
+
+        updateModalImagesCount();
+        switchModalStep(1);
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            const nInput = document.getElementById('modalName');
+            if (nInput) nInput.focus();
+        }, 100);
+    };
+
+    window.closeProductModal = function () {
+        document.getElementById('productFormModal').style.display = 'none';
+    };
+
+    // 5. Save from Product Modal
+    window.saveProductModal = function (closeModalAfter = true) {
+        const nameInput = document.getElementById('modalName');
+        const name = nameInput.value.trim();
+        if (!name) {
+            switchModalStep(1);
+            nameInput.focus();
+            alert('Please enter a Product Name in First (Basic & Pricing).');
+            return;
+        }
+
+        const priceInput = document.getElementById('modalPrice');
+        const price = parseFloat(priceInput.value);
+        if (isNaN(price) || price <= 0) {
+            switchModalStep(1);
+            priceInput.focus();
+            alert('Please enter a valid Price in First (Basic & Pricing).');
+            return;
+        }
+
+        const catInput = document.getElementById('modalCategory');
+        const categoryId = catInput.value;
+        if (!categoryId) {
+            switchModalStep(1);
+            catInput.focus();
+            alert('Please select a Category in First (Basic & Pricing).');
+            return;
+        }
+
+        const idxVal = document.getElementById('modalRowIndex').value;
+        const isEdit = (idxVal !== '' && idxVal !== null);
+        let row;
+
+        if (isEdit) {
+            const idx = parseInt(idxVal);
+            row = rowsData[idx];
+            if (!row) return;
+        } else {
+            row = createEmptyRow(rowsData.length, categoryId);
+            rowsData.push(row);
+        }
+
+        // Step 1
+        row.name = name;
+        row.sku = document.getElementById('modalSku').value.trim();
+        row.category_id = categoryId;
+        const catObj = allCategories.find(c => String(c.id) === String(categoryId));
+        row.category_name = catObj ? catObj.name : '';
+        row.is_active = document.getElementById('modalIsActive').checked;
+        row.price = priceInput.value;
+        row.discount_percentage = parseInt(document.getElementById('modalDiscount').value) || 0;
+        row.offer_price = document.getElementById('modalOfferPrice').value;
+        row.stock = parseInt(document.getElementById('modalStock').value) || 0;
+
+        // Step 2
+        row.short_description = document.getElementById('modalShortDesc').value;
+        row.description = document.getElementById('modalDescription').value;
+        row.is_featured = document.getElementById('modalIsFeatured').checked;
+        row.is_trending = document.getElementById('modalIsTrending').checked;
+        row.is_new_arrival = document.getElementById('modalIsNewArrival').checked;
+        row.is_best_seller = document.getElementById('modalIsBestSeller').checked;
+        row.is_today_deal = document.getElementById('modalIsTodayDeal').checked;
+
+        // Step 3
+        row.fabric = document.getElementById('modalFabric').value;
+        row.color = document.getElementById('modalColor').value;
+        row.material = document.getElementById('modalMaterial').value;
+        row.occasion = document.getElementById('modalOccasion').value;
+        row.zari_type = document.getElementById('modalZari').value;
+        row.video_url = document.getElementById('modalVideoUrl').value;
+        row.tags = document.getElementById('modalTags').value;
+
+        // Step 4
+        row.saree_length = document.getElementById('modalLength').value;
+        row.authenticity = document.getElementById('modalAuthenticity').value;
+        row.specifications = document.getElementById('modalSpecifications').value;
+        row.meta_title = document.getElementById('modalMetaTitle').value;
+        row.meta_description = document.getElementById('modalMetaDescription').value;
+        row.meta_keywords = document.getElementById('modalMetaKeywords').value;
+
+        // Step 5: Images
+        if (modalSlotFiles[0]) {
+            if (modalSlotFiles[0].isDeleted) {
+                row.image_url = '';
+                row.image_file = null;
+            } else if (modalSlotFiles[0].file) {
+                row.image_file = modalSlotFiles[0].file;
+                row.image_url = modalSlotFiles[0].url;
+            }
+        }
+        row.slot_files = modalSlotFiles;
+
+        // Rerender table
+        renderTable();
+
+        // Auto-save draft to backend
+        saveDraft(function () {
+            showToast(isEdit ? 'Product updated successfully.' : 'Product added to Bulk Stock.');
+        });
+
+        if (closeModalAfter) {
+            closeProductModal();
+        } else {
+            openProductModal(null);
+        }
+    };
+
+    const btnSaveAndClose = document.getElementById('btnModalSaveAndClose');
+    if (btnSaveAndClose) {
+        btnSaveAndClose.addEventListener('click', function () {
+            saveProductModal(true);
+        });
+    }
+
+    const btnSaveAndAnother = document.getElementById('btnModalSaveAndAnother');
+    if (btnSaveAndAnother) {
+        btnSaveAndAnother.addEventListener('click', function () {
+            saveProductModal(false);
+        });
+    }
+
+    // Backwards compatibility alias
+    window.openSpecsModal = function (idx) {
+        openProductModal(idx);
+    };
+
+    // MODAL: Preview Card
+    window.openPreviewModal = function (idx) {
+        const row = rowsData[idx];
+        if (!row) return;
+        const container = document.getElementById('previewCardContent');
+        const cat = allCategories.find(c => String(c.id) === String(row.category_id));
+        const catName = cat ? cat.name : 'Saree Collection';
+        const formattedPrice = row.price ? `₹${parseFloat(row.price).toLocaleString('en-IN')}` : '₹--';
+
+        container.innerHTML = `
+            <div style="background: #18050e; border: 1px solid var(--bs-border); border-radius: 12px; overflow: hidden; max-width: 320px; margin: 0 auto; box-shadow: 0 8px 25px rgba(0,0,0,0.5); text-align: left;">
+                <div style="height: 360px; background: #260918; position: relative;">
+                    ${row.image_url ? `<img src="${row.image_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="${escapeHtml(row.name)}">` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#a38c96;"><i class="bi bi-image fs-1"></i></div>`}
+                    <span style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase;">
+                        ${escapeHtml(catName)}
+                    </span>
+                </div>
+                <div style="padding: 1rem;">
+                    <h5 style="color: #ffffff; font-size: 0.95rem; font-weight: 600; margin-bottom: 0.35rem;">${escapeHtml(row.name || 'Untitled Saree')}</h5>
+                    <div style="font-size: 0.78rem; color: #a38c96; margin-bottom: 0.6rem;">SKU: ${escapeHtml(row.sku || 'RS-PENDING')} | Stock: ${row.stock || 0}</div>
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <span style="color: var(--bs-accent-gold); font-size: 1.15rem; font-weight: 700;">${formattedPrice}</span>
+                        ${row.offer_price ? `<span style="color: #888; text-decoration: line-through; font-size: 0.85rem;">₹${parseFloat(row.offer_price).toLocaleString('en-IN')}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('previewModal').style.display = 'flex';
+    };
+
+    window.closePreviewModal = function () {
+        document.getElementById('previewModal').style.display = 'none';
+    };
+
+    // MODAL: Summary Modal
+    window.openSummaryModal = function () {
+        const container = document.getElementById('summaryModalContent');
+        const count = rowsData.length;
+        const totalValue = rowsData.reduce((acc, r) => acc + (parseFloat(r.price || 0) * parseInt(r.stock || 1)), 0);
+        const totalStock = rowsData.reduce((acc, r) => acc + parseInt(r.stock || 0), 0);
+
+        // Group by category
+        const catCounts = {};
+        rowsData.forEach(r => {
+            const cat = allCategories.find(c => String(c.id) === String(r.category_id));
+            const name = cat ? cat.name : 'Uncategorized';
+            catCounts[name] = (catCounts[name] || 0) + 1;
+        });
+
+        let catHtml = '';
+        for (const [catName, cCount] of Object.entries(catCounts)) {
+            catHtml += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem;">
+                    <span>${escapeHtml(catName)}</span>
+                    <span class="badge bg-secondary">${cCount} sarees</span>
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 0.85rem;">
+                    <div style="font-size: 0.75rem; color: #d4af37;">TOTAL DRAFT PRODUCTS</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #ffffff;">${count}</div>
+                </div>
+                <div style="background: rgba(233,30,99,0.1); border: 1px solid rgba(233,30,99,0.3); border-radius: 8px; padding: 0.85rem;">
+                    <div style="font-size: 0.75rem; color: #ff80ab;">TOTAL UNITS IN STOCK</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #ffffff;">${totalStock}</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <div style="font-size: 0.85rem; font-weight: 600; color: #d4af37; margin-bottom: 0.5rem;">Total Inventory Value (Draft):</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: #ffffff;">₹${totalValue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+                <div style="font-size: 0.85rem; font-weight: 600; color: #f5ebe6; margin-bottom: 0.5rem;">Products by Category:</div>
+                <div style="max-height: 160px; overflow-y: auto;">
+                    ${catHtml || '<div class="text-muted fs-8">No categories added yet.</div>'}
+                </div>
+            </div>
+        `;
+
+        document.getElementById('summaryModal').style.display = 'flex';
+    };
+
+    window.closeSummaryModal = function () {
+        document.getElementById('summaryModal').style.display = 'none';
+    };
+
+    // Close modals on backdrop click
+    document.querySelectorAll('.rss-modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    });
+
+    // Initial render
+    renderTable();
+});
+</script>
+{% endblock %}

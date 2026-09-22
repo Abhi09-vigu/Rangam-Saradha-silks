@@ -80,7 +80,7 @@ class WebsiteSetting(models.Model):
     bridal_banner_subtitle = models.TextField(default="Exquisite handcrafted Kanchipuram bridal silk sarees designed for your special day.", help_text="Subtitle or description text.")
     bridal_banner_image = models.ImageField(upload_to='bridal/', blank=True, null=True, help_text="Background image for the bridal banner.")
     bridal_banner_button_text = models.CharField(max_length=50, default="Shop Wedding Collection", help_text="Text on the banner button.")
-    bridal_banner_button_url = models.CharField(max_length=200, default="/shop/?collection=bridal", help_text="URL the button links to.")
+    bridal_banner_button_url = models.CharField(max_length=200, default="/shop/?category=bridal-collection", help_text="URL the button links to.")
 
     # Dynamic Why Choose Us Headers
     why_choose_title = models.CharField(max_length=100, default="Why Choose Us", help_text="Main heading for the Why Choose Us section.")

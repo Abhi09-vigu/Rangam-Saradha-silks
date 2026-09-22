@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 from .serializers import ContactMessageSerializer
-from shop.models import Category, Product, Collection
+from shop.models import Category, Product
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ DEFAULT_CMS_PAGES = {
     },
     'refund-policy': {
         'title': 'Refund & Return Policy',
-        'content': '<h2>Refund & Return Policy</h2><p>We strive to ensure complete customer satisfaction with every handcrafted silk saree.</p><h4>1. Returns & Exchanges</h4><p>If you receive a defective or damaged product, please notify us within 48 hours of delivery with unboxing video proof.</p><h4>2. Refund Process</h4><p>Once verified, refunds will be initiated to your original payment method within 5-7 business days.</p>'
+        'content': '<h2>Refund & Return Policy</h2><p>At Rangam Saradha Silks, we strive to ensure complete customer satisfaction with every handcrafted pure silk saree. Each saree undergoes multi-step quality inspection before being securely packaged and dispatched.</p><div class="alert alert-warning my-4 p-3 rounded-3" style="background-color: #fff9e6; border: 1px solid #e0c283;"><h5 class="fw-bold mb-2 text-dark"><i class="bi bi-camera-video-fill text-warning me-2"></i>Mandatory 360° Unboxing Video Proof Policy</h5><p class="mb-2 fs-7 text-dark">To safeguard authentic customer claims and process any return, exchange, or transit damage request, a <strong>continuous uncut parcel opening video</strong> is strictly mandatory.</p><ul class="mb-0 fs-7 ps-3 text-dark"><li>The video must clearly capture the intact, sealed package and shipping label before cutting open.</li><li>The recording must be in a single continuous take with no pauses, cuts, or edits.</li><li>Unfold and display the saree, blouse piece, zari borders, and tags on camera.</li><li>Any defect, missing item, or transit damage must be shown clearly in the video and reported to us within 48 hours of delivery.</li></ul></div><h4>1. Returns & Exchanges Window</h4><p>Eligible for return or exchange within 7 days of delivery. For transit damage or manufacturing defects, video proof must be reported within 48 hours of receipt.</p><h4>2. Item Condition</h4><p>Items must be unworn, unpleated, with original Silk Mark, security tags, and packaging intact.</p><h4>3. Refund Process</h4><p>Once received and quality-verified at our facility, a 100% refund will be credited back to your original payment method within 5 to 7 business days.</p>'
     },
     'shipping-policy': {
         'title': 'Shipping & Delivery Policy',

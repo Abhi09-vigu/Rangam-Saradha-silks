@@ -1,0 +1,1348 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    :root {
+        --coupon-bg: #12090d;
+        --coupon-card-bg: #1a0d13;
+        --coupon-card-border: #2f1420;
+        --coupon-input-bg: #221019;
+        --coupon-input-border: #3d1b2c;
+        --coupon-input-focus: #af0446;
+        --coupon-accent-gold: #c5a059;
+        --coupon-accent-magenta: #af0446;
+        --coupon-text-main: #f8ebe6;
+        --coupon-text-muted: #a38c96;
+    }
+
+    body {
+        background-color: var(--coupon-bg) !important;
+        color: var(--coupon-text-main) !important;
+    }
+
+    /* Coupon Container & Page Title */
+    .rss-coupon-admin-wrapper {
+        max-width: 1320px;
+        margin: 0 auto 3rem auto;
+        padding: 0 1rem;
+    }
+
+    .rss-coupon-breadcrumbs {
+        font-size: 0.82rem;
+        color: var(--coupon-text-muted);
+        margin-bottom: 0.75rem;
+    }
+    .rss-coupon-breadcrumbs a {
+        color: var(--coupon-accent-gold);
+        text-decoration: none;
+    }
+    .rss-coupon-breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .rss-coupon-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1.25rem;
+    }
+
+    /* Cards */
+    .rss-admin-card {
+        background: var(--coupon-card-bg);
+        border: 1px solid var(--coupon-card-border);
+        border-radius: 12px;
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .rss-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+    }
+
+    .rss-card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    .rss-icon-magenta {
+        background: rgba(175, 4, 70, 0.2);
+        color: #ff3377;
+    }
+    .rss-icon-gold {
+        background: rgba(197, 160, 89, 0.2);
+        color: #d4b068;
+    }
+
+    .rss-card-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0;
+    }
+    .rss-card-subtitle {
+        font-size: 0.8rem;
+        color: var(--coupon-text-muted);
+        margin: 2px 0 0 0;
+    }
+
+    /* Form Fields Grid */
+    .rss-two-col-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem 2rem;
+    }
+    @media (max-width: 900px) {
+        .rss-two-col-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+    }
+
+    .rss-form-group {
+        margin-bottom: 1rem;
+    }
+    .rss-form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #f0dfe6;
+        margin-bottom: 0.35rem;
+    }
+    .rss-form-label .required {
+        color: #ff4d6d;
+        margin-left: 2px;
+    }
+
+    .rss-input-wrapper {
+        position: relative !important;
+        display: flex !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+
+    .rss-input,
+    input.rss-input,
+    input[type="text"].rss-input,
+    input[type="number"].rss-input,
+    input[type="date"].rss-input {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        background: var(--coupon-input-bg) !important;
+        border: 1px solid var(--coupon-input-border) !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        font-size: 0.92rem !important;
+        padding: 0 0.85rem !important;
+        line-height: normal !important;
+        outline: none !important;
+        margin: 0 !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="date"].rss-input {
+        display: inline-flex !important;
+        align-items: center !important;
+        color-scheme: dark !important;
+    }
+
+    .rss-select,
+    select.rss-select {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        background: var(--coupon-input-bg) !important;
+        border: 1px solid var(--coupon-input-border) !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        font-size: 0.92rem !important;
+        padding: 0 2.5rem 0 0.85rem !important;
+        line-height: 42px !important;
+        outline: none !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.85rem center !important;
+        background-size: 14px 14px !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .rss-input:focus,
+    input.rss-input:focus,
+    .rss-select:focus,
+    select.rss-select:focus {
+        border-color: var(--coupon-input-focus) !important;
+        box-shadow: 0 0 0 3px rgba(175, 4, 70, 0.25) !important;
+    }
+    .rss-select option {
+        background: #201017 !important;
+        color: #ffffff !important;
+        padding: 8px 12px !important;
+    }
+
+    .rss-input-addon {
+        box-sizing: border-box !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #2a1520 !important;
+        border: 1px solid var(--coupon-input-border) !important;
+        border-left: none !important;
+        border-radius: 0 8px 8px 0 !important;
+        padding: 0 0.85rem !important;
+        color: var(--coupon-accent-gold) !important;
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+    }
+    .has-addon .rss-input,
+    .has-addon input.rss-input {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .rss-help-text {
+        font-size: 0.76rem;
+        color: var(--coupon-text-muted);
+        margin-top: 0.3rem;
+    }
+
+    .rss-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.88rem;
+        color: #ffffff;
+        cursor: pointer;
+        user-select: none;
+        margin-top: 0.5rem;
+    }
+    .rss-checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--coupon-accent-magenta);
+        cursor: pointer;
+    }
+
+    /* Apply To Radio Cards */
+    .rss-apply-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 850px) {
+        .rss-apply-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .rss-radio-card {
+        border: 1px solid var(--coupon-card-border);
+        background: #1e0f16;
+        border-radius: 10px;
+        padding: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        user-select: none;
+    }
+    .rss-radio-card:hover {
+        border-color: rgba(175, 4, 70, 0.6);
+        background: #25121c;
+    }
+    .rss-radio-card.active {
+        border-color: var(--coupon-accent-magenta);
+        background: rgba(175, 4, 70, 0.12);
+        box-shadow: 0 0 14px rgba(175, 4, 70, 0.25);
+    }
+    .rss-radio-card input[type="radio"] {
+        margin-top: 3px;
+        accent-color: var(--coupon-accent-magenta);
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    .rss-radio-card-content h4 {
+        margin: 0 0 0.2rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+    .rss-radio-card-content p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--coupon-text-muted);
+        line-height: 1.35;
+    }
+
+    /* Sub-panels (Categories & Products) */
+    .rss-targeting-section {
+        background: #170b10;
+        border: 1px solid var(--coupon-card-border);
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+        display: none;
+    }
+    .rss-targeting-section.visible {
+        display: block;
+    }
+
+    .rss-section-split {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+        .rss-section-split {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Search Box */
+    .rss-search-wrap {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin-bottom: 0.75rem !important;
+    }
+    .rss-search-wrap i {
+        position: absolute !important;
+        left: 0.95rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: var(--coupon-accent-gold) !important;
+        font-size: 0.95rem !important;
+        pointer-events: none !important;
+        z-index: 2 !important;
+    }
+    .rss-search-input,
+    input.rss-search-input,
+    input[type="text"].rss-search-input {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        background: #200f17 !important;
+        border: 1px solid var(--coupon-input-border) !important;
+        border-radius: 8px !important;
+        padding: 0 0.85rem 0 2.75rem !important;
+        color: #ffffff !important;
+        font-size: 0.88rem !important;
+        line-height: normal !important;
+        outline: none !important;
+        margin: 0 !important;
+    }
+    .rss-search-input::placeholder,
+    input.rss-search-input::placeholder {
+        color: #9c8390 !important;
+        opacity: 1 !important;
+    }
+    .rss-search-input:focus,
+    input.rss-search-input:focus {
+        border-color: var(--coupon-accent-magenta) !important;
+        box-shadow: 0 0 0 3px rgba(175, 4, 70, 0.25) !important;
+    }
+
+    /* Scrollable Checklist */
+    .rss-scroll-list {
+        height: 250px;
+        overflow-y: auto;
+        background: #14080e;
+        border: 1px solid #2e1420;
+        border-radius: 8px;
+        padding: 0.5rem;
+    }
+    .rss-scroll-list::-webkit-scrollbar,
+    .rss-scroll-table-wrap::-webkit-scrollbar,
+    .rss-selected-scroll-box::-webkit-scrollbar {
+        width: 6px;
+    }
+    .rss-scroll-list::-webkit-scrollbar-thumb,
+    .rss-scroll-table-wrap::-webkit-scrollbar-thumb,
+    .rss-selected-scroll-box::-webkit-scrollbar-thumb {
+        background: #471d31;
+        border-radius: 4px;
+    }
+
+    .rss-check-item {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.45rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        color: #f0e6eb;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .rss-check-item:hover {
+        background: #24111c;
+    }
+    .rss-check-item input[type="checkbox"] {
+        accent-color: var(--coupon-accent-magenta);
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Selected Panel Header & Items */
+    .rss-selected-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    .rss-selected-header h5 {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+    .rss-clear-all-btn {
+        background: none;
+        border: none;
+        color: #ff3377;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+    }
+    .rss-clear-all-btn:hover {
+        text-decoration: underline;
+    }
+
+    .rss-chips-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        min-height: 48px;
+    }
+
+    .rss-category-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #af0446, #7a0230);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    .rss-chip-remove {
+        cursor: pointer;
+        opacity: 0.8;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        transition: opacity 0.15s;
+    }
+    .rss-chip-remove:hover {
+        opacity: 1;
+        color: #ffe6ee;
+    }
+
+    .rss-info-message {
+        background: rgba(13, 110, 253, 0.12);
+        border: 1px solid rgba(13, 110, 253, 0.28);
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+        color: #8ac2ff;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    /* Products Table */
+    .rss-scroll-table-wrap {
+        height: 270px;
+        overflow-y: auto;
+        border: 1px solid #2e1420;
+        border-radius: 8px;
+        background: #14080e;
+    }
+    .rss-product-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+    }
+    .rss-product-table th {
+        position: sticky;
+        top: 0;
+        background: #25101b;
+        color: var(--coupon-text-muted);
+        text-align: left;
+        padding: 0.55rem 0.65rem;
+        font-weight: 600;
+        border-bottom: 1px solid #361726;
+        z-index: 2;
+    }
+    .rss-product-table td {
+        padding: 0.5rem 0.65rem;
+        border-bottom: 1px solid #230d18;
+        color: #f5ebe6;
+        vertical-align: middle;
+    }
+    .rss-product-table tr:hover td {
+        background: #200e18;
+    }
+    .rss-product-thumb-small {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        object-fit: cover;
+        background: #2a1520;
+    }
+
+    /* Selected Products Cards */
+    .rss-selected-scroll-box {
+        height: 270px;
+        overflow-y: auto;
+        display: flex;
+        flex-column: column;
+        gap: 0.5rem;
+        padding-right: 4px;
+    }
+    .rss-selected-product-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #200f17;
+        border: 1px solid #331523;
+        border-radius: 8px;
+        padding: 0.45rem 0.65rem;
+        gap: 0.65rem;
+    }
+    .rss-prod-left {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        overflow: hidden;
+    }
+    .rss-prod-meta {
+        overflow: hidden;
+    }
+    .rss-prod-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+    .rss-prod-cat {
+        font-size: 0.72rem;
+        color: var(--coupon-text-muted);
+    }
+    .rss-prod-right {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-shrink: 0;
+    }
+    .rss-prod-price {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: var(--coupon-accent-gold);
+    }
+    .rss-prod-remove {
+        cursor: pointer;
+        color: #a38c96;
+        font-size: 0.85rem;
+        transition: color 0.15s;
+    }
+    .rss-prod-remove:hover {
+        color: #ff3377;
+    }
+
+    /* Bottom Action Buttons */
+    .rss-bottom-actions-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(197, 160, 89, 0.2);
+    }
+    @media (max-width: 600px) {
+        .rss-bottom-actions-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    .rss-btn-save {
+        background: var(--coupon-accent-gold);
+        color: #1a0a10 !important;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.4rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .rss-btn-save:hover {
+        background: #d4b068;
+    }
+
+    .rss-btn-addanother {
+        background: var(--coupon-accent-magenta);
+        color: #ffffff !important;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.15rem;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .rss-btn-addanother:hover {
+        background: #c70550;
+    }
+
+    .rss-btn-continue {
+        background: #871343;
+        color: #ffffff !important;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.15rem;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .rss-btn-continue:hover {
+        background: #9c174e;
+    }
+
+    .rss-btn-cancel {
+        margin-left: auto;
+        background: #25121b;
+        color: #d1bcc5 !important;
+        font-weight: 600;
+        border: 1px solid #3d1b2c;
+        border-radius: 8px;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .rss-btn-cancel:hover {
+        background: #331825;
+        color: #ffffff !important;
+    }
+
+    /* Error Alert */
+    .rss-error-alert {
+        background: rgba(220, 53, 69, 0.15);
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        color: #ff8595;
+        margin-bottom: 1.25rem;
+        font-size: 0.88rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% with form=adminform.form %}
+<div class="rss-coupon-admin-wrapper">
+    <!-- Breadcrumbs -->
+    <div class="rss-coupon-breadcrumbs">
+        <a href="{% url 'admin:index' %}">Home</a> &rsaquo;
+        <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a> &rsaquo;
+        <a href="{% url 'admin:shop_coupon_changelist' %}">Coupons</a> &rsaquo;
+        {% if add %}Add coupon{% else %}Change coupon{% endif %}
+    </div>
+
+    <!-- Page Title -->
+    <h1 class="rss-coupon-title">
+        {% if add %}Add coupon{% else %}Change coupon: {{ original.code }}{% endif %}
+    </h1>
+
+    <form method="post" id="coupon_form" novalidate>
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="rss-error-alert">
+            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the errors below:</strong>
+            <ul class="mb-0 mt-1 ps-3">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Hidden inputs container for submitting selected categories & products reliably -->
+        <div id="hiddenCategoriesContainer"></div>
+        <div id="hiddenProductsContainer"></div>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: BASIC INFORMATION                             -->
+        <!-- ======================================================== -->
+        <div class="rss-admin-card">
+            <div class="rss-card-header">
+                <div class="rss-card-icon rss-icon-magenta">
+                    <i class="bi bi-tag-fill"></i>
+                </div>
+                <div>
+                    <h3 class="rss-card-title">Basic Information</h3>
+                </div>
+            </div>
+
+            <div class="rss-two-col-grid">
+                <!-- Left Column -->
+                <div>
+                    <!-- Code -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_code">
+                            Code:<span class="required">*</span>
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <input type="text" name="code" id="id_code" class="rss-input" value="{{ form.code.value|default:'' }}" required placeholder="e.g. SILK10">
+                        </div>
+                        <div class="rss-help-text">Enter a unique coupon code (e.g. RANGAM10)</div>
+                    </div>
+
+                    <!-- Discount Type -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_discount_type">
+                            Discount type:<span class="required">*</span>
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <select name="discount_type" id="id_discount_type" class="rss-select">
+                                <option value="PERCENT" {% if form.discount_type.value == 'PERCENT' or not form.discount_type.value %}selected{% endif %}>Percentage</option>
+                                <option value="FIXED" {% if form.discount_type.value == 'FIXED' %}selected{% endif %}>Fixed Amount</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Discount Value -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_discount_value">
+                            Discount value:<span class="required">*</span>
+                        </label>
+                        <div class="rss-input-wrapper has-addon">
+                            <input type="number" step="0.01" name="discount_value" id="id_discount_value" class="rss-input" value="{{ form.discount_value.value|default:'' }}" required>
+                            <span class="rss-input-addon" id="discountValueAddon">%</span>
+                        </div>
+                        <div class="rss-help-text" id="discountValueHelp">Enter discount percentage (e.g. 10 for 10%)</div>
+                    </div>
+
+                    <!-- Min Purchase -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_min_purchase">
+                            Min purchase:
+                        </label>
+                        <div class="rss-input-wrapper has-addon">
+                            <input type="number" step="0.01" name="min_purchase" id="id_min_purchase" class="rss-input" value="{{ form.min_purchase.value|default:'0' }}">
+                            <span class="rss-input-addon">₹</span>
+                        </div>
+                        <div class="rss-help-text">Minimum order value to apply this coupon</div>
+                    </div>
+
+                    <!-- Max Discount -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_max_discount">
+                            Max discount:
+                        </label>
+                        <div class="rss-input-wrapper has-addon">
+                            <input type="number" step="0.01" name="max_discount" id="id_max_discount" class="rss-input" value="{{ form.max_discount.value|default:'' }}">
+                            <span class="rss-input-addon">₹</span>
+                        </div>
+                        <div class="rss-help-text">Maximum discount amount (optional)</div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- Usage Limit -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_usage_limit">
+                            Usage limit:
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <input type="number" name="usage_limit" id="id_usage_limit" class="rss-input" value="{{ form.usage_limit.value|default:'100' }}">
+                        </div>
+                        <div class="rss-help-text">Total number of times this coupon can be used</div>
+                    </div>
+
+                    <!-- Used Count -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_used_count">
+                            Used count:
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <input type="number" name="used_count" id="id_used_count" class="rss-input" value="{{ form.used_count.value|default:'0' }}">
+                        </div>
+                        <div class="rss-help-text">Automatically updated</div>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_start_date">
+                            Start date:
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <input type="date" name="start_date" id="id_start_date" class="rss-input" value="{{ form.start_date.value|date:'Y-m-d'|default:form.start_date.value|default:'' }}">
+                        </div>
+                        <div class="rss-help-text">Date from which this coupon becomes valid</div>
+                    </div>
+
+                    <!-- Expiry Date -->
+                    <div class="rss-form-group">
+                        <label class="rss-form-label" for="id_expiry_date">
+                            Expiry date:<span class="required">*</span>
+                        </label>
+                        <div class="rss-input-wrapper">
+                            <input type="date" name="expiry_date" id="id_expiry_date" class="rss-input" value="{{ form.expiry_date.value|date:'Y-m-d'|default:form.expiry_date.value|default:'' }}" required>
+                        </div>
+                        <div class="rss-help-text">Date on which this coupon expires</div>
+                    </div>
+
+                    <!-- Is Active -->
+                    <div class="rss-form-group pt-2">
+                        <label class="rss-checkbox-label" for="id_is_active">
+                            <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or form.is_active.value is None and add %}checked{% endif %}>
+                            <span>This coupon is active and can be used</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: APPLY TO                                      -->
+        <!-- ======================================================== -->
+        <div class="rss-admin-card">
+            <div class="rss-card-header">
+                <div class="rss-card-icon rss-icon-magenta">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <div>
+                    <h3 class="rss-card-title">Apply To</h3>
+                    <p class="rss-card-subtitle">Choose where this coupon can be applied</p>
+                </div>
+            </div>
+
+            <!-- Radio Cards -->
+            <div class="rss-apply-cards-grid">
+                <!-- All Products -->
+                <label class="rss-radio-card" id="card_apply_all" for="apply_all">
+                    <input type="radio" name="apply_to" id="apply_all" value="ALL" {% if current_apply_to == 'ALL' or not current_apply_to %}checked{% endif %}>
+                    <div class="rss-radio-card-content">
+                        <h4>All Products</h4>
+                        <p>Coupon can be used on all products in the store</p>
+                    </div>
+                </label>
+
+                <!-- Specific Categories -->
+                <label class="rss-radio-card" id="card_apply_categories" for="apply_categories">
+                    <input type="radio" name="apply_to" id="apply_categories" value="CATEGORIES" {% if current_apply_to == 'CATEGORIES' %}checked{% endif %}>
+                    <div class="rss-radio-card-content">
+                        <h4>Specific Categories</h4>
+                        <p>Coupon can be used only on selected categories</p>
+                    </div>
+                </label>
+
+                <!-- Specific Products -->
+                <label class="rss-radio-card" id="card_apply_products" for="apply_products">
+                    <input type="radio" name="apply_to" id="apply_products" value="PRODUCTS" {% if current_apply_to == 'PRODUCTS' %}checked{% endif %}>
+                    <div class="rss-radio-card-content">
+                        <h4>Specific Products</h4>
+                        <p>Coupon can be used only on selected products</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- SUB-PANEL: SPECIFIC CATEGORIES -->
+            <div class="rss-targeting-section" id="categoriesSection">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-folder-fill text-warning fs-5"></i>
+                    <div>
+                        <h4 class="m-0 fs-6 fw-bold text-white">Select Categories</h4>
+                        <p class="m-0 text-muted fs-8">Choose the categories where this coupon will be valid</p>
+                    </div>
+                </div>
+
+                <div class="rss-section-split">
+                    <!-- Left: Search & Scrollable Checklist -->
+                    <div>
+                        <div class="rss-search-wrap">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="categorySearchInput" class="rss-search-input" placeholder="Search categories...">
+                        </div>
+                        <div class="rss-scroll-list" id="categoriesChecklist">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Selected Categories Chips -->
+                    <div>
+                        <div class="rss-selected-header">
+                            <h5 id="selectedCategoriesCount">Selected Categories (0)</h5>
+                            <button type="button" class="rss-clear-all-btn" id="clearAllCategoriesBtn">Clear all</button>
+                        </div>
+                        <div class="rss-chips-container" id="selectedCategoriesChips">
+                            <!-- Chips rendered via JS -->
+                        </div>
+                        <div class="rss-info-message">
+                            <i class="bi bi-info-circle-fill fs-6 flex-shrink-0"></i>
+                            <span>All products under the selected categories will be eligible for this coupon.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-PANEL: SPECIFIC PRODUCTS -->
+            <div class="rss-targeting-section" id="productsSection">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-box-seam text-warning fs-5"></i>
+                    <div>
+                        <h4 class="m-0 fs-6 fw-bold text-white">Select Specific Products</h4>
+                        <p class="m-0 text-muted fs-8">Choose the specific sarees eligible for this coupon</p>
+                    </div>
+                </div>
+
+                <div class="rss-section-split">
+                    <!-- Left: Search & Products Table -->
+                    <div>
+                        <div class="rss-search-wrap">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="productSearchInput" class="rss-search-input" placeholder="Search products by name or SKU...">
+                        </div>
+                        <div class="rss-scroll-table-wrap">
+                            <table class="rss-product-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px;"></th>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Selected Products Cards -->
+                    <div>
+                        <div class="rss-selected-header">
+                            <h5 id="selectedProductsCount">Selected Products (0)</h5>
+                            <button type="button" class="rss-clear-all-btn" id="clearAllProductsBtn">Clear all</button>
+                        </div>
+                        <div class="rss-selected-scroll-box" id="selectedProductsList">
+                            <!-- Cards rendered via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- BOTTOM ACTIONS BAR                                       -->
+        <!-- ======================================================== -->
+        <div class="rss-bottom-actions-bar">
+            <button type="submit" name="_save" class="rss-btn-save">SAVE</button>
+            <button type="submit" name="_addanother" class="rss-btn-addanother">Save and add another</button>
+            <button type="submit" name="_continue" class="rss-btn-continue">Save and continue editing</button>
+            {% if not add and has_delete_permission and original %}
+                <a href="{% url 'admin:shop_coupon_delete' original.pk %}" class="rss-btn-delete" style="background: #611124; color: #ff99aa !important; border: 1px solid #851830; border-radius: 8px; padding: 0.65rem 1.15rem; font-size: 0.88rem; font-weight: 600; text-decoration: none; margin-left: 0.5rem; transition: all 0.2s;">Delete</a>
+            {% endif %}
+            <a href="{% url 'admin:shop_coupon_changelist' %}" class="rss-btn-cancel">CANCEL</a>
+        </div>
+    </form>
+</div>
+{% endwith %}
+
+<!-- Raw data passed from Django view -->
+<script id="categoriesData" type="application/json">{{ all_categories_json|safe }}</script>
+<script id="productsData" type="application/json">{{ all_products_json|safe }}</script>
+<script id="initialCategoryIds" type="application/json">{{ selected_category_ids_json|safe }}</script>
+<script id="initialProductIds" type="application/json">{{ selected_product_ids_json|safe }}</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Data Parsing
+    const allCategories = JSON.parse(document.getElementById('categoriesData').textContent || '[]');
+    const allProducts = JSON.parse(document.getElementById('productsData').textContent || '[]');
+    const initialCategoryIds = new Set(JSON.parse(document.getElementById('initialCategoryIds').textContent || '[]'));
+    const initialProductIds = new Set(JSON.parse(document.getElementById('initialProductIds').textContent || '[]'));
+
+    // State tracking
+    const selectedCategoryIds = new Set(initialCategoryIds);
+    const selectedProductIds = new Set(initialProductIds);
+
+    // DOM Elements
+    const radioAll = document.getElementById('apply_all');
+    const radioCategories = document.getElementById('apply_categories');
+    const radioProducts = document.getElementById('apply_products');
+    const cardAll = document.getElementById('card_apply_all');
+    const cardCategories = document.getElementById('card_apply_categories');
+    const cardProducts = document.getElementById('card_apply_products');
+    const categoriesSection = document.getElementById('categoriesSection');
+    const productsSection = document.getElementById('productsSection');
+
+    const discountTypeSelect = document.getElementById('id_discount_type');
+    const discountValueAddon = document.getElementById('discountValueAddon');
+    const discountValueHelp = document.getElementById('discountValueHelp');
+
+    const hiddenCategoriesContainer = document.getElementById('hiddenCategoriesContainer');
+    const hiddenProductsContainer = document.getElementById('hiddenProductsContainer');
+
+    // 2. Discount Type Sync (% vs ₹)
+    function updateDiscountTypeAddon() {
+        if (!discountTypeSelect) return;
+        if (discountTypeSelect.value === 'FIXED') {
+            discountValueAddon.textContent = '₹';
+            discountValueHelp.textContent = 'Enter fixed discount amount in ₹ (e.g. 500)';
+        } else {
+            discountValueAddon.textContent = '%';
+            discountValueHelp.textContent = 'Enter discount percentage (e.g. 10 for 10%)';
+        }
+    }
+    if (discountTypeSelect) {
+        discountTypeSelect.addEventListener('change', updateDiscountTypeAddon);
+        updateDiscountTypeAddon();
+    }
+
+    // 3. Apply To Mode Switching
+    function updateApplyToMode() {
+        const mode = document.querySelector('input[name="apply_to"]:checked')?.value || 'ALL';
+
+        cardAll.classList.toggle('active', mode === 'ALL');
+        cardCategories.classList.toggle('active', mode === 'CATEGORIES');
+        cardProducts.classList.toggle('active', mode === 'PRODUCTS');
+
+        categoriesSection.classList.toggle('visible', mode === 'CATEGORIES');
+        productsSection.classList.toggle('visible', mode === 'PRODUCTS');
+    }
+
+    [radioAll, radioCategories, radioProducts].forEach(radio => {
+        if (radio) {
+            radio.addEventListener('change', updateApplyToMode);
+        }
+    });
+    updateApplyToMode();
+
+    // 4. Categories Rendering & Management
+    const categorySearchInput = document.getElementById('categorySearchInput');
+    const categoriesChecklist = document.getElementById('categoriesChecklist');
+    const selectedCategoriesChips = document.getElementById('selectedCategoriesChips');
+    const selectedCategoriesCount = document.getElementById('selectedCategoriesCount');
+    const clearAllCategoriesBtn = document.getElementById('clearAllCategoriesBtn');
+
+    function renderCategoriesList(query = '') {
+        const cleanQuery = query.toLowerCase().trim();
+        categoriesChecklist.innerHTML = '';
+
+        const filtered = allCategories.filter(cat =>
+            cat.name.toLowerCase().includes(cleanQuery)
+        );
+
+        if (filtered.length === 0) {
+            categoriesChecklist.innerHTML = '<div class="p-3 text-center text-muted fs-8">No categories found</div>';
+            return;
+        }
+
+        filtered.forEach(cat => {
+            const isChecked = selectedCategoryIds.has(cat.id);
+            const label = document.createElement('label');
+            label.className = 'rss-check-item';
+            label.innerHTML = `
+                <input type="checkbox" data-cat-id="${cat.id}" ${isChecked ? 'checked' : ''}>
+                <span>${escapeHtml(cat.name)}</span>
+            `;
+
+            label.querySelector('input').addEventListener('change', function (e) {
+                if (e.target.checked) {
+                    selectedCategoryIds.add(cat.id);
+                } else {
+                    selectedCategoryIds.delete(cat.id);
+                }
+                renderCategoryChips();
+                syncHiddenInputs();
+            });
+
+            categoriesChecklist.appendChild(label);
+        });
+    }
+
+    function renderCategoryChips() {
+        selectedCategoriesChips.innerHTML = '';
+        selectedCategoriesCount.textContent = `Selected Categories (${selectedCategoryIds.size})`;
+
+        if (selectedCategoryIds.size === 0) {
+            selectedCategoriesChips.innerHTML = '<span class="text-muted fs-8 py-2">No categories selected</span>';
+            return;
+        }
+
+        selectedCategoryIds.forEach(catId => {
+            const cat = allCategories.find(c => c.id === catId);
+            if (!cat) return;
+
+            const chip = document.createElement('div');
+            chip.className = 'rss-category-chip';
+            chip.innerHTML = `
+                <span>${escapeHtml(cat.name)}</span>
+                <span class="rss-chip-remove" title="Remove">&times;</span>
+            `;
+
+            chip.querySelector('.rss-chip-remove').addEventListener('click', function () {
+                selectedCategoryIds.delete(cat.id);
+                renderCategoriesList(categorySearchInput.value);
+                renderCategoryChips();
+                syncHiddenInputs();
+            });
+
+            selectedCategoriesChips.appendChild(chip);
+        });
+    }
+
+    if (categorySearchInput) {
+        categorySearchInput.addEventListener('input', function () {
+            renderCategoriesList(this.value);
+        });
+    }
+
+    if (clearAllCategoriesBtn) {
+        clearAllCategoriesBtn.addEventListener('click', function () {
+            selectedCategoryIds.clear();
+            renderCategoriesList(categorySearchInput.value);
+            renderCategoryChips();
+            syncHiddenInputs();
+        });
+    }
+
+    // 5. Products Rendering & Management
+    const productSearchInput = document.getElementById('productSearchInput');
+    const productsTableBody = document.getElementById('productsTableBody');
+    const selectedProductsList = document.getElementById('selectedProductsList');
+    const selectedProductsCount = document.getElementById('selectedProductsCount');
+    const clearAllProductsBtn = document.getElementById('clearAllProductsBtn');
+
+    function renderProductsTable(query = '') {
+        const cleanQuery = query.toLowerCase().trim();
+        productsTableBody.innerHTML = '';
+
+        const filtered = allProducts.filter(p =>
+            p.name.toLowerCase().includes(cleanQuery) ||
+            (p.sku && p.sku.toLowerCase().includes(cleanQuery)) ||
+            (p.category && p.category.toLowerCase().includes(cleanQuery))
+        );
+
+        if (filtered.length === 0) {
+            productsTableBody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-muted fs-8">No matching products found</td></tr>';
+            return;
+        }
+
+        filtered.forEach(p => {
+            const isChecked = selectedProductIds.has(p.id);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <input type="checkbox" data-prod-id="${p.id}" ${isChecked ? 'checked' : ''} style="accent-color: #af0446; cursor:pointer;">
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        ${p.thumb ? `<img src="${p.thumb}" class="rss-product-thumb-small" alt="${escapeHtml(p.name)}">` : `<div class="rss-product-thumb-small d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image fs-8"></i></div>`}
+                        <div>
+                            <div class="fw-semibold text-white fs-8">${escapeHtml(p.name)}</div>
+                            <div class="text-muted fs-9">${escapeHtml(p.sku || '')}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="badge bg-dark border border-secondary text-light fs-9">${escapeHtml(p.category)}</span></td>
+                <td><span class="fw-bold text-warning fs-8">${escapeHtml(p.price)}</span></td>
+            `;
+
+            tr.querySelector('input').addEventListener('change', function (e) {
+                if (e.target.checked) {
+                    selectedProductIds.add(p.id);
+                } else {
+                    selectedProductIds.delete(p.id);
+                }
+                renderSelectedProductCards();
+                syncHiddenInputs();
+            });
+
+            productsTableBody.appendChild(tr);
+        });
+    }
+
+    function renderSelectedProductCards() {
+        selectedProductsList.innerHTML = '';
+        selectedProductsCount.textContent = `Selected Products (${selectedProductIds.size})`;
+
+        if (selectedProductIds.size === 0) {
+            selectedProductsList.innerHTML = '<div class="p-3 text-center text-muted fs-8">No products selected</div>';
+            return;
+        }
+
+        selectedProductIds.forEach(prodId => {
+            const p = allProducts.find(item => item.id === prodId);
+            if (!p) return;
+
+            const card = document.createElement('div');
+            card.className = 'rss-selected-product-card';
+            card.innerHTML = `
+                <div class="rss-prod-left">
+                    ${p.thumb ? `<img src="${p.thumb}" class="rss-product-thumb-small" alt="${escapeHtml(p.name)}">` : `<div class="rss-product-thumb-small d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image fs-8"></i></div>`}
+                    <div class="rss-prod-meta">
+                        <div class="rss-prod-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+                        <div class="rss-prod-cat">${escapeHtml(p.category)}</div>
+                    </div>
+                </div>
+                <div class="rss-prod-right">
+                    <span class="rss-prod-price">${escapeHtml(p.price)}</span>
+                    <span class="rss-prod-remove" title="Remove">&times;</span>
+                </div>
+            `;
+
+            card.querySelector('.rss-prod-remove').addEventListener('click', function () {
+                selectedProductIds.delete(p.id);
+                renderProductsTable(productSearchInput.value);
+                renderSelectedProductCards();
+                syncHiddenInputs();
+            });
+
+            selectedProductsList.appendChild(card);
+        });
+    }
+
+    if (productSearchInput) {
+        productSearchInput.addEventListener('input', function () {
+            renderProductsTable(this.value);
+        });
+    }
+
+    if (clearAllProductsBtn) {
+        clearAllProductsBtn.addEventListener('click', function () {
+            selectedProductIds.clear();
+            renderProductsTable(productSearchInput.value);
+            renderSelectedProductCards();
+            syncHiddenInputs();
+        });
+    }
+
+    // 6. Sync hidden form inputs for standard Django ModelForm POST
+    function syncHiddenInputs() {
+        hiddenCategoriesContainer.innerHTML = '';
+        hiddenProductsContainer.innerHTML = '';
+
+        const mode = document.querySelector('input[name="apply_to"]:checked')?.value || 'ALL';
+
+        if (mode === 'CATEGORIES') {
+            selectedCategoryIds.forEach(catId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'categories';
+                input.value = catId;
+                hiddenCategoriesContainer.appendChild(input);
+            });
+        } else if (mode === 'PRODUCTS') {
+            selectedProductIds.forEach(prodId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'products';
+                input.value = prodId;
+                hiddenProductsContainer.appendChild(input);
+            });
+        }
+    }
+
+    // Listen to radio changes to re-sync hidden inputs
+    [radioAll, radioCategories, radioProducts].forEach(radio => {
+        if (radio) {
+            radio.addEventListener('change', syncHiddenInputs);
+        }
+    });
+
+    // Form submission validation & sync
+    const couponForm = document.getElementById('coupon_form');
+    if (couponForm) {
+        couponForm.addEventListener('submit', function (e) {
+            syncHiddenInputs();
+            const mode = document.querySelector('input[name="apply_to"]:checked')?.value || 'ALL';
+            if (mode === 'CATEGORIES' && selectedCategoryIds.size === 0) {
+                alert('Please select at least one category for Specific Categories.');
+                e.preventDefault();
+                return false;
+            }
+            if (mode === 'PRODUCTS' && selectedProductIds.size === 0) {
+                alert('Please select at least one product for Specific Products.');
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
+    // Helper escapeHtml
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Initial render
+    renderCategoriesList();
+    renderCategoryChips();
+    renderProductsTable();
+    renderSelectedProductCards();
+    syncHiddenInputs();
+});
+</script>
+{% endblock %}

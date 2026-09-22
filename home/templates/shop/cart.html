@@ -70,28 +70,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Coupon Box -->
-                <div class="card border border-light p-4 mt-4" style="border-radius: 12px; background-color: var(--section-bg);">
-                    <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Apply Promo Coupon</h5>
-                    
-                    {% if coupon %}
-                    <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded border border-success">
-                        <div>
-                            <span class="badge bg-success mb-1">Applied</span>
-                            <h6 class="fw-bold mb-0 text-dark">{{ coupon.code }}</h6>
-                            <span class="text-muted fs-8">Discount: {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0 }}%{% else %}{{ site_settings.currency }}{{ coupon.discount_value }}{% endif %} Off</span>
-                        </div>
-                        <a href="{% url 'shop:coupon_remove' %}" class="btn btn-sm btn-outline-danger">Remove</a>
-                    </div>
-                    {% else %}
-                    <form action="{% url 'shop:apply_coupon' %}" method="POST" class="d-flex gap-2">
-                        {% csrf_token %}
-                        <input type="text" name="coupon_code" class="form-control" placeholder="Enter coupon code (e.g. SILK10)" required style="max-width: 250px;">
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </form>
-                    {% endif %}
-                </div>
             </div>
 
             <!-- Pricing Summary Card -->
