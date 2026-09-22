@@ -257,9 +257,7 @@ function renderQuickViewModal(product, container) {
 
     // Stock badges
     let stockBadgeHtml = '';
-    if (product.stock === 0) {
-        stockBadgeHtml = `<span class="badge bg-danger text-white px-2 py-1 fs-7">Out of Stock</span>`;
-    } else if (product.stock <= 5) {
+    if (product.stock <= 5) {
         stockBadgeHtml = `<span class="badge bg-warning text-dark px-2 py-1 fs-7">Only ${product.stock} Left</span>`;
     } else {
         stockBadgeHtml = `<span class="badge bg-success text-white px-2 py-1 fs-7">In Stock</span>`;

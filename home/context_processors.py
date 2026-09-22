@@ -70,7 +70,7 @@ def global_context(request):
     if hasattr(request, 'user') and request.user.is_authenticated and not request.user.is_staff:
         try:
             from accounts.models import Wishlist
-            wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+            wishlist_product_ids = list(Wishlist.objects.filter(user=request.user, product__is_active=True, product__stock__gt=0).values_list('product_id', flat=True))
         except Exception:
             pass
 

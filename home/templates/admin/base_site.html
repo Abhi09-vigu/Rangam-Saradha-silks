@@ -3,6 +3,18 @@
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
+{% block extrahead %}
+{{ block.super }}
+<script>
+    // Enforce dark mode as the default theme across the entire admin
+    document.documentElement.dataset.theme = 'dark';
+    try {
+        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('django.admin.theme', 'dark');
+    } catch (e) {}
+</script>
+{% endblock %}
+
 {% block branding %}
 <div class="brand-container d-flex align-items-center">
     <img src="{% static 'images/logo.jpg' %}" alt="Rangam Saradha" style="height: 38px; width: auto; border-radius: 4px; margin-right: 12px; border: 1px solid #AE6F21;">
@@ -20,36 +32,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    :root {
+    :root, html, html[data-theme="dark"], html[data-theme="light"], html[data-theme="auto"], body {
         /* Premium Typography */
         --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         --font-family-serif: 'Cormorant Garamond', Georgia, serif;
         
-        /* Light Mode Brand Palette */
+        /* Dark Mode Brand Palette by Default */
         --primary: #AF0446;
         --primary-fg: #ffffff;
         --secondary: #AE6F21;
         --secondary-fg: #ffffff;
         --accent: #AE6F21;
         
-        --header-bg: #540222;
+        --body-bg: #140d0f;
+        --body-fg: #f5ebe6;
+        --border-color: #3d1b24;
+        
+        --header-bg: #21030e;
         --header-fg: #fffdf9;
         --header-link-color: #fffdf9;
         
-        --breadcrumbs-bg: #fffdf9;
-        --breadcrumbs-fg: #666666;
-        --breadcrumbs-link-color: #AE6F21;
+        --breadcrumbs-bg: #21030e;
+        --breadcrumbs-fg: #d2c5bf;
+        --breadcrumbs-link-color: #e5a452;
         
-        --link-color: #AF0446;
-        --link-hover-color: #7d0332;
-        --link-selected-color: #AE6F21;
+        --link-color: #f770a1;
+        --link-hover-color: #ff9ebb;
+        --link-selected-color: #e5a452;
         
         --button-bg: #AF0446;
         --button-hover-bg: #8c0338;
         --button-fg: #ffffff;
-        
-        --border-color: #f0e6d6;
-        --body-bg: #fcfbfa;
+    }
+
+    /* Completely hide / remove the dark & light mode toggle button */
+    .theme-toggle,
+    button.theme-toggle,
+    #theme-toggle,
+    div.theme-toggle {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* Typography Overrides */
@@ -61,12 +89,18 @@
         font-family: var(--font-family-serif) !important;
     }
 
+    /* Full dark theme body & container backgrounds */
+    body, #content, #container, #main, #content-main {
+        background-color: #140d0f !important;
+        color: #f5ebe6 !important;
+    }
+
     /* Header Panel */
     #header {
-        background: linear-gradient(135deg, #42011a 0%, #AF0446 100%) !important;
+        background: linear-gradient(135deg, #2b0212 0%, #4a031e 100%) !important;
         border-bottom: 3px solid #AE6F21 !important;
         padding: 12px 24px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     }
 
     #header a {
@@ -76,7 +110,7 @@
     }
 
     #header a:hover {
-        color: #AE6F21 !important;
+        color: #e5a452 !important;
     }
 
     #user-tools {
@@ -84,50 +118,50 @@
         font-weight: 500 !important;
     }
 
-    /* Breadcrumbs Navigation */
+    /* Breadcrumbs Navigation in Dark Mode */
     .breadcrumbs {
-        background-color: #fffcf8 !important;
-        border-bottom: 1px solid #f0e6d6 !important;
-        color: var(--breadcrumbs-fg) !important;
+        background-color: #21030e !important;
+        border-bottom: 1px solid #3d1b24 !important;
+        color: #d2c5bf !important;
         padding: 12px 40px !important;
         font-weight: 500;
     }
 
     .breadcrumbs a {
-        color: var(--breadcrumbs-link-color) !important;
+        color: #e5a452 !important;
         text-decoration: none;
         transition: color 0.2s ease;
     }
 
     .breadcrumbs a:hover {
-        color: var(--primary) !important;
+        color: #ff9ebb !important;
         text-decoration: underline;
     }
 
-    /* Navigation Sidebar */
+    /* Navigation Sidebar in Dark Mode */
     #nav-sidebar {
-        background-color: #380115 !important;
-        border-right: 2px solid #AE6F21 !important;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05) !important;
+        background-color: #1a090e !important;
+        border-right: 2px solid #541d08 !important;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3) !important;
     }
 
     #nav-sidebar .app-module th, #nav-sidebar .app-module caption {
-        background-color: #4a011b !important;
+        background-color: #260d15 !important;
         color: #fffdf9 !important;
         font-family: var(--font-family-serif) !important;
         font-size: 1.15rem !important;
         font-weight: 700 !important;
-        border-bottom: 1px solid #AE6F21 !important;
+        border-bottom: 1px solid #541d08 !important;
         padding: 12px 16px !important;
         letter-spacing: 0.5px;
     }
 
     #nav-sidebar td, #nav-sidebar th {
-        border-bottom: 1px solid #4a011b !important;
+        border-bottom: 1px solid #2b0f17 !important;
     }
 
     #nav-sidebar tr a {
-        color: #f5ebeb !important;
+        color: #d2c5bf !important;
         padding: 10px 16px !important;
         display: block;
         font-size: 13px;
@@ -135,7 +169,7 @@
     }
 
     #nav-sidebar tr a:hover {
-        background-color: #5c0326 !important;
+        background-color: #3a1520 !important;
         color: #ffffff !important;
         padding-left: 20px !important;
     }
@@ -151,46 +185,52 @@
     }
 
     #nav-sidebar .toggle-nav-sidebar {
-        background-color: #4a011b !important;
-        border-right: 2px solid #AE6F21 !important;
+        background-color: #260d15 !important;
+        border-right: 2px solid #541d08 !important;
     }
 
-    /* Admin List Results Table */
+    /* Admin List Results Table in Dark Mode */
     .results table {
         border-radius: 12px !important;
         overflow: hidden !important;
-        border: 1px solid #f0e6d6 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+        border: 1px solid #3d1b24 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        background-color: #1c1114 !important;
     }
 
     .results table th {
-        background-color: #fffcf8 !important;
-        color: #AF0446 !important;
+        background-color: #260d15 !important;
+        color: #f5ebe6 !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border-bottom: 2px solid #f0e6d6 !important;
+        border-bottom: 2px solid #3d1b24 !important;
         padding: 12px 10px !important;
     }
 
     .results table th a {
-        color: #AF0446 !important;
+        color: #f5ebe6 !important;
+    }
+
+    .results table td {
+        color: #e2d3cd !important;
+        border-bottom: 1px solid #3d1b24 !important;
     }
 
     .results tr.row1 {
-        background-color: #ffffff !important;
+        background-color: #1c1114 !important;
     }
 
     .results tr.row2 {
-        background-color: #faf8f5 !important;
+        background-color: #221519 !important;
     }
 
-    .results tr:hover {
-        background-color: #f7f1e9 !important;
+    .results tr:hover td {
+        background-color: #2b171e !important;
     }
 
-    /* Buttons / Inputs */
+    /* Buttons / Inputs in Dark Mode */
     input[type=submit], input[type=button], .button, .btn {
         background: #AF0446 !important;
         border: 1px solid #8c0338 !important;
@@ -201,24 +241,24 @@
         padding: 8px 16px !important;
         cursor: pointer;
         transition: all 0.2s ease !important;
-        box-shadow: 0 2px 4px rgba(175, 4, 70, 0.15) !important;
+        box-shadow: 0 2px 4px rgba(175, 4, 70, 0.3) !important;
     }
 
     input[type=submit]:hover, input[type=button]:hover, .button:hover, .btn:hover {
         background: #8c0338 !important;
-        box-shadow: 0 4px 8px rgba(175, 4, 70, 0.25) !important;
+        box-shadow: 0 4px 8px rgba(175, 4, 70, 0.4) !important;
         transform: translateY(-1px);
     }
 
     input[type=submit].default, .button.default {
         background: #AE6F21 !important;
         border-color: #8c571a !important;
-        box-shadow: 0 2px 4px rgba(174, 111, 33, 0.15) !important;
+        box-shadow: 0 2px 4px rgba(174, 111, 33, 0.3) !important;
     }
 
     input[type=submit].default:hover, .button.default:hover {
         background: #8c571a !important;
-        box-shadow: 0 4px 8px rgba(174, 111, 33, 0.25) !important;
+        box-shadow: 0 4px 8px rgba(174, 111, 33, 0.4) !important;
     }
 
     .deletelink {
@@ -236,103 +276,68 @@
     /* Card styling for changeform/changelist containers */
     .module {
         border-radius: 12px !important;
-        border: 1px solid #f0e6d6 !important;
+        border: 1px solid #3d1b24 !important;
         overflow: hidden !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
-        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        background: #1c1114 !important;
+        color: #f5ebe6 !important;
+    }
+
+    .module caption, .module h2, .module h3 {
+        background-color: #260d15 !important;
+        color: #f5ebe6 !important;
     }
 
     div.breadcrumbs + #content {
         padding: 30px 40px !important;
     }
 
-    /* Dark Mode Theme Overrides */
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --body-bg: #140d0f;
-            --body-fg: #f5ebe6;
-            --border-color: #3d1b24;
-            
-            --header-bg: #21030e;
-            --breadcrumbs-bg: #291016;
-            --breadcrumbs-fg: #d2c5bf;
-            --breadcrumbs-link-color: #e5a452;
-            
-            --link-color: #f770a1;
-            --link-hover-color: #ff9ebb;
-        }
+    /* Inputs, selects, and textareas */
+    input[type=text], input[type=password], input[type=email], input[type=url], 
+    input[type=number], input[type=tel], input[type=date], select, textarea {
+        background-color: #1f1418 !important;
+        border: 1.5px solid #4a222c !important;
+        color: #f5ebe6 !important;
+        border-radius: 8px !important;
+    }
 
-        body {
-            background-color: var(--body-bg) !important;
-            color: var(--body-fg) !important;
-        }
+    input[type=text]:focus, input[type=password]:focus, select:focus, textarea:focus {
+        border-color: #AE6F21 !important;
+        box-shadow: 0 0 0 3px rgba(174, 111, 33, 0.25) !important;
+        outline: none !important;
+    }
 
-        #content {
-            background-color: var(--body-bg) !important;
-        }
+    /* Changelist filters sidebar */
+    #changelist-filter {
+        background-color: #1c1114 !important;
+        border-left: 1px solid #3d1b24 !important;
+    }
 
-        .breadcrumbs {
-            background-color: #21030e !important;
-            border-bottom: 1px solid #3d1b24 !important;
-            color: var(--breadcrumbs-fg) !important;
-        }
+    #changelist-filter h2 {
+        background-color: #260d15 !important;
+        color: #f5ebe6 !important;
+        border-bottom: 1px solid #3d1b24 !important;
+    }
 
-        #nav-sidebar {
-            background-color: #1a090e !important;
-            border-right: 2px solid #541d08 !important;
-        }
+    #changelist-filter h3 {
+        color: #e5a452 !important;
+    }
 
-        #nav-sidebar .app-module th, #nav-sidebar .app-module caption {
-            background-color: #260d15 !important;
-            border-bottom: 1px solid #541d08 !important;
-        }
+    #changelist-filter a {
+        color: #d2c5bf !important;
+    }
 
-        #nav-sidebar tr a {
-            color: #d2c5bf !important;
-        }
+    #changelist-filter li.selected a {
+        color: #ff85a9 !important;
+        font-weight: 700;
+    }
 
-        #nav-sidebar tr a:hover {
-            background-color: #3a1520 !important;
-        }
-
-        .module {
-            background: #1c1114 !important;
-            border: 1px solid #3d1b24 !important;
-        }
-
-        .results table {
-            border: 1px solid #3d1b24 !important;
-        }
-
-        .results table th {
-            background-color: #260d15 !important;
-            color: #f5ebe6 !important;
-            border-bottom: 2px solid #3d1b24 !important;
-        }
-
-        .results table th a {
-            color: #f5ebe6 !important;
-        }
-
-        .results tr.row1 {
-            background-color: #1c1114 !important;
-        }
-
-        .results tr.row2 {
-            background-color: #221519 !important;
-        }
-
-        .results tr:hover {
-            background-color: #301d23 !important;
-        }
-
-        /* High contrast for Bootstrap text helper classes in dark mode */
-        .text-dark {
-            color: #f5ebe6 !important;
-        }
-        .text-muted {
-            color: #d2c5bf !important;
-        }
+    /* Text helper classes in dark mode */
+    .text-dark {
+        color: #f5ebe6 !important;
+    }
+    .text-muted {
+        color: #d2c5bf !important;
     }
 
     /* FORCE FULL PAGE SCROLLING & RESTORE SAVE BUTTONS */

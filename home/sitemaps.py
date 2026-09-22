@@ -84,7 +84,7 @@ class ProductSitemap(BaseSitemap):
     changefreq = 'daily'
 
     def items(self):
-        return Product.objects.filter(is_active=True).order_by('-updated_at')
+        return Product.objects.filter(is_active=True, stock__gt=0).order_by('-updated_at')
 
     def lastmod(self, item):
         return item.updated_at

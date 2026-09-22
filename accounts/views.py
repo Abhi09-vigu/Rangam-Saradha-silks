@@ -562,14 +562,15 @@ def address_delete(request, pk):
 
 @customer_required
 def wishlist_view(request):
-    items = Wishlist.objects.filter(user=request.user).select_related('product')
+    Wishlist.objects.filter(user=request.user).filter(Q(product__stock__lte=0) | Q(product__is_active=False)).delete()
+    items = Wishlist.objects.filter(user=request.user, product__is_active=True, product__stock__gt=0).select_related('product')
     return render(request, 'accounts/wishlist.html', {'wishlist_items': items})
 
 @customer_required
 def toggle_wishlist(request, product_id):
     # Lazy import
     from shop.models import Product
-    product = get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, id=product_id, is_active=True, stock__gt=0)
     wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
     
     if wishlist_item.exists():

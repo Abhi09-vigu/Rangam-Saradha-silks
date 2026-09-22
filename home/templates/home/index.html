@@ -430,7 +430,7 @@ collections. Explore our latest collections online.{% endblock %}
 
     <!-- View All Categories Action Button -->
     <div class="cat-bottom-action text-center">
-        <a href="{{ site_settings.category_button_url|default:'/shop/' }}" class="cat-view-all-btn">
+        <a href="{% if site_settings.category_button_url and site_settings.category_button_url != '/shop/' %}{{ site_settings.category_button_url }}{% else %}{% url 'shop:categories' %}{% endif %}" class="cat-view-all-btn">
             <span>{{ site_settings.category_button_text|default:'View All Categories' }}</span>
             <i class="bi bi-arrow-right ms-2"></i>
         </a>
@@ -594,10 +594,10 @@ collections. Explore our latest collections online.{% endblock %}
 
                             <!-- Stock Row: Soft Green Pill Badge -->
                             <div class="rss-prod-stock">
-                                {% if product.stock > 0 %}
-                                <span class="rss-prod-stock-pill in-stock">In Stock</span>
+                                {% if product.stock <= 5 %}
+                                <span class="rss-prod-stock-pill in-stock" style="background-color: #fef3c7; color: #92400e; border-color: #fde68a;">Only {{ product.stock }} Left</span>
                                 {% else %}
-                                <span class="rss-prod-stock-pill out-of-stock">Out of Stock</span>
+                                <span class="rss-prod-stock-pill in-stock">In Stock</span>
                                 {% endif %}
                             </div>
 
@@ -1447,25 +1447,27 @@ function handleNewsletterSubmit(form) {
             pauseFor(1600);
         }, { passive: true });
 
-        // Mouse Drag-to-Scroll
+        // Mouse Drag-to-Scroll with reliable click support
+        const DRAG_THRESHOLD = 14;
+
         track.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
             isDragging = true;
             hasMoved = false;
             startX = e.pageX - track.offsetLeft;
             scrollStart = track.scrollLeft;
-            track.classList.add('is-dragging');
         });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const x = e.pageX - track.offsetLeft;
             const dist = x - startX;
-            if (Math.abs(dist) > 4) {
+            if (Math.abs(dist) > DRAG_THRESHOLD) {
                 hasMoved = true;
+                track.classList.add('is-dragging');
+                track.scrollLeft = scrollStart - dist;
+                checkInfiniteLoop();
             }
-            track.scrollLeft = scrollStart - dist;
-            checkInfiniteLoop();
         });
 
         const endDrag = () => {
@@ -1473,11 +1475,15 @@ function handleNewsletterSubmit(form) {
                 isDragging = false;
                 track.classList.remove('is-dragging');
                 pauseFor(1400);
+                // Clear drag movement flag after click dispatch so subsequent clicks are not blocked
+                setTimeout(() => {
+                    hasMoved = false;
+                }, 80);
             }
         };
         window.addEventListener('mouseup', endDrag);
 
-        // Prevent clicking inside cards while dragging
+        // Prevent clicking inside cards ONLY if user was actually dragging (> 14px)
         track.addEventListener('click', (e) => {
             if (hasMoved) {
                 e.preventDefault();

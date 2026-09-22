@@ -146,14 +146,14 @@ def index(request):
     categories = Category.objects.filter(is_active=True).order_by('display_order')[:16]
     budget_ranges = BudgetRange.objects.filter(is_active=True).order_by('display_order')
     
-    # Dynamic Homepage Product Sections
-    featured_products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images', 'categories')[:8]
+    # Dynamic Homepage Product Sections (only in-stock products)
+    featured_products = Product.objects.filter(is_active=True, stock__gt=0, is_featured=True).prefetch_related('images', 'categories')[:8]
     if featured_products.count() < 4:
-        featured_products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')[:8]
-    trending_products = Product.objects.filter(is_active=True, is_trending=True).prefetch_related('images', 'categories')[:4]
-    new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).prefetch_related('images', 'categories')[:12]
-    best_sellers = Product.objects.filter(is_active=True, is_best_seller=True).prefetch_related('images', 'categories')[:12]
-    today_deals = Product.objects.filter(is_active=True, is_today_deal=True).prefetch_related('images', 'categories')[:12]
+        featured_products = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')[:8]
+    trending_products = Product.objects.filter(is_active=True, stock__gt=0, is_trending=True).prefetch_related('images', 'categories')[:4]
+    new_arrivals = Product.objects.filter(is_active=True, stock__gt=0, is_new_arrival=True).prefetch_related('images', 'categories')[:12]
+    best_sellers = Product.objects.filter(is_active=True, stock__gt=0, is_best_seller=True).prefetch_related('images', 'categories')[:12]
+    today_deals = Product.objects.filter(is_active=True, stock__gt=0, is_today_deal=True).prefetch_related('images', 'categories')[:12]
     
     # Why Choose Us, Fabric Curations
     why_choose_us = WhyChooseUs.objects.filter(is_active=True).order_by('display_order')
@@ -173,7 +173,7 @@ def index(request):
 
     # Recently viewed products placeholder (fetched from cookie/session)
     recent_ids = request.session.get('recently_viewed', [])
-    recently_viewed = Product.objects.filter(id__in=recent_ids, is_active=True).prefetch_related('images')[:4]
+    recently_viewed = Product.objects.filter(id__in=recent_ids, is_active=True, stock__gt=0).prefetch_related('images')[:4]
 
     context = {
         'sliders': sliders,

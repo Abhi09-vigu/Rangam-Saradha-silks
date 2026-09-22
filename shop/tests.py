@@ -555,4 +555,154 @@ class MonthlySalesReportTest(TestCase):
         )
 
 
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": "django.core.files.storage.InMemoryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+)
+class OutOfStockVisibilityAndAdminTest(TestCase):
+    def setUp(self):
+        from accounts.models import CustomUser, Wishlist
+        from shop.models import Category, Product, Cart, CartItem
+        from django.contrib.admin.sites import AdminSite
+        from shop.admin import ProductAdmin
+
+        self.site = AdminSite()
+        self.product_admin = ProductAdmin(Product, self.site)
+
+        self.user = CustomUser.objects.create_user(
+            username="testcustomer",
+            email="customer@example.com",
+            phone_number="9876543210",
+            password="testpassword123"
+        )
+        self.admin_user = CustomUser.objects.create_superuser(
+            username="testadmin",
+            email="admin@example.com",
+            phone_number="9876543211",
+            password="testpassword123"
+        )
+
+        self.category = Category.objects.create(name="Kanjivaram", slug="kanjivaram")
+
+        self.in_stock_product = Product.objects.create(
+            name="In Stock Saree",
+            slug="in-stock-saree",
+            sku="ISS-001",
+            price=3000.00,
+            stock=8,
+            is_active=True
+        )
+        self.in_stock_product.categories.add(self.category)
+
+        self.out_of_stock_product = Product.objects.create(
+            name="Out Of Stock Saree",
+            slug="out-of-stock-saree",
+            sku="OSS-001",
+            price=4500.00,
+            stock=0,
+            is_active=True
+        )
+        self.out_of_stock_product.categories.add(self.category)
+
+    def test_out_of_stock_hidden_from_catalog(self):
+        """Verify out of stock product is completely removed from website catalog."""
+        resp = self.client.get('/shop/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "In Stock Saree")
+        self.assertNotContains(resp, "Out Of Stock Saree")
+
+    def test_out_of_stock_hidden_from_category_page(self):
+        """Verify out of stock product is not shown in category detail page."""
+        resp = self.client.get(f'/shop/category/{self.category.slug}/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "In Stock Saree")
+        self.assertNotContains(resp, "Out Of Stock Saree")
+
+    def test_out_of_stock_inaccessible_on_detail_page(self):
+        """Verify direct URL to out of stock product returns 404 on the website."""
+        resp = self.client.get(f'/shop/product/{self.out_of_stock_product.slug}/')
+        self.assertEqual(resp.status_code, 404)
+
+        # In-stock product is accessible
+        in_stock_resp = self.client.get(f'/shop/product/{self.in_stock_product.slug}/')
+        self.assertEqual(in_stock_resp.status_code, 200)
+
+    def test_out_of_stock_cannot_be_added_to_cart(self):
+        """Verify customers cannot add an out of stock product to cart."""
+        resp = self.client.post(f'/shop/cart/add/{self.out_of_stock_product.id}/', {'quantity': 1})
+        self.assertEqual(resp.status_code, 404)
+
+    def test_out_of_stock_auto_removed_from_cart(self):
+        """Verify cart cleanses out of stock items automatically when viewing cart."""
+        from shop.models import Cart, CartItem
+        self.client.force_login(self.user)
+        cart = Cart.objects.create(user=self.user)
+        item_out = CartItem.objects.create(cart=cart, product=self.out_of_stock_product, quantity=1)
+        item_in = CartItem.objects.create(cart=cart, product=self.in_stock_product, quantity=1)
+
+        resp = self.client.get('/shop/cart/')
+        self.assertEqual(resp.status_code, 200)
+        # Warning alert notifies user that the out of stock item was removed
+        self.assertContains(resp, "became out of stock and were removed from your cart: Out Of Stock Saree")
+        self.assertContains(resp, "In Stock Saree")
+        # Ensure the out-of-stock item is removed from the cart table form
+        self.assertNotContains(resp, f"/shop/cart/update/{item_out.id}/")
+        self.assertContains(resp, f"/shop/cart/update/{item_in.id}/")
+        # Ensure the item was actually purged from database CartItem
+        self.assertFalse(CartItem.objects.filter(cart=cart, product=self.out_of_stock_product).exists())
+        self.assertTrue(CartItem.objects.filter(cart=cart, product=self.in_stock_product).exists())
+
+    def test_out_of_stock_auto_removed_from_wishlist(self):
+        """Verify wishlist cleanses and does not display out of stock products."""
+        from accounts.models import Wishlist
+        self.client.force_login(self.user)
+        Wishlist.objects.create(user=self.user, product=self.out_of_stock_product)
+        Wishlist.objects.create(user=self.user, product=self.in_stock_product)
+
+        resp = self.client.get('/accounts/wishlist/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "Out Of Stock Saree")
+        self.assertContains(resp, "In Stock Saree")
+        self.assertFalse(Wishlist.objects.filter(user=self.user, product=self.out_of_stock_product).exists())
+
+    def test_admin_shows_out_of_stock_product_and_filter(self):
+        """Verify admin panel lists out of stock products and displays 'Out of Stock' status."""
+        # Status HTML in ProductAdmin
+        status_html = self.product_admin.stock_status(self.out_of_stock_product)
+        self.assertIn("Out of Stock", status_html)
+
+        # Admin Changelist has both in-stock and out-of-stock products
+        self.client.force_login(self.admin_user)
+        self.client.cookies['admin_sessionid'] = self.client.cookies['sessionid'].value
+        resp = self.client.get('/admin/shop/product/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Out Of Stock Saree")
+        self.assertContains(resp, "In Stock Saree")
+        self.assertContains(resp, "Out of Stock")
+
+        # Admin filter by out of stock
+        filter_resp = self.client.get('/admin/shop/product/?stock_status=out_of_stock')
+        self.assertEqual(filter_resp.status_code, 200)
+        self.assertContains(filter_resp, "Out Of Stock Saree")
+        self.assertNotContains(filter_resp, "In Stock Saree")
+
+    def test_admin_dashboard_out_of_stock_count(self):
+        """Verify admin dashboard context contains out_of_stock_products_count."""
+        from rangam_saradha_silk.admin import CustomAdminSite
+        custom_site = CustomAdminSite()
+        from django.test.client import RequestFactory
+        request = RequestFactory().get('/admin/')
+        request.user = self.admin_user
+        response = custom_site.index(request)
+        self.assertIn('out_of_stock_products_count', response.context_data)
+        self.assertEqual(response.context_data['out_of_stock_products_count'], 1)
+
+
+
 

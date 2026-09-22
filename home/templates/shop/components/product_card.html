@@ -42,7 +42,7 @@
         <div class="product-category d-flex justify-content-between align-items-center">
             <span>
                 {% if product.categories.all %}
-                {{ product.categories.first.name }}
+                <a href="{{ product.categories.first.get_absolute_url }}" class="text-decoration-none text-muted hover-primary">{{ product.categories.first.name }}</a>
                 {% else %}
                 Silk Saree
                 {% endif %}
@@ -52,9 +52,7 @@
             {% endif %}
         </div>
         <div class="product-stock-badge mt-1 mb-2">
-            {% if product.stock == 0 %}
-            <span class="badge bg-danger text-white" style="font-size: 0.7rem; padding: 3px 6px;">Out of Stock</span>
-            {% elif product.stock <= 5 %}
+            {% if product.stock <= 5 %}
             <span class="badge bg-warning text-dark" style="font-size: 0.7rem; padding: 3px 6px;">Only {{ product.stock }} left</span>
             {% else %}
             <span class="badge bg-success text-white" style="font-size: 0.7rem; padding: 3px 6px;">In Stock</span>

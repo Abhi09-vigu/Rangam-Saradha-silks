@@ -44,7 +44,7 @@ def categories_list(request):
     """
     from django.db.models import Count
     categories = Category.objects.filter(is_active=True).annotate(
-        product_count=Count('products', filter=Q(products__is_active=True))
+        product_count=Count('products', filter=Q(products__is_active=True, products__stock__gt=0))
     ).order_by('display_order')
     
     context = {
@@ -53,7 +53,7 @@ def categories_list(request):
     return render(request, 'shop/categories.html', context)
 
 def catalog(request, category_slug=None):
-    products = Product.objects.filter(is_active=True).prefetch_related('images', 'categories')
+    products = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
     
     # SKU Filter
     sku_param = request.GET.get('sku', '').strip()
@@ -110,10 +110,6 @@ def catalog(request, category_slug=None):
     if max_price:
         products = products.filter(offer_price__lte=max_price)
         
-    availability = request.GET.get('stock')
-    if availability == 'in_stock':
-        products = products.filter(stock__gt=0)
-        
     discount = request.GET.get('discount')
     if discount == 'yes':
         products = products.filter(discount_percentage__gt=0)
@@ -135,9 +131,9 @@ def catalog(request, category_slug=None):
     collections = Collection.objects.filter(is_active=True)
     
     # Get distinct attribute values for filters
-    colors = Product.objects.filter(is_active=True).values_list('color', flat=True).distinct()
-    fabrics = Product.objects.filter(is_active=True).values_list('fabric', flat=True).distinct()
-    occasions = Product.objects.filter(is_active=True).values_list('occasion', flat=True).distinct()
+    colors = Product.objects.filter(is_active=True, stock__gt=0).values_list('color', flat=True).distinct()
+    fabrics = Product.objects.filter(is_active=True, stock__gt=0).values_list('fabric', flat=True).distinct()
+    occasions = Product.objects.filter(is_active=True, stock__gt=0).values_list('occasion', flat=True).distinct()
     
     # Clean filters (omit nulls/blanks)
     colors = [c for c in colors if c]
@@ -174,7 +170,7 @@ def catalog(request, category_slug=None):
 
     # Determine maximum and minimum saree price all over the website
     from django.db.models import Max, Min
-    price_stats = Product.objects.filter(is_active=True).aggregate(
+    price_stats = Product.objects.filter(is_active=True, stock__gt=0).aggregate(
         max_offer=Max('offer_price'),
         max_regular=Max('price'),
         min_offer=Min('offer_price'),
@@ -206,8 +202,8 @@ def catalog(request, category_slug=None):
     return render(request, 'shop/catalog.html', context)
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product.objects.prefetch_related('images', 'categories', 'reviews__user'), slug=slug, is_active=True)
-    related_products = Product.objects.filter(is_active=True, categories__in=product.categories.all()).exclude(id=product.id).distinct()[:4]
+    product = get_object_or_404(Product.objects.prefetch_related('images', 'categories', 'reviews__user'), slug=slug, is_active=True, stock__gt=0)
+    related_products = Product.objects.filter(is_active=True, stock__gt=0, categories__in=product.categories.all()).exclude(id=product.id).distinct()[:4]
     
     # Store in session for recently viewed list
     recent = request.session.get('recently_viewed', [])
@@ -233,6 +229,19 @@ def product_detail(request, slug):
 def cart_detail(request):
     cart = _get_or_create_cart(request)
     cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
+    
+    # Automatically remove any items that became out of stock or inactive from website
+    out_of_stock_items = [item for item in cart.items.all() if not item.product or not item.product.is_active or item.product.stock <= 0]
+    if out_of_stock_items:
+        removed_names = []
+        for item in out_of_stock_items:
+            if item.product:
+                removed_names.append(item.product.name)
+            item.delete()
+        if removed_names:
+            messages.warning(request, f"The following item(s) became out of stock and were removed from your cart: {', '.join(removed_names)}")
+        cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
+        
     settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
     
     subtotal = sum(item.get_total_price() for item in cart.items.all())
@@ -274,7 +283,7 @@ def cart_detail(request):
     return render(request, 'shop/cart.html', context)
 
 def cart_add(request, product_id):
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+    product = get_object_or_404(Product, id=product_id, is_active=True, stock__gt=0)
     quantity = int(request.POST.get('quantity', 1))
     buy_now = request.POST.get('buy_now') == 'true'
     
@@ -351,6 +360,19 @@ def remove_coupon(request):
 def checkout(request):
     cart = _get_or_create_cart(request)
     cart = Cart.objects.prefetch_related('items__product__images', 'items__product__categories').get(id=cart.id)
+    
+    # Automatically remove any items that became out of stock or inactive from website
+    out_of_stock_items = [item for item in cart.items.all() if not item.product or not item.product.is_active or item.product.stock <= 0]
+    if out_of_stock_items:
+        removed_names = []
+        for item in out_of_stock_items:
+            if item.product:
+                removed_names.append(item.product.name)
+            item.delete()
+        if removed_names:
+            messages.warning(request, f"The following item(s) became out of stock and were removed from your cart: {', '.join(removed_names)}")
+        return redirect('shop:cart_detail')
+        
     if not cart.items.exists():
         messages.error(request, "Your cart is empty.")
         return redirect('shop:cart_detail')
@@ -814,7 +836,7 @@ def order_detail(request, order_number):
 
 @customer_required
 def add_review(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, id=product_id, is_active=True, stock__gt=0)
     if request.method == 'POST':
         rating = int(request.POST.get('rating', 5))
         comment = request.POST.get('comment')
@@ -837,7 +859,7 @@ def add_review(request, product_id):
 
 def product_quick_view(request, product_id):
     from django.urls import reverse
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+    product = get_object_or_404(Product, id=product_id, is_active=True, stock__gt=0)
     images = [img.image.url for img in product.images.all()]
     if not images:
         images = ["https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"]
@@ -874,7 +896,7 @@ def product_quick_view(request, product_id):
         'original_price': float(product.price) if product.discount_percentage > 0 else None,
         'discount_percentage': product.discount_percentage,
         'stock': product.stock,
-        'stock_status': 'In Stock' if product.stock > 0 else 'Out of Stock',
+        'stock_status': 'In Stock' if product.stock > 5 else f'Only {product.stock} Left',
         'short_description': product.short_description or (product.description[:200] + '...'),
         'highlights': highlights,
         'images': images,
@@ -886,7 +908,7 @@ def product_quick_view(request, product_id):
 
 
 def compare_add(request, product_id):
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+    product = get_object_or_404(Product, id=product_id, is_active=True, stock__gt=0)
     compare_list = request.session.get('compare_list', [])
     
     if product.id not in compare_list:
@@ -914,7 +936,13 @@ def compare_remove(request, product_id):
 
 def compare_page(request):
     compare_ids = request.session.get('compare_list', [])
-    products = Product.objects.filter(id__in=compare_ids, is_active=True).prefetch_related('images', 'categories')
+    products = Product.objects.filter(id__in=compare_ids, is_active=True, stock__gt=0).prefetch_related('images', 'categories')
+    
+    # Clean out of stock or inactive products from session compare_list
+    valid_ids = [p.id for p in products]
+    if len(valid_ids) != len(compare_ids):
+        request.session['compare_list'] = [pid for pid in compare_ids if pid in valid_ids]
+        request.session.modified = True
     
     # Sort products in the order they were added
     products_dict = {p.id: p for p in products}
@@ -1046,7 +1074,8 @@ def sku_autocomplete_api(request):
         return JsonResponse({'results': []})
 
     matches = Product.objects.filter(
-        is_active=True
+        is_active=True,
+        stock__gt=0
     ).filter(
         Q(sku__icontains=q) | Q(name__icontains=q)
     ).prefetch_related('images')[:8]
@@ -1167,7 +1196,7 @@ def send_booking_notification_email(booking):
 
 @login_required(login_url='accounts:login')
 def book_call(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
+    product = get_object_or_404(Product, slug=slug, is_active=True, stock__gt=0)
     settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
     call_booking_fee = getattr(settings_obj, 'call_booking_fee', Decimal('50.00')) or Decimal('50.00')
     

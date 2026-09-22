@@ -29,12 +29,13 @@ class CustomAdminSite(AdminSite):
         extra_context['revenue_today'] = revenue_today
 
         extra_context['total_products'] = Product.objects.count()
+        extra_context['out_of_stock_products_count'] = Product.objects.filter(stock__lte=0).count()
         extra_context['total_customers'] = CustomUser.objects.filter(is_staff=False).count()
         extra_context['total_categories'] = Category.objects.count()
         extra_context['total_coupons'] = Coupon.objects.count()
 
-        # 2. Inventory warnings (low stock <= 5)
-        extra_context['low_stock_products'] = Product.objects.filter(stock__lte=5, is_active=True).order_by('stock')[:5]
+        # 2. Inventory warnings (out of stock <= 0, low stock 1-5)
+        extra_context['low_stock_products'] = Product.objects.filter(stock__lte=5).order_by('stock')[:8]
 
         # 3. Recent orders & customers
         extra_context['recent_orders'] = Order.objects.order_by('-created_at')[:5]

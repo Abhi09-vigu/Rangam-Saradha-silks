@@ -22,7 +22,7 @@ class StockStatusFilter(admin.SimpleListFilter):
         elif self.value() == 'low_stock':
             return queryset.filter(stock__range=(1, 5))
         elif self.value() == 'out_of_stock':
-            return queryset.filter(stock=0)
+            return queryset.filter(stock__lte=0)
         return queryset
 
 class ProductImageInline(admin.TabularInline):
@@ -83,7 +83,7 @@ class ProductAdmin(admin.ModelAdmin):
     product_image_thumbnail.short_description = "Image"
 
     def stock_status(self, obj):
-        if obj.stock == 0:
+        if obj.stock <= 0:
             color = '#AF0446' # Red
             text = 'Out of Stock'
         elif 1 <= obj.stock <= 5:

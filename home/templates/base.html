@@ -622,6 +622,25 @@
                 btn.setAttribute('aria-label', 'Show password');
             }
         });
+
+        // Smart navigation for Categories dropdown link in navbar
+        document.addEventListener('DOMContentLoaded', function () {
+            const catDropdown = document.getElementById('categoriesDropdown');
+            if (catDropdown) {
+                catDropdown.addEventListener('click', function (e) {
+                    // On desktop (width >= 992px), clicking 'Categories' navigates directly or smooth-scrolls
+                    if (window.innerWidth >= 992) {
+                        const catSection = document.getElementById('categories');
+                        if (window.location.pathname === '/' && catSection) {
+                            e.preventDefault();
+                            catSection.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            window.location.href = "{% url 'shop:categories' %}";
+                        }
+                    }
+                });
+            }
+        });
     </script>
 
     <!-- Auto-dismiss Top Notification Popup (Appears shortly on top for 2 seconds then exits) -->
