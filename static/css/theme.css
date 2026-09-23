@@ -22,7 +22,9 @@
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -48,7 +50,9 @@ body {
     padding: 0;
 }
 
-img, video, iframe {
+img,
+video,
+iframe {
     max-width: 100%;
     height: auto;
 }
@@ -169,6 +173,7 @@ h6,
 
 /* Desktop Hover Dropdown Support for Navbar */
 @media (min-width: 992px) {
+
     .navbar-premium .nav-item.dropdown,
     .navbar-premium .navbar-icons .dropdown {
         position: relative;
@@ -203,23 +208,23 @@ h6,
         height: 12px;
     }
 
-    .navbar-premium .nav-item.dropdown:hover > .dropdown-menu,
-    .navbar-premium .nav-item.dropdown.show > .dropdown-menu,
-    .navbar-premium .navbar-icons .dropdown:hover > .dropdown-menu,
-    .navbar-premium .navbar-icons .dropdown.show > .dropdown-menu {
+    .navbar-premium .nav-item.dropdown:hover>.dropdown-menu,
+    .navbar-premium .nav-item.dropdown.show>.dropdown-menu,
+    .navbar-premium .navbar-icons .dropdown:hover>.dropdown-menu,
+    .navbar-premium .navbar-icons .dropdown.show>.dropdown-menu {
         opacity: 1 !important;
         visibility: visible !important;
         pointer-events: auto !important;
         transform: translateY(0) !important;
     }
 
-    .navbar-premium .nav-item.dropdown:hover > .nav-link,
-    .navbar-premium .nav-item.dropdown.show > .nav-link {
+    .navbar-premium .nav-item.dropdown:hover>.nav-link,
+    .navbar-premium .nav-item.dropdown.show>.nav-link {
         color: var(--primary) !important;
     }
 
-    .navbar-premium .nav-item.dropdown:hover > .nav-link::after,
-    .navbar-premium .nav-item.dropdown.show > .nav-link::after {
+    .navbar-premium .nav-item.dropdown:hover>.nav-link::after,
+    .navbar-premium .nav-item.dropdown.show>.nav-link::after {
         width: 60%;
     }
 
@@ -246,12 +251,14 @@ h6,
         background-color: #ffffff;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     }
+
     .catalog-filter-offcanvas .card {
         border-radius: 0 !important;
         box-shadow: none !important;
         background: transparent !important;
         padding: 1rem !important;
     }
+
     .catalog-filter-offcanvas .offcanvas-header {
         border-bottom: 1px solid #f1f1f1;
     }
@@ -1156,6 +1163,7 @@ h6,
         right: 14px;
         gap: 6px;
     }
+
     .floating-support-btn,
     .whatsapp-float-btn {
         width: 46px;
@@ -1163,15 +1171,18 @@ h6,
         padding: 7px;
         margin-right: 12px;
     }
+
     .floating-book-call-btn {
         padding: 5px 14px 5px 6px;
         gap: 7px;
     }
+
     .floating-book-call-btn .video-icon-badge {
         width: 28px;
         height: 28px;
         font-size: 0.85rem;
     }
+
     .floating-book-call-btn .video-btn-label {
         font-size: 0.82rem;
     }
@@ -1348,9 +1359,11 @@ h6,
     .rss-budget-grid {
         gap: 8px;
     }
+
     .rss-budget-card {
         padding: 20px 4px 16px 4px;
     }
+
     .rss-budget-card-title {
         font-size: 0.76rem;
     }
@@ -1360,9 +1373,11 @@ h6,
     .rss-budget-section {
         padding: 40px 0 45px 0;
     }
+
     .rss-budget-title {
         font-size: 1.85rem;
     }
+
     .rss-budget-grid {
         display: flex;
         flex-wrap: nowrap;
@@ -1373,13 +1388,16 @@ h6,
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
     }
+
     .rss-budget-grid::-webkit-scrollbar {
         height: 4px;
     }
+
     .rss-budget-grid::-webkit-scrollbar-thumb {
         background: #e2d5c5;
         border-radius: 4px;
     }
+
     .rss-budget-card-link {
         flex: 0 0 148px;
         min-width: 148px;
@@ -2219,6 +2237,7 @@ h6,
 }
 
 @media (max-width: 768px) {
+
     #offerBannerCarousel .carousel-control-prev,
     #offerBannerCarousel .carousel-control-next {
         width: 36px;
@@ -4146,6 +4165,9 @@ h6,
 .cat-header-desc {
     font-family: 'Poppins', sans-serif;
     font-size: 0.98rem;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
     color: #5C4A42;
     margin-bottom: 14px;
 }
@@ -5071,13 +5093,16 @@ h6,
 }
 
 @media (max-width: 991.98px) {
+
     .rss-trust-card,
     .rss-trust-strip {
         padding: 28px 16px;
     }
+
     .rss-trust-box {
         padding: 16px 8px;
     }
+
     .rss-trust-divider {
         display: none !important;
     }
@@ -6173,12 +6198,15 @@ h6,
         flex: 0 0 160px;
         min-width: 160px;
     }
+
     .rss-new-arrivals-img-wrap {
         height: 190px;
     }
+
     .rss-new-arrivals-nav-btn.prev {
         left: 2px;
     }
+
     .rss-new-arrivals-nav-btn.next {
         right: 2px;
     }
@@ -6343,6 +6371,7 @@ h6,
    ========================================================================== */
 
 @media (max-width: 768px) {
+
     /* 1. Global Document & Section Overflow Containment */
     html,
     body {
@@ -6396,7 +6425,7 @@ h6,
         margin-right: -8px !important;
     }
 
-    .row > * {
+    .row>* {
         padding-left: 8px !important;
         padding-right: 8px !important;
     }
@@ -6897,6 +6926,7 @@ h6,
    BREAKPOINT: Max-Width 480px (Standard Mobile Screens)
    ========================================================================== */
 @media (max-width: 480px) {
+
     .container,
     .container-fluid {
         padding-left: 14px !important;
@@ -6919,6 +6949,7 @@ h6,
    BREAKPOINT: Max-Width 375px (Compact Mobile Screens: 320px, 360px, 375px)
    ========================================================================== */
 @media (max-width: 375px) {
+
     .container,
     .container-fluid {
         padding-left: 12px !important;
@@ -7168,9 +7199,11 @@ h6,
         min-width: 110px;
         padding: 2px 4px;
     }
+
     .rss-why-item-title {
         font-size: 0.84rem;
     }
+
     .rss-why-item-desc {
         font-size: 0.72rem;
     }
@@ -7182,24 +7215,30 @@ h6,
         align-items: center;
         padding: 24px 16px 12px 16px !important;
     }
+
     .rss-why-heading-group {
         margin: 0 auto;
         text-align: center;
     }
+
     .rss-why-ornament {
         justify-content: center;
     }
+
     .rss-why-action-wrap {
         text-align: center;
     }
+
     .rss-why-features-col {
         justify-content: center;
         padding: 12px 16px 24px 16px !important;
     }
+
     .rss-why-items-row {
         justify-content: center !important;
         gap: 16px 20px;
     }
+
     .rss-why-divider {
         display: none;
     }
@@ -7271,6 +7310,7 @@ h6,
     color: #ffffff;
     box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
 }
+
 .popup-success {
     border-color: rgba(16, 185, 129, 0.4);
 }
@@ -7280,6 +7320,7 @@ h6,
     color: #ffffff;
     box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
 }
+
 .popup-danger {
     border-color: rgba(239, 68, 68, 0.4);
 }
@@ -7289,6 +7330,7 @@ h6,
     color: #ffffff;
     box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
 }
+
 .popup-warning {
     border-color: rgba(245, 158, 11, 0.4);
 }
@@ -7298,6 +7340,7 @@ h6,
     color: #ffffff;
     box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
 }
+
 .popup-info {
     border-color: rgba(59, 130, 246, 0.4);
 }
@@ -7335,6 +7378,7 @@ h6,
         opacity: 0;
         transform: translateY(-30px) scale(0.92);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -7345,6 +7389,7 @@ h6,
    Universal Print Styles for Tax Invoice & Bill Printing
    ========================================================================== */
 @media print {
+
     /* Hide all website navigation, headers, footers, and widgets */
     header,
     footer,
@@ -7371,4 +7416,4 @@ h6,
         margin: 0 !important;
         padding: 0 !important;
     }
-}
+}

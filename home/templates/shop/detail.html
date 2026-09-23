@@ -178,9 +178,6 @@
                             <span class="badge-bestseller">
                                 <i class="fa-solid fa-crown text-warning"></i> Bestseller
                             </span>
-                            <span class="badge-fabric-pill">
-                                <i class="fa-solid fa-feather-pointed"></i> {{ product.fabric|default:"Pure Kanchipuram Silk" }}
-                            </span>
                         </div>
 
                         <div class="showcase-actions-group">
@@ -339,7 +336,7 @@
                                 <i class="bi bi-truck"></i>
                             </div>
                             <span class="trust-pillar-text">Free Shipping</span>
-                            <span class="trust-pillar-sub">Above ₹1000</span>
+                            <span class="trust-pillar-sub">Above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0|intcomma }}</span>
                         </div>
 
                         <div class="trust-pillar-item">
@@ -502,10 +499,12 @@
                                 </tr>
                                 {% endif %}
                                 {% for item in product.parsed_specifications %}
+                                {% if item.0|lower != 'fabric' or not product.fabric %}
                                 <tr>
                                     <th class="text-muted fw-semibold py-3">{{ item.0 }}</th>
                                     <td class="text-dark py-3">{{ item.1 }}</td>
                                 </tr>
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -526,7 +525,7 @@
                                     <h5 class="fs-6 fw-bold mb-0">Express Insured Shipping</h5>
                                 </div>
                                 <ul class="text-muted fs-7 mb-0 ps-3">
-                                    <li class="mb-2">Dispatched within 24 to 48 business hours with live SMS tracking.</li>
+                                    <li class="mb-2">Dispatched within 24 to 48 business hours with tracking ID sent via email.</li>
                                     <li>Free doorstep shipping on all domestic orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0 }}.</li>
                                 </ul>
                             </div>

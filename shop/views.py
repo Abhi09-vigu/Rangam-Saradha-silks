@@ -220,21 +220,34 @@ def catalog(request, category_slug=None):
         
     color = request.GET.get('color')
     if color:
-        products = products.filter(color__iexact=color)
+        color = color.strip()
+        if color:
+            products = products.filter(
+                Q(color__iexact=color) |
+                Q(color__icontains=color)
+            ).distinct()
         
     fabric = request.GET.get('fabric')
     if fabric:
-        products = products.filter(
-            Q(fabric__icontains=fabric) |
-            Q(material__icontains=fabric) |
-            Q(name__icontains=fabric) |
-            Q(categories__name__icontains=fabric) |
-            Q(tags__icontains=fabric)
-        ).distinct()
+        fabric = fabric.strip()
+        if fabric:
+            products = products.filter(
+                Q(fabric__iexact=fabric) |
+                Q(fabric__icontains=fabric) |
+                Q(material__icontains=fabric) |
+                Q(name__icontains=fabric) |
+                Q(categories__name__icontains=fabric) |
+                Q(tags__icontains=fabric)
+            ).distinct()
 
     occasion = request.GET.get('occasion')
     if occasion:
-        products = products.filter(occasion__iexact=occasion)
+        occasion = occasion.strip()
+        if occasion:
+            products = products.filter(
+                Q(occasion__iexact=occasion) |
+                Q(occasion__icontains=occasion)
+            ).distinct()
         
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
@@ -262,15 +275,26 @@ def catalog(request, category_slug=None):
     # Categories and filters for Sidebar UI
     categories = Category.objects.filter(is_active=True)
     
-    # Get distinct attribute values for filters
-    colors = Product.objects.filter(is_active=True, stock__gt=0).values_list('color', flat=True).distinct()
-    fabrics = Product.objects.filter(is_active=True, stock__gt=0).values_list('fabric', flat=True).distinct()
-    occasions = Product.objects.filter(is_active=True, stock__gt=0).values_list('occasion', flat=True).distinct()
+    # Helper to clean and deduplicate filter values preserving original casing
+    def clean_unique_filter_list(items):
+        seen = {}
+        for item in items:
+            if item and str(item).strip():
+                val = str(item).strip()
+                k = val.lower()
+                if k not in seen:
+                    seen[k] = val
+        return sorted(seen.values(), key=lambda s: s.lower())
+
+    # Get distinct attribute values for filters (clear default ordering to prevent created_at duplication in SELECT DISTINCT)
+    raw_colors = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('color', flat=True).distinct()
+    raw_fabrics = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('fabric', flat=True).distinct()
+    raw_occasions = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('occasion', flat=True).distinct()
     
-    # Clean filters (omit nulls/blanks)
-    colors = [c for c in colors if c]
-    fabrics = [f for f in fabrics if f]
-    occasions = [o for o in occasions if o]
+    # Clean filters (omit nulls/blanks, deduplicate case-insensitively, sort)
+    colors = clean_unique_filter_list(raw_colors)
+    fabrics = clean_unique_filter_list(raw_fabrics)
+    occasions = clean_unique_filter_list(raw_occasions)
 
     # Determine if any filter / query parameter is active in URL
     has_filters = bool(

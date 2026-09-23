@@ -231,7 +231,7 @@ DEFAULT_CMS_PAGES = {
     },
     'shipping-policy': {
         'title': 'Shipping & Delivery Policy',
-        'content': '<h2>Shipping & Delivery Policy</h2><p>We provide fast and reliable doorstep delivery across India and internationally.</p><h4>1. Delivery Timelines</h4><p>Orders are dispatched within 24-48 hours. Domestic deliveries typically take 3-6 business days.</p><h4>2. Order Tracking</h4><p>Once dispatched, a tracking ID and carrier link will be sent to your registered email and SMS.</p>'
+        'content': '<h2>Shipping & Delivery Policy</h2><p>We provide fast and reliable doorstep delivery across India and internationally.</p><h4>1. Delivery Timelines</h4><p>Orders are dispatched within 24-48 hours. Domestic deliveries typically take 3-6 business days.</p><h4>2. Order Tracking</h4><p>Once dispatched, a tracking ID will be sent to your registered email.</p>'
     },
     'about-us': {
         'title': 'About Our Brand',

@@ -111,21 +111,58 @@ class Product(models.Model):
         """
         Parses text specifications into a list of (label, value) tuples.
         Supports 'Key: Value' format or plain descriptive lines.
+        Deduplicates against dedicated model fields (Fabric, Color, Material, etc.) to prevent duplicate rows.
         """
         if not self.specifications:
             return []
         if isinstance(self.specifications, dict):
-            return list(self.specifications.items())
+            raw_items = list(self.specifications.items())
+        else:
+            raw_items = []
+            for line in str(self.specifications).splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if ':' in line:
+                    key, val = line.split(':', 1)
+                    raw_items.append((key.strip(), val.strip()))
+                else:
+                    raw_items.append(('Specification', line))
+
+        import re
+        def normalize_key(k):
+            return re.sub(r'[^a-z0-9]', '', str(k).lower())
+
+        # Collect keys that are already displayed via direct model fields
+        existing_keys = set()
+        if self.fabric:
+            existing_keys.add(normalize_key('Fabric'))
+            existing_keys.add(normalize_key('Fabric Type'))
+            existing_keys.add(normalize_key('Saree Fabric'))
+        if self.color:
+            existing_keys.add(normalize_key('Color'))
+            existing_keys.add(normalize_key('Colour'))
+        if self.material:
+            existing_keys.add(normalize_key('Material'))
+        if self.occasion:
+            existing_keys.add(normalize_key('Occasion'))
+        if self.zari_type:
+            existing_keys.add(normalize_key('Zari Type'))
+            existing_keys.add(normalize_key('Zari'))
+        if self.saree_length:
+            existing_keys.add(normalize_key('Saree Length'))
+            existing_keys.add(normalize_key('Length'))
+        if self.authenticity:
+            existing_keys.add(normalize_key('Authenticity'))
+
         items = []
-        for line in str(self.specifications).splitlines():
-            line = line.strip()
-            if not line:
+        for key, val in raw_items:
+            k_norm = normalize_key(key)
+            if k_norm in existing_keys:
                 continue
-            if ':' in line:
-                key, val = line.split(':', 1)
-                items.append((key.strip(), val.strip()))
-            else:
-                items.append(('Specification', line))
+            existing_keys.add(k_norm)
+            items.append((key.strip(), val.strip()))
+
         return items
 
     @property

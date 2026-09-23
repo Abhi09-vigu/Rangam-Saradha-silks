@@ -199,14 +199,14 @@
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Category</h5>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="" id="cat-all" {% if not category_param and not current_filters.category %}checked{% endif %}>
+                                <input class="form-check-input" type="radio" name="category" value="" id="cat-all" {% if not category_param and not current_filters.category %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="form-check-label text-dark fs-7" for="cat-all">
                                     All Categories
                                 </label>
                             </div>
                             {% for cat in categories %}
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if category_param == cat.slug or current_filters.category == cat.slug %}checked{% endif %}>
+                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if category_param == cat.slug or current_filters.category == cat.slug %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="form-check-label text-dark fs-7" for="cat-{{ cat.id }}">
                                     {{ cat.name }}
                                 </label>
@@ -218,7 +218,7 @@
                         {% if occasions %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Occasion</h5>
-                            <select name="occasion" class="form-select fs-7">
+                            <select name="occasion" id="filterOccasion" class="form-select fs-7" onchange="this.form.submit()">
                                 <option value="">Select Occasion</option>
                                 {% for o in occasions %}
                                 <option value="{{ o }}" {% if current_filters.occasion == o %}selected{% endif %}>{{ o }}</option>
@@ -231,7 +231,7 @@
                         {% if fabrics %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Fabric</h5>
-                            <select name="fabric" class="form-select fs-7">
+                            <select name="fabric" id="filterFabric" class="form-select fs-7" onchange="this.form.submit()">
                                 <option value="">Select Fabric</option>
                                 {% for f in fabrics %}
                                 <option value="{{ f }}" {% if current_filters.fabric == f %}selected{% endif %}>{{ f }}</option>
@@ -244,7 +244,7 @@
                         {% if colors %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Color</h5>
-                            <select name="color" class="form-select fs-7">
+                            <select name="color" id="filterColor" class="form-select fs-7" onchange="this.form.submit()">
                                 <option value="">Select Color</option>
                                 {% for c in colors %}
                                 <option value="{{ c }}" {% if current_filters.color == c %}selected{% endif %}>{{ c }}</option>
@@ -281,7 +281,7 @@
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Offers</h5>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="discount" value="yes" id="filter-discount" {% if current_filters.discount == 'yes' %}checked{% endif %}>
+                                <input class="form-check-input" type="checkbox" name="discount" value="yes" id="filter-discount" {% if current_filters.discount == 'yes' %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="form-check-label text-dark fs-7" for="filter-discount">
                                     On Discount
                                 </label>
@@ -330,6 +330,44 @@
                 </select>
             </div>
         </div>
+
+        <!-- Active Filter Pills -->
+        {% if current_filters.fabric or current_filters.occasion or current_filters.color or current_filters.discount or category_param %}
+        <div class="d-flex flex-wrap gap-2 mb-4 align-items-center bg-white p-2.5 rounded-3 border">
+            <span class="fs-8 text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Active Filters:</span>
+            {% if active_category %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'category' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Category Filter">
+                <span>Category: <strong>{{ active_category.name }}</strong></span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
+            {% if current_filters.occasion %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'occasion' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Occasion Filter">
+                <span>Occasion: <strong>{{ current_filters.occasion }}</strong></span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
+            {% if current_filters.fabric %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'fabric' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Fabric Filter">
+                <span>Fabric: <strong>{{ current_filters.fabric }}</strong></span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
+            {% if current_filters.color %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'color' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Color Filter">
+                <span>Color: <strong>{{ current_filters.color }}</strong></span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
+            {% if current_filters.discount == 'yes' %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'discount' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Discount Filter">
+                <span>Discounted Sarees</span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
+            <a href="{% url 'shop:catalog' %}" class="fs-8 text-danger fw-semibold text-decoration-none ms-auto px-2 py-1">Clear all</a>
+        </div>
+        {% endif %}
 
         {% if products %}
         <div class="row g-4">
