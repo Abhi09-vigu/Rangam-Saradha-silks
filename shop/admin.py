@@ -27,11 +27,62 @@ class StockStatusFilter(admin.SimpleListFilter):
             return queryset.filter(stock__lte=0)
         return queryset
 
+import io
+import logging
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from .image_utils import convert_image_data_to_web_friendly
+
+logger = logging.getLogger(__name__)
+
+class MultipleFileInput(forms.FileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput(attrs={
+            'accept': 'image/*,.dng,.raw,.cr2,.cr3,.nef,.arw,.heic,.heif'
+        }))
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+class ProductAdminForm(forms.ModelForm):
+    upload_multiple_images = MultipleFileField(
+        required=False,
+        label="Batch Upload Multiple Images",
+        help_text="Select and upload multiple photos at once (Hold Ctrl / Shift to pick multiple files). All files (even 10MB+ high-resolution camera photos) are automatically optimized, compressed, and attached to this product."
+    )
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    extra = 1
+    extra = 5  # Show 5 upload rows by default
+    max_num = None  # Unlimited images allowed
+    fields = ['preview_thumbnail', 'image', 'display_order']
+    readonly_fields = ['preview_thumbnail']
+
+    def preview_thumbnail(self, obj):
+        if obj.pk and obj.image:
+            return format_html(
+                '<a href="{0}" target="_blank">'
+                '<img src="{0}" style="max-height: 48px; max-width: 64px; object-fit: cover; border-radius: 4px; border: 1px solid #e0e0e0;" alt="Preview" />'
+                '</a>',
+                obj.image.url
+            )
+        return "New (Save to Preview)"
+    preview_thumbnail.short_description = "Preview"
 
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     list_display = ['product_image_thumbnail', 'name', 'sku', 'price', 'discount_percentage', 'offer_price', 'stock', 'stock_status', 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal']
     list_display_links = ['name']
     list_filter = [StockStatusFilter, 'is_active', 'is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal', 'categories']
@@ -43,6 +94,10 @@ class ProductAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'sku', 'categories', 'is_active')
+        }),
+        ('Batch Image Upload (Multi-Select)', {
+            'fields': ('upload_multiple_images',),
+            'description': 'Select multiple saree photos at once from your device. They will be auto-optimized and attached as gallery images.'
         }),
         ('Pricing & Inventory', {
             'fields': ('price', 'discount_percentage', 'offer_price', 'stock')
@@ -61,6 +116,38 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        files = request.FILES.getlist('upload_multiple_images')
+        if files:
+            current_max_order = form.instance.images.values_list('display_order', flat=True)
+            start_order = (max(current_max_order) + 1) if current_max_order else 0
+            for idx, uploaded_file in enumerate(files):
+                try:
+                    name = getattr(uploaded_file, 'name', 'saree_image.jpg')
+                    if hasattr(uploaded_file, 'temporary_file_path'):
+                        with open(uploaded_file.temporary_file_path(), 'rb') as fp:
+                            content = fp.read()
+                    else:
+                        content = uploaded_file.read()
+                    converted_bytes, new_name, mime = convert_image_data_to_web_friendly(content, name)
+                    buf = io.BytesIO(converted_bytes)
+                    django_file = InMemoryUploadedFile(
+                        file=buf,
+                        field_name='image',
+                        name=new_name,
+                        content_type=mime,
+                        size=len(converted_bytes),
+                        charset=None
+                    )
+                    ProductImage.objects.create(
+                        product=form.instance,
+                        image=django_file,
+                        display_order=start_order + idx
+                    )
+                except Exception as err:
+                    logger.error(f"Error saving batch image {uploaded_file.name}: {err}")
 
     class Media:
         js = ('js/admin_pricing_calc.js',)

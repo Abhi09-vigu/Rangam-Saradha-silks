@@ -114,3 +114,48 @@ class UniversalImageHandlingTests(TestCase):
         instance = form.save(commit=False)
         instance.product = product
         self.assertTrue(instance.image.name.endswith('.jpg'), f"Image name should end with .jpg, got {instance.image.name}")
+
+    def test_large_image_over_10mb_automatically_compressed_below_limit(self):
+        """Test that an image > 10MB (like the 11,127,485 byte error in Cloudinary) is auto-compressed below 5MB."""
+        import numpy as np
+        # Create a large high-resolution image (3500x3500) that produces a >11MB JPEG
+        arr = np.random.randint(40, 220, (3500, 3500, 3), dtype=np.uint8)
+        img = Image.fromarray(arr)
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=95)
+        raw_bytes = buf.getvalue()
+        self.assertGreater(len(raw_bytes), 10 * 1024 * 1024, "Test requires raw image > 10MB")
+
+        field = forms.ImageField()
+        large_file = SimpleUploadedFile('giant_saree_photo.jpg', raw_bytes, content_type='image/jpeg')
+        cleaned = field.clean(large_file)
+
+        # Must be strictly under Cloudinary's 10,485,760 byte limit
+        self.assertLess(cleaned.size, 10485760, f"Cleaned image size {cleaned.size} must be under Cloudinary 10MB limit")
+        self.assertLessEqual(cleaned.size, 5 * 1024 * 1024, f"Cleaned image size {cleaned.size} must be under 5MB target")
+
+    def test_upload_more_than_5_images_for_one_product(self):
+        """Test that more than 5 images (e.g. 8 images) can be added to a single product without issue."""
+        category = Category.objects.create(name="Multi Test Silk", slug="multi-test-silk")
+        product = Product.objects.create(
+            name="Grand Kanchipuram Bridal Saree",
+            sku="RSS-MULTI-IMG-TEST",
+            price=12000,
+            stock=10
+        )
+
+        # Upload 8 images for this one product
+        for i in range(1, 9):
+            buf = io.BytesIO()
+            Image.new('RGB', (100, 100), color=(i * 20, 50, 100)).save(buf, format='JPEG')
+            file_upload = SimpleUploadedFile(f'saree_angle_{i}.jpg', buf.getvalue(), content_type='image/jpeg')
+            ProductImage.objects.create(
+                product=product,
+                image=file_upload,
+                display_order=i
+            )
+
+        self.assertEqual(product.images.count(), 8)
+        images = list(product.images.all())
+        self.assertEqual(len(images), 8)
+        self.assertEqual([img.display_order for img in images], [1, 2, 3, 4, 5, 6, 7, 8])

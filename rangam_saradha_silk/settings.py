@@ -239,6 +239,11 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Upload limits to comfortably handle batches of high-res saree photography
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
+
 
 # ============================================================
 # DJANGO 5.2 STORAGE CONFIGURATION

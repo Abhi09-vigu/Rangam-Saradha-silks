@@ -55,14 +55,21 @@ CONVERT_TO_JPEG_EXTENSIONS = RAW_EXTENSIONS | {
 }
 
 
+MAX_IMAGE_DIMENSION = 2560  # Ultra-crisp for 4K and saree zoom
+MAX_ALLOWED_FILE_BYTES = 5 * 1024 * 1024  # 5 MB target ceiling (Cloudinary limit is 10,485,760 bytes = 10 MB)
+AUTO_RESIZE_BYTES_THRESHOLD = 2 * 1024 * 1024  # 2 MB - files larger than this get compressed
+
+
 def convert_image_data_to_web_friendly(content_bytes, original_name):
     """
     Takes raw bytes and filename of an uploaded image.
-    If it's SVG: validates and returns (content_bytes, original_name, 'image/svg+xml').
-    If it's RAW/DNG/HEIC/TIFF/BMP: develops/converts to high-quality JPEG,
-    returns (jpeg_bytes, new_name_with_jpg, 'image/jpeg').
-    If it's standard web format (JPG, PNG, WebP, GIF):
-    auto-rotates EXIF orientation if needed and returns (content_bytes, original_name, mime_type).
+    - If it's SVG: validates and returns (content_bytes, original_name, 'image/svg+xml').
+    - If it's RAW/DNG/HEIC/TIFF/BMP: develops/converts to high-quality JPEG.
+    - If it's standard web format (JPG, PNG, WebP, GIF):
+      * If small (<= 2MB) and within 2560px dimensions, preserves original.
+      * If large (> 2MB) or huge dimensions (> 2560px), auto-resizes and optimizes to JPEG
+        so that file size is ~400KB-1.5MB and strictly stays below Cloudinary's 10MB limit.
+    - Auto-rotates EXIF orientation to ensure smartphone photos always stand upright.
     """
     ext = os.path.splitext(original_name)[1].lower().lstrip('.')
     base_name = os.path.splitext(original_name)[0]
@@ -101,12 +108,34 @@ def convert_image_data_to_web_friendly(content_bytes, original_name):
     except Exception:
         pass
 
-    # If it's already a web format and not in conversion list, keep as is
-    if ext in ('jpg', 'jpeg', 'png', 'webp', 'gif') and ext not in CONVERT_TO_JPEG_EXTENSIONS:
+    # Check if this image already qualifies as a small, web-ready asset
+    is_standard_web = ext in ('jpg', 'jpeg', 'png', 'webp', 'gif')
+    is_small_size = len(content_bytes) <= AUTO_RESIZE_BYTES_THRESHOLD
+    is_within_dimensions = max(img.size) <= MAX_IMAGE_DIMENSION
+
+    # Special handling for animated GIF under 8MB
+    if ext == 'gif' and len(content_bytes) < 8 * 1024 * 1024:
+        return content_bytes, original_name, 'image/gif'
+
+    # If it is already small, within safe dimensions, and not a format needing conversion
+    if is_standard_web and is_small_size and is_within_dimensions and ext not in CONVERT_TO_JPEG_EXTENSIONS:
         mime = f"image/{'jpeg' if ext in ('jpg', 'jpeg') else ext}"
         return content_bytes, original_name, mime
 
-    # Convert image to RGB mode (handling transparency if converting to JPEG)
+    # 1. Resize if image dimensions exceed MAX_IMAGE_DIMENSION (2560px)
+    if max(img.size) > MAX_IMAGE_DIMENSION:
+        img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.Resampling.LANCZOS)
+
+    # 2. Preserve PNG transparency if it is relatively small
+    if ext == 'png' and (img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info)):
+        if len(content_bytes) <= 3 * 1024 * 1024 and max(img.size) <= MAX_IMAGE_DIMENSION:
+            out_buf = io.BytesIO()
+            img.save(out_buf, format='PNG', optimize=True)
+            png_bytes = out_buf.getvalue()
+            if len(png_bytes) < MAX_ALLOWED_FILE_BYTES:
+                return png_bytes, original_name, 'image/png'
+
+    # Convert to RGB mode (blending transparent layers onto white background)
     if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
         background = Image.new('RGB', img.size, (255, 255, 255))
         if img.mode != 'RGBA':
@@ -116,11 +145,28 @@ def convert_image_data_to_web_friendly(content_bytes, original_name):
     elif img.mode != 'RGB':
         img = img.convert('RGB')
 
-    # Save as high-quality JPEG
+    # 3. Save as high-quality web-optimized JPEG
+    quality = 88
     out_buf = io.BytesIO()
-    img.save(out_buf, format='JPEG', quality=92, optimize=True)
+    img.save(out_buf, format='JPEG', quality=quality, optimize=True)
+    out_bytes = out_buf.getvalue()
+
+    # Progressive step-down if output exceeds 5 MB (Cloudinary limit is 10,485,760 bytes = 10 MB)
+    while len(out_bytes) > MAX_ALLOWED_FILE_BYTES and quality > 60:
+        quality -= 8
+        out_buf = io.BytesIO()
+        img.save(out_buf, format='JPEG', quality=quality, optimize=True)
+        out_bytes = out_buf.getvalue()
+
+    # Extreme safety fallback for ultra-dense patterns
+    if len(out_bytes) > 8 * 1024 * 1024:
+        img.thumbnail((1920, 1920), Image.Resampling.LANCZOS)
+        out_buf = io.BytesIO()
+        img.save(out_buf, format='JPEG', quality=75, optimize=True)
+        out_bytes = out_buf.getvalue()
+
     new_name = f"{base_name}.jpg"
-    return out_buf.getvalue(), new_name, 'image/jpeg'
+    return out_bytes, new_name, 'image/jpeg'
 
 
 _initialized = False
