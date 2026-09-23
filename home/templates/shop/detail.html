@@ -277,9 +277,6 @@
                             <span class="showcase-discount-pill">24% OFF</span>
                             {% endif %}
                         </div>
-                        <p class="showcase-tax-note">
-                            Price inclusive of all taxes. Free shipping on orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0|intcomma }}.
-                        </p>
                     </div>
 
                     <!-- Stock Status & Delivery Pills -->
@@ -322,7 +319,7 @@
                                 </div>
                             </div>
 
-                            <!-- 3 CTA Action Buttons -->
+                            <!-- CTA Action Buttons -->
                             <div class="showcase-btn-group">
                                 <button type="submit" class="btn-add-bag" {% if product.stock == 0 and product.is_active == False %}disabled{% endif %}>
                                     <i class="bi bi-bag-plus-fill"></i> Add to Bag
@@ -330,9 +327,6 @@
                                 <button type="submit" name="buy_now" value="true" class="btn-buy-now" {% if product.stock == 0 and product.is_active == False %}disabled{% endif %}>
                                     <i class="bi bi-lightning-charge-fill text-danger"></i> Buy Now
                                 </button>
-                                <a href="{% url 'shop:book_call' product.slug %}" class="btn-book-call-action">
-                                    <i class="bi bi-telephone"></i> Book a Call
-                                </a>
                             </div>
 
                         </div>
@@ -346,14 +340,6 @@
                             </div>
                             <span class="trust-pillar-text">Free Shipping</span>
                             <span class="trust-pillar-sub">Above ₹1000</span>
-                        </div>
-
-                        <div class="trust-pillar-item">
-                            <div class="trust-pillar-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <span class="trust-pillar-text">100% Authentic</span>
-                            <span class="trust-pillar-sub">Silks Certified</span>
                         </div>
 
                         <div class="trust-pillar-item">
@@ -392,11 +378,6 @@
                     </button>
                 </li>
                 <li>
-                    <button type="button" class="showcase-tab-btn" data-tab-target="tab-care" role="tab" aria-selected="false">
-                        Care Instructions
-                    </button>
-                </li>
-                <li>
                     <button type="button" class="showcase-tab-btn" data-tab-target="tab-shipping" role="tab" aria-selected="false">
                         Shipping & Returns
                     </button>
@@ -426,40 +407,9 @@
                         <!-- Left Column: Title, Description, 4 Features -->
                         <div class="col-lg-7">
                             <h2 class="showcase-desc-title">{{ product.name }}</h2>
-                            <p class="showcase-desc-text">
+                            <p class="showcase-desc-text mb-0">
                                 {{ product.description|default:"Elegant purple silk saree with traditional floral motifs and premium zari work. Perfect for weddings, festivals and special occasions."|striptags }}
                             </p>
-
-                            <!-- 4 Feature Badges (Gold Circles) -->
-                            <div class="showcase-features-grid">
-                                <div class="showcase-feature-item">
-                                    <div class="feature-circle-icon">
-                                        <i class="fa-solid fa-leaf"></i>
-                                    </div>
-                                    <span class="feature-title">Pure Silk</span>
-                                </div>
-
-                                <div class="showcase-feature-item">
-                                    <div class="feature-circle-icon">
-                                        <i class="bi bi-grid-3x3"></i>
-                                    </div>
-                                    <span class="feature-title">Zari Work</span>
-                                </div>
-
-                                <div class="showcase-feature-item">
-                                    <div class="feature-circle-icon">
-                                        <i class="bi bi-flower2"></i>
-                                    </div>
-                                    <span class="feature-title">Floral Design</span>
-                                </div>
-
-                                <div class="showcase-feature-item">
-                                    <div class="feature-circle-icon">
-                                        <i class="bi bi-gem"></i>
-                                    </div>
-                                    <span class="feature-title">Perfect for Weddings & Festivals</span>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Right Column: Poetic Quote Card + Fabric Highlight -->
@@ -563,50 +513,6 @@
                 </div>
             </div>
 
-            <!-- TAB 3: CARE INSTRUCTIONS -->
-            <div class="showcase-tab-pane" id="tab-care" role="tabpanel">
-                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
-                    <h3 class="font-heading fs-4 mb-4">Silk Care & Preservation</h3>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
-                                <i class="fa-solid fa-soap fs-3 text-primary mt-1"></i>
-                                <div>
-                                    <h5 class="fs-6 fw-bold mb-1">Dry Clean Only</h5>
-                                    <p class="text-muted fs-7 mb-0">Always opt for professional dry cleaning to maintain luster, zari brightness, and fabric longevity.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
-                                <i class="fa-solid fa-box-archive fs-3 text-primary mt-1"></i>
-                                <div>
-                                    <h5 class="fs-6 fw-bold mb-1">Storage in Muslin Cloth</h5>
-                                    <p class="text-muted fs-7 mb-0">Wrap the saree in a clean, breathable cotton or muslin bag. Avoid hanging on metal hangers.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
-                                <i class="fa-solid fa-spray-can-sparkles fs-3 text-primary mt-1"></i>
-                                <div>
-                                    <h5 class="fs-6 fw-bold mb-1">Avoid Direct Perfumes</h5>
-                                    <p class="text-muted fs-7 mb-0">Never spray perfume or deodorants directly on the pure silk or gold zari borders to avoid tarnishing.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-light">
-                                <i class="fa-solid fa-wind fs-3 text-primary mt-1"></i>
-                                <div>
-                                    <h5 class="fs-6 fw-bold mb-1">Periodic Refolding</h5>
-                                    <p class="text-muted fs-7 mb-0">Unfold and air out the saree in mild shade every 3-4 months and change fold lines to prevent crease tears.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- TAB 4: SHIPPING & RETURNS -->
             <div class="showcase-tab-pane" id="tab-shipping" role="tabpanel">
@@ -621,8 +527,7 @@
                                 </div>
                                 <ul class="text-muted fs-7 mb-0 ps-3">
                                     <li class="mb-2">Dispatched within 24 to 48 business hours with live SMS tracking.</li>
-                                    <li class="mb-2">Free doorstep shipping on all domestic orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0 }}.</li>
-                                    <li>Transit insurance included against damage or transit loss.</li>
+                                    <li>Free doorstep shipping on all domestic orders above {{ site_settings.currency|default:"₹" }}{{ site_settings.free_shipping_limit|default:1000|floatformat:0 }}.</li>
                                 </ul>
                             </div>
                         </div>
@@ -680,7 +585,7 @@
                                     <div class="col-sm-6 col-lg-3">
                                         <div class="d-flex align-items-start gap-2 bg-white bg-opacity-75 p-2 rounded-3 border border-warning-subtle h-100">
                                             <i class="bi bi-clock-history text-primary fs-7 mt-1"></i>
-                                            <span><strong>Step 4:</strong> Share video with support within 48 hours of delivery</span>
+                                            <span><strong>Step 4:</strong> Share video with support within 24 hours of delivery</span>
                                         </div>
                                     </div>
                                 </div>

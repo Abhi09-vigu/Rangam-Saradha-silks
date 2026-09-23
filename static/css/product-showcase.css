@@ -619,10 +619,10 @@
     transform: translateY(-1.5px);
 }
 
-/* 4 Trust Badges */
+/* Trust Badges */
 .showcase-trust-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-top: 1.75rem;
     padding-top: 1.75rem;

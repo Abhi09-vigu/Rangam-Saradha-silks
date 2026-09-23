@@ -2120,59 +2120,76 @@ h6,
     }
 }
 
-/* Offer Banners Styling */
+/* Offer Banners Styling (100% Full-Width Edge-to-Edge Hero Banner) */
 .offer-banners-section {
-    background-color: var(--luxury-cream, #fdfbf7) !important;
-}
-
-#offerBannerCarousel {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.offer-banner-card {
-    height: 380px;
-    background-color: #21030e;
-    position: relative;
-    border: 1px solid rgba(212, 175, 55, 0.15);
-    /* Subtle gold border */
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.offer-banner-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(33, 3, 14, 0.15) !important;
-}
-
-.offer-banner-img-wrapper {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: transparent !important;
     overflow: hidden;
 }
 
-.offer-zoom-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+#offerBannerCarousel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.offer-banner-card:hover .offer-zoom-img {
-    transform: scale(1.03);
+.offer-banner-card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    background-color: transparent !important;
+    position: relative;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.offer-banner-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.offer-banner-img-wrapper {
+    width: 100% !important;
+    height: auto !important;
+    overflow: hidden;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.offer-full-banner-img,
+.offer-zoom-img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    object-fit: cover !important;
+    transition: none !important;
+    transform: none !important;
 }
 
 /* Custom control styling for luxury look */
 #offerBannerCarousel .carousel-control-prev,
 #offerBannerCarousel .carousel-control-next {
-    width: 50px;
-    height: 50px;
-    background: rgba(33, 3, 14, 0.7);
+    width: 48px;
+    height: 48px;
+    background: rgba(33, 3, 14, 0.65);
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
     opacity: 0;
     transition: all 0.3s ease;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    z-index: 10;
 }
 
 #offerBannerCarousel .carousel-control-prev {
@@ -2192,6 +2209,7 @@ h6,
 #offerBannerCarousel .carousel-control-next:hover {
     background: #21030e;
     border-color: #d4af37;
+    transform: translateY(-50%) scale(1.06);
 }
 
 #offerBannerCarousel .carousel-control-prev-icon,
@@ -2200,36 +2218,20 @@ h6,
     height: 20px;
 }
 
-@media (max-width: 992px) {
-    .offer-banner-card {
-        height: 280px;
-    }
-}
-
 @media (max-width: 768px) {
-    .offer-banner-card {
-        height: 210px;
-    }
-
     #offerBannerCarousel .carousel-control-prev,
     #offerBannerCarousel .carousel-control-next {
-        width: 35px;
-        height: 35px;
-        opacity: 0.8;
+        width: 36px;
+        height: 36px;
+        opacity: 0.85;
     }
 
     #offerBannerCarousel .carousel-control-prev {
-        left: 10px;
+        left: 8px;
     }
 
     #offerBannerCarousel .carousel-control-next {
-        right: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .offer-banner-card {
-        height: 150px;
+        right: 8px;
     }
 }
 
@@ -6023,6 +6025,11 @@ h6,
     flex-direction: column;
 }
 
+.rss-new-arrivals-card a {
+    color: inherit;
+    text-decoration: none;
+}
+
 .rss-new-arrivals-img-wrap {
     position: relative;
     width: 100%;
@@ -6091,12 +6098,40 @@ h6,
     text-overflow: ellipsis;
 }
 
+.rss-new-arrivals-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.rss-new-arrivals-price-orig {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    color: #8C756B;
+    text-decoration: line-through;
+    font-weight: 400;
+}
+
+.rss-new-arrivals-price-current {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #721428;
+    line-height: 1.2;
+}
+
 .rss-new-arrivals-price {
     font-family: 'Poppins', sans-serif;
     font-size: 0.88rem;
     font-weight: 700;
     color: #333333;
     line-height: 1.2;
+}
+
+.rss-new-arrivals-track.no-scroll {
+    cursor: default;
 }
 
 .rss-new-arrivals-nav-btn {

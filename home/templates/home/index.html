@@ -39,9 +39,9 @@ collections. Explore our latest collections online.{% endblock %}
 {% block content %}
 <h1 class="visually-hidden">Rangam Saradha Silks</h1>
 
-<!-- Dynamic Luxury Hero Section (Replacing Offer Banner) -->
+{% if show_hero_slider and sliders %}
+<!-- Dynamic Luxury Hero Section (Hero Slider Active) -->
 <section class="rss-hero-section" id="hero">
-    {% if sliders %}
     <div id="rssHeroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
         <div class="carousel-inner">
             {% for slide in sliders %}
@@ -191,74 +191,38 @@ collections. Explore our latest collections online.{% endblock %}
         </div>
         {% endif %}
     </div>
-
-    {% else %}
-    <!-- Default Fallback Hero Stage -->
-    <div class="rss-hero-stage">
-        <img src="{% static 'images/hero-handloom.jpg' %}" alt="Rangam Saradha Silks Handloom Heritage"
-            class="rss-hero-bg-media" fetchpriority="high">
-        <div class="rss-hero-gradient-overlay"></div>
-        <div class="rss-hero-content-layer">
-            <div class="container-fluid px-lg-5 px-md-4 px-3">
-                <div class="rss-hero-content-box">
-                    <div class="rss-hero-eyebrow-row">
-                        <span>HANDWOVEN HERITAGE</span>
-                        <span class="eyebrow-motif">❦</span>
-                        <span class="eyebrow-line"></span>
-                    </div>
-                    <h2 class="rss-hero-title">Woven by Hand.<br>Made to Treasure.</h2>
-                    <p class="rss-hero-description">Pure Silks. Timeless Traditions. For Your Most Precious Moments.</p>
-                    <div class="rss-hero-btn-row">
-                        <a href="{% url 'shop:catalog' %}" class="rss-hero-primary-btn">
-                            <span>Explore Collections</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                        <button type="button" class="rss-hero-story-btn" data-bs-toggle="modal"
-                            data-bs-target="#heroStoryModal">
-                            <span class="story-play-circle"><i class="bi bi-play-fill"></i></span>
-                            <span class="story-play-text">Watch Our Story</span>
-                        </button>
-                    </div>
-                    <div class="rss-hero-badges-row">
-                        <div class="rss-hero-badge-item">
-                            <div class="rss-hero-badge-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                    stroke-width="1.6">
-                                    <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                                    <path d="M12 22v-4" />
-                                    <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-                                </svg>
-                            </div>
-                            <div class="rss-hero-badge-text">Authentic<br>Handloom</div>
-                        </div>
-                        <div class="rss-hero-badge-item">
-                            <div class="rss-hero-badge-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                    stroke-width="1.6">
-                                    <path d="M12 2l8 4.5v5.5c0 5.25-3.5 10-8 11-4.5-1-8-5.75-8-11V6.5l8-4.5z" />
-                                    <path d="M9 12l2 2 4-4" />
-                                </svg>
-                            </div>
-                            <div class="rss-hero-badge-text">Pure Silk<br>Guaranteed</div>
-                        </div>
-                        <div class="rss-hero-badge-item">
-                            <div class="rss-hero-badge-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                    stroke-width="1.6">
-                                    <path d="M3 21h18" />
-                                    <path d="M5 21V10l7-6 7 6v11" />
-                                    <path d="M9 21v-6h6v6" />
-                                </svg>
-                            </div>
-                            <div class="rss-hero-badge-text">A Legacy<br>of Tradition</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 </section>
+
+{% elif show_offer_banner and banners %}
+<!-- Offer Banners Hero Section (100% Full-Width Edge-to-Edge) -->
+<section class="offer-banners-section w-100 p-0 m-0 overflow-hidden" id="hero-offer-banner">
+    <div id="offerBannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-inner w-100 p-0 m-0">
+            {% for banner in banners %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <a href="{{ banner.link|default:'/shop/' }}" class="offer-banner-card d-block w-100 p-0 m-0 text-decoration-none">
+                    <div class="offer-banner-img-wrapper w-100">
+                        {% if banner.image %}
+                        <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="w-100 offer-full-banner-img" fetchpriority="high">
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% if banners|length > 1 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="prev" aria-label="Previous Offer">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="next" aria-label="Next Offer">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
 
 <!-- Heritage Story Video Modal -->
 <div class="modal fade" id="heroStoryModal" tabindex="-1" aria-labelledby="heroStoryModalLabel" aria-hidden="true">
@@ -917,11 +881,13 @@ collections. Explore our latest collections online.{% endblock %}
 
         <!-- Carousel Track Wrapper with Navigation Arrows -->
         <div class="rss-new-arrivals-carousel-wrapper position-relative">
+            {% if new_arrivals|length > 5 %}
             <button class="rss-new-arrivals-nav-btn prev" id="newArrivalsPrev" aria-label="Previous Products">
                 <i class="bi bi-chevron-left"></i>
             </button>
+            {% endif %}
 
-            <div class="rss-new-arrivals-track" id="newArrivalsTrack">
+            <div class="rss-new-arrivals-track{% if new_arrivals|length <= 5 %} no-scroll{% endif %}" id="newArrivalsTrack">
                 {% for product in new_arrivals %}
                 <div class="rss-new-arrivals-card">
                     <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
@@ -936,34 +902,24 @@ collections. Explore our latest collections online.{% endblock %}
                             </button>
                         </div>
                         <h3 class="rss-new-arrivals-name">{{ product.name }}</h3>
-                        <div class="rss-new-arrivals-price">&#8377;{{ product.price|floatformat:0|intcomma }}</div>
-                    </a>
-                </div>
-                {% endfor %}
-                {# Duplicate loop for seamless infinite scrolling #}
-                {% for product in new_arrivals %}
-                <div class="rss-new-arrivals-card" aria-hidden="true">
-                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none" tabindex="-1">
-                        <div class="rss-new-arrivals-img-wrap">
-                            {% if product.images.all %}
-                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="rss-new-arrivals-img" loading="lazy">
+                        <div class="rss-new-arrivals-price-row" style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                            {% if product.offer_price and product.price > product.offer_price %}
+                            <span class="rss-new-arrivals-price-orig" style="color: #8C756B !important; font-size: 0.85rem; text-decoration: line-through !important; font-family: 'Poppins', sans-serif;">&#8377;{{ product.price|floatformat:0 }}</span>
+                            <span class="rss-new-arrivals-price-current" style="color: #721428 !important; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif;">&#8377;{{ product.offer_price|floatformat:0 }}</span>
                             {% else %}
-                            <img src="{% static 'images/categories/silk-sarees.jpg' %}" alt="{{ product.name }}" class="rss-new-arrivals-img" loading="lazy">
+                            <span class="rss-new-arrivals-price-current" style="color: #721428 !important; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif;">&#8377;{{ product.price|floatformat:0 }}</span>
                             {% endif %}
-                            <button type="button" class="rss-new-arrivals-wishlist-btn wishlist-btn" data-product-id="{{ product.id }}" title="Add to Wishlist" aria-label="Add to Wishlist" tabindex="-1">
-                                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
-                            </button>
                         </div>
-                        <h3 class="rss-new-arrivals-name">{{ product.name }}</h3>
-                        <div class="rss-new-arrivals-price">&#8377;{{ product.price|floatformat:0|intcomma }}</div>
                     </a>
                 </div>
                 {% endfor %}
             </div>
 
+            {% if new_arrivals|length > 5 %}
             <button class="rss-new-arrivals-nav-btn next" id="newArrivalsNext" aria-label="Next Products">
                 <i class="bi bi-chevron-right"></i>
             </button>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -1526,6 +1482,136 @@ function handleNewsletterSubmit(form) {
         }
     }
 
+    // New Arrivals Scroller (only scrolls if more than 5 products)
+    function setupNewArrivalsScroller({
+        trackId,
+        prevBtnId,
+        nextBtnId,
+        speed = 0.65,
+        stepAmount = 260
+    }) {
+        const track = document.getElementById(trackId);
+        if (!track) return;
+        const prevBtn = prevBtnId ? document.getElementById(prevBtnId) : null;
+        const nextBtn = nextBtnId ? document.getElementById(nextBtnId) : null;
+        const cards = track.querySelectorAll('.rss-new-arrivals-card');
+
+        // Only scroll if more than 5 products
+        if (cards.length <= 5) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            return;
+        }
+
+        let isPaused = false;
+        let isDragging = false;
+        let startX = 0;
+        let scrollStart = 0;
+        let hasMoved = false;
+        let resumeTimer = null;
+        let animId = null;
+
+        const pauseFor = (ms = 2200) => {
+            isPaused = true;
+            clearTimeout(resumeTimer);
+            resumeTimer = setTimeout(() => {
+                isPaused = false;
+            }, ms);
+        };
+
+        // Smooth continuous scroll when > 5 items
+        const tick = () => {
+            if (!isPaused && !isDragging) {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                if (maxScroll > 10) {
+                    if (track.scrollLeft >= maxScroll - 2) {
+                        pauseFor(3000);
+                        track.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        track.scrollLeft += speed;
+                    }
+                }
+            }
+            animId = requestAnimationFrame(tick);
+        };
+        animId = requestAnimationFrame(tick);
+
+        track.addEventListener('mouseenter', () => { isPaused = true; });
+        track.addEventListener('mouseleave', () => {
+            if (!isDragging) isPaused = false;
+        });
+
+        track.addEventListener('touchstart', () => {
+            isPaused = true;
+            clearTimeout(resumeTimer);
+        }, { passive: true });
+        track.addEventListener('touchend', () => {
+            pauseFor(1600);
+        }, { passive: true });
+
+        // Mouse Drag-to-Scroll
+        const DRAG_THRESHOLD = 14;
+        track.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            isDragging = true;
+            hasMoved = false;
+            startX = e.pageX - track.offsetLeft;
+            scrollStart = track.scrollLeft;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const x = e.pageX - track.offsetLeft;
+            const dist = x - startX;
+            if (Math.abs(dist) > DRAG_THRESHOLD) {
+                hasMoved = true;
+                track.classList.add('is-dragging');
+                track.scrollLeft = scrollStart - dist;
+            }
+        });
+
+        const endDrag = () => {
+            if (isDragging) {
+                isDragging = false;
+                track.classList.remove('is-dragging');
+                pauseFor(1400);
+                setTimeout(() => {
+                    hasMoved = false;
+                }, 80);
+            }
+        };
+        window.addEventListener('mouseup', endDrag);
+
+        track.addEventListener('click', (e) => {
+            if (hasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                hasMoved = false;
+            }
+        }, true);
+
+        // Prev / Next button click handlers
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                pauseFor(2500);
+                track.scrollBy({ left: -stepAmount, behavior: 'smooth' });
+            });
+            prevBtn.addEventListener('mouseenter', () => { isPaused = true; });
+            prevBtn.addEventListener('mouseleave', () => { isPaused = false; });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                pauseFor(2500);
+                track.scrollBy({ left: stepAmount, behavior: 'smooth' });
+            });
+            nextBtn.addEventListener('mouseenter', () => { isPaused = true; });
+            nextBtn.addEventListener('mouseleave', () => { isPaused = false; });
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         // Initialize Categories Showcase Continuous Scroller
         setupContinuousScroller({
@@ -1536,8 +1622,8 @@ function handleNewsletterSubmit(form) {
             stepAmount: 320
         });
 
-        // Initialize New Arrivals Continuous Scroller
-        setupContinuousScroller({
+        // Initialize New Arrivals Scroller (only active if > 5 products)
+        setupNewArrivalsScroller({
             trackId: 'newArrivalsTrack',
             prevBtnId: 'newArrivalsPrev',
             nextBtnId: 'newArrivalsNext',

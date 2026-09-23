@@ -21,6 +21,19 @@ class WebsiteSetting(models.Model):
     call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
 
+    # Hero Slider vs Offer Banner Top Display Mode
+    hero_display_mode = models.CharField(
+        max_length=20,
+        choices=[
+            ('AUTO', 'Automatic (Hero Slider if active, else Offer Banner)'),
+            ('HERO_SLIDER', 'Hero Slider Only'),
+            ('OFFER_BANNER', 'Offer Banner Only'),
+        ],
+        default='AUTO',
+        verbose_name="Homepage Top Banner Display",
+        help_text="Choose whether to show the Hero Slider or the Offer Banner at the top of the homepage. In 'Automatic' mode, the Hero Slider is shown if active slides exist; if hero sliders are removed/deactivated, it automatically shows the Offer Banner instead. Either one will be displayed, never both simultaneously."
+    )
+
     # Mandatory TEMP POPUP / Launch Lock Settings
     launch_mode_active = models.BooleanField(
         default=True,
