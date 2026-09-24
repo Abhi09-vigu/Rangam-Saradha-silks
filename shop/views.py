@@ -471,37 +471,84 @@ def cart_remove(request, item_id):
     return redirect('shop:cart_detail')
 
 def apply_coupon(request):
-    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'shop:checkout'
     if request.method == 'POST':
-        code = request.POST.get('coupon_code', '').strip()
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest'
+            or request.content_type == 'application/json'
+            or 'application/json' in request.headers.get('accept', '')
+        )
+        
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+            except Exception:
+                data = {}
+            code = data.get('coupon_code', '').strip()
+            next_url = data.get('next') or 'shop:checkout'
+        else:
+            code = request.POST.get('coupon_code', '').strip()
+            next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'shop:checkout'
+
         cart = _get_or_create_cart(request)
         subtotal = sum(item.get_total_price() for item in cart.items.all())
-        
+
+        if not code:
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': 'Please enter a coupon code.'}, status=400)
+            messages.error(request, 'Please enter a coupon code.')
+            return redirect(next_url)
+
         try:
             coupon = Coupon.objects.get(code__iexact=code, is_active=True)
             today = datetime.date.today()
             if coupon.start_date and coupon.start_date > today:
-                messages.error(request, f"Coupon '{code}' is not active yet (starts on {coupon.start_date.strftime('%d-%m-%Y')}).")
+                err = f"Coupon '{code}' is not active yet (starts on {coupon.start_date.strftime('%d-%m-%Y')})."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
             elif coupon.expiry_date and coupon.expiry_date < today:
-                messages.error(request, f"Coupon '{code}' has expired.")
+                err = f"Coupon '{code}' has expired."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
             elif coupon.used_count >= coupon.usage_limit:
-                messages.error(request, f"Coupon '{code}' usage limit has been reached.")
+                err = f"Coupon '{code}' usage limit has been reached."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
             elif subtotal < coupon.min_purchase:
-                messages.error(request, f"Minimum purchase amount of ₹{coupon.min_purchase:.0f} required to apply this coupon.")
+                err = f"Minimum purchase amount of ₹{coupon.min_purchase:.0f} required to apply this coupon."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
             elif coupon.apply_to in ('CATEGORIES', 'PRODUCTS') and not coupon.get_eligible_items(cart):
                 if coupon.apply_to == 'CATEGORIES':
-                    messages.error(request, f"Coupon '{code}' applies only to selected categories. None are in your cart.")
+                    err = f"Coupon '{code}' applies only to selected categories. None are in your cart."
                 else:
-                    messages.error(request, f"Coupon '{code}' applies only to specific products. None are in your cart.")
+                    err = f"Coupon '{code}' applies only to specific products. None are in your cart."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
             elif coupon.is_valid(subtotal, cart=cart):
                 request.session['coupon_code'] = coupon.code
-                messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
+                msg = f"Coupon '{coupon.code}' applied successfully!"
+                if is_ajax:
+                    return JsonResponse({'success': True, 'message': msg})
+                messages.success(request, msg)
             else:
-                messages.error(request, "Coupon could not be applied to your current cart.")
+                err = "Coupon could not be applied to your current cart."
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': err}, status=400)
+                messages.error(request, err)
         except Coupon.DoesNotExist:
-            messages.error(request, "Invalid coupon code.")
-            
-    return redirect(next_url)
+            err = "Invalid coupon code."
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': err}, status=400)
+            messages.error(request, err)
+
+        return redirect(next_url)
+
+    return redirect('shop:checkout')
 
 def remove_coupon(request):
     if 'coupon_code' in request.session:
