@@ -5,110 +5,110 @@
 
 {% block extra_css %}
 <style>
-/* Luxury Payment Options Styling */
-.payment-card-option {
-    border: 1.5px solid #e9ecef;
-    border-radius: 14px;
-    background: #ffffff;
-    transition: all 0.25s ease;
-    position: relative;
-    cursor: pointer;
-}
+    /* Luxury Payment Options Styling */
+    .payment-card-option {
+        border: 1.5px solid #e9ecef;
+        border-radius: 14px;
+        background: #ffffff;
+        transition: all 0.25s ease;
+        position: relative;
+        cursor: pointer;
+    }
 
-.payment-card-option:hover {
-    border-color: #d1b17b;
-    box-shadow: 0 4px 15px rgba(140, 16, 53, 0.05);
-}
+    .payment-card-option:hover {
+        border-color: #d1b17b;
+        box-shadow: 0 4px 15px rgba(140, 16, 53, 0.05);
+    }
 
-.payment-card-option.active {
-    border-color: #8c1035;
-    background: #fffcf9;
-    box-shadow: 0 6px 20px rgba(140, 16, 53, 0.09);
-}
+    .payment-card-option.active {
+        border-color: #8c1035;
+        background: #fffcf9;
+        box-shadow: 0 6px 20px rgba(140, 16, 53, 0.09);
+    }
 
-.payment-card-option .form-check-input:checked {
-    background-color: #8c1035;
-    border-color: #8c1035;
-}
+    .payment-card-option .form-check-input:checked {
+        background-color: #8c1035;
+        border-color: #8c1035;
+    }
 
-.payment-method-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
+    .payment-method-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
 
-.payment-method-title {
-    font-family: var(--font-heading, 'Playfair Display', serif);
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 2px;
-}
+    .payment-method-title {
+        font-family: var(--font-heading, 'Playfair Display', serif);
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 2px;
+    }
 
-.payment-method-subtitle {
-    color: #6c757d;
-    font-size: 0.82rem;
-    letter-spacing: 0.02em;
-}
+    .payment-method-subtitle {
+        color: #6c757d;
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+    }
 
-.payment-pill-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-}
+    .payment-pill-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
 
-.badge-instant-secure {
-    background: #fdf5e6;
-    color: #8c5d1c;
-    border: 1px solid #ebd7a8;
-}
+    .badge-instant-secure {
+        background: #fdf5e6;
+        color: #8c5d1c;
+        border: 1px solid #ebd7a8;
+    }
 
-.badge-cod-free {
-    background: #eefbf4;
-    color: #198754;
-    border: 1px solid #c3e6cb;
-}
+    .badge-cod-free {
+        background: #eefbf4;
+        color: #198754;
+        border: 1px solid #c3e6cb;
+    }
 
-.payment-chip-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-}
+    .payment-chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
 
-.payment-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.72rem;
-    color: #495057;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-weight: 500;
-}
+    .payment-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.72rem;
+        color: #495057;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
 
-.payment-chip i {
-    font-size: 0.85rem;
-    color: #8c1035;
-}
+    .payment-chip i {
+        font-size: 0.85rem;
+        color: #8c1035;
+    }
 
-/* Luxury Failure & Notice Banner */
-#payment-status-alert {
-    border-radius: 12px;
-    border-left: 4px solid #AF0446;
-    background: #fff8f8;
-}
+    /* Luxury Failure & Notice Banner */
+    #payment-status-alert {
+        border-radius: 12px;
+        border-left: 4px solid #AF0446;
+        background: #fff8f8;
+    }
 
-.cursor-pointer {
-    cursor: pointer;
-}
+    .cursor-pointer {
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -122,12 +122,14 @@
             <div class="row g-5">
                 <!-- Delivery Details Column -->
                 <div class="col-lg-7">
-                    
+
                     <!-- Saved Address List -->
-                    <div class="card border border-light p-4 mb-4" style="border-radius: 16px; background-color: var(--section-bg);">
+                    <div class="card border border-light p-4 mb-4"
+                        style="border-radius: 16px; background-color: var(--section-bg);">
                         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                             <h4 class="font-heading fs-5 mb-0">Delivery Address</h4>
-                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="btn btn-sm btn-outline-primary rounded-pill">Add New</a>
+                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}"
+                                class="btn btn-sm btn-outline-primary rounded-pill">Add New</a>
                         </div>
 
                         {% if addresses %}
@@ -136,17 +138,22 @@
                             <div class="col-md-12">
                                 <div class="card border-light p-3 position-relative" style="border-radius: 12px;">
                                     <div class="form-check">
-                                        <input class="form-check-input address-radio" type="radio" name="address_id" id="addr-{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} required>
+                                        <input class="form-check-input address-radio" type="radio" name="address_id"
+                                            id="addr-{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or
+                                            forloop.first %}checked{% endif %} required>
                                         <label class="form-check-label w-100 cursor-pointer" for="addr-{{ addr.id }}">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
                                                     <span class="fw-semibold text-dark">{{ addr.full_name }}</span>
                                                     <span class="badge bg-secondary ms-2">{{ addr.address_type }}</span>
-                                                    {% if addr.is_default %}<span class="badge bg-success ms-2">Default</span>{% endif %}
+                                                    {% if addr.is_default %}<span
+                                                        class="badge bg-success ms-2">Default</span>{% endif %}
                                                 </div>
                                             </div>
-                                            <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}, {{ addr.address_line_2|default:"" }}</p>
-                                            <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                                            <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}, {{
+                                                addr.address_line_2|default:"" }}</p>
+                                            <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{
+                                                addr.pincode }}</p>
                                             <p class="text-muted fs-7 mb-0">Phone: {{ addr.phone_number }}</p>
                                         </label>
                                     </div>
@@ -156,8 +163,10 @@
                         </div>
                         {% else %}
                         <div class="text-center py-4">
-                            <p class="text-muted mb-3">No saved addresses found. Please add a delivery address to complete your checkout.</p>
-                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="btn btn-primary">Add Address Now</a>
+                            <p class="text-muted mb-3">No saved addresses found. Please add a delivery address to
+                                complete your checkout.</p>
+                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}"
+                                class="btn btn-primary">Add Address Now</a>
                         </div>
                         {% endif %}
                     </div>
@@ -169,9 +178,13 @@
                                 <i class="bi bi-exclamation-octagon-fill fs-4 text-danger"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="fw-bold text-danger mb-1" id="payment-alert-heading">Payment was not completed. Your order has not been confirmed.</h6>
-                                <p class="text-muted fs-8 mb-2" id="payment-alert-body">No payment has been deducted. You can safely retry online payment or choose Cash on Delivery.</p>
-                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fs-8 fw-semibold" onclick="dismissPaymentAlert()">
+                                <h6 class="fw-bold text-danger mb-1" id="payment-alert-heading">Payment was not
+                                    completed. Your order has not been confirmed.</h6>
+                                <p class="text-muted fs-8 mb-2" id="payment-alert-body">No payment has been deducted.
+                                    You can safely retry online payment or choose Cash on Delivery.</p>
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fs-8 fw-semibold"
+                                    onclick="dismissPaymentAlert()">
                                     <i class="bi bi-arrow-repeat me-1"></i> Retry Payment
                                 </button>
                             </div>
@@ -179,55 +192,73 @@
                     </div>
 
                     <!-- Payment Options -->
-                    <div class="card border border-light p-4" style="border-radius: 16px; background-color: var(--section-bg);">
+                    <div class="card border border-light p-4"
+                        style="border-radius: 16px; background-color: var(--section-bg);">
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                             <h4 class="font-heading fs-5 mb-0">Payment Method</h4>
-                            <span class="fs-8 text-muted"><i class="bi bi-shield-lock-fill text-success me-1"></i>256-Bit SSL Encrypted</span>
+                            <span class="fs-8 text-muted"><i
+                                    class="bi bi-shield-lock-fill text-success me-1"></i>256-Bit SSL Encrypted</span>
                         </div>
-                        
+
                         <!-- Option 1: Cash On Delivery -->
-                        <div class="payment-card-option p-3 mb-3 {% if default_payment_method == 'COD' %}active{% endif %}" id="card-option-cod">
+                        <div class="payment-card-option p-3 mb-3 {% if default_payment_method == 'COD' %}active{% endif %}"
+                            id="card-option-cod">
                             <div class="form-check d-flex align-items-start m-0">
-                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio" name="payment_method" id="pay-cod" value="COD" {% if default_payment_method == 'COD' %}checked{% endif %}>
+                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio"
+                                    name="payment_method" id="pay-cod" value="COD" {% if default_payment_method=='COD'
+                                    %}checked{% endif %}>
                                 <label class="form-check-label text-dark w-100 cursor-pointer" for="pay-cod">
                                     <div class="payment-method-header">
                                         <div class="payment-method-title">Cash on Delivery</div>
                                         {% if cod_is_free %}
                                         <span class="payment-pill-badge badge-cod-free">FREE COD</span>
                                         {% else %}
-                                        <span class="payment-pill-badge badge bg-light text-muted border">+{{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD Fee</span>
+                                        <span class="payment-pill-badge badge bg-light text-muted border">+{{
+                                            site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD Fee</span>
                                         {% endif %}
                                     </div>
                                     {% if cod_is_free %}
-                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay with cash upon delivery of your saree. Free COD applied for orders of {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }} and above!</p>
+                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay with cash upon delivery of your
+                                        saree. Free COD applied for orders of {{ site_settings.currency }}{{
+                                        cod_free_threshold|floatformat:0 }} and above!</p>
                                     {% else %}
-                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay in cash upon doorstep delivery (Additional {{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD handling fee; Free COD on orders {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }}+).</p>
+                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay in cash upon doorstep delivery
+                                        (Additional {{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD
+                                        handling fee; Free COD on orders {{ site_settings.currency }}{{
+                                        cod_free_threshold|floatformat:0 }}+).</p>
                                     {% endif %}
                                 </label>
                             </div>
                         </div>
-                        
+
                         <!-- Option 2: Pay Online with Razorpay (Card Style UI) -->
-                        <div class="payment-card-option p-3 mb-2 {% if default_payment_method == 'RAZORPAY' or default_payment_method == 'ONLINE' %}active{% endif %}" id="card-option-razorpay">
+                        <div class="payment-card-option p-3 mb-2 {% if default_payment_method == 'RAZORPAY' or default_payment_method == 'ONLINE' %}active{% endif %}"
+                            id="card-option-razorpay">
                             <div class="form-check d-flex align-items-start m-0">
-                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio" name="payment_method" id="pay-razorpay" value="RAZORPAY" {% if default_payment_method == 'RAZORPAY' or default_payment_method == 'ONLINE' %}checked{% endif %}>
+                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio"
+                                    name="payment_method" id="pay-razorpay" value="RAZORPAY" {% if
+                                    default_payment_method=='RAZORPAY' or default_payment_method=='ONLINE' %}checked{%
+                                    endif %}>
                                 <label class="form-check-label text-dark w-100 cursor-pointer" for="pay-razorpay">
                                     <div class="payment-method-header">
                                         <div>
                                             <div class="payment-method-title">Pay Online</div>
-                                            <div class="payment-method-subtitle fw-semibold">UPI • Cards • Net Banking • Wallets</div>
+                                            <div class="payment-method-subtitle fw-semibold">UPI • Cards • Net Banking •
+                                                Wallets</div>
                                         </div>
                                         <span class="payment-pill-badge badge-instant-secure">
                                             <i class="bi bi-patch-check-fill text-warning"></i> Fast & Secure
                                         </span>
                                     </div>
                                     <p class="text-muted fw-normal fs-8 mb-2 mt-2">
-                                        Pay securely via Razorpay using UPI (Google Pay, PhonePe, Paytm), Credit/Debit Card, Net Banking or Mobile Wallets.
+                                        Pay securely via Razorpay using UPI (Google Pay, PhonePe, Paytm), Credit/Debit
+                                        Card, Net Banking or Mobile Wallets.
                                     </p>
                                     <!-- Payment brand badges -->
                                     <div class="payment-chip-group">
                                         <span class="payment-chip"><i class="bi bi-qr-code-scan"></i> UPI / QR</span>
-                                        <span class="payment-chip"><i class="bi bi-credit-card-2-front"></i> Visa / Mastercard / RuPay</span>
+                                        <span class="payment-chip"><i class="bi bi-credit-card-2-front"></i> Visa /
+                                            Mastercard / RuPay</span>
                                         <span class="payment-chip"><i class="bi bi-bank"></i> Net Banking</span>
                                         <span class="payment-chip"><i class="bi bi-wallet2"></i> Wallets</span>
                                     </div>
@@ -243,59 +274,74 @@
                 <div class="col-lg-5">
                     <div class="summary-card shadow-sm border border-light bg-light" style="border-radius: 16px;">
                         <h4 class="font-heading fs-5 mb-4 text-center pb-2 border-bottom">Order Details</h4>
-                        
+
                         <!-- Mini items list -->
                         <div class="mb-4" style="max-height: 240px; overflow-y: auto;">
                             {% for item in cart.items.all %}
                             <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom border-light">
-                                <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0" style="width: 50px; height: 65px; border-radius: 6px;">
+                                <div class="card border border-light overflow-hidden shadow-sm flex-shrink-0"
+                                    style="width: 50px; height: 65px; border-radius: 6px;">
                                     {% if item.product.images.all %}
-                                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}"
+                                        class="w-100 h-100" style="object-fit: cover;">
                                     {% else %}
-                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Placeholder Saree" class="w-100 h-100" style="object-fit: cover;">
+                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800"
+                                        alt="Placeholder Saree" class="w-100 h-100" style="object-fit: cover;">
                                     {% endif %}
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold fs-7 mb-0 text-dark">{{ item.product.name }}</h6>
-                                    <span class="text-muted fs-8">Qty: {{ item.quantity }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</span>
+                                    <span class="text-muted fs-8">Qty: {{ item.quantity }} | Fabric: {{
+                                        item.product.fabric|default:"Pure Silk" }}</span>
                                 </div>
-                                <span class="fw-bold fs-7 text-dark">{{ site_settings.currency }}{{ item.get_total_price_with_tax|floatformat:2 }}</span>
+                                <span class="fw-bold fs-7 text-dark">{{ site_settings.currency }}{{
+                                    item.get_total_price_with_tax|floatformat:2 }}</span>
                             </div>
                             {% endfor %}
                         </div>
-                        
+
                         <!-- Promo Coupon Box -->
                         <div class="mb-3 pb-3 border-bottom border-light">
-                            <label class="form-label fw-semibold fs-8 text-uppercase text-muted mb-2" style="letter-spacing: 0.05em;">
+                            <label class="form-label fw-semibold fs-8 text-uppercase text-muted mb-2"
+                                style="letter-spacing: 0.05em;">
                                 <i class="bi bi-tag-fill me-1 text-primary"></i> Apply Promo Coupon
                             </label>
                             {% if coupon %}
-                            <div class="d-flex justify-content-between align-items-center p-2 px-3 rounded-3" style="background: #eefbf4; border: 1px solid #c3e6cb;">
+                            <div class="d-flex justify-content-between align-items-center p-2 px-3 rounded-3"
+                                style="background: #eefbf4; border: 1px solid #c3e6cb;">
                                 <div>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="badge bg-success" style="font-size: 0.68rem;">APPLIED</span>
                                         <span class="fw-bold text-dark fs-7">{{ coupon.code }}</span>
                                     </div>
                                     <span class="text-success fs-8 fw-semibold">
-                                        {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0 }}% Off{% else %}{{ site_settings.currency }}{{ coupon.discount_value }} Off{% endif %}
+                                        {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0
+                                        }}% Off{% else %}{{ site_settings.currency }}{{ coupon.discount_value }} Off{%
+                                        endif %}
                                     </span>
                                 </div>
-                                <a href="{% url 'shop:coupon_remove' %}?next={{ request.path }}" class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 rounded-pill">Remove</a>
+                                <a href="{% url 'shop:coupon_remove' %}?next={{ request.path }}"
+                                    class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 rounded-pill">Remove</a>
                             </div>
                             {% else %}
                             <form action="{% url 'shop:apply_coupon' %}" method="POST" class="d-flex gap-2">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.path }}">
-                                <input type="text" name="coupon_code" class="form-control form-control-sm rounded-pill px-3" placeholder="Enter coupon code (e.g. SILK10)" required style="font-size: 0.85rem; text-transform: uppercase;">
-                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Apply</button>
+                                <input type="text" name="coupon_code"
+                                    class="form-control form-control-sm rounded-pill px-3"
+                                    placeholder="Enter coupon code (e.g. SILK10)" required
+                                    style="font-size: 0.85rem; text-transform: uppercase;">
+                                <button type="submit"
+                                    class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Apply</button>
                             </form>
                             {% endif %}
                         </div>
-                        
+
                         <!-- Calculation List -->
                         <div class="d-flex justify-content-between mb-2 fs-7">
                             <span class="text-muted">Subtotal:</span>
-                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ subtotal|floatformat:2 }}</span>
+                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ subtotal|floatformat:2
+                                }}</span>
                         </div>
 
                         {% if discount > 0 %}
@@ -306,9 +352,11 @@
                         {% endif %}
 
                         <!-- COD Charge Row (Shown only if COD has an applicable fee > 0) -->
-                        <div class="d-flex justify-content-between mb-2 fs-7" id="cod-charge-row" style="display: {% if cod_charge > 0 and default_payment_method == 'COD' %}flex{% else %}none{% endif %} !important;">
+                        <div class="d-flex justify-content-between mb-2 fs-7" id="cod-charge-row"
+                            style="display: {% if cod_charge > 0 and default_payment_method == 'COD' %}flex{% else %}none{% endif %} !important;">
                             <span class="text-muted">COD Fee:</span>
-                            <span class="fw-semibold text-dark" id="summary-cod-charge">{{ site_settings.currency }}{{ cod_charge|floatformat:2 }}</span>
+                            <span class="fw-semibold text-dark" id="summary-cod-charge">{{ site_settings.currency }}{{
+                                cod_charge|floatformat:2 }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-4 fs-7 pb-2 border-bottom">
@@ -324,34 +372,36 @@
 
                         <div class="d-flex justify-content-between mb-1 fs-5 fw-bold text-dark">
                             <span>Grand Total:</span>
-                            <span class="text-primary" id="summary-grand-total">{{ site_settings.currency }}{{ grand_total|floatformat:2 }}</span>
+                            <span class="text-primary" id="summary-grand-total">{{ site_settings.currency }}{{
+                                grand_total|floatformat:2 }}</span>
                         </div>
                         <div class="text-end text-muted fs-8 mb-4">
                             <span>(Inclusive of all taxes)</span>
                         </div>
 
                         <!-- Hidden data attributes for JS calculations -->
-                        <div id="checkout-summary-data" 
-                             data-subtotal="{{ subtotal }}" 
-                             data-discount="{{ discount }}" 
-                             data-shipping="{{ shipping }}" 
-                             data-cod-is-free="{% if cod_is_free %}true{% else %}false{% endif %}"
-                             data-cod-fee="{{ standard_cod_fee }}"
-                             data-currency="{{ site_settings.currency }}"
-                             data-razorpay-key-id="{{ razorpay_key_id }}">
+                        <div id="checkout-summary-data" data-subtotal="{{ subtotal }}" data-discount="{{ discount }}"
+                            data-shipping="{{ shipping }}"
+                            data-cod-is-free="{% if cod_is_free %}true{% else %}false{% endif %}"
+                            data-cod-fee="{{ standard_cod_fee }}" data-currency="{{ site_settings.currency }}"
+                            data-razorpay-key-id="{{ razorpay_key_id }}">
                         </div>
 
                         {% if addresses %}
-                        <button type="submit" id="place-order-btn" class="btn btn-primary w-100 py-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1 shadow-sm">
-                            <span id="btn-text">{% if default_payment_method == 'COD' %}Place Order (COD){% else %}Pay Online with Razorpay{% endif %}</span>
+                        <button type="submit" id="place-order-btn"
+                            class="btn btn-primary w-100 py-3 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1 shadow-sm">
+                            <span id="btn-text">{% if default_payment_method == 'COD' %}Place Order (COD){% else %}Pay
+                                Online with Razorpay{% endif %}</span>
                         </button>
                         {% else %}
-                        <button type="button" class="btn btn-secondary w-100 py-3 rounded-pill disabled" disabled>Please Add Address First</button>
+                        <button type="button" class="btn btn-secondary w-100 py-3 rounded-pill disabled" disabled>Please
+                            Add Address First</button>
                         {% endif %}
 
                         <div class="text-center mt-3">
                             <span class="fs-8 text-muted">
-                                <i class="bi bi-shield-check text-success me-1"></i> Safe & Secure Transactions • Authentic Handwoven Sarees
+                                <i class="bi bi-shield-check text-success me-1"></i> Safe & Secure Transactions •
+                                Authentic Handwoven Sarees
                             </span>
                         </div>
                     </div>
@@ -385,10 +435,10 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const summaryData = document.getElementById("checkout-summary-data");
         if (!summaryData) return;
-        
+
         const subtotal = parseFloat(summaryData.dataset.subtotal) || 0;
         const discount = parseFloat(summaryData.dataset.discount) || 0;
         const shipping = parseFloat(summaryData.dataset.shipping) || 0;
@@ -396,23 +446,23 @@
         const standardCodFee = parseFloat(summaryData.dataset.codFee) || 49.00;
         const currency = summaryData.dataset.currency || "₹";
         const razorpayKeyId = summaryData.dataset.razorpayKeyId || "";
-        
+
         const codRow = document.getElementById("cod-charge-row");
         const codVal = document.getElementById("summary-cod-charge");
         const grandTotalVal = document.getElementById("summary-grand-total");
         const submitBtn = document.getElementById("place-order-btn");
         const btnText = document.getElementById("btn-text");
         const checkoutForm = document.getElementById("checkout-form");
-        
+
         const cardCod = document.getElementById("card-option-cod");
         const cardRazorpay = document.getElementById("card-option-razorpay");
-        
+
         let activeRazorpayOrderId = null;
 
         function updateTotals() {
             const selectedRadio = document.querySelector('input[name="payment_method"]:checked');
             const selectedPayment = selectedRadio ? selectedRadio.value : 'COD';
-            
+
             // Visual active highlight on payment option cards
             if (cardCod && cardRazorpay) {
                 if (selectedPayment === 'COD') {
@@ -440,15 +490,15 @@
                 if (codRow) codRow.style.setProperty("display", "none", "important");
                 if (btnText) btnText.textContent = "Pay Online with Razorpay";
             }
-            
+
             // Grand Total calculation
             const grandTotal = (subtotal - discount) + shipping + codCharge;
             if (grandTotalVal) grandTotalVal.textContent = currency + grandTotal.toFixed(2);
         }
-        
+
         // Handle radio clicking on container
         if (cardCod) {
-            cardCod.addEventListener("click", function(e) {
+            cardCod.addEventListener("click", function (e) {
                 const radio = document.getElementById("pay-cod");
                 if (radio && !radio.checked) {
                     radio.checked = true;
@@ -458,7 +508,7 @@
         }
 
         if (cardRazorpay) {
-            cardRazorpay.addEventListener("click", function(e) {
+            cardRazorpay.addEventListener("click", function (e) {
                 const radio = document.getElementById("pay-razorpay");
                 if (radio && !radio.checked) {
                     radio.checked = true;
@@ -470,7 +520,7 @@
         document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
             radio.addEventListener("change", updateTotals);
         });
-        
+
         updateTotals();
 
         // Helper to set button loading state
@@ -489,19 +539,19 @@
 
         // Handle Razorpay checkout flow
         if (checkoutForm) {
-            checkoutForm.addEventListener("submit", function(e) {
+            checkoutForm.addEventListener("submit", function (e) {
                 const selectedRadio = document.querySelector('input[name="payment_method"]:checked');
                 const selectedPayment = selectedRadio ? selectedRadio.value : 'COD';
-                
+
                 // If Cash on Delivery, allow standard browser form submission to shop:order_create
                 if (selectedPayment === 'COD') {
                     return true;
                 }
-                
+
                 // Razorpay Online Payment Flow
                 e.preventDefault();
                 dismissPaymentAlert();
-                
+
                 const addressRadio = document.querySelector('input[name="address_id"]:checked');
                 if (!addressRadio) {
                     alert("Please select a delivery address.");
@@ -523,128 +573,128 @@
                         address_id: addressId
                     })
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) {
-                        setButtonLoading(false);
-                        showPaymentAlert(
-                            "Unable to initiate online payment",
-                            data.error || "Please check your network connection and try again, or choose Cash on Delivery."
-                        );
-                        return;
-                    }
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.success) {
+                            setButtonLoading(false);
+                            showPaymentAlert(
+                                "Unable to initiate online payment",
+                                data.error || "Please check your network connection and try again, or choose Cash on Delivery."
+                            );
+                            return;
+                        }
 
-                    activeRazorpayOrderId = data.razorpay_order_id;
+                        activeRazorpayOrderId = data.razorpay_order_id;
 
-                    // Step 2: Open Razorpay modal checkout popup
-                    const options = {
-                        key: data.key_id,
-                        amount: data.amount,
-                        currency: data.currency || "INR",
-                        name: "{{ site_settings.website_name|default:'Rangam Saradha Silks'|escapejs }}",
-                        description: "Order #" + data.order_number,
-                        order_id: data.razorpay_order_id,
-                        prefill: {
-                            name: data.customer_name || "",
-                            email: data.customer_email || "",
-                            contact: data.customer_phone || ""
-                        },
-                        notes: {
-                            order_number: data.order_number
-                        },
-                        theme: {
-                            color: "#8c1035" // Rangam Saradha Silks signature luxury maroon
-                        },
-                        modal: {
-                            ondismiss: function() {
-                                setButtonLoading(false);
-                                showPaymentAlert(
-                                    "Payment was not completed. Your order has not been confirmed.",
-                                    "The payment window was closed before completion. Your cart items are safe and you can retry now."
-                                );
-                                // Notify backend of cancellation
-                                fetch("{% url 'shop:razorpay_payment_failed' %}", {
+                        // Step 2: Open Razorpay modal checkout popup
+                        const options = {
+                            key: data.key_id,
+                            amount: data.amount,
+                            currency: data.currency || "INR",
+                            name: "{{ site_settings.website_name|default:'Rangam Saradha Silks'|escapejs }}",
+                            description: "Order #" + data.order_number,
+                            order_id: data.razorpay_order_id,
+                            prefill: {
+                                name: data.customer_name || "",
+                                email: data.customer_email || "",
+                                contact: data.customer_phone || ""
+                            },
+                            notes: {
+                                order_number: data.order_number
+                            },
+                            theme: {
+                                color: "#8c1035" // Rangam Saradha Silks signature luxury maroon
+                            },
+                            modal: {
+                                ondismiss: function () {
+                                    setButtonLoading(false);
+                                    showPaymentAlert(
+                                        "Payment was not completed. Your order has not been confirmed.",
+                                        "The payment window was closed before completion. Your cart items are safe and you can retry now."
+                                    );
+                                    // Notify backend of cancellation
+                                    fetch("{% url 'shop:razorpay_payment_failed' %}", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "X-CSRFToken": csrfToken
+                                        },
+                                        body: JSON.stringify({
+                                            razorpay_order_id: activeRazorpayOrderId,
+                                            reason: "Checkout modal dismissed by customer"
+                                        })
+                                    }).catch(() => { });
+                                }
+                            },
+                            handler: function (response) {
+                                // Step 3: Customer Paid! Submit signature to backend for verification
+                                setButtonLoading(true, "Verifying Payment & Confirming Order...");
+
+                                fetch("{% url 'shop:razorpay_verify_payment' %}", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
                                         "X-CSRFToken": csrfToken
                                     },
                                     body: JSON.stringify({
-                                        razorpay_order_id: activeRazorpayOrderId,
-                                        reason: "Checkout modal dismissed by customer"
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature
                                     })
-                                }).catch(() => {});
+                                })
+                                    .then(vRes => vRes.json())
+                                    .then(vData => {
+                                        if (vData.success && vData.redirect_url) {
+                                            window.location.href = vData.redirect_url;
+                                        } else {
+                                            setButtonLoading(false);
+                                            showPaymentAlert(
+                                                "Payment was not completed. Your order has not been confirmed.",
+                                                vData.error || "Cryptographic verification was unsuccessful. Please contact support or retry."
+                                            );
+                                        }
+                                    })
+                                    .catch(err => {
+                                        setButtonLoading(false);
+                                        showPaymentAlert(
+                                            "Payment was not completed. Your order has not been confirmed.",
+                                            "Server error during payment verification. Please contact our support team."
+                                        );
+                                    });
                             }
-                        },
-                        handler: function(response) {
-                            // Step 3: Customer Paid! Submit signature to backend for verification
-                            setButtonLoading(true, "Verifying Payment & Confirming Order...");
-                            
-                            fetch("{% url 'shop:razorpay_verify_payment' %}", {
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function (resp) {
+                            setButtonLoading(false);
+                            const reason = (resp.error && resp.error.description) ? resp.error.description : "Transaction declined or failed.";
+                            showPaymentAlert(
+                                "Payment was not completed. Your order has not been confirmed.",
+                                reason + " You can select your payment method and retry now."
+                            );
+                            // Notify backend of payment failure
+                            fetch("{% url 'shop:razorpay_payment_failed' %}", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
                                     "X-CSRFToken": csrfToken
                                 },
                                 body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature
+                                    razorpay_order_id: activeRazorpayOrderId,
+                                    reason: reason
                                 })
-                            })
-                            .then(vRes => vRes.json())
-                            .then(vData => {
-                                if (vData.success && vData.redirect_url) {
-                                    window.location.href = vData.redirect_url;
-                                } else {
-                                    setButtonLoading(false);
-                                    showPaymentAlert(
-                                        "Payment was not completed. Your order has not been confirmed.",
-                                        vData.error || "Cryptographic verification was unsuccessful. Please contact support or retry."
-                                    );
-                                }
-                            })
-                            .catch(err => {
-                                setButtonLoading(false);
-                                showPaymentAlert(
-                                    "Payment was not completed. Your order has not been confirmed.",
-                                    "Server error during payment verification. Please contact our support team."
-                                );
-                            });
-                        }
-                    };
+                            }).catch(() => { });
+                        });
 
-                    const rzp = new Razorpay(options);
-                    rzp.on('payment.failed', function(resp) {
+                        rzp.open();
+                    })
+                    .catch(err => {
                         setButtonLoading(false);
-                        const reason = (resp.error && resp.error.description) ? resp.error.description : "Transaction declined or failed.";
                         showPaymentAlert(
-                            "Payment was not completed. Your order has not been confirmed.",
-                            reason + " You can select your payment method and retry now."
+                            "Unable to initiate online payment",
+                            "Network error. Please verify your connection and try again."
                         );
-                        // Notify backend of payment failure
-                        fetch("{% url 'shop:razorpay_payment_failed' %}", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRFToken": csrfToken
-                            },
-                            body: JSON.stringify({
-                                razorpay_order_id: activeRazorpayOrderId,
-                                reason: reason
-                            })
-                        }).catch(() => {});
                     });
-
-                    rzp.open();
-                })
-                .catch(err => {
-                    setButtonLoading(false);
-                    showPaymentAlert(
-                        "Unable to initiate online payment",
-                        "Network error. Please verify your connection and try again."
-                    );
-                });
             });
         }
     });
