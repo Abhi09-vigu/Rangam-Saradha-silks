@@ -369,11 +369,27 @@ class CartItem(models.Model):
     def get_total_price(self):
         return self.product.offer_price * self.quantity
 
-    def get_unit_price_with_tax(self, tax_rate=Decimal('0.05')):
-        unit_price = Decimal(str(self.product.offer_price))
-        return (unit_price * (Decimal('1.00') + tax_rate)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    @staticmethod
+    def get_configured_tax_rate():
+        from home.models import WebsiteSetting
+        settings_obj = WebsiteSetting.objects.first()
+        if settings_obj and settings_obj.tax_percentage is not None:
+            tax_pct = Decimal(str(settings_obj.tax_percentage))
+            if tax_pct > Decimal('0.00'):
+                return tax_pct / Decimal('100.00')
+        return Decimal('0.00')
 
-    def get_total_price_with_tax(self, tax_rate=Decimal('0.05')):
+    def get_unit_price_with_tax(self, tax_rate=None):
+        if tax_rate is None:
+            tax_rate = self.get_configured_tax_rate()
+        else:
+            tax_rate = Decimal(str(tax_rate))
+        unit_price = Decimal(str(self.product.offer_price))
+        if tax_rate > Decimal('0.00'):
+            return (unit_price * (Decimal('1.00') + tax_rate)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        return unit_price
+
+    def get_total_price_with_tax(self, tax_rate=None):
         return (self.get_unit_price_with_tax(tax_rate) * self.quantity).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def __str__(self):

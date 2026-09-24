@@ -138,22 +138,17 @@
                             <div class="col-md-12">
                                 <div class="card border-light p-3 position-relative" style="border-radius: 12px;">
                                     <div class="form-check">
-                                        <input class="form-check-input address-radio" type="radio" name="address_id"
-                                            id="addr-{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or
-                                            forloop.first %}checked{% endif %} required>
+                                        <input class="form-check-input address-radio" type="radio" name="address_id" id="addr-{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} required>
                                         <label class="form-check-label w-100 cursor-pointer" for="addr-{{ addr.id }}">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
                                                     <span class="fw-semibold text-dark">{{ addr.full_name }}</span>
                                                     <span class="badge bg-secondary ms-2">{{ addr.address_type }}</span>
-                                                    {% if addr.is_default %}<span
-                                                        class="badge bg-success ms-2">Default</span>{% endif %}
+                                                    {% if addr.is_default %}<span class="badge bg-success ms-2">Default</span>{% endif %}
                                                 </div>
                                             </div>
-                                            <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}, {{
-                                                addr.address_line_2|default:"" }}</p>
-                                            <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{
-                                                addr.pincode }}</p>
+                                            <p class="text-muted fs-7 mt-2 mb-1">{{ addr.address_line_1 }}{% if addr.address_line_2 %}, {{ addr.address_line_2 }}{% endif %}</p>
+                                            <p class="text-muted fs-7 mb-1">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
                                             <p class="text-muted fs-7 mb-0">Phone: {{ addr.phone_number }}</p>
                                         </label>
                                     </div>
@@ -204,28 +199,20 @@
                         <div class="payment-card-option p-3 mb-3 {% if default_payment_method == 'COD' %}active{% endif %}"
                             id="card-option-cod">
                             <div class="form-check d-flex align-items-start m-0">
-                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio"
-                                    name="payment_method" id="pay-cod" value="COD" {% if default_payment_method=='COD'
-                                    %}checked{% endif %}>
+                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio" name="payment_method" id="pay-cod" value="COD" {% if default_payment_method == 'COD' %}checked{% endif %}>
                                 <label class="form-check-label text-dark w-100 cursor-pointer" for="pay-cod">
                                     <div class="payment-method-header">
                                         <div class="payment-method-title">Cash on Delivery</div>
                                         {% if cod_is_free %}
                                         <span class="payment-pill-badge badge-cod-free">FREE COD</span>
                                         {% else %}
-                                        <span class="payment-pill-badge badge bg-light text-muted border">+{{
-                                            site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD Fee</span>
+                                        <span class="payment-pill-badge badge bg-light text-muted border">+{{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD Fee</span>
                                         {% endif %}
                                     </div>
                                     {% if cod_is_free %}
-                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay with cash upon delivery of your
-                                        saree. Free COD applied for orders of {{ site_settings.currency }}{{
-                                        cod_free_threshold|floatformat:0 }} and above!</p>
+                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay with cash upon delivery of your saree. Free COD applied for orders of {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }} and above!</p>
                                     {% else %}
-                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay in cash upon doorstep delivery
-                                        (Additional {{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD
-                                        handling fee; Free COD on orders {{ site_settings.currency }}{{
-                                        cod_free_threshold|floatformat:0 }}+).</p>
+                                    <p class="text-muted fw-normal fs-8 mb-0 mt-1">Pay in cash upon doorstep delivery (Additional {{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD handling fee; Free COD on orders {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }}+).</p>
                                     {% endif %}
                                 </label>
                             </div>
@@ -235,10 +222,7 @@
                         <div class="payment-card-option p-3 mb-2 {% if default_payment_method == 'RAZORPAY' or default_payment_method == 'ONLINE' %}active{% endif %}"
                             id="card-option-razorpay">
                             <div class="form-check d-flex align-items-start m-0">
-                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio"
-                                    name="payment_method" id="pay-razorpay" value="RAZORPAY" {% if
-                                    default_payment_method=='RAZORPAY' or default_payment_method=='ONLINE' %}checked{%
-                                    endif %}>
+                                <input class="form-check-input mt-1 me-3 flex-shrink-0" type="radio" name="payment_method" id="pay-razorpay" value="RAZORPAY" {% if default_payment_method == 'RAZORPAY' or default_payment_method == 'ONLINE' %}checked{% endif %}>
                                 <label class="form-check-label text-dark w-100 cursor-pointer" for="pay-razorpay">
                                     <div class="payment-method-header">
                                         <div>
@@ -291,11 +275,9 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold fs-7 mb-0 text-dark">{{ item.product.name }}</h6>
-                                    <span class="text-muted fs-8">Qty: {{ item.quantity }} | Fabric: {{
-                                        item.product.fabric|default:"Pure Silk" }}</span>
+                                    <span class="text-muted fs-8">Qty: {{ item.quantity }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</span>
                                 </div>
-                                <span class="fw-bold fs-7 text-dark">{{ site_settings.currency }}{{
-                                    item.get_total_price_with_tax|floatformat:2 }}</span>
+                                <span class="fw-bold fs-7 text-dark">{{ site_settings.currency }}{{ item.get_total_price_with_tax|floatformat:2 }}</span>
                             </div>
                             {% endfor %}
                         </div>
@@ -315,9 +297,7 @@
                                         <span class="fw-bold text-dark fs-7">{{ coupon.code }}</span>
                                     </div>
                                     <span class="text-success fs-8 fw-semibold">
-                                        {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0
-                                        }}% Off{% else %}{{ site_settings.currency }}{{ coupon.discount_value }} Off{%
-                                        endif %}
+                                        {% if coupon.discount_type == 'PERCENT' %}{{ coupon.discount_value|floatformat:0 }}% Off{% else %}{{ site_settings.currency }}{{ coupon.discount_value }} Off{% endif %}
                                     </span>
                                 </div>
                                 <a href="{% url 'shop:coupon_remove' %}?next={{ request.path }}"
@@ -340,8 +320,7 @@
                         <!-- Calculation List -->
                         <div class="d-flex justify-content-between mb-2 fs-7">
                             <span class="text-muted">Subtotal:</span>
-                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ subtotal|floatformat:2
-                                }}</span>
+                            <span class="fw-semibold text-dark">{{ site_settings.currency }}{{ subtotal|floatformat:2 }}</span>
                         </div>
 
                         {% if discount > 0 %}
@@ -355,8 +334,7 @@
                         <div class="d-flex justify-content-between mb-2 fs-7" id="cod-charge-row"
                             style="display: {% if cod_charge > 0 and default_payment_method == 'COD' %}flex{% else %}none{% endif %} !important;">
                             <span class="text-muted">COD Fee:</span>
-                            <span class="fw-semibold text-dark" id="summary-cod-charge">{{ site_settings.currency }}{{
-                                cod_charge|floatformat:2 }}</span>
+                            <span class="fw-semibold text-dark" id="summary-cod-charge">{{ site_settings.currency }}{{ cod_charge|floatformat:2 }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-4 fs-7 pb-2 border-bottom">
@@ -372,8 +350,7 @@
 
                         <div class="d-flex justify-content-between mb-1 fs-5 fw-bold text-dark">
                             <span>Grand Total:</span>
-                            <span class="text-primary" id="summary-grand-total">{{ site_settings.currency }}{{
-                                grand_total|floatformat:2 }}</span>
+                            <span class="text-primary" id="summary-grand-total">{{ site_settings.currency }}{{ grand_total|floatformat:2 }}</span>
                         </div>
                         <div class="text-end text-muted fs-8 mb-4">
                             <span>(Inclusive of all taxes)</span>

@@ -128,8 +128,11 @@ def global_context(request):
     temp_popup_minutes = "00"
     temp_popup_seconds = "00"
 
-    # Only show to non-staff and outside Django admin
-    if not is_staff and not request.path.startswith('/admin/'):
+    # Only show to non-staff and outside Django admin, and NEVER to search engine crawlers
+    user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+    is_bot = any(bot in user_agent for bot in ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'sogou', 'exabot', 'facebot', 'ia_archiver'])
+
+    if not is_staff and not is_bot and not request.path.startswith('/admin/'):
         override = getattr(settings, 'LAUNCH_MODE_OVERRIDE', None) or os.environ.get('LAUNCH_MODE_OVERRIDE')
         is_active_now = False
         if override == 'launched':

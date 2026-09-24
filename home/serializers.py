@@ -36,7 +36,13 @@ class ContactMessageSerializer(serializers.ModelSerializer):
         }
     )
 
+    phone_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default=''
+    )
+
     class Meta:
         model = ContactMessage
-        fields = ['id', 'name', 'email', 'subject', 'message', 'created_at']
+        fields = ['id', 'name', 'email', 'phone_number', 'subject', 'message', 'created_at']
         read_only_fields = ['id', 'created_at']

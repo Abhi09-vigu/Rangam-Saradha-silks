@@ -12,7 +12,7 @@ class WebsiteSetting(models.Model):
     primary_color = models.CharField(max_length=7, default="#AF0446", help_text="HEX Color code (e.g. #AF0446)")
     secondary_color = models.CharField(max_length=7, default="#AE6F21", help_text="HEX Color code (e.g. #AE6F21)")
     currency = models.CharField(max_length=10, default="₹")
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=5.00, help_text="Tax percentage (e.g., 5.00 for 5% GST)")
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Tax percentage in Website Settings (e.g., 5.00 for 5% GST, or 0.00 for no tax). Applied to all products when set.")
     gst_number = models.CharField(max_length=30, default="33AAAAA0000A1Z5", blank=True, help_text="Business GSTIN for invoices and tax compliance")
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
@@ -123,12 +123,78 @@ class WebsiteSetting(models.Model):
         return self.website_name
 
 class ContactInfo(models.Model):
-    phone = models.CharField(max_length=20, default="+91 98765 43210")
-    email = models.EmailField(default="contact@rangamsaradhasilk.com")
-    address = models.TextField(default="123 Silk Street, Kanchipuram, Tamil Nadu, India")
-    google_map_iframe = models.TextField(blank=True, null=True, help_text="Paste the full iframe embed code from Google Maps")
-    working_hours = models.CharField(max_length=100, default="Mon - Sat: 9:00 AM - 8:00 PM")
+    # Header Section
+    page_title = models.CharField(max_length=150, default="Contact Us", help_text="Main heading on the contact page")
+    page_subtitle = models.CharField(max_length=255, default="Connect with Rangam Saradha Silks", help_text="Subtitle under main heading")
+    header_bg_image = models.ImageField(upload_to='contact/', blank=True, null=True, help_text="Optional custom background/texture for the header")
+
+    # Help Section (Left Top)
+    help_eyebrow = models.CharField(max_length=150, default="WE'D LOVE TO HEAR FROM YOU", help_text="Small gold eyebrow label")
+    help_title = models.CharField(max_length=150, default="We're Here to Help", help_text="Heading for the left contact section")
+    help_description = models.TextField(
+        default="Have a question about our pure silk sarees, custom orders, or shipping times? Drop us a line or visit our flagship store. Our team will be happy to assist you.",
+        help_text="Introductory text explaining how customers can get in touch"
+    )
+
+    # 1. Visit Our Store Card
+    store_card_title = models.CharField(max_length=100, default="Visit Our Store")
+    address = models.TextField(default="Door No-28-747-1, Rajendra Nagar, Dharmavaram, Sri Sathya Sai District, Andhra Pradesh - 515671")
+    store_btn_text = models.CharField(max_length=50, default="Get Directions")
+    store_btn_url = models.CharField(max_length=300, default="https://maps.google.com/?q=Rangam+Saradha+Silks+Dharmavaram", blank=True, help_text="Map URL or direction link")
+
+    # 2. Call Us Card
+    call_card_title = models.CharField(max_length=100, default="Call Us")
+    phone = models.CharField(max_length=30, default="+91 91002 88963")
+    phone_hours = models.CharField(max_length=100, default="Mon - Sat: 9:00 AM - 7:00 PM", help_text="Phone availability hours")
+    call_btn_text = models.CharField(max_length=50, default="Call Now")
+    call_btn_url = models.CharField(max_length=100, default="tel:+919100288963", blank=True)
+
+    # 3. Email Us Card
+    email_card_title = models.CharField(max_length=100, default="Email Us")
+    email = models.EmailField(default="rangamsaradhasilks@gmail.com")
+    email_btn_text = models.CharField(max_length=50, default="Send Email")
+    email_btn_url = models.CharField(max_length=150, default="mailto:rangamsaradhasilks@gmail.com", blank=True)
+
+    # 4. Working Hours Card
+    hours_card_title = models.CharField(max_length=100, default="Working Hours")
+    working_hours = models.CharField(max_length=100, default="Mon - Sat: 9:00 AM - 7:00 PM")
+    working_hours_secondary = models.CharField(max_length=100, default="Sun: 9:00 AM - 12:00 PM", blank=True)
+
+    # Send Us a Message Form Card (Right Top)
+    form_title = models.CharField(max_length=100, default="Send Us a Message")
+    form_subtitle = models.CharField(max_length=200, default="We'll get back to you as soon as possible.")
+    form_button_text = models.CharField(max_length=50, default="Send Message")
+    form_subjects = models.TextField(
+        default="Inquiry about Pure Silk Sarees\nCustom Bridal Order\nOrder Status & Shipping\nStore Visit & Video Call\nBulk & Wholesale Inquiry\nOther Inquiries",
+        help_text="Subject options for the form dropdown (one per line)"
+    )
+
+    # Middle Promotional Saree Banner
+    banner_title = models.CharField(max_length=150, default="Looking for the Perfect Saree?")
+    banner_description = models.TextField(
+        default="From traditional silk sarees to elegant wedding collections, we're here to help you find the perfect saree for every occasion."
+    )
+    banner_button_text = models.CharField(max_length=60, default="Explore Our Collection")
+    banner_button_url = models.CharField(max_length=255, default="/shop/")
+    banner_image = models.ImageField(upload_to='contact/', blank=True, null=True, help_text="Custom background image for the middle saree banner")
     
+    feature_1_title = models.CharField(max_length=100, default="Wedding Collections")
+    feature_1_icon = models.CharField(max_length=50, default="bi-gift", help_text="Bootstrap icon class")
+    feature_2_title = models.CharField(max_length=100, default="Traditional Silk Sarees")
+    feature_2_icon = models.CharField(max_length=50, default="bi-flower1", help_text="Bootstrap icon class")
+    feature_3_title = models.CharField(max_length=100, default="Custom Orders")
+    feature_3_icon = models.CharField(max_length=50, default="bi-heart", help_text="Bootstrap icon class")
+    feature_4_title = models.CharField(max_length=100, default="Customer Support")
+    feature_4_icon = models.CharField(max_length=50, default="bi-headset", help_text="Bootstrap icon class")
+
+    # Bottom Store Location Section
+    location_eyebrow = models.CharField(max_length=100, default="OUR LOCATION")
+    location_title = models.CharField(max_length=150, default="Visit Rangam Saradha Silks")
+    location_description = models.TextField(default="Experience our exclusive collection in person at our Dharmavaram store.")
+    location_button_text = models.CharField(max_length=50, default="Get Directions")
+    location_button_url = models.CharField(max_length=300, default="https://maps.google.com/?q=Rangam+Saradha+Silks+Dharmavaram")
+    google_map_iframe = models.TextField(blank=True, null=True, help_text="Paste the full iframe embed code from Google Maps")
+
     # Social Media
     facebook_url = models.URLField(blank=True, null=True)
     instagram_url = models.URLField(blank=True, null=True)
@@ -141,6 +207,11 @@ class ContactInfo(models.Model):
         null=True,
         help_text="WhatsApp number with country code, without spaces or symbols (e.g. 919876543210 or 9876543210)",
     )
+
+    def get_subject_list(self):
+        if not self.form_subjects:
+            return ["Inquiry about Pure Silk Sarees", "Custom Bridal Order", "Order Status & Shipping", "Other Inquiries"]
+        return [line.strip() for line in self.form_subjects.splitlines() if line.strip()]
 
     @property
     def whatsapp_url(self):
@@ -169,8 +240,8 @@ class ContactInfo(models.Model):
             self.google_map_iframe = sanitize_and_format_google_map(self.google_map_iframe)
 
     class Meta:
-        verbose_name = "Contact Info"
-        verbose_name_plural = "Contact Info"
+        verbose_name = "Contact Info & Page Settings"
+        verbose_name_plural = "Contact Info & Page Settings"
 
     def save(self, *args, **kwargs):
         if not self.pk and ContactInfo.objects.exists():
@@ -179,7 +250,7 @@ class ContactInfo(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Contact & Social Media Information"
+        return "Contact & Page Information"
 
 class HeroSlider(models.Model):
     image = models.ImageField(upload_to='slider/', help_text="Background image (used if no video is provided or as poster)")
@@ -301,6 +372,7 @@ class InstagramPost(models.Model):
 class ContactMessage(models.Model):
     name = models.CharField(max_length=150)
     email = models.EmailField()
+    phone_number = models.CharField(max_length=30, blank=True, null=True, default='')
     subject = models.CharField(max_length=200)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

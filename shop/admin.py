@@ -108,8 +108,8 @@ class ProductAdmin(admin.ModelAdmin):
         ('Marketing & Flags', {
             'fields': ('is_featured', 'is_trending', 'is_new_arrival', 'is_best_seller', 'is_today_deal')
         }),
-        ('Specifications & Details', {
-            'fields': ('video_url', 'video_file', 'tags', 'fabric', 'color', 'material', 'occasion', 'zari_type', 'saree_length', 'authenticity', 'specifications')
+        ('Media & Additional Details', {
+            'fields': ('video_url', 'video_file', 'specifications')
         }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),

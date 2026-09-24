@@ -30,20 +30,22 @@ def calculate_order_pricing(subtotal, discount=Decimal('0.00'), payment_method='
 
     net_product_total = subtotal - discount
 
-    # 1. 5% GST Calculation:
-    # The 5% GST amount is directly added to the product total when the customer is ready to pay.
-    # The customer pays the 5% GST included in the final amount without a separate GST line shown.
-    tax_percent = Decimal(str(getattr(settings_obj, 'tax_percentage', 5.00) or 5.00))
-    if tax_percent > 0:
+    # 1. Tax / GST Calculation from Website Settings in Admin Panel:
+    tax_setting_val = getattr(settings_obj, 'tax_percentage', None)
+    if tax_setting_val is not None:
+        tax_percent = Decimal(str(tax_setting_val))
+    else:
+        tax_percent = Decimal('0.00')
+
+    if tax_percent > Decimal('0.00'):
         tax_amount = (net_product_total * tax_percent / Decimal('100.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal_with_tax = (subtotal * (Decimal('1.00') + tax_percent / Decimal('100.00'))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     else:
         tax_amount = Decimal('0.00')
+        subtotal_with_tax = subtotal
 
     taxable_base = net_product_total
-    # Product total with 5% GST directly added
     product_total_with_tax = net_product_total + tax_amount
-    subtotal_with_tax = (subtotal * (Decimal('1.00') + tax_percent / Decimal('100.00'))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
     discount_with_tax = subtotal_with_tax - product_total_with_tax
 
     # 2. Shipping Calculation

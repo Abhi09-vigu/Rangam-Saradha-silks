@@ -1,17 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block meta_title %}Contact Us | Rangam Saradha Silks{% endblock %}
-{% block title %}Contact Us | Rangam Saradha Silks{% endblock %}
-{% block meta_description %}Get in touch with Rangam Saradha Silks for queries regarding our pure silk saree collections, custom orders, store location, and customer support.{% endblock %}
-{% block meta_keywords %}Rangam Saradha Silks Contact, silk sarees support, Kanchipuram sarees store, contact Rangam Saradha Silks{% endblock %}
+{% block meta_title %}{{ contact_info.page_title|default:"Contact Us" }} | Rangam Saradha Silks{% endblock %}
+{% block title %}{{ contact_info.page_title|default:"Contact Us" }} | Rangam Saradha Silks{% endblock %}
+{% block meta_description %}{{ contact_info.help_description|default:"Get in touch with Rangam Saradha Silks for queries regarding our pure silk saree collections, custom orders, store location, and customer support." }}{% endblock %}
+{% block meta_keywords %}Rangam Saradha Silks Contact, silk sarees support, Dharmavaram sarees store, handloom silk, pure silk sarees contact{% endblock %}
 {% block canonical %}https://rangamsaradhasilks.com/contact/{% endblock %}
 {% block og_url %}https://rangamsaradhasilks.com/contact/{% endblock %}
-{% block og_title %}Contact Us | Rangam Saradha Silks{% endblock %}
-{% block og_description %}Get in touch with Rangam Saradha Silks for queries regarding our pure silk saree collections, custom orders, store location, and customer support.{% endblock %}
-{% block twitter_title %}Contact Us | Rangam Saradha Silks{% endblock %}
-{% block twitter_description %}Get in touch with Rangam Saradha Silks for queries regarding our pure silk saree collections, custom orders, store location, and customer support.{% endblock %}
+{% block og_title %}{{ contact_info.page_title|default:"Contact Us" }} | Rangam Saradha Silks{% endblock %}
+{% block og_description %}{{ contact_info.help_description|default:"Get in touch with Rangam Saradha Silks." }}{% endblock %}
+{% block twitter_title %}{{ contact_info.page_title|default:"Contact Us" }} | Rangam Saradha Silks{% endblock %}
+{% block twitter_description %}{{ contact_info.help_description|default:"Get in touch with Rangam Saradha Silks." }}{% endblock %}
 
 {% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "{{ contact_info.page_title|default:'Contact Us' }}",
+  "url": "https://rangamsaradhasilks.com/contact/",
+  "description": "{{ contact_info.help_description|escapejs }}",
+  "mainEntity": {
+    "@type": "LocalBusiness",
+    "name": "Rangam Saradha Silks",
+    "telephone": "{{ contact_info.phone }}",
+    "email": "{{ contact_info.email }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ contact_info.address }}"
+    }
+  }
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -36,362 +56,1021 @@
 
 {% block extra_css %}
 <style>
-    .google-map-container iframe {
+    /* =========================================================
+       CONTACT PAGE LUXURY STYLING - RANGAM SARADHA SILKS
+       ========================================================= */
+    :root {
+        --contact-bg: #FAF5ED;
+        --contact-maroon: #58081F;
+        --contact-maroon-dark: #3F0414;
+        --contact-maroon-light: #730C2A;
+        --contact-gold: #AE6F21;
+        --contact-gold-light: #D4A359;
+        --contact-gold-border: rgba(174, 111, 33, 0.22);
+        --contact-card-bg: #FFFFFF;
+        --contact-text-dark: #2A1D1D;
+        --contact-text-muted: #6C5D53;
+    }
+
+    .contact-page-wrapper {
+        background-color: var(--contact-bg);
+        color: var(--contact-text-dark);
+        font-family: var(--font-body, 'Poppins', sans-serif);
+        overflow-x: hidden;
+    }
+
+    /* 1. TOP HEADER HERO BANNER */
+    .contact-hero-banner {
+        position: relative;
+        background-color: #FAF4EA;
+        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, rgba(250, 244, 234, 0.95) 100%);
+        border-bottom: 1px solid var(--contact-gold-border);
+        padding: 3.5rem 1rem;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .contact-hero-temple {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 320px;
+        background-image: url("{% static 'images/contact_temple_left.jpg' %}");
+        background-size: cover;
+        background-position: left center;
+        opacity: 0.18;
+        -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 0) 100%);
+        mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 0) 100%);
+        pointer-events: none;
+    }
+
+    .contact-hero-saree {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 340px;
+        background-image: url("{% static 'images/contact_saree_drape.jpg' %}");
+        background-size: cover;
+        background-position: right top;
+        opacity: 0.92;
+        -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        pointer-events: none;
+    }
+
+    .contact-hero-title {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: clamp(2.4rem, 4.5vw, 3.25rem);
+        font-weight: 700;
+        color: var(--contact-maroon);
+        margin-bottom: 0.35rem;
+        letter-spacing: -0.5px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .contact-motif-divider {
+        height: 22px;
+        width: auto;
+        display: block;
+        margin: 0.4rem auto 0.65rem auto;
+        filter: drop-shadow(0 1px 2px rgba(174, 111, 33, 0.25));
+        position: relative;
+        z-index: 2;
+    }
+
+    .contact-hero-subtitle {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        color: var(--contact-text-muted);
+        letter-spacing: 0.4px;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* 2. MAIN 2-COLUMN SECTION */
+    .contact-main-section {
+        padding: 4rem 0 4.5rem 0;
+    }
+
+    .contact-eyebrow {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--contact-gold);
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-section-heading {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: clamp(2rem, 3.2vw, 2.6rem);
+        font-weight: 700;
+        color: var(--contact-maroon);
+        margin-bottom: 0.85rem;
+        line-height: 1.2;
+    }
+
+    .contact-section-desc {
+        color: var(--contact-text-muted);
+        font-size: 0.95rem;
+        line-height: 1.65;
+        max-width: 530px;
+        margin-bottom: 2rem;
+    }
+
+    /* 2X2 INFO CARDS GRID */
+    .contact-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 576px) {
+        .contact-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .contact-info-card {
+        background-color: var(--contact-card-bg);
+        border: 1px solid var(--contact-gold-border);
+        border-radius: 18px;
+        padding: 1.5rem 1.35rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    }
+
+    .contact-info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px rgba(174, 111, 33, 0.12);
+        border-color: rgba(174, 111, 33, 0.4);
+    }
+
+    .contact-icon-bubble {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: rgba(174, 111, 33, 0.12);
+        color: var(--contact-gold);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        margin-bottom: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .contact-card-title {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--contact-text-dark);
+        margin-bottom: 0.35rem;
+    }
+
+    .contact-card-text {
+        font-size: 0.84rem;
+        color: var(--contact-text-muted);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        min-height: 42px;
+    }
+
+    .contact-card-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 15px;
+        border: 1px solid rgba(174, 111, 33, 0.35);
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #7D4C13;
+        background-color: #FFFDF9;
+        text-decoration: none;
+        width: fit-content;
+        transition: all 0.25s ease;
+        margin-top: auto;
+    }
+
+    .contact-card-btn:hover {
+        background-color: var(--contact-gold);
+        border-color: var(--contact-gold);
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(174, 111, 33, 0.3);
+        transform: translateX(2px);
+    }
+
+    /* TRADITIONAL MANDALA CORNER WATERMARKS */
+    .card-mandala-corner {
+        position: absolute;
+        bottom: -15px;
+        right: -15px;
+        width: 100px;
+        height: 100px;
+        pointer-events: none;
+        opacity: 0.45;
+        z-index: 1;
+    }
+
+    /* RIGHT COLUMN: SEND US A MESSAGE CARD */
+    .contact-form-card {
+        background-color: var(--contact-card-bg);
+        border: 1px solid var(--contact-gold-border);
+        border-radius: 24px;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.06);
+        padding: 2.75rem 2.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (max-width: 576px) {
+        .contact-form-card {
+            padding: 1.75rem 1.25rem;
+            border-radius: 18px;
+        }
+    }
+
+    .form-mandala-top-right {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 130px;
+        height: 130px;
+        pointer-events: none;
+        opacity: 0.45;
+        z-index: 1;
+    }
+
+    .contact-form-card-title {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: 1.95rem;
+        font-weight: 700;
+        color: var(--contact-maroon);
+        text-align: center;
+        margin-bottom: 0.2rem;
+    }
+
+    .contact-form-card-subtitle {
+        text-align: center;
+        color: var(--contact-text-muted);
+        font-size: 0.88rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .contact-field-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #4A3E39;
+        margin-bottom: 0.35rem;
+        display: block;
+    }
+
+    .contact-form-control {
+        border: 1px solid #DFD5C6;
+        border-radius: 9px;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.88rem;
+        color: var(--contact-text-dark);
+        background-color: #FFFFFF;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+
+    .contact-form-control:focus {
+        outline: none;
+        border-color: var(--contact-gold);
+        box-shadow: 0 0 0 3px rgba(174, 111, 33, 0.15);
+        background-color: #FFFDFB;
+    }
+
+    .contact-form-control::placeholder {
+        color: #A3968C;
+        font-size: 0.85rem;
+    }
+
+    .contact-submit-btn {
+        width: 100%;
+        padding: 0.85rem 1.5rem;
+        background: linear-gradient(135deg, var(--contact-maroon) 0%, var(--contact-maroon-light) 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 11px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(88, 8, 31, 0.28);
+    }
+
+    .contact-submit-btn:hover {
+        background: linear-gradient(135deg, var(--contact-maroon-dark) 0%, var(--contact-maroon) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(88, 8, 31, 0.38);
+        color: #FFFFFF;
+    }
+
+    .contact-submit-btn:disabled {
+        opacity: 0.75;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* 3. MIDDLE PROMOTIONAL LUXURY BANNER */
+    .contact-middle-banner {
+        position: relative;
+        background: linear-gradient(90deg, #37030F 0%, #52071A 38%, #400412 100%);
+        padding: 3.25rem 0;
+        overflow: hidden;
+        border-top: 1px solid rgba(212, 163, 89, 0.3);
+        border-bottom: 1px solid rgba(212, 163, 89, 0.3);
+    }
+
+    .contact-banner-saree-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 38%;
+        background-image: url("{% if contact_info.banner_image %}{{ contact_info.banner_image.url }}{% else %}{% static 'images/contact_saree_drape.jpg' %}{% endif %}");
+        background-size: cover;
+        background-position: left center;
+        -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
+        mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
+        opacity: 0.95;
+        pointer-events: none;
+    }
+
+    .contact-banner-lotus {
+        height: 18px;
+        width: auto;
+        filter: brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-banner-title {
+        font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+        font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 0.45rem;
+    }
+
+    .contact-banner-desc {
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.92rem;
+        line-height: 1.55;
+        max-width: 540px;
+        margin-bottom: 1.35rem;
+    }
+
+    .btn-banner-gold {
+        background: var(--contact-gold-light);
+        color: #2A1017;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 9px 24px;
+        border-radius: 50px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(212, 163, 89, 0.35);
+    }
+
+    .btn-banner-gold:hover {
+        background: #E6BC77;
+        color: #1F0A10;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 163, 89, 0.45);
+    }
+
+    .contact-features-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1.75rem;
+        height: 100%;
+    }
+
+    @media (max-width: 991px) {
+        .contact-banner-saree-bg {
+            width: 100%;
+            opacity: 0.25;
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+        .contact-features-wrap {
+            justify-content: flex-start;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+    }
+
+    .contact-feature-item {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 75px;
+    }
+
+    .contact-feature-icon {
+        font-size: 1.85rem;
+        color: var(--contact-gold-light);
+        margin-bottom: 0.35rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .contact-feature-label {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 500;
+        line-height: 1.25;
+    }
+
+    /* 4. BOTTOM STORE LOCATION & MAP SECTION */
+    .contact-location-section {
+        padding: 4.5rem 0 5rem 0;
+        background-color: var(--contact-bg);
+    }
+
+    .contact-location-info-box {
+        position: relative;
+        padding-right: 1.5rem;
+    }
+
+    .location-mandala-corner {
+        position: absolute;
+        bottom: -25px;
+        left: -25px;
+        width: 150px;
+        height: 150px;
+        pointer-events: none;
+        opacity: 0.45;
+        z-index: 1;
+    }
+
+    .btn-directions-burgundy {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 24px;
+        background: linear-gradient(135deg, var(--contact-maroon) 0%, var(--contact-maroon-light) 100%);
+        color: #FFFFFF;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 16px rgba(88, 8, 31, 0.25);
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-directions-burgundy:hover {
+        background: linear-gradient(135deg, var(--contact-maroon-dark) 0%, var(--contact-maroon) 100%);
+        color: #FFFFFF;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(88, 8, 31, 0.35);
+    }
+
+    .contact-map-frame-box {
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--contact-gold-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+        background-color: #E8E2D6;
+        min-height: 320px;
+        height: 320px;
+        position: relative;
+    }
+
+    .contact-map-frame-box iframe {
         width: 100% !important;
-        height: 300px !important;
-        min-height: 300px;
+        height: 100% !important;
+        min-height: 320px;
         border: 0;
         display: block;
-        border-radius: 16px;
     }
-    @media (max-width: 576px) {
-        .google-map-container iframe {
-            height: 240px !important;
-            min-height: 240px;
+
+    @media (max-width: 768px) {
+        .contact-map-frame-box {
+            height: 270px;
+            min-height: 270px;
+            margin-top: 2rem;
+        }
+        .contact-map-frame-box iframe {
+            height: 270px !important;
+            min-height: 270px;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="section-luxury bg-light py-5">
-    <div class="container text-center">
-        <h1 class="font-heading display-4 text-dark mb-0">Contact Us</h1>
-    </div>
-</section>
+<div class="contact-page-wrapper">
 
-<section class="section-luxury">
-    <div class="container">
-        <div class="row g-5">
-            <!-- Contact Details & Map -->
-            <div class="col-lg-6">
-                <span class="section-subtitle">Get In Touch</span>
-                <h2 class="font-heading mb-4">We'd Love To Hear From You</h2>
-                <p class="text-muted mb-5">Have a question about our pure silk sarees, custom orders, or shipping times? Drop us a line or visit our flagship boutique store.</p>
-                
-                <div class="mb-4">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-geo-alt fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Our Flagship Store</h5>
-                            <p class="text-muted mb-0">{{ contact_info.address }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-telephone fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Call Us</h5>
-                            <p class="text-muted mb-0">{{ contact_info.phone }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-envelope fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Email Us</h5>
-                            <p class="text-muted mb-0">{{ contact_info.email }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="bg-light p-3 rounded-circle text-primary me-3">
-                            <i class="bi bi-clock fs-4"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Working Hours</h5>
-                            <p class="text-muted mb-0">{{ contact_info.working_hours }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Google Maps Embed -->
-                {% if contact_info.safe_google_map_iframe %}
-                <div class="mt-4 overflow-hidden rounded-4 shadow-sm border border-light google-map-container" style="border-radius: 16px;">
-                    {{ contact_info.safe_google_map_iframe|safe }}
-                </div>
-                {% endif %}
-            </div>
+    <!-- 1. TOP HEADER HERO BANNER -->
+    <header class="contact-hero-banner">
+        <div class="contact-hero-temple" aria-hidden="true"></div>
+        <div class="contact-hero-saree" aria-hidden="true"></div>
+        
+        <div class="container position-relative" style="z-index: 3;">
+            <h1 class="contact-hero-title">{{ contact_info.page_title|default:"Contact Us" }}</h1>
             
-            <!-- Contact Submission Form (React & Axios Integration) -->
-            <div class="col-lg-6">
-                <div id="react-contact-form-root">
-                    <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 24px;">
-                        <h3 class="font-heading mb-4 text-center">Send Us a Message</h3>
+            <img src="{% static 'images/why-ornament-lotus-trans.png' %}" alt="Floral Motif" class="contact-motif-divider" width="205" height="26">
+            
+            <p class="contact-hero-subtitle">{{ contact_info.page_subtitle|default:"Connect with Rangam Saradha Silks" }}</p>
+        </div>
+    </header>
+
+    <!-- 2. MAIN 2-COLUMN SECTION -->
+    <section class="contact-main-section">
+        <div class="container">
+
+            {% if messages %}
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-12">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show border-0 shadow-sm rounded-3 py-3 px-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row g-5 align-items-start">
+                
+                <!-- LEFT COLUMN: WE'RE HERE TO HELP & 4 CARDS -->
+                <div class="col-lg-6">
+                    <span class="contact-eyebrow">{{ contact_info.help_eyebrow|default:"WE'D LOVE TO HEAR FROM YOU" }}</span>
+                    <h2 class="contact-section-heading">{{ contact_info.help_title|default:"We're Here to Help" }}</h2>
+                    <p class="contact-section-desc">{{ contact_info.help_description|default:"Have a question about our pure silk sarees, custom orders, or shipping times? Drop us a line or visit our flagship store. Our team will be happy to assist you." }}</p>
+
+                    <!-- 2x2 Grid of Cards -->
+                    <div class="contact-cards-grid">
                         
-                        <form action="{% url 'home:contact' %}" method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="name" class="form-label text-muted">Your Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control px-3 py-2" id="name" placeholder="John Doe" required>
+                        <!-- CARD 1: Visit Our Store -->
+                        <div class="contact-info-card">
+                            <!-- SVG Mandala Watermark -->
+                            <svg class="card-mandala-corner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="100" cy="100" r="90" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                                <circle cx="100" cy="100" r="70" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="50" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="30" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                                <path d="M100 20 C85 50, 85 50, 100 80 C115 50, 115 50, 100 20 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                                <path d="M20 100 C50 85, 50 85, 80 100 C50 115, 50 115, 20 100 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            </svg>
+
+                            <div>
+                                <div class="contact-icon-bubble">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <h3 class="contact-card-title">{{ contact_info.store_card_title|default:"Visit Our Store" }}</h3>
+                                <p class="contact-card-text">{{ contact_info.address|default:"Door No-28-747-1, Rajendra Nagar, Dharmavaram, Sri Sathya Sai District, Andhra Pradesh - 515671" }}</p>
                             </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label text-muted">Email Address <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control px-3 py-2" id="email" placeholder="john@example.com" required>
+                            <a href="{{ contact_info.store_btn_url|default:'https://maps.google.com/?q=Rangam+Saradha+Silks+Dharmavaram' }}" target="_blank" rel="noopener noreferrer" class="contact-card-btn">
+                                <span>{{ contact_info.store_btn_text|default:"Get Directions" }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <!-- CARD 2: Call Us -->
+                        <div class="contact-info-card">
+                            <svg class="card-mandala-corner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="100" cy="100" r="90" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                                <circle cx="100" cy="100" r="70" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="50" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="30" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                                <path d="M100 20 C85 50, 85 50, 100 80 C115 50, 115 50, 100 20 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                                <path d="M20 100 C50 85, 50 85, 80 100 C50 115, 50 115, 20 100 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            </svg>
+
+                            <div>
+                                <div class="contact-icon-bubble">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <h3 class="contact-card-title">{{ contact_info.call_card_title|default:"Call Us" }}</h3>
+                                <p class="contact-card-text mb-1 fw-medium text-dark">{{ contact_info.phone|default:"+91 91002 88963" }}</p>
+                                <p class="contact-card-text small text-muted">{{ contact_info.phone_hours|default:"Mon - Sat: 9:00 AM - 7:00 PM" }}</p>
                             </div>
-                            <div class="mb-3">
-                                <label for="subject" class="form-label text-muted">Subject <span class="text-danger">*</span></label>
-                                <input type="text" name="subject" class="form-control px-3 py-2" id="subject" placeholder="Inquiry about Kanchipuram Sarees" required>
+                            <a href="{{ contact_info.call_btn_url|default:'tel:+919100288963' }}" class="contact-card-btn">
+                                <span>{{ contact_info.call_btn_text|default:"Call Now" }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <!-- CARD 3: Email Us -->
+                        <div class="contact-info-card">
+                            <svg class="card-mandala-corner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="100" cy="100" r="90" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                                <circle cx="100" cy="100" r="70" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="50" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="30" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                                <path d="M100 20 C85 50, 85 50, 100 80 C115 50, 115 50, 100 20 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                                <path d="M20 100 C50 85, 50 85, 80 100 C50 115, 50 115, 20 100 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            </svg>
+
+                            <div>
+                                <div class="contact-icon-bubble">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <h3 class="contact-card-title">{{ contact_info.email_card_title|default:"Email Us" }}</h3>
+                                <p class="contact-card-text text-break">{{ contact_info.email|default:"rangamsaradhasilks@gmail.com" }}</p>
                             </div>
-                            <div class="mb-4">
-                                <label for="message" class="form-label text-muted">Your Message <span class="text-danger">*</span></label>
-                                <textarea name="message" class="form-control px-3 py-2" id="message" rows="5" placeholder="Write your message here..." required></textarea>
+                            <a href="{{ contact_info.email_btn_url|default:'mailto:rangamsaradhasilks@gmail.com' }}" class="contact-card-btn">
+                                <span>{{ contact_info.email_btn_text|default:"Send Email" }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <!-- CARD 4: Working Hours -->
+                        <div class="contact-info-card">
+                            <svg class="card-mandala-corner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="100" cy="100" r="90" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                                <circle cx="100" cy="100" r="70" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="50" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="30" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                                <path d="M100 20 C85 50, 85 50, 100 80 C115 50, 115 50, 100 20 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                                <path d="M20 100 C50 85, 50 85, 80 100 C50 115, 50 115, 20 100 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            </svg>
+
+                            <div>
+                                <div class="contact-icon-bubble">
+                                    <i class="bi bi-clock-fill"></i>
+                                </div>
+                                <h3 class="contact-card-title">{{ contact_info.hours_card_title|default:"Working Hours" }}</h3>
+                                <p class="contact-card-text mb-1">{{ contact_info.working_hours|default:"Mon - Sat: 9:00 AM - 7:00 PM" }}</p>
+                                {% if contact_info.working_hours_secondary %}
+                                <p class="contact-card-text small text-muted">{{ contact_info.working_hours_secondary }}</p>
+                                {% endif %}
                             </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary w-100 py-2.5">Send Message</button>
+                            <div class="pt-2">
+                                <span class="badge bg-light text-dark border border-warning-subtle px-2 py-1 rounded-pill small">
+                                    <i class="bi bi-patch-check-fill text-success me-1"></i> Open Today
+                                </span>
                             </div>
-                        </form>
+                        </div>
+
                     </div>
                 </div>
+
+                <!-- RIGHT COLUMN: SEND US A MESSAGE FORM CARD -->
+                <div class="col-lg-6">
+                    <div class="contact-form-card">
+                        
+                        <!-- Top-Right Mandala Corner Linework -->
+                        <svg class="form-mandala-top-right" viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="130" cy="0" r="115" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                            <circle cx="130" cy="0" r="90" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1.1"/>
+                            <circle cx="130" cy="0" r="65" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                            <circle cx="130" cy="0" r="40" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                            <path d="M130 90 C100 65, 100 65, 130 30 C160 65, 160 65, 130 90 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            <path d="M40 0 C65 30, 65 30, 90 0 C65 -30, 65 -30, 40 0 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                        </svg>
+
+                        <h2 class="contact-form-card-title">{{ contact_info.form_title|default:"Send Us a Message" }}</h2>
+                        
+                        <img src="{% static 'images/why-ornament-lotus-trans.png' %}" alt="Lotus" class="contact-motif-divider" style="height: 18px;" width="205" height="26">
+                        
+                        <p class="contact-form-card-subtitle">{{ contact_info.form_subtitle|default:"We'll get back to you as soon as possible." }}</p>
+
+                        <!-- Live Feedback Alert Container -->
+                        <div id="ajax-form-feedback" class="d-none mb-3"></div>
+
+                        <!-- Form Submission -->
+                        <form id="contact-main-form" action="{% url 'home:contact' %}" method="POST" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Row 1: Full Name & Email Address -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-6">
+                                    <label for="contact_name" class="contact-field-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" id="contact_name" class="contact-form-control" placeholder="Enter your name" required>
+                                    <div class="invalid-feedback small" id="err-name"></div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="contact_email" class="contact-field-label">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" name="email" id="contact_email" class="contact-form-control" placeholder="Enter your email" required>
+                                    <div class="invalid-feedback small" id="err-email"></div>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Phone Number & Subject -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-6">
+                                    <label for="contact_phone" class="contact-field-label">Phone Number</label>
+                                    <input type="tel" name="phone_number" id="contact_phone" class="contact-form-control" placeholder="Enter your phone number">
+                                    <div class="invalid-feedback small" id="err-phone"></div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="contact_subject" class="contact-field-label">Subject <span class="text-danger">*</span></label>
+                                    <select name="subject" id="contact_subject" class="contact-form-control form-select" required>
+                                        <option value="" disabled selected>Select a subject</option>
+                                        {% if subject_list %}
+                                            {% for item in subject_list %}
+                                            <option value="{{ item }}">{{ item }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="Inquiry about Pure Silk Sarees">Inquiry about Pure Silk Sarees</option>
+                                            <option value="Custom Bridal Order">Custom Bridal Order</option>
+                                            <option value="Order Status & Shipping">Order Status & Shipping</option>
+                                            <option value="Store Visit & Video Call">Store Visit & Video Call</option>
+                                            <option value="Other Inquiries">Other Inquiries</option>
+                                        {% endif %}
+                                    </select>
+                                    <div class="invalid-feedback small" id="err-subject"></div>
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Message -->
+                            <div class="mb-4">
+                                <label for="contact_message" class="contact-field-label">Your Message <span class="text-danger">*</span></label>
+                                <textarea name="message" id="contact_message" class="contact-form-control" rows="5" placeholder="Write your message here..." required></textarea>
+                                <div class="invalid-feedback small" id="err-message"></div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" id="contact_submit_btn" class="contact-submit-btn">
+                                <i class="bi bi-send-fill"></i>
+                                <span id="btn-text-content">{{ contact_info.form_button_text|default:"Send Message" }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <!-- 3. MIDDLE PROMOTIONAL LUXURY BANNER -->
+    <section class="contact-middle-banner">
+        <div class="contact-banner-saree-bg" aria-hidden="true"></div>
+
+        <div class="container position-relative" style="z-index: 3;">
+            <div class="row align-items-center">
+                
+                <!-- Middle Text & Button -->
+                <div class="col-lg-7 offset-lg-2 ps-lg-4 text-center text-lg-start">
+                    <img src="{% static 'images/why-ornament-lotus-trans.png' %}" alt="Motif" class="contact-banner-lotus" width="205" height="26">
+                    <h2 class="contact-banner-title">{{ contact_info.banner_title|default:"Looking for the Perfect Saree?" }}</h2>
+                    <p class="contact-banner-desc">{{ contact_info.banner_description|default:"From traditional silk sarees to elegant wedding collections, we're here to help you find the perfect saree for every occasion." }}</p>
+                    <a href="{{ contact_info.banner_button_url|default:'/shop/' }}" class="btn-banner-gold">
+                        <span>{{ contact_info.banner_button_text|default:"Explore Our Collection" }}</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- 4 Trust Features on Right -->
+                <div class="col-lg-3">
+                    <div class="contact-features-wrap">
+                        
+                        <!-- Feature 1 -->
+                        <div class="contact-feature-item">
+                            <i class="bi {{ contact_info.feature_1_icon|default:'bi-gift' }} contact-feature-icon"></i>
+                            <span class="contact-feature-label">{{ contact_info.feature_1_title|default:"Wedding Collections" }}</span>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div class="contact-feature-item">
+                            <i class="bi {{ contact_info.feature_2_icon|default:'bi-flower1' }} contact-feature-icon"></i>
+                            <span class="contact-feature-label">{{ contact_info.feature_2_title|default:"Traditional Silk Sarees" }}</span>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div class="contact-feature-item">
+                            <i class="bi {{ contact_info.feature_3_icon|default:'bi-heart' }} contact-feature-icon"></i>
+                            <span class="contact-feature-label">{{ contact_info.feature_3_title|default:"Custom Orders" }}</span>
+                        </div>
+
+                        <!-- Feature 4 -->
+                        <div class="contact-feature-item">
+                            <i class="bi {{ contact_info.feature_4_icon|default:'bi-headset' }} contact-feature-icon"></i>
+                            <span class="contact-feature-label">{{ contact_info.feature_4_title|default:"Customer Support" }}</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. BOTTOM STORE LOCATION & INTERACTIVE GOOGLE MAP -->
+    <section class="contact-location-section">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                
+                <!-- Left: Location Details -->
+                <div class="col-lg-4">
+                    <div class="contact-location-info-box">
+                        <!-- Bottom-left corner decorative mandala -->
+                        <svg class="location-mandala-corner" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="0" cy="150" r="135" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 3"/>
+                            <circle cx="0" cy="150" r="110" stroke="#AE6F21" stroke-opacity="0.22" stroke-width="1"/>
+                            <circle cx="0" cy="150" r="80" stroke="#AE6F21" stroke-opacity="0.18" stroke-width="1"/>
+                            <circle cx="0" cy="150" r="50" stroke="#AE6F21" stroke-opacity="0.25" stroke-width="1.2"/>
+                            <path d="M0 70 C30 100, 30 100, 0 130 C-30 100, -30 100, 0 70 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                            <path d="M70 150 C100 120, 100 120, 130 150 C100 180, 100 180, 70 150 Z" stroke="#AE6F21" stroke-opacity="0.2" fill="none"/>
+                        </svg>
+
+                        <span class="contact-eyebrow">{{ contact_info.location_eyebrow|default:"OUR LOCATION" }}</span>
+                        <h2 class="contact-section-heading mb-3">{{ contact_info.location_title|default:"Visit Rangam Saradha Silks" }}</h2>
+                        <p class="contact-section-desc mb-4">{{ contact_info.location_description|default:"Experience our exclusive collection in person at our Dharmavaram store." }}</p>
+                        
+                        <a href="{{ contact_info.location_button_url|default:'https://maps.google.com/?q=Rangam+Saradha+Silks+Dharmavaram' }}" target="_blank" rel="noopener noreferrer" class="btn-directions-burgundy">
+                            <span>{{ contact_info.location_button_text|default:"Get Directions" }}</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right: Responsive Google Maps Embed -->
+                <div class="col-lg-8">
+                    <div class="contact-map-frame-box">
+                        {% if contact_info.safe_google_map_iframe %}
+                            {{ contact_info.safe_google_map_iframe|safe }}
+                        {% else %}
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3890.354!2d77.7133326!3d14.4179758!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb14300456bf311:0x8857825762b2bec!2sRangam%20Saradha%20Silks!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+                                width="100%" 
+                                height="320" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Axios JS Library -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- React 18 & ReactDOM -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const contactForm = document.getElementById('contact-main-form');
+    const submitBtn = document.getElementById('contact_submit_btn');
+    const btnTextContent = document.getElementById('btn-text-content');
+    const feedbackBox = document.getElementById('ajax-form-feedback');
 
-{% verbatim %}
-<script type="text/babel">
-const ContactFormReact = () => {
-    const [formData, setFormData] = React.useState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-    });
+    if (!contactForm) return;
 
-    const [errors, setErrors] = React.useState({});
-    const [submitting, setSubmitting] = React.useState(false);
-    const [successMessage, setSuccessMessage] = React.useState('');
-    const [errorMessage, setErrorMessage] = React.useState('');
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
-        if (errors[name]) {
-            setErrors((prev) => ({ ...prev, [name]: null }));
-        }
-    };
-
-    const validate = () => {
-        const newErrors = {};
-        if (!formData.name || !formData.name.trim()) {
-            newErrors.name = 'Name is required.';
-        }
-        if (!formData.email || !formData.email.trim()) {
-            newErrors.email = 'Valid email is required.';
-        } else {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(formData.email.trim())) {
-                newErrors.email = 'Valid email is required.';
+    // Helper: get cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
-        if (!formData.subject || !formData.subject.trim()) {
-            newErrors.subject = 'Subject is required.';
-        }
-        if (!formData.message || !formData.message.trim()) {
-            newErrors.message = 'Message is required.';
-        }
+        return cookieValue;
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
+    contactForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        setSuccessMessage('');
-        setErrorMessage('');
 
-        if (!validate()) {
-            return;
+        // Clear previous error messages
+        ['name', 'email', 'phone', 'subject', 'message'].forEach(f => {
+            const errEl = document.getElementById(`err-${f}`);
+            const inputEl = document.getElementById(`contact_${f}`);
+            if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+            if (inputEl) { inputEl.classList.remove('is-invalid'); }
+        });
+
+        if (feedbackBox) {
+            feedbackBox.className = 'd-none mb-3';
+            feedbackBox.innerHTML = '';
         }
 
-        setSubmitting(true);
+        const name = (document.getElementById('contact_name').value || '').trim();
+        const email = (document.getElementById('contact_email').value || '').trim();
+        const phone = (document.getElementById('contact_phone').value || '').trim();
+        const subject = (document.getElementById('contact_subject').value || '').trim();
+        const message = (document.getElementById('contact_message').value || '').trim();
+
+        let hasError = false;
+
+        function markInvalid(fieldName, errorMsg) {
+            const inputEl = document.getElementById(`contact_${fieldName}`);
+            const errEl = document.getElementById(`err-${fieldName}`);
+            if (inputEl) inputEl.classList.add('is-invalid');
+            if (errEl) {
+                errEl.textContent = errorMsg;
+                errEl.style.display = 'block';
+            }
+            hasError = true;
+        }
+
+        if (!name) markInvalid('name', 'Please enter your name.');
+        if (!email) {
+            markInvalid('email', 'Please enter your email address.');
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) markInvalid('email', 'Please enter a valid email address.');
+        }
+        if (!subject) markInvalid('subject', 'Please select a subject.');
+        if (!message) markInvalid('message', 'Please enter your message.');
+
+        if (hasError) return;
+
+        // Button loading state
+        const originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Sending Message...</span>
+        `;
+
+        const payload = {
+            name: name,
+            email: email,
+            phone_number: phone,
+            subject: subject,
+            message: message
+        };
+
+        const csrfToken = getCookie('csrftoken') || (window.CSRF_TOKEN ? window.CSRF_TOKEN : '');
 
         try {
-            const getCookie = (name) => {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            };
-
-            const csrfToken = getCookie('csrftoken') || (window.CSRF_TOKEN ? window.CSRF_TOKEN : '');
-
-            const response = await axios.post('/api/contact/', formData, {
+            const response = await fetch('/api/contact/', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
-                }
+                },
+                body: JSON.stringify(payload)
             });
 
-            if (response.status === 201 || (response.data && response.data.success)) {
-                setSuccessMessage(
-                    response.data.message || 'Thank you for contacting us. We will get back to you shortly.'
-                );
-                setFormData({
-                    name: '',
-                    email: '',
-                    subject: '',
-                    message: ''
-                });
-                setErrors({});
-            } else {
-                setErrorMessage(response.data.message || 'Failed to send message. Please try again.');
-            }
-        } catch (error) {
-            if (error.response && error.response.data) {
-                const apiData = error.response.data;
-                if (apiData.message) {
-                    setErrorMessage(apiData.message);
-                } else {
-                    setErrorMessage('Submission failed. Please check your inputs and try again.');
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                if (feedbackBox) {
+                    feedbackBox.className = 'alert alert-success border-0 shadow-sm rounded-3 py-3 px-4 mb-4';
+                    feedbackBox.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Message Sent Successfully!</h6>
+                                <p class="mb-0 small">${data.message || 'Thank you for reaching out to Rangam Saradha Silks. We will get back to you shortly.'}</p>
+                            </div>
+                        </div>
+                    `;
                 }
-                if (apiData.errors) {
-                    setErrors(apiData.errors);
-                }
+                contactForm.reset();
             } else {
-                setErrorMessage('Error sending email or connecting to server. Please try again later.');
+                let errText = data.message || 'Failed to submit form. Please check your details.';
+                if (data.errors) {
+                    for (const key in data.errors) {
+                        markInvalid(key, Array.isArray(data.errors[key]) ? data.errors[key][0] : data.errors[key]);
+                    }
+                }
+                if (feedbackBox) {
+                    feedbackBox.className = 'alert alert-danger border-0 shadow-sm rounded-3 py-3 px-4 mb-4';
+                    feedbackBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${errText}`;
+                }
             }
+        } catch (err) {
+            console.error('Contact submission error:', err);
+            // Fallback to normal form submission if network API fails
+            contactForm.submit();
+            return;
         } finally {
-            setSubmitting(false);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
         }
-    };
-
-    return (
-        <div className="card border-0 shadow-lg p-4 p-md-5" style={{ borderRadius: '24px' }}>
-            <h3 className="font-heading mb-4 text-center">Send Us a Message</h3>
-
-            {successMessage && (
-                <div className="alert alert-success border-0 shadow-sm mb-4" role="alert">
-                    <i className="bi bi-check-circle-fill me-2"></i>
-                    {successMessage}
-                </div>
-            )}
-
-            {errorMessage && (
-                <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    {errorMessage}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} noValidate>
-                <div className="mb-3">
-                    <label htmlFor="name" className="form-label text-muted">
-                        Your Name <span className="text-danger">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        className={`form-control px-3 py-2 ${errors.name ? 'is-invalid' : ''}`}
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={handleChange}
-                        disabled={submitting}
-                    />
-                    {errors.name && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.name}</div>}
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="email" className="form-label text-muted">
-                        Email Address <span className="text-danger">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        className={`form-control px-3 py-2 ${errors.email ? 'is-invalid' : ''}`}
-                        placeholder="john@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        disabled={submitting}
-                    />
-                    {errors.email && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.email}</div>}
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="subject" className="form-label text-muted">
-                        Subject <span className="text-danger">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="subject"
-                        id="subject"
-                        className={`form-control px-3 py-2 ${errors.subject ? 'is-invalid' : ''}`}
-                        placeholder="Inquiry about Kanchipuram Sarees"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        disabled={submitting}
-                    />
-                    {errors.subject && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.subject}</div>}
-                </div>
-
-                <div className="mb-4">
-                    <label htmlFor="message" className="form-label text-muted">
-                        Your Message <span className="text-danger">*</span>
-                    </label>
-                    <textarea
-                        name="message"
-                        id="message"
-                        rows="5"
-                        className={`form-control px-3 py-2 ${errors.message ? 'is-invalid' : ''}`}
-                        placeholder="Write your message here..."
-                        value={formData.message}
-                        onChange={handleChange}
-                        disabled={submitting}
-                    ></textarea>
-                    {errors.message && <div className="invalid-feedback" style={{ display: 'block' }}>{errors.message}</div>}
-                </div>
-
-                <div className="text-center">
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-100 py-2.5"
-                        disabled={submitting}
-                    >
-                        {submitting ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                Sending Message...
-                            </>
-                        ) : (
-                            'Send Message'
-                        )}
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-const root = ReactDOM.createRoot(document.getElementById('react-contact-form-root'));
-root.render(<ContactFormReact />);
+    });
+});
 </script>
-{% endverbatim %}
 {% endblock %}

@@ -4466,8 +4466,7 @@ h6,
         display: flex;
         gap: 16px;
         overflow-x: auto;
-        scroll-behavior: smooth;
-        scroll-snap-type: x mandatory;
+        scroll-behavior: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         padding: 10px 4px 16px 4px;
@@ -4481,7 +4480,6 @@ h6,
         flex: 0 0 calc(100% / 2.3);
         min-width: 130px;
         max-width: 160px;
-        scroll-snap-align: center;
     }
 
     .cat-circle-frame {

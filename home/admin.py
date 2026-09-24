@@ -47,20 +47,64 @@ class WebsiteSettingAdmin(SingletonAdmin):
     )
 
 class ContactInfoAdmin(SingletonAdmin):
-    list_display = ['phone', 'email', 'working_hours']
-    fields = [
-        'phone',
-        'email',
-        'facebook_url',
-        'instagram_url',
-        'youtube_url',
-        'twitter_url',
-        'pinterest_url',
-        'whatsapp_number',
-        'address',
-        'working_hours',
-        'google_map_iframe',
-    ]
+    list_display = ['page_title', 'phone', 'email', 'working_hours']
+    fieldsets = (
+        ('🌸 1. Top Header Banner', {
+            'fields': ('page_title', 'page_subtitle', 'header_bg_image'),
+            'description': 'Configure the main page title, subtitle, and optional header background texture.',
+        }),
+        ('💬 2. Help & Inquiry Section (Top Left)', {
+            'fields': ('help_eyebrow', 'help_title', 'help_description'),
+            'description': 'Configure the eyebrow text, main heading, and supporting description on the left.',
+        }),
+        ('📍 3. Card 1: Visit Our Store', {
+            'fields': ('store_card_title', 'address', ('store_btn_text', 'store_btn_url')),
+            'description': 'Physical store address and Get Directions button link.',
+        }),
+        ('📞 4. Card 2: Call Us', {
+            'fields': ('call_card_title', 'phone', 'phone_hours', ('call_btn_text', 'call_btn_url')),
+            'description': 'Store telephone number, availability hours, and direct call button.',
+        }),
+        ('✉️ 5. Card 3: Email Us', {
+            'fields': ('email_card_title', 'email', ('email_btn_text', 'email_btn_url')),
+            'description': 'Official customer email address and mailto button.',
+        }),
+        ('⏰ 6. Card 4: Working Hours', {
+            'fields': ('hours_card_title', 'working_hours', 'working_hours_secondary'),
+            'description': 'Business operational hours for weekdays and Sundays/weekends.',
+        }),
+        ('📝 7. Message Form (Top Right)', {
+            'fields': ('form_title', 'form_subtitle', 'form_button_text', 'form_subjects'),
+            'description': 'Form heading, subtitle, submit button label, and dropdown subjects (one subject per line).',
+        }),
+        ('✨ 8. Middle Promotional Saree Banner', {
+            'fields': (
+                'banner_title',
+                'banner_description',
+                ('banner_button_text', 'banner_button_url'),
+                'banner_image',
+                ('feature_1_title', 'feature_1_icon'),
+                ('feature_2_title', 'feature_2_icon'),
+                ('feature_3_title', 'feature_3_icon'),
+                ('feature_4_title', 'feature_4_icon'),
+            ),
+            'description': 'Luxury promotional banner with button and 4 highlighted brand features (icons use Bootstrap Icon class names like bi-gift, bi-flower1, bi-heart, bi-headset).',
+        }),
+        ('🗺️ 9. Store Location & Interactive Google Map (Bottom)', {
+            'fields': (
+                'location_eyebrow',
+                'location_title',
+                'location_description',
+                ('location_button_text', 'location_button_url'),
+                'google_map_iframe',
+            ),
+            'description': 'Bottom location section heading, description, directions button, and responsive Google Map iframe.',
+        }),
+        ('🌐 10. Social Media & Direct WhatsApp', {
+            'fields': ('whatsapp_number', 'instagram_url', 'facebook_url', 'youtube_url', 'twitter_url', 'pinterest_url'),
+            'description': 'Store social media channels and WhatsApp click-to-chat configuration.',
+        }),
+    )
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 3, 'style': 'height: 80px; width: 100%; max-width: 600px;'})},
     }
@@ -116,9 +160,9 @@ class InstagramPostAdmin(admin.ModelAdmin):
     list_filter = ['is_active']
 
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'subject', 'created_at']
-    readonly_fields = ['name', 'email', 'subject', 'message', 'created_at']
-    search_fields = ['name', 'email', 'subject', 'message']
+    list_display = ['name', 'email', 'phone_number', 'subject', 'created_at']
+    readonly_fields = ['name', 'email', 'phone_number', 'subject', 'message', 'created_at']
+    search_fields = ['name', 'email', 'phone_number', 'subject', 'message']
     
     def has_add_permission(self, request):
         return False

@@ -54,7 +54,6 @@ class CMSPageSitemap(BaseSitemap):
 
     def location(self, item):
         return reverse('home:cms_page', kwargs={'slug': item.slug})
-        return item.get_absolute_url()
 
     def priority(self, item):
         if item.slug == 'about-us':
@@ -76,7 +75,6 @@ class CategorySitemap(BaseSitemap):
 
     def location(self, item):
         return reverse('shop:category_detail', kwargs={'category_slug': item.slug})
-        return item.get_absolute_url()
 
 
 class ProductSitemap(BaseSitemap):
@@ -91,5 +89,4 @@ class ProductSitemap(BaseSitemap):
 
     def location(self, item):
         return reverse('shop:product_detail', kwargs={'slug': item.slug})
-        return item.get_absolute_url()
 

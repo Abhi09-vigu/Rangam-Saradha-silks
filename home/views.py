@@ -10,7 +10,7 @@ from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import WebsiteSetting, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
+from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 from .serializers import ContactMessageSerializer
 from shop.models import Category, Product
 
@@ -45,20 +45,23 @@ class ContactFormAPIView(APIView):
         formatted_time = contact_message.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
 
         # Email notification setup
+        phone_line = f"Phone Number: {contact_message.phone_number}\n" if contact_message.phone_number else ""
         email_subject = f"New Contact Form Submission - {contact_message.subject}"
         email_body = (
             f"You have received a new contact form submission on Rangam Saradha Silks.\n\n"
             f"--------------------------------------------------\n"
             f"Name: {contact_message.name}\n"
             f"Email Address: {contact_message.email}\n"
+            f"{phone_line}"
             f"Subject: {contact_message.subject}\n"
             f"Message:\n{contact_message.message}\n"
             f"--------------------------------------------------\n"
             f"Date & Time of submission: {formatted_time}\n"
         )
         
-        recipient_email = "rangamsaradhasilks@gmail.com"
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', 'rangamsaradhasilks@gmail.com')
+        contact_info_obj = ContactInfo.objects.first()
+        recipient_email = getattr(contact_info_obj, 'email', None) or "rangamsaradhasilks@gmail.com"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', recipient_email)
 
         try:
             send_mail(
@@ -66,17 +69,10 @@ class ContactFormAPIView(APIView):
                 message=email_body,
                 from_email=from_email,
                 recipient_list=[recipient_email],
-                fail_silently=False,
+                fail_silently=True,
             )
         except Exception as e:
             logger.error(f"Error sending contact form email: {str(e)}")
-            return Response(
-                {
-                    "success": False,
-                    "message": f"Failed to send email notification: {str(e)}"
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
         return Response(
             {
@@ -92,37 +88,45 @@ def faq_view(request):
     return render(request, 'home/faq.html', {'faqs': faqs})
 
 def contact_view(request):
+    contact_info = ContactInfo.objects.first()
+    if not contact_info:
+        contact_info = ContactInfo.objects.create()
+
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        subject = request.POST.get('subject')
-        message = request.POST.get('message')
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        message = request.POST.get('message', '').strip()
         
         if not name or not email or not subject or not message:
-            messages.error(request, "All fields (Name, Email, Subject, Message) are required.")
+            messages.error(request, "Please fill in all required fields (Name, Email, Subject, Message).")
             return redirect('home:contact')
 
         contact_msg = ContactMessage.objects.create(
             name=name,
             email=email,
+            phone_number=phone_number,
             subject=subject,
             message=message
         )
 
         formatted_time = contact_msg.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+        phone_line = f"Phone Number: {contact_msg.phone_number}\n" if contact_msg.phone_number else ""
         email_subject = f"New Contact Form Submission - {contact_msg.subject}"
         email_body = (
             f"You have received a new contact form submission on Rangam Saradha Silks.\n\n"
             f"--------------------------------------------------\n"
             f"Name: {contact_msg.name}\n"
             f"Email Address: {contact_msg.email}\n"
+            f"{phone_line}"
             f"Subject: {contact_msg.subject}\n"
             f"Message:\n{contact_msg.message}\n"
             f"--------------------------------------------------\n"
             f"Date & Time of submission: {formatted_time}\n"
         )
-        recipient_email = "rangamsaradhasilks@gmail.com"
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', 'rangamsaradhasilks@gmail.com')
+        recipient_email = getattr(contact_info, 'email', None) or "rangamsaradhasilks@gmail.com"
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', recipient_email)
 
         try:
             send_mail(
@@ -130,16 +134,19 @@ def contact_view(request):
                 message=email_body,
                 from_email=from_email,
                 recipient_list=[recipient_email],
-                fail_silently=False,
+                fail_silently=True,
             )
-            messages.success(request, "Thank you for contacting us. We will get back to you shortly.")
         except Exception as e:
             logger.error(f"Error sending contact form email: {str(e)}")
-            messages.error(request, f"Failed to send email notification: {str(e)}")
 
+        messages.success(request, "Thank you for contacting us! We have received your message and will get back to you shortly.")
         return redirect('home:contact')
         
-    return render(request, 'home/contact.html')
+    context = {
+        'contact_info': contact_info,
+        'subject_list': contact_info.get_subject_list(),
+    }
+    return render(request, 'home/contact.html', context)
 
 def index(request):
     setting = WebsiteSetting.objects.first()
@@ -322,6 +329,8 @@ def robots_txt(request):
         "Disallow: /shop/order/",
         "Disallow: /shop/booking/",
         "Disallow: /shop/coupon/",
+        "Disallow: /shop/compare/",
+        "Disallow: /shop/wishlist/",
         "Disallow: /api/",
         "Disallow: /debug-db/",
         "Allow: /",

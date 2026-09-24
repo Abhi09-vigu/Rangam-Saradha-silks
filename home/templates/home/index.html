@@ -345,7 +345,7 @@
 
         <div class="cat-showcase-track" id="catShowcaseTrack">
             {% for cat in categories %}
-            <div class="cat-showcase-item">
+            <div class="cat-showcase-item" data-original="true">
                 <a href="{{ cat.get_absolute_url }}" class="cat-showcase-card">
                     <div class="cat-circle-frame">
                         {% if cat.image %}
@@ -354,28 +354,6 @@
                         {% else %}
                         <img src="{% static 'images/logo.jpg' %}" alt="{{ cat.name }}" class="cat-circle-img"
                             loading="eager">
-                        {% endif %}
-                    </div>
-                    <h3 class="cat-card-title">{{ cat.name }}</h3>
-                    <div class="cat-card-divider">
-                        <span class="divider-line"></span>
-                        <span class="divider-diamond">❖</span>
-                        <span class="divider-line"></span>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-            {# Duplicate loop to ensure continuous infinite horizontal scroll on all displays #}
-            {% for cat in categories %}
-            <div class="cat-showcase-item" aria-hidden="true">
-                <a href="{{ cat.get_absolute_url }}" class="cat-showcase-card" tabindex="-1">
-                    <div class="cat-circle-frame">
-                        {% if cat.image %}
-                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="cat-circle-img" loading="lazy"
-                            onerror="this.onerror=null; this.src='/static/images/categories/{{ cat.slug }}.jpg';">
-                        {% else %}
-                        <img src="{% static 'images/logo.jpg' %}" alt="{{ cat.name }}" class="cat-circle-img"
-                            loading="lazy">
                         {% endif %}
                     </div>
                     <h3 class="cat-card-title">{{ cat.name }}</h3>
@@ -1405,12 +1383,19 @@
         prevBtnId,
         nextBtnId,
         speed = 0.65,
-        stepAmount = 280
+        stepAmount = 300
     }) {
         const track = document.getElementById(trackId);
         if (!track) return;
         const prevBtn = prevBtnId ? document.getElementById(prevBtnId) : null;
         const nextBtn = nextBtnId ? document.getElementById(nextBtnId) : null;
+
+        const originalItems = Array.from(track.querySelectorAll('.cat-showcase-item:not([data-clone="true"])'));
+        if (originalItems.length <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            return;
+        }
 
         let isPaused = false;
         let isDragging = false;
@@ -1419,6 +1404,7 @@
         let hasMoved = false;
         let resumeTimer = null;
         let animId = null;
+        let singleSetWidth = 0;
 
         const pauseFor = (ms = 2200) => {
             isPaused = true;
@@ -1428,18 +1414,77 @@
             }, ms);
         };
 
+        const cloneBatch = () => {
+            const frag = document.createDocumentFragment();
+            originalItems.forEach(item => {
+                const clone = item.cloneNode(true);
+                clone.setAttribute('data-clone', 'true');
+                clone.setAttribute('aria-hidden', 'true');
+                clone.querySelectorAll('a, button').forEach(el => el.setAttribute('tabindex', '-1'));
+                frag.appendChild(clone);
+            });
+            track.appendChild(frag);
+        };
+
+        const initClonesAndMetrics = () => {
+            // Remove any previously created clones (e.g. on resize reinit)
+            track.querySelectorAll('[data-clone="true"]').forEach(c => c.remove());
+
+            // Append first batch of clones to measure exact width difference
+            cloneBatch();
+
+            const firstClone = track.querySelector('[data-clone="true"]');
+            if (firstClone && originalItems[0]) {
+                singleSetWidth = firstClone.offsetLeft - originalItems[0].offsetLeft;
+            }
+            if (!singleSetWidth || singleSetWidth < 50) {
+                const itemWidth = originalItems[0].offsetWidth || 148;
+                singleSetWidth = originalItems.length * (itemWidth + 24);
+            }
+
+            // Ensure track is wide enough for seamless looping on any viewport
+            // Needs to cover clientWidth + at least 2.5 * singleSetWidth
+            const targetWidth = Math.max(track.clientWidth, window.innerWidth) * 2.5 + singleSetWidth * 2;
+            let safety = 0;
+            while (track.scrollWidth < targetWidth && safety < 8) {
+                cloneBatch();
+                safety++;
+            }
+
+            // Position initial scroll at exactly singleSetWidth (start of Set 1)
+            // Visually identical to 0, but allows seamless bidirectional scrolling (both prev and next)
+            track.scrollLeft = singleSetWidth;
+        };
+
+        initClonesAndMetrics();
+
+        // Infinite loop wrapping logic
         const checkInfiniteLoop = () => {
-            const half = track.scrollWidth / 2;
-            if (half > 20) {
-                if (track.scrollLeft >= half) {
-                    track.scrollLeft -= half;
-                } else if (track.scrollLeft <= 0) {
-                    track.scrollLeft += half;
+            if (!singleSetWidth || singleSetWidth < 50) return;
+
+            // When scrolling forward past Set 1 into Set 2
+            if (track.scrollLeft >= singleSetWidth * 2) {
+                track.scrollLeft -= singleSetWidth;
+                if (isDragging) {
+                    scrollStart -= singleSetWidth;
                 }
+            }
+            // When scrolling backward past Set 1 into Set 0
+            else if (track.scrollLeft <= singleSetWidth * 0.2) {
+                track.scrollLeft += singleSetWidth;
+                if (isDragging) {
+                    scrollStart += singleSetWidth;
+                }
+            }
+
+            // Failsafe: if ever approaching physical end of scroll container
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            if (maxScroll > 10 && track.scrollLeft >= maxScroll - 4) {
+                track.scrollLeft = singleSetWidth;
             }
         };
 
-        // Continuous silky smooth auto-scroll
+        // Continuous silky smooth auto-scroll tick
         const tick = () => {
             if (!isPaused && !isDragging) {
                 track.scrollLeft += speed;
@@ -1448,6 +1493,11 @@
             animId = requestAnimationFrame(tick);
         };
         animId = requestAnimationFrame(tick);
+
+        // Track real-time scroll events from user interaction (smooth scroll, trackpad, touch)
+        track.addEventListener('scroll', () => {
+            checkInfiniteLoop();
+        }, { passive: true });
 
         // Hover pause
         track.addEventListener('mouseenter', () => { isPaused = true; });
@@ -1460,12 +1510,13 @@
             isPaused = true;
             clearTimeout(resumeTimer);
         }, { passive: true });
+
         track.addEventListener('touchend', () => {
             pauseFor(1600);
         }, { passive: true });
 
-        // Mouse Drag-to-Scroll with reliable click support
-        const DRAG_THRESHOLD = 14;
+        // Mouse Drag-to-Scroll
+        const DRAG_THRESHOLD = 12;
 
         track.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
@@ -1492,7 +1543,6 @@
                 isDragging = false;
                 track.classList.remove('is-dragging');
                 pauseFor(1400);
-                // Clear drag movement flag after click dispatch so subsequent clicks are not blocked
                 setTimeout(() => {
                     hasMoved = false;
                 }, 80);
@@ -1500,7 +1550,7 @@
         };
         window.addEventListener('mouseup', endDrag);
 
-        // Prevent clicking inside cards ONLY if user was actually dragging (> 14px)
+        // Prevent clicking inside cards ONLY if user was actually dragging (> 12px)
         track.addEventListener('click', (e) => {
             if (hasMoved) {
                 e.preventDefault();
@@ -1525,7 +1575,6 @@
                 e.preventDefault();
                 pauseFor(2500);
                 track.scrollBy({ left: -stepAmount, behavior: 'smooth' });
-                setTimeout(checkInfiniteLoop, 350);
             });
             prevBtn.addEventListener('mouseenter', () => { isPaused = true; });
             prevBtn.addEventListener('mouseleave', () => { isPaused = false; });
@@ -1536,11 +1585,25 @@
                 e.preventDefault();
                 pauseFor(2500);
                 track.scrollBy({ left: stepAmount, behavior: 'smooth' });
-                setTimeout(checkInfiniteLoop, 350);
             });
             nextBtn.addEventListener('mouseenter', () => { isPaused = true; });
             nextBtn.addEventListener('mouseleave', () => { isPaused = false; });
         }
+
+        // Window resize handler
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const targetWidth = Math.max(track.clientWidth, window.innerWidth) * 2.5 + singleSetWidth * 2;
+                let safety = 0;
+                while (track.scrollWidth < targetWidth && safety < 6) {
+                    cloneBatch();
+                    safety++;
+                }
+                checkInfiniteLoop();
+            }, 250);
+        });
     }
 
     // New Arrivals Scroller (only scrolls if more than 5 products)
