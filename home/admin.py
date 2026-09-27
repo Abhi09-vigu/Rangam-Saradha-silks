@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.db import models
 from django.forms import Textarea
@@ -14,8 +15,20 @@ class SingletonAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+class WebsiteSettingAdminForm(forms.ModelForm):
+    class Meta:
+        model = WebsiteSetting
+        fields = '__all__'
+        widgets = {
+            'priority_sku_prefixes': forms.TextInput(attrs={
+                'placeholder': 'e.g. RSS-GB, KJM-SUB',
+                'style': 'max-width: 500px; width: 100%;',
+            }),
+        }
+
 class WebsiteSettingAdmin(SingletonAdmin):
-    list_display = ['website_name', 'hero_display_mode', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit']
+    form = WebsiteSettingAdminForm
+    list_display = ['website_name', 'priority_sku_prefixes', 'hero_display_mode', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit']
     fieldsets = (
         ('🌟 TEMP POPUP: Mandatory Full-Screen Launch Overlay', {
             'fields': ('launch_mode_active', 'launch_datetime', 'launch_title', 'launch_tagline_1', 'launch_tagline_2'),
@@ -24,6 +37,10 @@ class WebsiteSettingAdmin(SingletonAdmin):
         ('Homepage Top Banner Display (Hero Slider vs Offer Banner)', {
             'fields': ('hero_display_mode',),
             'description': 'Choose whether to show the Hero Slider or the Offer Banner at the top of the homepage. Select "Automatic" (shows Hero Slider if active slides exist, otherwise automatically shows Offer Banner), "Hero Slider Only", or "Offer Banner Only". Only one will be displayed at a time, never both.',
+        }),
+        ('🏷️ Product Display Priority (SKU Prefixes)', {
+            'fields': ('priority_sku_prefixes',),
+            'description': 'Control the product display order on the shop and catalog listing pages. Enter SKU prefixes separated by commas (e.g. RSS-GB, KJM-SUB). Products matching these prefixes will appear first on the shop page in this exact order, followed by all remaining products.',
         }),
         ('General Website Settings', {
             'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), ('cod_charge', 'cod_max_limit', 'call_booking_fee'), 'maintenance_mode'),

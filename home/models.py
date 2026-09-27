@@ -21,6 +21,15 @@ class WebsiteSetting(models.Model):
     call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
 
+    # Product Display Priority (SKU Prefixes)
+    priority_sku_prefixes = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        verbose_name="Priority SKU Prefixes",
+        help_text="Comma-separated SKU prefixes (e.g. RSS-GB, KJM-SUB) to control product display order on the shop page. Matching is prefix-based (e.g. RSS-GB matches RSS-GB-006)."
+    )
+
     # Hero Slider vs Offer Banner Top Display Mode
     hero_display_mode = models.CharField(
         max_length=20,
@@ -76,6 +85,20 @@ class WebsiteSetting(models.Model):
     @property
     def cod_free_threshold(self):
         return self.cod_max_limit
+
+    def get_priority_sku_prefixes(self):
+        """
+        Returns an ordered list of clean, non-empty, deduplicated SKU prefixes.
+        Example: 'RSS-GB, KJM-SUB' -> ['RSS-GB', 'KJM-SUB']
+        """
+        if not self.priority_sku_prefixes:
+            return []
+        prefixes = []
+        for p in self.priority_sku_prefixes.split(','):
+            cleaned = p.strip()
+            if cleaned and cleaned not in prefixes:
+                prefixes.append(cleaned)
+        return prefixes
 
     # Dynamic About Section
     about_title = models.CharField(max_length=150, default="About Rangam Saradha Silk Sarees", help_text="Main heading for the homepage About section.")

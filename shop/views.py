@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from accounts.decorators import customer_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail, EmailMultiAlternatives
@@ -189,6 +189,66 @@ def filter_products_by_search(queryset, raw_query):
     return queryset.filter(or_q).distinct()
 
 
+def apply_sku_priority_and_sorting(queryset, sort_by=None, site_settings=None):
+    """
+    Orders a Product queryset by SKU priority prefixes (configured in WebsiteSetting),
+    while preserving secondary sorting within each prefix group and for all remaining products.
+    
+    1. If the admin configures: "RSS-GB, KJM-SUB", products starting with "RSS-GB-" appear first,
+       followed by products starting with "KJM-SUB-", followed by all other products.
+    2. Within each group, products are sorted by the chosen sort_by option:
+       - 'price_low': offer_price ascending
+       - 'price_high': offer_price descending
+       - 'popular': is_trending descending
+       - 'new' or default: created_at descending (newest arrivals)
+    3. If no priority SKU prefixes are configured, standard sorting is applied.
+    """
+    if site_settings is None:
+        site_settings = WebsiteSetting.objects.first()
+
+    priority_prefixes = site_settings.get_priority_sku_prefixes() if site_settings else []
+
+    primary_order = []
+    if priority_prefixes:
+        whens = []
+        for idx, prefix in enumerate(priority_prefixes):
+            clean_p = prefix.strip()
+            if not clean_p:
+                continue
+            if clean_p.endswith('-'):
+                cond = Q(sku__istartswith=clean_p)
+            else:
+                # Matches prefix with hyphen (e.g. 'RSS-GB' matches 'RSS-GB-006') or exact prefix
+                cond = Q(sku__istartswith=f"{clean_p}-") | Q(sku__iexact=clean_p)
+                # If prefix contains no hyphen, also match direct prefix (e.g. 'KJ' matches 'KJ123' or 'KJ-123')
+                if '-' not in clean_p:
+                    cond |= Q(sku__istartswith=clean_p)
+            whens.append(When(cond, then=Value(idx)))
+
+        if whens:
+            queryset = queryset.annotate(
+                sku_priority=Case(
+                    *whens,
+                    default=Value(len(whens)),
+                    output_field=IntegerField()
+                )
+            )
+            primary_order = ['sku_priority']
+
+    # Determine secondary ordering based on user-selected sort
+    if sort_by == 'price_low':
+        secondary_order = ['offer_price', '-created_at', 'id']
+    elif sort_by == 'price_high':
+        secondary_order = ['-offer_price', '-created_at', 'id']
+    elif sort_by == 'popular':
+        secondary_order = ['-is_trending', '-created_at', 'id']
+    else:
+        # Default: newest arrivals (covers sort == 'new' and default)
+        secondary_order = ['-created_at', 'id']
+
+    return queryset.order_by(*(primary_order + secondary_order))
+
+
 def catalog(request, category_slug=None):
     products = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
     
@@ -261,17 +321,10 @@ def catalog(request, category_slug=None):
     if discount == 'yes':
         products = products.filter(discount_percentage__gt=0)
         
-    # Sorting
+    # Sorting with WebsiteSetting SKU Priority
+    site_settings = WebsiteSetting.objects.first()
     sort_by = request.GET.get('sort', '-created_at')
-    if sort_by == 'price_low':
-        products = products.order_by('offer_price')
-    elif sort_by == 'price_high':
-        products = products.order_by('-offer_price')
-    elif sort_by == 'popular':
-        products = products.order_by('-is_trending')
-    else:
-        # Default: newest arrivals
-        products = products.order_by('-created_at')
+    products = apply_sku_priority_and_sorting(products, sort_by=sort_by, site_settings=site_settings)
 
     # Categories and filters for Sidebar UI
     categories = Category.objects.filter(is_active=True)
