@@ -311,7 +311,7 @@
                                 <tr>
                                     <td>
                                         <h6 class="fw-semibold mb-1 text-dark">{{ item.product.name }}</h6>
-                                        <p class="text-muted fs-8 mb-0">Fabric: {{ item.product.fabric|default:"Pure Silk" }}</p>
+                                        <p class="text-muted fs-8 mb-0">SKU: {{ item.product.sku }} | Fabric: {{ item.product.fabric|default:"Pure Silk" }}</p>
                                     </td>
                                     <td class="text-center fs-7">{{ site_settings.currency }}{{ item.price|floatformat:2 }}</td>
                                     <td class="text-center fs-7 fw-semibold">{{ item.quantity }}</td>

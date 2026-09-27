@@ -181,6 +181,8 @@
                         </div>
 
                         <div class="showcase-actions-group">
+                            <span class="showcase-sku">SKU: {{ product.sku|default:"54678886" }}</span>
+
                             <!-- Wishlist Action -->
                             <a href="{% url 'accounts:toggle_wishlist' product.id %}"
                                class="showcase-circle-action-btn wishlist-btn"

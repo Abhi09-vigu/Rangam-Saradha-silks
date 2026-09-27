@@ -71,6 +71,7 @@
                                     </a>
                                 </h5>
                                 <div class="d-flex flex-wrap gap-3 text-muted fs-7 mb-2">
+                                    <span>SKU: <strong class="text-dark">{{ booking.product.sku|default:"N/A" }}</strong></span>
                                     {% if booking.product.fabric %}
                                     <span>Fabric: <strong class="text-dark">{{ booking.product.fabric }}</strong></span>
                                     {% endif %}

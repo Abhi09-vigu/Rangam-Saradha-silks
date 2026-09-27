@@ -234,26 +234,23 @@ class SkuPriorityOrderingTestCase(TestCase):
         prices = [p.offer_price for p in products]
         self.assertEqual(prices, sorted(prices))
 
-    def test_sku_is_not_displayed_on_frontend_product_card_or_detail(self):
+    def test_sku_is_displayed_on_frontend_product_card_and_detail(self):
         """
-        Complete SKU number must not be displayed on customer frontend:
-        - Product cards do not render 'SKU: <sku>'
-        - Product detail page does not render 'SKU: <sku>'
+        SKU number is displayed on product cards and product detail page.
         """
         # Catalog page test
         response_catalog = self.client.get(reverse('shop:catalog'))
         self.assertEqual(response_catalog.status_code, 200)
         content_catalog = response_catalog.content.decode('utf-8')
-        # Ensure SKU label format "SKU: RSS-GB-006" is not present on product cards
-        self.assertNotIn("SKU: RSS-GB-006", content_catalog)
-        self.assertNotIn("SKU: KJM-SUB-027", content_catalog)
+        self.assertIn("SKU: RSS-GB-006", content_catalog)
+        self.assertIn("SKU: KJM-SUB-027", content_catalog)
 
         # Product detail page test
         response_detail = self.client.get(reverse('shop:product_detail', kwargs={'slug': self.p_rss_1.slug}))
         self.assertEqual(response_detail.status_code, 200)
         content_detail = response_detail.content.decode('utf-8')
-        self.assertNotIn("SKU: RSS-GB-006", content_detail)
-        self.assertNotIn('class="showcase-sku"', content_detail)
+        self.assertIn("SKU: RSS-GB-006", content_detail)
+        self.assertIn('class="showcase-sku"', content_detail)
 
     def test_database_sku_values_unmodified(self):
         """Original SKU values stored in the database remain intact."""

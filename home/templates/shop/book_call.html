@@ -48,7 +48,7 @@
                                     <span class="text-muted text-decoration-line-through fs-8">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
-                                {% if product.fabric %}<small class="text-muted fs-8">Fabric: {{ product.fabric }}</small>{% endif %}
+                                <small class="text-muted fs-8">SKU: {{ product.sku }}{% if product.fabric %} | Fabric: {{ product.fabric }}{% endif %}</small>
                             </div>
                         </div>
                     </div>
