@@ -55,18 +55,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. Lightbox Fullscreen Modal
     // ------------------------------------------------------------------------
     const expandBtn = document.getElementById('showcaseExpandBtn');
+    const imageShield = document.getElementById('showcaseImageShield');
     const lightboxModal = document.getElementById('showcaseLightboxModal');
     const lightboxClose = document.getElementById('showcaseLightboxClose');
 
-    if (expandBtn && lightboxModal) {
-        expandBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (mainImg && lightboxImg) {
-                lightboxImg.src = mainImg.src;
-            }
+    const openLightbox = function (e) {
+        if (e) e.preventDefault();
+        if (mainImg && lightboxImg) {
+            lightboxImg.src = mainImg.src;
+        }
+        if (lightboxModal) {
             lightboxModal.classList.add('show');
             document.body.style.overflow = 'hidden';
-        });
+        }
+    };
+
+    if (expandBtn) {
+        expandBtn.addEventListener('click', openLightbox);
+    }
+    if (imageShield) {
+        imageShield.addEventListener('click', openLightbox);
+    }
 
         const closeLightbox = function () {
             lightboxModal.classList.remove('show');

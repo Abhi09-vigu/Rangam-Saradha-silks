@@ -150,6 +150,66 @@ class CouponTargetingTestCase(TestCase):
         )
         self.assertFalse(coupon.is_valid(self.cart_total, cart=self.cart))
 
+    def test_start_time_today(self):
+        """Coupon starting later today is not yet active; coupon starting earlier today is active"""
+        now = timezone.localtime() if timezone.is_aware(timezone.now()) else datetime.datetime.now()
+        # Future time today
+        future_time = (now + timedelta(hours=2)).time()
+        coupon_future = Coupon.objects.create(
+            code='TODAYLATER',
+            discount_type='PERCENT',
+            discount_value=Decimal('10.00'),
+            apply_to='ALL',
+            start_date=now.date(),
+            start_time=future_time,
+            expiry_date=now.date() + timedelta(days=5),
+            is_active=True
+        )
+        self.assertFalse(coupon_future.is_valid(self.cart_total, cart=self.cart))
+
+        # Past time today
+        past_time = (now - timedelta(hours=2)).time()
+        coupon_past = Coupon.objects.create(
+            code='TODAYEARLIER',
+            discount_type='PERCENT',
+            discount_value=Decimal('10.00'),
+            apply_to='ALL',
+            start_date=now.date(),
+            start_time=past_time,
+            expiry_date=now.date() + timedelta(days=5),
+            is_active=True
+        )
+        self.assertTrue(coupon_past.is_valid(self.cart_total, cart=self.cart))
+
+    def test_expiry_time_today(self):
+        """Coupon expiring earlier today is expired; coupon expiring later today is active"""
+        now = timezone.localtime() if timezone.is_aware(timezone.now()) else datetime.datetime.now()
+        past_time = (now - timedelta(hours=2)).time()
+        coupon_expired = Coupon.objects.create(
+            code='EXPIREDTODAY',
+            discount_type='PERCENT',
+            discount_value=Decimal('10.00'),
+            apply_to='ALL',
+            start_date=now.date() - timedelta(days=1),
+            expiry_date=now.date(),
+            expiry_time=past_time,
+            is_active=True
+        )
+        self.assertFalse(coupon_expired.is_valid(self.cart_total, cart=self.cart))
+
+        future_time = (now + timedelta(hours=2)).time()
+        coupon_active = Coupon.objects.create(
+            code='ACTIVETODAY',
+            discount_type='PERCENT',
+            discount_value=Decimal('10.00'),
+            apply_to='ALL',
+            start_date=now.date() - timedelta(days=1),
+            expiry_date=now.date(),
+            expiry_time=future_time,
+            is_active=True
+        )
+        self.assertTrue(coupon_active.is_valid(self.cart_total, cart=self.cart))
+
     def test_fixed_discount_capped_at_eligible_total(self):
         """Fixed discount cannot exceed eligible items total"""
         coupon = Coupon.objects.create(

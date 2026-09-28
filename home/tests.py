@@ -547,3 +547,55 @@ class PopupManagementTests(TestCase):
         self.assertEqual(resp_slot.status_code, 400)
         self.assertFalse(resp_slot.json()['success'])
 
+    def test_home_index_sku_priority(self):
+        """Verify that homepage products are ordered according to WebsiteSetting priority_sku_prefixes"""
+        setting = WebsiteSetting.objects.first()
+        if not setting:
+            setting = WebsiteSetting.objects.create(website_name="Rangam Saradha Silks")
+        setting.priority_sku_prefixes = "RSS-GB, KJM-SUB"
+        setting.save()
+
+        # Create products with different SKU prefixes
+        p_other = Product.objects.create(
+            name="Z-Other Saree",
+            slug="z-other-saree",
+            sku="GEN-001",
+            price=5000,
+            stock=10,
+            is_active=True,
+            is_featured=True,
+            is_new_arrival=True
+        )
+        p_kjm = Product.objects.create(
+            name="KJM Saree",
+            slug="kjm-saree",
+            sku="KJM-SUB-001",
+            price=8000,
+            stock=10,
+            is_active=True,
+            is_featured=True,
+            is_new_arrival=True
+        )
+        p_rss = Product.objects.create(
+            name="RSS GB Saree",
+            slug="rss-gb-saree",
+            sku="RSS-GB-001",
+            price=9000,
+            stock=10,
+            is_active=True,
+            is_featured=True,
+            is_new_arrival=True
+        )
+
+        resp = self.client.get(reverse('home:index'))
+        self.assertEqual(resp.status_code, 200)
+
+        featured = list(resp.context['featured_products'])
+        # Products matching RSS-GB must come before KJM-SUB, which must come before GEN
+        rss_idx = next(i for i, p in enumerate(featured) if p.sku.startswith('RSS-GB'))
+        kjm_idx = next(i for i, p in enumerate(featured) if p.sku.startswith('KJM-SUB'))
+        gen_idx = next(i for i, p in enumerate(featured) if p.sku.startswith('GEN'))
+
+        self.assertLess(rss_idx, kjm_idx)
+        self.assertLess(kjm_idx, gen_idx)
+

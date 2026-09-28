@@ -52,7 +52,7 @@
                         <td class="text-center py-3">
                             <div class="product-price-wrapper">
                                 <span class="price-current fw-bold text-primary">{{ site_settings.currency }}{{ product.offer_price|floatformat:2 }}</span>
-                                {% if product.discount_percentage > 0 %}
+                                {% if product.discount_percentage > 0 and product.price > product.offer_price %}
                                 <br><span class="price-original text-muted text-decoration-line-through fs-7">{{ site_settings.currency }}{{ product.price|floatformat:2 }}</span>
                                 <span class="badge bg-success-subtle text-success fs-8 ms-1">{{ product.discount_percentage }}% Off</span>
                                 {% endif %}

@@ -13,6 +13,7 @@ from rest_framework import status
 from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration
 from .serializers import ContactMessageSerializer
 from shop.models import Category, Product
+from shop.views import apply_sku_priority_and_sorting
 
 logger = logging.getLogger(__name__)
 
@@ -176,14 +177,23 @@ def index(request):
     categories = Category.objects.filter(is_active=True).order_by('display_order')[:16]
     budget_ranges = BudgetRange.objects.filter(is_active=True).order_by('display_order')
     
-    # Dynamic Homepage Product Sections (only in-stock products)
-    featured_products = Product.objects.filter(is_active=True, stock__gt=0, is_featured=True).prefetch_related('images', 'categories')[:8]
-    if featured_products.count() < 4:
-        featured_products = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')[:8]
-    trending_products = Product.objects.filter(is_active=True, stock__gt=0, is_trending=True).prefetch_related('images', 'categories')[:4]
-    new_arrivals = Product.objects.filter(is_active=True, stock__gt=0, is_new_arrival=True).prefetch_related('images', 'categories')[:12]
-    best_sellers = Product.objects.filter(is_active=True, stock__gt=0, is_best_seller=True).prefetch_related('images', 'categories')[:12]
-    today_deals = Product.objects.filter(is_active=True, stock__gt=0, is_today_deal=True).prefetch_related('images', 'categories')[:12]
+    # Dynamic Homepage Product Sections (only in-stock products with Priority SKU Prefixes applied)
+    featured_qs = Product.objects.filter(is_active=True, stock__gt=0, is_featured=True).prefetch_related('images', 'categories')
+    if featured_qs.count() < 4:
+        featured_qs = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
+    featured_products = apply_sku_priority_and_sorting(featured_qs, site_settings=setting)[:8]
+
+    trending_qs = Product.objects.filter(is_active=True, stock__gt=0, is_trending=True).prefetch_related('images', 'categories')
+    trending_products = apply_sku_priority_and_sorting(trending_qs, site_settings=setting)[:4]
+
+    new_arrivals_qs = Product.objects.filter(is_active=True, stock__gt=0, is_new_arrival=True).prefetch_related('images', 'categories')
+    new_arrivals = apply_sku_priority_and_sorting(new_arrivals_qs, site_settings=setting)[:12]
+
+    best_sellers_qs = Product.objects.filter(is_active=True, stock__gt=0, is_best_seller=True).prefetch_related('images', 'categories')
+    best_sellers = apply_sku_priority_and_sorting(best_sellers_qs, site_settings=setting)[:12]
+
+    today_deals_qs = Product.objects.filter(is_active=True, stock__gt=0, is_today_deal=True).prefetch_related('images', 'categories')
+    today_deals = apply_sku_priority_and_sorting(today_deals_qs, site_settings=setting)[:12]
     
     # Why Choose Us, Fabric Curations
     why_choose_us = WhyChooseUs.objects.filter(is_active=True).order_by('display_order')

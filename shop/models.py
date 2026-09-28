@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 import datetime
+from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
@@ -259,7 +260,9 @@ class Coupon(models.Model):
     usage_limit = models.IntegerField(default=100)
     used_count = models.IntegerField(default=0)
     start_date = models.DateField(default=datetime.date.today, null=True, blank=True, help_text="Start date from which this coupon becomes valid")
-    expiry_date = models.DateField()
+    start_time = models.TimeField(null=True, blank=True, help_text="Start time (optional, defaults to 00:00)")
+    expiry_date = models.DateField(help_text="Expiry date on which this coupon expires")
+    expiry_time = models.TimeField(null=True, blank=True, help_text="Expiry time (optional, defaults to 23:59:59)")
     is_active = models.BooleanField(default=True)
 
     # Targeting
@@ -306,15 +309,27 @@ class Coupon(models.Model):
         return items
 
     def is_valid(self, cart_total, cart=None):
-        today = datetime.date.today()
-        start = self.start_date.date() if isinstance(self.start_date, datetime.datetime) else self.start_date
-        expiry = self.expiry_date.date() if isinstance(self.expiry_date, datetime.datetime) else self.expiry_date
+        now = timezone.localtime() if timezone.is_aware(timezone.now()) else datetime.datetime.now()
+        current_date = now.date()
+        current_time = now.time()
+
         if not self.is_active:
             return False
-        if start and start > today:
-            return False
-        if expiry and expiry < today:
-            return False
+
+        start = self.start_date.date() if isinstance(self.start_date, datetime.datetime) else self.start_date
+        expiry = self.expiry_date.date() if isinstance(self.expiry_date, datetime.datetime) else self.expiry_date
+
+        if start:
+            if start > current_date:
+                return False
+            elif start == current_date and self.start_time and current_time < self.start_time:
+                return False
+
+        if expiry:
+            if expiry < current_date:
+                return False
+            elif expiry == current_date and self.expiry_time and current_time > self.expiry_time:
+                return False
         if self.used_count >= self.usage_limit:
             return False
         if Decimal(str(cart_total or 0)) < Decimal(str(self.min_purchase or 0)):

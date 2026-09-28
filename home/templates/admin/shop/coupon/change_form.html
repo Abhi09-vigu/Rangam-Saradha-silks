@@ -139,7 +139,8 @@
     input.rss-input,
     input[type="text"].rss-input,
     input[type="number"].rss-input,
-    input[type="date"].rss-input {
+    input[type="date"].rss-input,
+    input[type="time"].rss-input {
         box-sizing: border-box !important;
         width: 100% !important;
         height: 44px !important;
@@ -156,7 +157,8 @@
         margin: 0 !important;
         transition: border-color 0.2s, box-shadow 0.2s;
     }
-    input[type="date"].rss-input {
+    input[type="date"].rss-input,
+    input[type="time"].rss-input {
         display: inline-flex !important;
         align-items: center !important;
         color-scheme: dark !important;
@@ -824,26 +826,48 @@
                         <div class="rss-help-text">Automatically updated</div>
                     </div>
 
-                    <!-- Start Date -->
-                    <div class="rss-form-group">
-                        <label class="rss-form-label" for="id_start_date">
-                            Start date:
-                        </label>
-                        <div class="rss-input-wrapper">
-                            <input type="date" name="start_date" id="id_start_date" class="rss-input" value="{{ form.start_date.value|date:'Y-m-d'|default:form.start_date.value|default:'' }}">
+                    <!-- Start Date & Time -->
+                    <div class="rss-two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div class="rss-form-group mb-0">
+                            <label class="rss-form-label" for="id_start_date">
+                                Start date:
+                            </label>
+                            <div class="rss-input-wrapper">
+                                <input type="date" name="start_date" id="id_start_date" class="rss-input" value="{{ form.start_date.value|date:'Y-m-d'|default:form.start_date.value|default:'' }}">
+                            </div>
+                            <div class="rss-help-text">Valid from date</div>
                         </div>
-                        <div class="rss-help-text">Date from which this coupon becomes valid</div>
+                        <div class="rss-form-group mb-0">
+                            <label class="rss-form-label" for="id_start_time">
+                                Start time:
+                            </label>
+                            <div class="rss-input-wrapper">
+                                <input type="time" name="start_time" id="id_start_time" class="rss-input" value="{{ form.start_time.value|time:'H:i'|default:form.start_time.value|default:'' }}">
+                            </div>
+                            <div class="rss-help-text">Optional (e.g. 10:00 AM)</div>
+                        </div>
                     </div>
 
-                    <!-- Expiry Date -->
-                    <div class="rss-form-group">
-                        <label class="rss-form-label" for="id_expiry_date">
-                            Expiry date:<span class="required">*</span>
-                        </label>
-                        <div class="rss-input-wrapper">
-                            <input type="date" name="expiry_date" id="id_expiry_date" class="rss-input" value="{{ form.expiry_date.value|date:'Y-m-d'|default:form.expiry_date.value|default:'' }}" required>
+                    <!-- Expiry Date & Time -->
+                    <div class="rss-two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div class="rss-form-group mb-0">
+                            <label class="rss-form-label" for="id_expiry_date">
+                                Expiry date:<span class="required">*</span>
+                            </label>
+                            <div class="rss-input-wrapper">
+                                <input type="date" name="expiry_date" id="id_expiry_date" class="rss-input" value="{{ form.expiry_date.value|date:'Y-m-d'|default:form.expiry_date.value|default:'' }}" required>
+                            </div>
+                            <div class="rss-help-text">Valid until date</div>
                         </div>
-                        <div class="rss-help-text">Date on which this coupon expires</div>
+                        <div class="rss-form-group mb-0">
+                            <label class="rss-form-label" for="id_expiry_time">
+                                Expiry time:
+                            </label>
+                            <div class="rss-input-wrapper">
+                                <input type="time" name="expiry_time" id="id_expiry_time" class="rss-input" value="{{ form.expiry_time.value|time:'H:i'|default:form.expiry_time.value|default:'' }}">
+                            </div>
+                            <div class="rss-help-text">Optional (e.g. 11:59 PM)</div>
+                        </div>
                     </div>
 
                     <!-- Is Active -->

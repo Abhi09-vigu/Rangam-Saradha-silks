@@ -133,12 +133,12 @@
                                      tabindex="0"
                                      role="button"
                                      aria-label="View saree angle {{ forloop.counter }}">
-                                    <img src="{{ img.image.url }}" alt="{{ product.name }} view {{ forloop.counter }} - Rangam Saradha Silks">
+                                     <img src="{{ img.image.url }}" alt="{{ product.name }} view {{ forloop.counter }} - Rangam Saradha Silks" draggable="false" oncontextmenu="return false;">
                                 </div>
                                 {% endfor %}
                             {% else %}
                                 <div class="showcase-thumb-item active" data-full-img="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000">
-                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=400" alt="{{ product.name }}">
+                                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=400" alt="{{ product.name }}" draggable="false" oncontextmenu="return false;">
                                 </div>
                             {% endif %}
                         </div>
@@ -154,10 +154,13 @@
                     <!-- Main Showcase Image Card -->
                     <div class="showcase-main-wrapper" id="showcaseMainImgWrapper">
                         {% if product.images.first %}
-                        <img id="showcaseMainImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img">
+                        <img id="showcaseMainImg" src="{{ product.images.first.image.url }}" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img" draggable="false" oncontextmenu="return false;">
                         {% else %}
-                        <img id="showcaseMainImg" src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img">
+                        <img id="showcaseMainImg" src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000" alt="{{ product.name }} - Rangam Saradha Silks" class="showcase-main-img" draggable="false" oncontextmenu="return false;">
                         {% endif %}
+
+                        <!-- Protective transparent shield over image to prevent right-click and save -->
+                        <div class="showcase-image-shield" id="showcaseImageShield" aria-hidden="true" title="Click to view full screen"></div>
 
                         <!-- Expand / Fullscreen Lightbox Button -->
                         <button type="button" class="showcase-expand-btn" id="showcaseExpandBtn" aria-label="Open full screen preview" title="Full screen view">
@@ -266,12 +269,9 @@
                     <div class="showcase-price-box">
                         <div class="showcase-price-row">
                             <span class="showcase-price-current">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:0|intcomma }}</span>
-                            {% if product.discount_percentage > 0 %}
+                            {% if product.discount_percentage > 0 and product.price > product.offer_price %}
                             <span class="showcase-price-original">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:0|intcomma }}</span>
                             <span class="showcase-discount-pill">{{ product.discount_percentage }}% OFF</span>
-                            {% else %}
-                            <span class="showcase-price-original">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:0|intcomma }}</span>
-                            <span class="showcase-discount-pill">24% OFF</span>
                             {% endif %}
                         </div>
                     </div>
@@ -731,7 +731,7 @@
         <i class="bi bi-x-lg"></i>
     </button>
     <div class="showcase-lightbox-img-wrapper">
-        <img id="showcaseLightboxImg" src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000{% endif %}" alt="{{ product.name }} zoom view">
+        <img id="showcaseLightboxImg" src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000{% endif %}" alt="{{ product.name }} zoom view" draggable="false" oncontextmenu="return false;">
     </div>
 </div>
 {% endblock %}

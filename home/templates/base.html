@@ -98,6 +98,26 @@
             transform: translateY(-50%) scale(1.1);
         }
 
+        /* Anti-download protection for product images */
+        img,
+        .product-image,
+        .product-card img,
+        .showcase-main-img,
+        .showcase-thumb-item img,
+        #showcaseLightboxImg,
+        .rss-prod-img,
+        .rss-new-arrivals-img,
+        .rss-product-card-img,
+        .product-detail-img {
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            -khtml-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-user-drag: none !important;
+        }
+
         /* Top Floating Welcome / Message Popup (Auto-dismisses in 2s) */
         .top-popup-container {
             position: fixed;
@@ -736,8 +756,31 @@
                         }
                     });
                 }
-            });
         });
+
+        // Anti-download protection: prevent right-click context menu and drag on product images
+        document.addEventListener('contextmenu', function (e) {
+            if (e.target && (
+                e.target.tagName === 'IMG' ||
+                e.target.closest('.showcase-main-wrapper') ||
+                e.target.closest('.showcase-lightbox-modal') ||
+                e.target.closest('.showcase-thumbs-list') ||
+                e.target.closest('.product-card') ||
+                e.target.closest('.rss-prod-card') ||
+                e.target.closest('.rss-new-arrivals-card') ||
+                e.target.closest('.product-image-container-outer')
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        document.addEventListener('dragstart', function (e) {
+            if (e.target && e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
     </script>
 
     {% block extra_js %}{% endblock %}

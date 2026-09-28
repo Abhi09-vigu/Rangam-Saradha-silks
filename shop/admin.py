@@ -229,12 +229,14 @@ class CouponAdminForm(forms.ModelForm):
         model = Coupon
         fields = [
             'code', 'discount_type', 'discount_value', 'min_purchase', 'max_discount',
-            'usage_limit', 'used_count', 'start_date', 'expiry_date', 'is_active',
+            'usage_limit', 'used_count', 'start_date', 'start_time', 'expiry_date', 'expiry_time', 'is_active',
             'apply_to', 'categories', 'products'
         ]
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
             'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+            'expiry_time': forms.TimeInput(attrs={'type': 'time'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -243,6 +245,8 @@ class CouponAdminForm(forms.ModelForm):
         self.fields['products'].required = False
         self.fields['max_discount'].required = False
         self.fields['start_date'].required = False
+        self.fields['start_time'].required = False
+        self.fields['expiry_time'].required = False
         self.fields['used_count'].required = False
 
     def clean(self):
@@ -262,7 +266,7 @@ class CouponAdminForm(forms.ModelForm):
 class CouponAdmin(admin.ModelAdmin):
     form = CouponAdminForm
     change_form_template = 'admin/shop/coupon/change_form.html'
-    list_display = ['code', 'discount_type', 'discount_value', 'apply_to', 'min_purchase', 'usage_limit', 'used_count', 'start_date', 'expiry_date', 'is_active']
+    list_display = ['code', 'discount_type', 'discount_value', 'apply_to', 'min_purchase', 'usage_limit', 'used_count', 'start_date', 'start_time', 'expiry_date', 'expiry_time', 'is_active']
     list_filter = ['apply_to', 'discount_type', 'is_active']
     search_fields = ['code']
 

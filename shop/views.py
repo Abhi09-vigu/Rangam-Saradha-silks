@@ -553,13 +553,31 @@ def apply_coupon(request):
 
         try:
             coupon = Coupon.objects.get(code__iexact=code, is_active=True)
-            today = datetime.date.today()
-            if coupon.start_date and coupon.start_date > today:
-                err = f"Coupon '{code}' is not active yet (starts on {coupon.start_date.strftime('%d-%m-%Y')})."
+            now = timezone.localtime() if timezone.is_aware(timezone.now()) else datetime.datetime.now()
+            today = now.date()
+            current_time = now.time()
+
+            is_before_start = False
+            if coupon.start_date:
+                if coupon.start_date > today:
+                    is_before_start = True
+                elif coupon.start_date == today and coupon.start_time and current_time < coupon.start_time:
+                    is_before_start = True
+
+            is_expired = False
+            if coupon.expiry_date:
+                if coupon.expiry_date < today:
+                    is_expired = True
+                elif coupon.expiry_date == today and coupon.expiry_time and current_time > coupon.expiry_time:
+                    is_expired = True
+
+            if is_before_start:
+                time_str = f" at {coupon.start_time.strftime('%I:%M %p')}" if coupon.start_time else ""
+                err = f"Coupon '{code}' is not active yet (starts on {coupon.start_date.strftime('%d-%m-%Y')}{time_str})."
                 if is_ajax:
                     return JsonResponse({'success': False, 'error': err}, status=400)
                 messages.error(request, err)
-            elif coupon.expiry_date and coupon.expiry_date < today:
+            elif is_expired:
                 err = f"Coupon '{code}' has expired."
                 if is_ajax:
                     return JsonResponse({'success': False, 'error': err}, status=400)

@@ -156,6 +156,21 @@
     object-fit: cover;
     display: block;
     transition: opacity 0.25s ease, transform 0.4s ease;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-drag: none !important;
+}
+
+.showcase-image-shield {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: transparent;
+    cursor: zoom-in;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
 }
 
 .showcase-main-wrapper:hover .showcase-main-img {
@@ -966,6 +981,11 @@
     object-fit: contain;
     border-radius: 12px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-drag: none !important;
+    pointer-events: none !important;
 }
 
 /* --------------------------------------------------------------------------

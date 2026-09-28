@@ -44,7 +44,7 @@
                                 <h5 class="fw-bold text-dark fs-6 mb-1">{{ product.name }}</h5>
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="fw-bold text-primary fs-6">{{ site_settings.currency|default:"₹" }}{{ product.offer_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
+                                    {% if product.discount_percentage > 0 and product.price > product.offer_price %}
                                     <span class="text-muted text-decoration-line-through fs-8">{{ site_settings.currency|default:"₹" }}{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>

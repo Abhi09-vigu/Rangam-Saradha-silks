@@ -4,7 +4,7 @@
     <span class="product-badge badge-featured">Featured</span>
     {% elif badge_type == "new" or product.is_new_arrival %}
     <span class="product-badge badge-new">New</span>
-    {% elif product.discount_percentage > 0 %}
+    {% elif product.discount_percentage > 0 and product.price > product.offer_price %}
     <span class="product-badge bg-success text-white">{{ product.discount_percentage }}% Off</span>
     {% endif %}
 
@@ -65,7 +65,7 @@
         
         <div class="product-price-wrapper">
             <span class="price-current">{{ site_settings.currency }}{{ product.offer_price|floatformat:2 }}</span>
-            {% if product.discount_percentage > 0 %}
+            {% if product.discount_percentage > 0 and product.price > product.offer_price %}
             <span class="price-original text-muted">{{ site_settings.currency }}{{ product.price|floatformat:2 }}</span>
             {% endif %}
         </div>
