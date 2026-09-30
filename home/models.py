@@ -133,6 +133,46 @@ class WebsiteSetting(models.Model):
     category_button_text = models.CharField(max_length=50, default="View All Categories", help_text="Text for the Categories CTA button.")
     category_button_url = models.CharField(max_length=200, default="/shop/", help_text="URL / link for the Categories CTA button.")
 
+    # Dynamic Editorial Homepage Images & Content (Editable from Admin)
+    # 1. Section 3: Featured Collection Cards (3 Cards)
+    # Card 1
+    collection_card_1_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Card 1 Image", help_text="Upload custom image for Card 1. Defaults to curated static image if left blank.")
+    collection_card_1_tag = models.CharField(max_length=100, default="ROYAL HERITAGE", verbose_name="Card 1 Tag / Subtitle")
+    collection_card_1_title = models.CharField(max_length=150, default="Kanchipuram Silks", verbose_name="Card 1 Title / Name")
+    collection_card_1_desc = models.TextField(default="Woven with authentic gold zari and sacred temple architecture borders for grand celebrations.", verbose_name="Card 1 Description")
+    collection_card_1_button_text = models.CharField(max_length=50, default="Explore Collection", verbose_name="Card 1 Button Text")
+    collection_card_1_button_url = models.CharField(max_length=255, default="/shop/category/kanchipuram-sarees/", verbose_name="Card 1 Button Link (URL)", help_text="Page URL or category link (e.g. /shop/category/kanchipuram-sarees/)")
+
+    # Card 2
+    collection_card_2_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Card 2 Image", help_text="Upload custom image for Card 2. Defaults to curated static image if left blank.")
+    collection_card_2_tag = models.CharField(max_length=100, default="MUGHAL SPLENDOR", verbose_name="Card 2 Tag / Subtitle")
+    collection_card_2_title = models.CharField(max_length=150, default="Banarasi Brocades", verbose_name="Card 2 Title / Name")
+    collection_card_2_desc = models.TextField(default="Intricate floral jaal, meenakari embellishments, and cascading silk pallus for regal occasions.", verbose_name="Card 2 Description")
+    collection_card_2_button_text = models.CharField(max_length=50, default="Explore Collection", verbose_name="Card 2 Button Text")
+    collection_card_2_button_url = models.CharField(max_length=255, default="/shop/category/banarasi-sarees/", verbose_name="Card 2 Button Link (URL)", help_text="Page URL or category link (e.g. /shop/category/banarasi-sarees/)")
+
+    # Card 3
+    collection_card_3_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Card 3 Image", help_text="Upload custom image for Card 3. Defaults to curated static image if left blank.")
+    collection_card_3_tag = models.CharField(max_length=100, default="MASTER WEAVES", verbose_name="Card 3 Tag / Subtitle")
+    collection_card_3_title = models.CharField(max_length=150, default="Bridal Masterpieces", verbose_name="Card 3 Title / Name")
+    collection_card_3_desc = models.TextField(default="Our hallmark bridal drapes infused with enduring warmth, double-warp silk, and artisanal soul.", verbose_name="Card 3 Description")
+    collection_card_3_button_text = models.CharField(max_length=50, default="Explore Collection", verbose_name="Card 3 Button Text")
+    collection_card_3_button_url = models.CharField(max_length=255, default="/shop/category/bridal-collection/", verbose_name="Card 3 Button Link (URL)", help_text="Page URL or category link (e.g. /shop/category/bridal-collection/)")
+
+    # 2. Section 5: The Bridal Repertory Spotlight
+    bridal_spotlight_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Bridal Repertory Spotlight Image", help_text="Upload custom image for 'The Bridal Repertory - A Symphony of Pure Silk & Golden Zari' section.")
+
+    # 3. Section 6: Ancient Weaving Art (Master Artisan)
+    artisan_weaving_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Ancient Weaving Art Artisan Image", help_text="Upload custom image for 'Ancient Weaving Art - Crafted by Hands That Breathe Tradition' section.")
+
+    # 4. Section 8: Latest Weaves & Editorial Inspiration (Mosaic Grid)
+    mosaic_hero_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Mosaic Large Focal Image (Heirloom Zari Artistry)", help_text="Upload custom image for the large left frame in 'Latest Weaves & Editorial Inspiration'.")
+    mosaic_festive_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Mosaic Top Right Image (Festive Drapery)", help_text="Upload custom image for the top right frame 'Festive Drapery Collections'.")
+    mosaic_handloom_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Mosaic Bottom Right Image (Dharmavaram Hallmarks)", help_text="Upload custom image for the bottom right frame 'Dharmavaram Hallmarks'.")
+
+    # 5. Section 9: Brand Story (Tradition Woven With Elegance)
+    brand_story_image = models.ImageField(upload_to='editorial/', blank=True, null=True, verbose_name="Brand Story Heritage Image", help_text="Upload custom image for the Brand Story ('Tradition Woven With Elegance / 40+ Years Legacy') section.")
+
     class Meta:
         verbose_name = "Website Setting"
         verbose_name_plural = "Website Settings"
@@ -277,7 +317,8 @@ class ContactInfo(models.Model):
 
 class HeroSlider(models.Model):
     image = models.ImageField(upload_to='slider/', help_text="Background image (used if no video is provided or as poster)")
-    mobile_image = models.ImageField(upload_to='slider_mobile/', blank=True, null=True, help_text="Optional mobile-optimized image")
+    tablet_image = models.ImageField(upload_to='slider_tablet/', blank=True, null=True, help_text="Optional tablet-optimized image (768px - 991px)")
+    mobile_image = models.ImageField(upload_to='slider_mobile/', blank=True, null=True, help_text="Optional mobile-optimized image (up to 767px)")
     video_file = models.FileField(upload_to='slider_videos/', blank=True, null=True, help_text="Optional background video file (.mp4, .webm)")
     video_url = models.URLField(blank=True, null=True, help_text="Optional background video URL (e.g. Cloudinary or direct MP4 link)")
     title = models.CharField(max_length=150, default="Woven by Hand.\nMade to Treasure.", help_text="Main heading (can use line breaks)")
@@ -324,7 +365,9 @@ class HeroSlider(models.Model):
 
 class OfferBanner(models.Model):
     title = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='offers/')
+    image = models.ImageField(upload_to='offers/', help_text="Desktop banner image (wide screens)")
+    tablet_image = models.ImageField(upload_to='offers/tablet/', blank=True, null=True, help_text="Optional tablet-optimized image (shown on iPads & tablet screens: 768px - 991px). If not uploaded, desktop image will be used.")
+    mobile_image = models.ImageField(upload_to='offers/mobile/', blank=True, null=True, help_text="Optional mobile-optimized image (shown on phones & mobile screens: up to 767px). If not uploaded, desktop image will be used.")
     link = models.CharField(max_length=255, default="/shop/")
     display_order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)

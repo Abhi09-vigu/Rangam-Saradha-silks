@@ -71,7 +71,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <!-- Custom Theme CSS -->
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=7.2">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=8.1">
+    <!-- Luxury Curtain Reveal Intro CSS -->
+    <link rel="stylesheet" href="{% static 'css/curtain-intro.css' %}?v=2.0">
+    <script>
+        try {
+            if (sessionStorage.getItem('rangamCurtainShown') === 'true' || 
+                (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+                document.documentElement.classList.add('curtain-already-seen');
+            }
+        } catch(e) {}
+    </script>
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -238,25 +248,44 @@
     {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if show_temp_popup %}temp-popup-active{% endif %}">
+<body class="{% if show_temp_popup %}temp-popup-active{% endif %} {% block body_class %}{% endblock %}">
+
+    <!-- Luxury Royal Curtain Reveal Intro Animation -->
+    {% include 'includes/curtain_intro.html' %}
 
     <!-- Header Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-premium sticky-top">
-        <div class="container">
-            <!-- Brand Logo -->
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'home:index' %}">
-                {% if site_settings.logo %}
-                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" style="max-height: 60px;">
-                {% else %}
-                <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" style="max-height: 60px;">
-                {% endif %}
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <nav class="navbar navbar-expand-lg navbar-premium">
+        <div class="container-fluid px-lg-5 px-3 position-relative">
+            <!-- Mobile Left: Hamburger Button (Opens Offcanvas Drawer) -->
+            <button class="mobile-drape-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavOffcanvas" aria-controls="mobileNavOffcanvas" aria-label="Open Navigation Menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
             </button>
-            
-            <div class="collapse navbar-collapse" id="navbarContent">
+
+            <!-- Brand Logo (Centered on mobile, left on desktop) -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home:index' %}">
+                {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" class="drape-brand-logo-img">
+                {% else %}
+                <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name }} - Pure Silk & Traditional Sarees" class="drape-brand-logo-img">
+                {% endif %}
+                <span class="drape-brand-text d-none d-lg-inline">RANGAM SARADHA</span>
+            </a>
+
+            <!-- Mobile Right: Search & Cart Icons (d-lg-none) -->
+            <div class="mobile-nav-icons d-flex align-items-center gap-3 d-lg-none">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#searchModal" class="mobile-nav-icon" aria-label="Search" title="Search">
+                    <i class="bi bi-search"></i>
+                </a>
+                <a href="{% url 'shop:cart_detail' %}" class="mobile-nav-icon position-relative" aria-label="Shopping Cart" title="Shopping Cart">
+                    <i class="bi bi-bag"></i>
+                    <span class="drape-bag-badge">{{ cart_count|default:0 }}</span>
+                </a>
+            </div>
+
+            <!-- Desktop Navigation Content (Hidden on mobile) -->
+            <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarContent">
                 {% if user.is_authenticated %}
                 <!-- Mobile User Profile Card -->
                 <div class="mobile-nav-profile-card d-lg-none">
@@ -276,16 +305,16 @@
                 </div>
                 {% endif %}
 
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 drape-nav-list">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home:index' %}">Home</a>
                     </li>
-                    
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="{% url 'shop:categories' %}" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Categories
                         </a>
-                        <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="categoriesDropdown">
+                        <ul class="dropdown-menu drape-dropdown-menu border-0 shadow-lg" aria-labelledby="categoriesDropdown">
                             <li><a class="dropdown-item fw-semibold" href="{% url 'shop:categories' %}">All Saree Categories</a></li>
                             <li><hr class="dropdown-divider"></li>
                             {% for cat in nav_categories %}
@@ -344,7 +373,7 @@
                 </div>
                 {% else %}
                 <div class="mobile-nav-guest-section d-lg-none mb-3">
-                    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 py-2.5 rounded-pill fw-semibold fs-7">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light w-100 py-2.5 rounded-pill fw-semibold fs-7">
                         <i class="bi bi-person me-2"></i> Sign In / Register
                     </a>
                 </div>
@@ -353,25 +382,31 @@
                 <!-- Search, User, Wishlist, Cart Icons -->
                 <div class="navbar-icons d-flex align-items-center">
                     <!-- Search Bar Toggle -->
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#searchModal" title="Search">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#searchModal" class="drape-nav-icon" title="Search">
                         <i class="bi bi-search"></i>
                     </a>
                     
+                    <span class="drape-nav-divider"></span>
+
                     <!-- Wishlist -->
-                    <a href="{% url 'accounts:wishlist' %}" title="Wishlist">
+                    <a href="{% url 'accounts:wishlist' %}" class="drape-nav-icon" title="Wishlist">
                         <i class="bi bi-heart"></i>
                     </a>
+
+                    <span class="drape-nav-divider"></span>
                     
                     <!-- Cart -->
-                    <a href="{% url 'shop:cart_detail' %}" class="position-relative" title="Shopping Cart">
+                    <a href="{% url 'shop:cart_detail' %}" class="drape-nav-icon position-relative" title="Shopping Cart">
                         <i class="bi bi-bag"></i>
-                        <span class="badge-count">{{ cart_count }}</span>
+                        <span class="drape-bag-badge">{{ cart_count|default:0 }}</span>
                     </a>
                     
+                    <span class="drape-nav-divider"></span>
+
                     <!-- Account Dropdown -->
                     {% if user.is_authenticated %}
                     <div class="dropdown user-profile-dropdown">
-                        <a class="dropdown-toggle no-arrow" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="userProfileDropdown" title="{{ user.get_full_name|default:user.username }}">
+                        <a class="dropdown-toggle no-arrow drape-nav-icon" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="userProfileDropdown" title="{{ user.get_full_name|default:user.username }}">
                             {% if user.get_avatar_url %}
                                 <img src="{{ user.get_avatar_url }}" alt="{{ user.username }}" class="user-nav-avatar">
                             {% else %}
@@ -435,7 +470,7 @@
                     </div>
 
                     {% else %}
-                    <a href="{% url 'accounts:login' %}" title="Login / Register" class="ms-3">
+                    <a href="{% url 'accounts:login' %}" title="Login / Register" class="drape-nav-icon">
                         <i class="bi bi-person"></i>
                     </a>
                     {% endif %}
@@ -443,6 +478,126 @@
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Offcanvas Slide-over Drawer Menu (Reference Matched UI) -->
+    <div class="offcanvas offcanvas-start mobile-drape-offcanvas d-lg-none" tabindex="-1" id="mobileNavOffcanvas" aria-labelledby="mobileNavOffcanvasLabel">
+        <div class="offcanvas-header mobile-drape-header">
+            <a class="mobile-drape-brand text-decoration-none" href="{% url 'home:index' %}" id="mobileNavOffcanvasLabel">
+                <span class="mobile-drape-brand-text">{{ site_settings.website_name|default:"RANGAM SARADHA"|upper }}</span>
+            </a>
+            <button type="button" class="mobile-drape-close" data-bs-dismiss="offcanvas" aria-label="Close menu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="offcanvas-body mobile-drape-body p-0 d-flex flex-column">
+            <div class="mobile-drape-menu flex-grow-1">
+                <!-- 1. Home -->
+                <a href="{% url 'home:index' %}" class="mobile-drape-item">
+                    <span>Home</span>
+                </a>
+
+                <!-- 2. Categories (Accordion with + sign) -->
+                <div class="mobile-drape-accordion-item">
+                    <button class="mobile-drape-accordion-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobileCategoriesSubmenu" aria-expanded="false" aria-controls="mobileCategoriesSubmenu">
+                        <span>Categories</span>
+                        <span class="mobile-drape-plus" aria-hidden="true">+</span>
+                    </button>
+                    <div class="collapse mobile-drape-submenu" id="mobileCategoriesSubmenu">
+                        <a href="{% url 'shop:categories' %}" class="mobile-drape-subitem fw-bold text-primary">All Saree Categories</a>
+                        {% for cat in nav_categories %}
+                        <a href="{% url 'shop:category_detail' category_slug=cat.slug %}" class="mobile-drape-subitem">{{ cat.name }}</a>
+                        {% empty %}
+                        <a href="{% url 'shop:categories' %}" class="mobile-drape-subitem">Browse Categories</a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 3. Shop All -->
+                <a href="{% url 'shop:catalog' %}" class="mobile-drape-item">
+                    <span>Shop All</span>
+                </a>
+
+                <!-- 4. About Us -->
+                <a href="{% url 'home:cms_page' slug='about-us' %}" class="mobile-drape-item">
+                    <span>About Us</span>
+                </a>
+
+                <!-- 5. Contact Us -->
+                <a href="{% url 'home:contact' %}" class="mobile-drape-item">
+                    <span>Contact Us</span>
+                </a>
+
+                <!-- 6. Wishlist -->
+                <a href="{% url 'accounts:wishlist' %}" class="mobile-drape-item">
+                    <span>Wishlist</span>
+                    <i class="bi bi-heart text-muted"></i>
+                </a>
+
+                <!-- 7. Login / Account Row with Person Outline Icon -->
+                {% if user.is_authenticated %}
+                <div class="mobile-drape-accordion-item">
+                    <button class="mobile-drape-accordion-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAccountSubmenu" aria-expanded="false" aria-controls="mobileAccountSubmenu">
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person fs-5"></i>
+                            <span>{{ user.get_full_name|default:user.username }}</span>
+                        </span>
+                        <span class="mobile-drape-plus" aria-hidden="true">+</span>
+                    </button>
+                    <div class="collapse mobile-drape-submenu" id="mobileAccountSubmenu">
+                        <a href="{% url 'accounts:profile' %}" class="mobile-drape-subitem">My Profile</a>
+                        <a href="{% url 'accounts:profile' %}#orders" class="mobile-drape-subitem">My Orders</a>
+                        <a href="{% url 'accounts:profile' %}#call-bookings" class="mobile-drape-subitem">Video Consultations</a>
+                        {% if user.is_staff %}
+                        <a href="/admin/" target="_blank" class="mobile-drape-subitem">Admin Panel</a>
+                        {% endif %}
+                        <a href="{% url 'accounts:logout' %}" class="mobile-drape-subitem text-danger">Sign Out</a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="mobile-drape-item mobile-drape-login">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person fs-5"></i>
+                        <span>Log in</span>
+                    </span>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Drawer Bottom: Social Media Icon Row -->
+            {% if contact_info %}
+            <div class="mobile-drape-footer">
+                <div class="mobile-drape-socials">
+                    {% if contact_info.twitter_url %}
+                    <a href="{{ contact_info.twitter_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-icon social-x" aria-label="X (Twitter)">
+                        <i class="bi bi-twitter-x"></i>
+                    </a>
+                    {% endif %}
+                    {% if contact_info.facebook_url %}
+                    <a href="{{ contact_info.facebook_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-icon social-fb" aria-label="Facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    {% endif %}
+                    {% if contact_info.pinterest_url %}
+                    <a href="{{ contact_info.pinterest_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-icon social-pinterest" aria-label="Pinterest">
+                        <i class="bi bi-pinterest"></i>
+                    </a>
+                    {% endif %}
+                    {% if contact_info.instagram_url %}
+                    <a href="{{ contact_info.instagram_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-icon social-insta" aria-label="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    {% endif %}
+                    {% if contact_info.youtube_url %}
+                    <a href="{{ contact_info.youtube_url }}" target="_blank" rel="noopener noreferrer" class="mobile-social-icon social-yt" aria-label="YouTube">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
     <!-- Floating Top Notification Popup (Auto-dismisses in 2s) -->
     {% if messages %}
@@ -574,9 +729,8 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Floating Customer Support & Book Video Call Widget (Visible only after user login) -->
-    {% if user.is_authenticated %}
-    <div class="floating-contact-widget">
+    <!-- Floating Customer Support & Book Video Call Widget (Permanently floating on all pages for all users) -->
+    <div class="floating-contact-widget" id="floatingContactWidget">
         <!-- Circular Customer Care / WhatsApp Button (Top) -->
         <a href="{% if contact_info.whatsapp_url %}{{ contact_info.whatsapp_url }}{% else %}{% url 'home:contact' %}{% endif %}" class="floating-support-btn" target="_blank" rel="noopener noreferrer" title="Chat with us on WhatsApp" style="max-width: 54px; max-height: 54px;">
             <img src="{% static 'images/support_icon.png' %}" alt="WhatsApp Customer Support - Rangam Saradha Silks" class="floating-support-img" style="max-width: 100%; max-height: 100%; object-fit: contain;">
@@ -594,7 +748,6 @@
 
     <!-- Floating Book Video Call Modal -->
     {% include 'includes/book_call_modal.html' %}
-    {% endif %}
 
     <!-- Premium Toast Container -->
     <div class="premium-toast-container position-fixed bottom-0 end-0 p-4" style="z-index: 1090;"></div>
@@ -755,8 +908,31 @@
                             }
                         }
                     });
-                }
         });
+
+        // Auto-close mobile offcanvas when a menu item link is clicked
+        const mobileDrawerEl = document.getElementById('mobileNavOffcanvas');
+        const floatingWidgetEl = document.getElementById('floatingContactWidget');
+        if (mobileDrawerEl) {
+            mobileDrawerEl.querySelectorAll('a.mobile-drape-item, a.mobile-drape-subitem').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileDrawerEl);
+                    if (bsOffcanvas) {
+                        bsOffcanvas.hide();
+                    }
+                });
+            });
+
+            // Toggle drawer-open state so floating widget does not overlap
+            mobileDrawerEl.addEventListener('show.bs.offcanvas', function() {
+                document.body.classList.add('drawer-open');
+                if (floatingWidgetEl) floatingWidgetEl.style.setProperty('display', 'none', 'important');
+            });
+            mobileDrawerEl.addEventListener('hidden.bs.offcanvas', function() {
+                document.body.classList.remove('drawer-open');
+                if (floatingWidgetEl) floatingWidgetEl.style.removeProperty('display');
+            });
+        }
 
         // Anti-download protection: prevent right-click context menu and drag on product images
         document.addEventListener('contextmenu', function (e) {

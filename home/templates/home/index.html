@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
 {% load static humanize %}
 
-{% block meta_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
-{% block title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
-{% block meta_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
-{% block meta_keywords %}Rangam Saradha Silks, Rangam Saradha Silk Sarees, silk sarees, traditional sarees, sarees{% endblock %}
+{% block meta_title %}Rangam Saradha Silks | Pure Silk Sarees, Kanchipuram & Bridal Collections{% endblock %}
+{% block title %}Rangam Saradha Silks | Pure Silk Sarees, Kanchipuram & Bridal Collections{% endblock %}
+{% block meta_description %}Rangam Saradha Silks offers handcrafted pure silk sarees, royal Kanchipurams, opulent Banarasis, and traditional bridal collections woven with pure gold zari.{% endblock %}
+{% block meta_keywords %}Rangam Saradha Silks, silk sarees, pure silk sarees, kanchipuram sarees, banarasi sarees, bridal sarees, dharmavaram handlooms{% endblock %}
 {% block robots %}index, follow{% endblock %}
 {% block author %}Rangam Saradha Silks{% endblock %}
 {% block canonical %}https://rangamsaradhasilks.com/{% endblock %}
 {% block og_url %}https://rangamsaradhasilks.com/{% endblock %}
-{% block og_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
-{% block og_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
-{% block twitter_title %}Rangam Saradha Silks | Silk Sarees & Traditional Sarees{% endblock %}
-{% block twitter_description %}Rangam Saradha Silks offers premium silk sarees, traditional sarees and elegant saree collections. Explore our latest collections online.{% endblock %}
+{% block og_title %}Rangam Saradha Silks | Pure Silk Sarees & Traditional Collections{% endblock %}
+{% block og_description %}Rangam Saradha Silks offers handcrafted pure silk sarees, royal Kanchipurams, opulent Banarasis, and traditional bridal collections.{% endblock %}
+
+{% block body_class %}home-editorial-page{% endblock %}
 
 {% block extra_head %}
+<!-- Structured Data (JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -31,1338 +32,964 @@
   }
 }
 </script>
+{% endblock %}
 
+{% block extra_css %}
+<!-- Luxury Editorial Homepage Stylesheet -->
+<link rel="stylesheet" href="{% static 'css/homepage-editorial.css' %}?v=2.5">
 {% endblock %}
 
 {% block content %}
-<h1 class="visually-hidden">Rangam Saradha Silks</h1>
+<main class="home-editorial-main">
+    <h1 class="visually-hidden">Rangam Saradha Silks - Handcrafted Pure Silk & Traditional Sarees</h1>
 
-{% if show_hero_slider and sliders %}
-<!-- Dynamic Luxury Hero Section (Hero Slider Active) -->
-<section class="rss-hero-section" id="hero">
-    <div id="rssHeroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
-        <div class="carousel-inner">
-            {% for slide in sliders %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="rss-hero-stage">
-                    {% if slide.has_video %}
-                    <video class="rss-hero-bg-media" autoplay muted loop playsinline {% if slide.image %}poster="{{ slide.image.url }}"{% endif %}>
-                        <source src="{{ slide.get_video_src }}" type="video/mp4">
-                        {% if slide.image %}<img src="{{ slide.image.url }}" alt="{{ slide.title|striptags }}">{% endif %}
-                    </video>
-                    {% elif slide.image %}
-                    <img src="{{ slide.image.url }}" alt="Rangam Saradha Silks - {{ slide.title|striptags }}"
-                        class="rss-hero-bg-media" fetchpriority="high">
-                    {% else %}
-                    <img src="{% static 'images/hero-handloom.jpg' %}" alt="Rangam Saradha Silks Heritage Handloom"
-                        class="rss-hero-bg-media" fetchpriority="high">
-                    {% endif %}
-
-                    <!-- Luxury Dark Vignette Overlay -->
-                    <div class="rss-hero-gradient-overlay"></div>
-
-                    <!-- Hero Content Layer -->
-                    <div class="rss-hero-content-layer">
-                        <div class="container-fluid px-lg-5 px-md-4 px-3">
-                            <div class="rss-hero-content-box">
-                                {% if slide.subtitle %}
-                                <div class="rss-hero-eyebrow-row">
-                                    <span>{{ slide.subtitle }}</span>
-                                    <span class="eyebrow-motif">❦</span>
-                                    <span class="eyebrow-line"></span>
-                                </div>
+    <!-- =====================================================================
+         1. HERO SECTION (Drape Divaa Editorial Style)
+         ===================================================================== -->
+    <section class="drape-hero-section" id="hero">
+        <div id="drapeHeroCarousel" class="carousel slide carousel-fade drape-hero-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="false">
+            <div class="carousel-inner">
+                {% if show_hero_slider and sliders %}
+                    {% for slide in sliders %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <a href="{{ slide.button_url|default:'/shop/' }}" class="drape-hero-slide drape-hero-slide-link d-block w-100 h-100" aria-label="{{ slide.title|default:'Shop Sarees'|striptags }}">
+                            <!-- Hero Media Layer (Image from Admin Panel or Video) -->
+                            <div class="drape-hero-media-wrap">
+                                {% if slide.has_video %}
+                                <video class="drape-hero-bg-media" autoplay muted loop playsinline {% if slide.image %}poster="{{ slide.image.url }}"{% endif %}>
+                                    <source src="{{ slide.get_video_src }}" type="video/mp4">
+                                    {% if slide.image %}<img src="{{ slide.image.url }}" alt="{{ slide.title|striptags }}">{% endif %}
+                                </video>
+                                {% elif slide.image %}
+                                <picture>
+                                    {% if slide.mobile_image %}
+                                    <source media="(max-width: 767.98px)" srcset="{{ slide.mobile_image.url }}">
+                                    {% endif %}
+                                    {% if slide.tablet_image %}
+                                    <source media="(max-width: 991.98px)" srcset="{{ slide.tablet_image.url }}">
+                                    {% endif %}
+                                    <img src="{{ slide.image.url }}" alt="Rangam Saradha Silks - {{ slide.title|striptags }}" class="drape-hero-bg-media" fetchpriority="high">
+                                </picture>
+                                {% else %}
+                                <img src="{% static 'images/hero-handloom.jpg' %}" alt="Rangam Saradha Silks Heritage Handloom" class="drape-hero-bg-media" fetchpriority="high">
                                 {% endif %}
-
-                                {% if slide.title %}
-                                <h2 class="rss-hero-title">{{ slide.title|linebreaksbr }}</h2>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% elif show_offer_banner and banners %}
+                    {% for banner in banners %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <a href="{{ banner.link|default:'/shop/' }}" class="drape-hero-slide drape-hero-slide-link d-block w-100 h-100" aria-label="{{ banner.title|default:'Shop Sarees'|striptags }}">
+                            <!-- Hero Media Layer (Image from Admin Panel) -->
+                            <div class="drape-hero-media-wrap">
+                                {% if banner.mobile_image or banner.tablet_image %}
+                                <picture class="w-100 h-100 d-block">
+                                    {% if banner.mobile_image %}
+                                    <source media="(max-width: 767.98px)" srcset="{{ banner.mobile_image.url }}">
+                                    {% endif %}
+                                    {% if banner.tablet_image %}
+                                    <source media="(max-width: 991.98px)" srcset="{{ banner.tablet_image.url }}">
+                                    {% endif %}
+                                    <img src="{{ banner.image.url }}" alt="Rangam Saradha Silks - {{ banner.title|striptags }}" class="drape-hero-bg-media" fetchpriority="high">
+                                </picture>
+                                {% else %}
+                                <img src="{{ banner.image.url }}" alt="Rangam Saradha Silks - {{ banner.title|striptags }}" class="drape-hero-bg-media" fetchpriority="high">
                                 {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Editorial Fallback Slide -->
+                    <div class="carousel-item active">
+                        <a href="{% url 'shop:catalog' %}" class="drape-hero-slide drape-hero-slide-link d-block w-100 h-100" aria-label="Shop Silk Sarees">
+                            <div class="drape-hero-media-wrap">
+                                <img src="{% static 'images/hero-handloom.jpg' %}" alt="Rangam Saradha Silks Heritage Handloom" class="drape-hero-bg-media" fetchpriority="high">
+                            </div>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
 
-                                {% if slide.description %}
-                                <p class="rss-hero-description">{{ slide.description }}</p>
+            <!-- Clean Carousel Indicators (Dots / Lines) -->
+            {% if sliders and sliders|length > 1 %}
+            <div class="carousel-indicators drape-carousel-indicators">
+                {% for s in sliders %}
+                <button type="button" data-bs-target="#drapeHeroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% else %}false{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+            {% elif banners and banners|length > 1 %}
+            <div class="carousel-indicators drape-carousel-indicators">
+                {% for b in banners %}
+                <button type="button" data-bs-target="#drapeHeroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% else %}false{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <!-- =====================================================================
+         2. TRUST & HERITAGE PILLARS STRIP
+         ===================================================================== -->
+    <section class="editorial-trust-strip">
+        <div class="container">
+            <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-4">
+                <div class="col">
+                    <div class="trust-pillar-card editorial-reveal stagger-1">
+                        <div class="trust-pillar-icon-box">
+                            <i class="bi bi-patch-check"></i>
+                        </div>
+                        <div>
+                            <div class="trust-pillar-title">Silk Mark Certified</div>
+                            <div class="trust-pillar-sub">100% Handcrafted Pure Mulberry Silk</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="trust-pillar-card editorial-reveal stagger-2">
+                        <div class="trust-pillar-icon-box">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <div>
+                            <div class="trust-pillar-title">Genuine Gold Zari</div>
+                            <div class="trust-pillar-sub">Heirloom Quality Intricate Borders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="trust-pillar-card editorial-reveal stagger-3">
+                        <div class="trust-pillar-icon-box">
+                            <i class="bi bi-camera-video"></i>
+                        </div>
+                        <div>
+                            <div class="trust-pillar-title">Live Video Consultation</div>
+                            <div class="trust-pillar-sub">View Drape & Zari in Real-Time</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="trust-pillar-card editorial-reveal stagger-4">
+                        <div class="trust-pillar-icon-box">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div>
+                            <div class="trust-pillar-title">Worldwide Insured Shipping</div>
+                            <div class="trust-pillar-sub">Safe & Prompt Doorstep Delivery</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         3. FEATURED COLLECTIONS (Large Visual Cards with Sequential Reveal)
+         ===================================================================== -->
+    <section class="editorial-collections-section" id="featured-collections">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>CURATED ANTHOLOGY</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title">Featured Saree Collections</h2>
+                <p class="editorial-subtitle">Each masterpiece embodies centuries of handloom virtuosity, woven to celebrate the timeless grace of Indian womanhood.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+
+            <!-- Large Visual Cards (3 Columns) with Staggered Entrance -->
+            <div class="row g-4 row-cols-1 row-cols-md-3">
+                <!-- Card 1: Left Card -->
+                <div class="col">
+                    <a href="{{ site_settings.collection_card_1_button_url|default:'/shop/category/kanchipuram-sarees/' }}" class="collection-card-editorial editorial-reveal stagger-1">
+                        <div class="collection-card-img-wrap">
+                            <img src="{% if site_settings.collection_card_1_image %}{{ site_settings.collection_card_1_image.url }}{% else %}{% static 'images/categories/kanchipuram.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_1_title|default:'Royal Kanchipuram Silk Sarees' }}" class="collection-card-img" loading="lazy">
+                        </div>
+                        <div class="collection-card-overlay"></div>
+                        <div class="collection-card-content">
+                            <span class="collection-badge-tag">{{ site_settings.collection_card_1_tag|default:'ROYAL HERITAGE' }}</span>
+                            <h3 class="collection-card-title">{{ site_settings.collection_card_1_title|default:'Kanchipuram Silks' }}</h3>
+                            <p class="collection-card-desc">{{ site_settings.collection_card_1_desc|default:'Woven with authentic gold zari and sacred temple architecture borders for grand celebrations.' }}</p>
+                            <span class="collection-explore-btn">
+                                <span>{{ site_settings.collection_card_1_button_text|default:'Explore Collection' }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Card 2: Center Card -->
+                <div class="col">
+                    <a href="{{ site_settings.collection_card_2_button_url|default:'/shop/category/banarasi-sarees/' }}" class="collection-card-editorial editorial-reveal stagger-2">
+                        <div class="collection-card-img-wrap">
+                            <img src="{% if site_settings.collection_card_2_image %}{{ site_settings.collection_card_2_image.url }}{% else %}{% static 'images/categories/banarasi.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_2_title|default:'Opulent Banarasi Silk Sarees' }}" class="collection-card-img" loading="lazy">
+                        </div>
+                        <div class="collection-card-overlay"></div>
+                        <div class="collection-card-content">
+                            <span class="collection-badge-tag">{{ site_settings.collection_card_2_tag|default:'MUGHAL SPLENDOR' }}</span>
+                            <h3 class="collection-card-title">{{ site_settings.collection_card_2_title|default:'Banarasi Brocades' }}</h3>
+                            <p class="collection-card-desc">{{ site_settings.collection_card_2_desc|default:'Intricate floral jaal, meenakari embellishments, and cascading silk pallus for regal occasions.' }}</p>
+                            <span class="collection-explore-btn">
+                                <span>{{ site_settings.collection_card_2_button_text|default:'Explore Collection' }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Card 3: Right Card -->
+                <div class="col">
+                    <a href="{{ site_settings.collection_card_3_button_url|default:'/shop/category/bridal-collection/' }}" class="collection-card-editorial editorial-reveal stagger-3">
+                        <div class="collection-card-img-wrap">
+                            <img src="{% if site_settings.collection_card_3_image %}{{ site_settings.collection_card_3_image.url }}{% else %}{% static 'images/bridal-banner-luxury.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_3_title|default:'Bridal Masterpieces' }}" class="collection-card-img" loading="lazy">
+                        </div>
+                        <div class="collection-card-overlay"></div>
+                        <div class="collection-card-content">
+                            <span class="collection-badge-tag">{{ site_settings.collection_card_3_tag|default:'MASTER WEAVES' }}</span>
+                            <h3 class="collection-card-title">{{ site_settings.collection_card_3_title|default:'Bridal Masterpieces' }}</h3>
+                            <p class="collection-card-desc">{{ site_settings.collection_card_3_desc|default:'Our hallmark bridal drapes infused with enduring warmth, double-warp silk, and artisanal soul.' }}</p>
+                            <span class="collection-explore-btn">
+                                <span>{{ site_settings.collection_card_3_button_text|default:'Explore Collection' }}</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         4. HORIZONTAL COLLECTION GALLERY (Smooth Desktop + Touch Mobile)
+         ===================================================================== -->
+    {% if categories %}
+    <section class="editorial-category-section" id="categories">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>SHOP BY CATEGORY</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title">{{ site_settings.category_title|default:"Traditional Saree Collections" }}</h2>
+                <p class="editorial-subtitle">{{ site_settings.category_description|default:"Discover our curated repertoire of authentic weaves crafted for every milestone." }}</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-horizontal-wrap position-relative">
+            <!-- Navigation Chevrons -->
+            <button type="button" class="cat-slider-arrow cat-slider-prev d-none d-md-flex" id="catTrackPrev" aria-label="Previous categories">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <!-- Scrollable Track with Strict Overflow Containment -->
+            <div class="category-track" id="categoryTrack">
+                {% for cat in categories %}
+                <a href="{{ cat.get_absolute_url }}" class="category-editorial-item">
+                    <div class="category-circle-portrait">
+                        <div class="category-circle-inner">
+                            {% if cat.image %}
+                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-circle-img" loading="lazy" onerror="this.onerror=null; this.src='/static/images/categories/{{ cat.slug }}.jpg';">
+                            {% else %}
+                            <img src="{% static 'images/categories/silk.jpg' %}" alt="{{ cat.name }}" class="category-circle-img" loading="lazy">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="category-item-name">{{ cat.name }}</div>
+                    <div class="category-item-badge">Explore Weaves</div>
+                </a>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="cat-slider-arrow cat-slider-next d-none d-md-flex" id="catTrackNext" aria-label="Next categories">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'shop:categories' %}" class="editorial-link-btn">
+                <span>View All Categories</span>
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- =====================================================================
+         5. EDITORIAL SECTION A: LEFT IMAGE + RIGHT TEXT (Parallax & Clip Reveal)
+         ===================================================================== -->
+    <section class="editorial-story-section" id="editorial-bridal-spotlight">
+        <div class="container">
+            <div class="editorial-split-grid">
+                <!-- Left: Large Editorial Saree Image -->
+                <div class="editorial-frame-wrap has-gold-border">
+                    <img src="{% if site_settings.bridal_spotlight_image %}{{ site_settings.bridal_spotlight_image.url }}{% else %}{% static 'images/bridal-banner-luxury.jpg' %}{% endif %}" alt="Exquisite Bridal Silk Saree Drape" class="editorial-portrait-img editorial-parallax-target" data-parallax-speed="0.06" loading="lazy">
+                    <div class="editorial-floating-pill d-none d-sm-block">
+                        <div class="pill-quote">“A saree is not merely an attire; it is an heirloom woven with prayers and blessings.”</div>
+                        <div class="pill-author">— Rangam Saradha Silks</div>
+                    </div>
+                </div>
+
+                <!-- Right: Editorial Narrative -->
+                <div class="editorial-text-col editorial-reveal-right">
+                    <span class="editorial-tag-label">THE BRIDAL REPERTORY</span>
+                    <h2 class="editorial-narrative-title">A Symphony of Pure Silk &amp; Golden Zari</h2>
+                    <p class="editorial-lead-para">
+                        Every bridal saree in our sanctum requires over 180 hours of unwavering handloom precision. Woven with double-warp mulberry silk and genuine zari that passes gracefully from mother to daughter.
+                    </p>
+                    <p class="editorial-body-para">
+                        From the sacred temple town of Dharmavaram to the historic looms of Kanchipuram, our master weavers orchestrate intricate korvai interlocks, contrast pallus, and peacock motifs that embody sacred auspiciousness.
+                    </p>
+
+                    <div class="editorial-checkpoints">
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Pure Silk Mark Certified</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Tested Authentic Zari</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Running Matching Blouse</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Hand-Inspected Quality</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'shop:category_detail' category_slug='bridal-collection' %}" class="editorial-link-btn">
+                        <span>Discover Bridal Sarees</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         6. EDITORIAL SECTION B: RIGHT IMAGE + LEFT TEXT (Alternating Direction)
+         ===================================================================== -->
+    <section class="editorial-story-section alt-bg" id="editorial-craft-spotlight">
+        <div class="container">
+            <div class="editorial-split-grid">
+                <!-- Left: Narrative Text -->
+                <div class="editorial-text-col editorial-reveal-left order-2 order-lg-1">
+                    <span class="editorial-tag-label">ANCIENT WEAVING ART</span>
+                    <h2 class="editorial-narrative-title">Crafted by Hands That Breathe Tradition</h2>
+                    <p class="editorial-lead-para">
+                        In an era of mass-produced fast fashion, we cherish the meditative rhythm of pit looms and the patience of master artisans who infuse soul into every single thread.
+                    </p>
+                    <p class="editorial-body-para">
+                        Our generational weavers blend mathematical border alignments with age-old mythological narratives. When you drape a Rangam Saradha saree, you become the custodian of a living Indian handloom legacy.
+                    </p>
+
+                    <div class="editorial-checkpoints">
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Traditional Pit Looms</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Fair Weaver Partnerships</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Natural Dyes &amp; Luster</span>
+                        </div>
+                        <div class="checkpoint-item">
+                            <span class="checkpoint-icon"><i class="bi bi-check-lg"></i></span>
+                            <span class="checkpoint-text">Timeless Longevity</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'home:cms_page' slug='about-us' %}" class="editorial-link-btn">
+                        <span>Read Our Story</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Right: Artisan Handloom Visual -->
+                <div class="editorial-frame-wrap has-gold-border order-1 order-lg-2">
+                    <img src="{% if site_settings.artisan_weaving_image %}{{ site_settings.artisan_weaving_image.url }}{% else %}{% static 'images/about/weaver_handloom.jpg' %}{% endif %}" alt="Master Weaver Crafting Saree on Handloom" class="editorial-portrait-img editorial-parallax-target" data-parallax-speed="0.05" loading="lazy" onerror="this.onerror=null; this.src='/static/images/hero-handloom.jpg';">
+                    <div class="editorial-floating-pill d-none d-sm-block">
+                        <div class="pill-quote">“The loom does not merely weave threads; it weaves memories that endure for generations.”</div>
+                        <div class="pill-author">— Dharmavaram Master Weaver</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         7. NEW ARRIVALS / FEATURED PRODUCTS (Database Data + Multi-Image Hover)
+         ===================================================================== -->
+    {% if featured_products or new_arrivals %}
+    <section class="editorial-products-section" id="curated-sarees">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>EXCLUSIVE WEAVES</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title">Curated Silk Masterpieces</h2>
+                <p class="editorial-subtitle">Explore our latest handcrafted arrivals, available in exclusive limited loom editions.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+        </div>
+
+        {% with products_list=featured_products|default:new_arrivals %}
+        {% if products_list|length > 4 %}
+        <!-- More than 4 products: Horizontal Scroller -->
+        <div class="product-horizontal-wrap position-relative">
+            <!-- Navigation Chevrons -->
+            <button type="button" class="cat-slider-arrow cat-slider-prev d-none d-md-flex" id="productTrackPrev" aria-label="Previous products">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <!-- Scrollable Continuous Track -->
+            <div class="product-continuous-track" id="productContinuousTrack">
+                {% for product in products_list %}
+                <div class="product-card-editorial product-continuous-item">
+                    <!-- Product Media Container with Multi-Image Hover -->
+                    <div class="product-card-media-box">
+                        <a href="{{ product.get_absolute_url }}" class="d-block w-100 h-100 position-relative">
+                            {% with product.images.all as images %}
+                                {% if images|length > 0 %}
+                                    <img src="{{ images.0.image.url }}" alt="{{ product.name }}" class="prod-img-primary" loading="eager" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                    {% if images|length > 1 %}
+                                    <img src="{{ images.1.image.url }}" alt="{{ product.name }} detail" class="prod-img-secondary" loading="lazy" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{% static 'images/catalog-hero-saree.png' %}" alt="{{ product.name }}" class="prod-img-primary" loading="lazy">
                                 {% endif %}
+                            {% endwith %}
+                        </a>
 
-                                <!-- Buttons Row -->
-                                <div class="rss-hero-btn-row">
-                                    {% if slide.button_text %}
-                                    <a href="{{ slide.button_url|default:'/shop/' }}" class="rss-hero-primary-btn"
-                                        id="heroPrimaryBtn-{{ forloop.counter }}">
-                                        <span>{{ slide.button_text }}</span>
-                                        <i class="bi bi-arrow-right"></i>
-                                    </a>
-                                    {% endif %}
+                        <!-- Product Badges -->
+                        <div class="prod-badge-strip">
+                            {% if product.is_new_arrival %}
+                            <span class="prod-badge-tag badge-new">NEW ARRIVAL</span>
+                            {% elif product.is_featured %}
+                            <span class="prod-badge-tag badge-new">SIGNATURE</span>
+                            {% endif %}
+                            {% if product.discount_percentage > 0 %}
+                            <span class="prod-badge-tag badge-discount">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
+                        </div>
 
-                                    {% if slide.secondary_button_text %}
-                                    <a href="{% if slide.secondary_button_url and slide.secondary_button_url != '#' and slide.secondary_button_url != '#watchStory' %}{{ slide.secondary_button_url }}{% else %}#watchStoryModal{% endif %}"
-                                        class="rss-hero-story-btn" {% if not slide.secondary_button_url or slide.secondary_button_url == '#' or slide.secondary_button_url == '#watchStoryModal' or 'youtu' in slide.secondary_button_url|lower or '.mp4' in slide.secondary_button_url|lower %} data-bs-toggle="modal" data-bs-target="#heroStoryModal" {% endif %}
-                                        id="heroStoryBtn-{{ forloop.counter }}">
-                                        <span class="story-play-circle"><i class="bi bi-play-fill"></i></span>
-                                        <span class="story-play-text">{{ slide.secondary_button_text }}</span>
-                                    </a>
-                                    {% endif %}
-                                </div>
+                        <!-- Floating Quick Action Buttons Pill -->
+                        <div class="prod-floating-actions" aria-label="Product Actions">
+                            <a href="{% url 'shop:compare_add' product.id %}" class="prod-action-circle-btn compare-btn" data-product-id="{{ product.id }}" title="Compare Saree" aria-label="Compare Saree">
+                                <i class="bi bi-shuffle"></i>
+                            </a>
+                            <button type="button" class="prod-action-circle-btn quickview-btn" data-product-id="{{ product.id }}" title="Quick View Saree" aria-label="Quick View Saree">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <button type="button" class="prod-action-circle-btn wishlist-btn" data-product-id="{{ product.id }}" title="Save to Wishlist" aria-label="Save to Wishlist">
+                                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                                <!-- Heritage Badges -->
-                                {% if slide.heritage_badge_1 or slide.heritage_badge_2 or slide.heritage_badge_3 %}
-                                <div class="rss-hero-badges-row">
-                                    {% if slide.heritage_badge_1 %}
-                                    <div class="rss-hero-badge-item">
-                                        <div class="rss-hero-badge-icon">
-                                            <!-- Lotus Motif SVG -->
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                                                <path d="M12 22v-4" />
-                                                <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-                                            </svg>
-                                        </div>
-                                        <div class="rss-hero-badge-text">{{ slide.heritage_badge_1|linebreaksbr }}</div>
-                                    </div>
-                                    {% endif %}
+                    <!-- Information Box -->
+                    <div class="product-card-info-box">
+                        <div class="prod-category-sku-row">
+                            <span class="prod-category-link">
+                                {% if product.categories.all %}
+                                {{ product.categories.first.name }}
+                                {% else %}
+                                Pure Silk Saree
+                                {% endif %}
+                            </span>
+                            {% if product.sku %}
+                            <span class="prod-sku-code">{{ product.sku }}</span>
+                            {% endif %}
+                        </div>
 
-                                    {% if slide.heritage_badge_2 %}
-                                    <div class="rss-hero-badge-item">
-                                        <div class="rss-hero-badge-icon">
-                                            <!-- Pure Silk Shield SVG -->
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                                <path
-                                                    d="M12 2l8 4.5v5.5c0 5.25-3.5 10-8 11-4.5-1-8-5.75-8-11V6.5l8-4.5z" />
-                                                <path d="M9 12l2 2 4-4" />
-                                            </svg>
-                                        </div>
-                                        <div class="rss-hero-badge-text">{{ slide.heritage_badge_2|linebreaksbr }}</div>
-                                    </div>
-                                    {% endif %}
+                        <h3 class="prod-title-heading">
+                            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                        </h3>
 
-                                    {% if slide.heritage_badge_3 %}
-                                    <div class="rss-hero-badge-item">
-                                        <div class="rss-hero-badge-icon">
-                                            <!-- Temple / Heritage SVG -->
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059"
-                                                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M3 21h18" />
-                                                <path d="M5 21V10l7-6 7 6v11" />
-                                                <path d="M9 21v-6h6v6" />
-                                            </svg>
-                                        </div>
-                                        <div class="rss-hero-badge-text">{{ slide.heritage_badge_3|linebreaksbr }}</div>
-                                    </div>
+                        <div class="prod-price-row">
+                            <span class="price-current">{{ site_settings.currency }}{{ product.offer_price|floatformat:2|intcomma }}</span>
+                            {% if product.discount_percentage > 0 and product.price > product.offer_price %}
+                            <span class="price-original">{{ site_settings.currency }}{{ product.price|floatformat:2|intcomma }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="cat-slider-arrow cat-slider-next d-none d-md-flex" id="productTrackNext" aria-label="Next products">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        {% else %}
+        <!-- 4 or fewer products: Clean, centered grid layout (No scrolling, no duplicate items!) -->
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                {% for product in products_list %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+                    <div class="product-card-editorial w-100">
+                        <!-- Product Media Container with Multi-Image Hover -->
+                        <div class="product-card-media-box">
+                            <a href="{{ product.get_absolute_url }}" class="d-block w-100 h-100 position-relative">
+                                {% with product.images.all as images %}
+                                    {% if images|length > 0 %}
+                                        <img src="{{ images.0.image.url }}" alt="{{ product.name }}" class="prod-img-primary" loading="eager" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                        {% if images|length > 1 %}
+                                        <img src="{{ images.1.image.url }}" alt="{{ product.name }} detail" class="prod-img-secondary" loading="lazy" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                        {% endif %}
+                                    {% else %}
+                                        <img src="{% static 'images/catalog-hero-saree.png' %}" alt="{{ product.name }}" class="prod-img-primary" loading="lazy">
                                     {% endif %}
-                                </div>
+                                {% endwith %}
+                            </a>
+
+                            <!-- Product Badges -->
+                            <div class="prod-badge-strip">
+                                {% if product.is_new_arrival %}
+                                <span class="prod-badge-tag badge-new">NEW ARRIVAL</span>
+                                {% elif product.is_featured %}
+                                <span class="prod-badge-tag badge-new">SIGNATURE</span>
+                                {% endif %}
+                                {% if product.discount_percentage > 0 %}
+                                <span class="prod-badge-tag badge-discount">{{ product.discount_percentage }}% OFF</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Floating Quick Action Buttons Pill -->
+                            <div class="prod-floating-actions" aria-label="Product Actions">
+                                <a href="{% url 'shop:compare_add' product.id %}" class="prod-action-circle-btn compare-btn" data-product-id="{{ product.id }}" title="Compare Saree" aria-label="Compare Saree">
+                                    <i class="bi bi-shuffle"></i>
+                                </a>
+                                <button type="button" class="prod-action-circle-btn quickview-btn" data-product-id="{{ product.id }}" title="Quick View Saree" aria-label="Quick View Saree">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="prod-action-circle-btn wishlist-btn" data-product-id="{{ product.id }}" title="Save to Wishlist" aria-label="Save to Wishlist">
+                                    <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Information Box -->
+                        <div class="product-card-info-box">
+                            <div class="prod-category-sku-row">
+                                <span class="prod-category-link">
+                                    {% if product.categories.all %}
+                                    {{ product.categories.first.name }}
+                                    {% else %}
+                                    Pure Silk Saree
+                                    {% endif %}
+                                </span>
+                                {% if product.sku %}
+                                <span class="prod-sku-code">{{ product.sku }}</span>
+                                {% endif %}
+                            </div>
+
+                            <h3 class="prod-title-heading">
+                                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                            </h3>
+
+                            <div class="prod-price-row">
+                                <span class="price-current">{{ site_settings.currency }}{{ product.offer_price|floatformat:2|intcomma }}</span>
+                                {% if product.discount_percentage > 0 and product.price > product.offer_price %}
+                                <span class="price-original">{{ site_settings.currency }}{{ product.price|floatformat:2|intcomma }}</span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-
-        <!-- Slide Indicator (Bottom Left) -->
-        <div class="rss-hero-counter">
-            <span class="counter-line"></span>
-            {% for s in sliders %}
-            <span class="counter-num {% if forloop.first %}active{% endif %}" data-bs-target="#rssHeroCarousel"
-                data-bs-slide-to="{{ forloop.counter0 }}">0{{ forloop.counter }}</span>
-            {% endfor %}
-        </div>
-
-        <!-- Editorial Stamp (Bottom Right) -->
-        <div class="rss-hero-editorial-badge">
-            <div class="editorial-motif">❦</div>
-            <div class="editorial-text-1">MORE THAN A SAREE</div>
-            <div class="editorial-text-2">A HERITAGE</div>
-            <div class="editorial-divider"></div>
-        </div>
-
-        <!-- Navigation Arrows (Bottom Right) -->
-        {% if sliders|length > 1 %}
-        <div class="rss-hero-arrow-btns">
-            <button type="button" class="hero-arrow" data-bs-target="#rssHeroCarousel" data-bs-slide="prev"
-                aria-label="Previous Slide">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <button type="button" class="hero-arrow" data-bs-target="#rssHeroCarousel" data-bs-slide="next"
-                aria-label="Next Slide">
-                <i class="bi bi-chevron-right"></i>
-            </button>
         </div>
         {% endif %}
-    </div>
-</section>
+        {% endwith %}
 
-{% elif show_offer_banner and banners %}
-<!-- Offer Banners Hero Section (100% Full-Width Edge-to-Edge) -->
-<section class="offer-banners-section w-100 p-0 m-0 overflow-hidden" id="hero-offer-banner">
-    <div id="offerBannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
-        <div class="carousel-inner w-100 p-0 m-0">
-            {% for banner in banners %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <a href="{{ banner.link|default:'/shop/' }}"
-                    class="offer-banner-card d-block w-100 p-0 m-0 text-decoration-none">
-                    <div class="offer-banner-img-wrapper w-100">
-                        {% if banner.image %}
-                        <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="w-100 offer-full-banner-img"
-                            fetchpriority="high">
-                        {% endif %}
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-        {% if banners|length > 1 %}
-        <button class="carousel-control-prev" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="prev"
-            aria-label="Previous Offer">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#offerBannerCarousel" data-bs-slide="next"
-            aria-label="Next Offer">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-        {% endif %}
-    </div>
-</section>
-{% endif %}
-
-<!-- Heritage Story Video Modal -->
-<div class="modal fade" id="heroStoryModal" tabindex="-1" aria-labelledby="heroStoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg"
-            style="background-color: #120207; border: 1px solid rgba(197, 160, 89, 0.45) !important;">
-            <div class="modal-header border-bottom border-secondary border-opacity-25 py-3 px-4">
-                <h5 class="modal-title font-playfair text-gold mb-0" id="heroStoryModalLabel"
-                    style="color: #C5A059; letter-spacing: 0.05em;">Our Heritage & Craftsmanship</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="ratio ratio-16x9">
-                    <iframe id="heroStoryIframe" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1"
-                        title="Rangam Saradha Silks Story"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Categories Section (Traditional Saree Collections) -->
-{% if categories %}
-<section id="categories" class="rss-category-showcase-section">
-    <!-- Top-Left Hanging Jhumka Motif -->
-    <svg class="cat-corner-jhumka cat-jhumka-left" width="56" height="120" viewBox="0 0 56 120" fill="none"
-        aria-hidden="true">
-        <line x1="28" y1="0" x2="28" y2="40" stroke="#C5A059" stroke-width="1.5" stroke-dasharray="2 3" />
-        <polygon points="28,34 35,41 28,48 21,41" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.5" />
-        <circle cx="28" cy="41" r="2.5" fill="#C5A059" />
-        <path d="M16 62 C16 48 40 48 40 62 Z" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.6" />
-        <path d="M20 62 Q28 54 36 62" stroke="#C5A059" stroke-width="1.2" fill="none" />
-        <circle cx="28" cy="53" r="1.5" fill="#C5A059" />
-        <path d="M16 62 Q19 66 22 62 Q25 66 28 62 Q31 66 34 62 Q37 66 40 62" stroke="#C5A059" stroke-width="1.5"
-            fill="none" />
-        <line x1="22" y1="65" x2="22" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="22" cy="78" r="2" fill="#C5A059" />
-        <line x1="28" y1="65" x2="28" y2="84" stroke="#C5A059" stroke-width="1.2" />
-        <circle cx="28" cy="86" r="2.5" fill="#C5A059" />
-        <line x1="34" y1="65" x2="34" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="34" cy="78" r="2" fill="#C5A059" />
-    </svg>
-
-    <!-- Top-Right Hanging Jhumka Motif -->
-    <svg class="cat-corner-jhumka cat-jhumka-right" width="56" height="120" viewBox="0 0 56 120" fill="none"
-        aria-hidden="true">
-        <line x1="28" y1="0" x2="28" y2="40" stroke="#C5A059" stroke-width="1.5" stroke-dasharray="2 3" />
-        <polygon points="28,34 35,41 28,48 21,41" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.5" />
-        <circle cx="28" cy="41" r="2.5" fill="#C5A059" />
-        <path d="M16 62 C16 48 40 48 40 62 Z" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.6" />
-        <path d="M20 62 Q28 54 36 62" stroke="#C5A059" stroke-width="1.2" fill="none" />
-        <circle cx="28" cy="53" r="1.5" fill="#C5A059" />
-        <path d="M16 62 Q19 66 22 62 Q25 66 28 62 Q31 66 34 62 Q37 66 40 62" stroke="#C5A059" stroke-width="1.5"
-            fill="none" />
-        <line x1="22" y1="65" x2="22" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="22" cy="78" r="2" fill="#C5A059" />
-        <line x1="28" y1="65" x2="28" y2="84" stroke="#C5A059" stroke-width="1.2" />
-        <circle cx="28" cy="86" r="2.5" fill="#C5A059" />
-        <line x1="34" y1="65" x2="34" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="34" cy="78" r="2" fill="#C5A059" />
-    </svg>
-
-    <!-- Bottom Left Brand Typography -->
-    <div class="cat-corner-brand-left">
-        <span class="brand-eyebrow">TRADITION TODAY</span>
-        <span class="brand-tagline">FOR A BRIGHTER TOMORROW</span>
-    </div>
-
-    <!-- Bottom Right Brand Typography -->
-    <div class="cat-corner-brand-right">
-        <div class="corner-lotus-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A3702C" stroke-width="1.6">
-                <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                <path d="M12 22v-4" />
-                <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-            </svg>
-        </div>
-        <span class="brand-eyebrow">MORE THAN A SAREE</span>
-        <span class="brand-tagline">A HERITAGE</span>
-    </div>
-
-    <!-- Section Heading -->
-    <div class="cat-header-wrapper">
-        <div class="cat-header-lotus">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="1.6"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                <path d="M12 22v-4" />
-                <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-            </svg>
-        </div>
-        <div class="cat-header-eyebrow">
-            <span class="eyebrow-line"></span>
-            <span class="eyebrow-motif">✦</span>
-            <span class="eyebrow-text">{{ site_settings.category_subtitle|default:"SHOP BY CATEGORY" }}</span>
-            <span class="eyebrow-motif">✦</span>
-            <span class="eyebrow-line"></span>
-        </div>
-        <h2 class="cat-header-title">{{ site_settings.category_title|default:"Traditional Saree Collections" }}</h2>
-        <p class="cat-header-desc">{{ site_settings.category_description|default:"Explore timeless weaves crafted for every occasion." }}</p>
-        <div class="cat-header-flourish">
-            <span class="flourish-accent">❧</span>
-            <span class="flourish-line"></span>
-            <span class="flourish-center">❖</span>
-            <span class="flourish-line"></span>
-            <span class="flourish-accent">❧</span>
-        </div>
-    </div>
-
-    <!-- Category Slider Showcase -->
-    <div class="cat-slider-container">
-        <button type="button" class="cat-nav-arrow cat-nav-prev" id="catSliderPrev" aria-label="Previous categories">
-            <i class="bi bi-chevron-left"></i>
-        </button>
-
-        <div class="cat-showcase-track" id="catShowcaseTrack">
-            {% for cat in categories %}
-            <div class="cat-showcase-item" data-original="true">
-                <a href="{{ cat.get_absolute_url }}" class="cat-showcase-card">
-                    <div class="cat-circle-frame">
-                        {% if cat.image %}
-                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="cat-circle-img" loading="eager"
-                            onerror="this.onerror=null; this.src='/static/images/categories/{{ cat.slug }}.jpg';">
-                        {% else %}
-                        <img src="{% static 'images/logo.jpg' %}" alt="{{ cat.name }}" class="cat-circle-img"
-                            loading="eager">
-                        {% endif %}
-                    </div>
-                    <h3 class="cat-card-title">{{ cat.name }}</h3>
-                    <div class="cat-card-divider">
-                        <span class="divider-line"></span>
-                        <span class="divider-diamond">❖</span>
-                        <span class="divider-line"></span>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-
-        <button type="button" class="cat-nav-arrow cat-nav-next" id="catSliderNext" aria-label="Next categories">
-            <i class="bi bi-chevron-right"></i>
-        </button>
-    </div>
-
-    <!-- View All Categories Action Button -->
-    <div class="cat-bottom-action text-center">
-        <a href="{% if site_settings.category_button_url and site_settings.category_button_url != '/shop/' %}{{ site_settings.category_button_url }}{% else %}{% url 'shop:categories' %}{% endif %}"
-            class="cat-view-all-btn">
-            <span>{{ site_settings.category_button_text|default:'View All Categories' }}</span>
-            <i class="bi bi-arrow-right ms-2"></i>
-        </a>
-    </div>
-</section>
-{% endif %}
-
-<!-- Featured Saree Collections (Product Cards Showcase) -->
-{% if featured_products %}
-<section class="rss-featured-section" id="featured-sarees">
-    <!-- Top-Left Hanging Jhumka Motif -->
-    <svg class="cat-corner-jhumka cat-jhumka-left" width="56" height="120" viewBox="0 0 56 120" fill="none"
-        aria-hidden="true">
-        <line x1="28" y1="0" x2="28" y2="40" stroke="#C5A059" stroke-width="1.5" stroke-dasharray="2 3" />
-        <polygon points="28,34 35,41 28,48 21,41" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.5" />
-        <circle cx="28" cy="41" r="2.5" fill="#C5A059" />
-        <path d="M16 62 C16 48 40 48 40 62 Z" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.6" />
-        <path d="M20 62 Q28 54 36 62" stroke="#C5A059" stroke-width="1.2" fill="none" />
-        <circle cx="28" cy="53" r="1.5" fill="#C5A059" />
-        <path d="M16 62 Q19 66 22 62 Q25 66 28 62 Q31 66 34 62 Q37 66 40 62" stroke="#C5A059" stroke-width="1.5"
-            fill="none" />
-        <line x1="22" y1="65" x2="22" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="22" cy="78" r="2" fill="#C5A059" />
-        <line x1="28" y1="65" x2="28" y2="84" stroke="#C5A059" stroke-width="1.2" />
-        <circle cx="28" cy="86" r="2.5" fill="#C5A059" />
-        <line x1="34" y1="65" x2="34" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="34" cy="78" r="2" fill="#C5A059" />
-    </svg>
-
-    <!-- Top-Right Hanging Jhumka Motif -->
-    <svg class="cat-corner-jhumka cat-jhumka-right" width="56" height="120" viewBox="0 0 56 120" fill="none"
-        aria-hidden="true">
-        <line x1="28" y1="0" x2="28" y2="40" stroke="#C5A059" stroke-width="1.5" stroke-dasharray="2 3" />
-        <polygon points="28,34 35,41 28,48 21,41" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.5" />
-        <circle cx="28" cy="41" r="2.5" fill="#C5A059" />
-        <path d="M16 62 C16 48 40 48 40 62 Z" fill="#FAF7F2" stroke="#C5A059" stroke-width="1.6" />
-        <path d="M20 62 Q28 54 36 62" stroke="#C5A059" stroke-width="1.2" fill="none" />
-        <circle cx="28" cy="53" r="1.5" fill="#C5A059" />
-        <path d="M16 62 Q19 66 22 62 Q25 66 28 62 Q31 66 34 62 Q37 66 40 62" stroke="#C5A059" stroke-width="1.5"
-            fill="none" />
-        <line x1="22" y1="65" x2="22" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="22" cy="78" r="2" fill="#C5A059" />
-        <line x1="28" y1="65" x2="28" y2="84" stroke="#C5A059" stroke-width="1.2" />
-        <circle cx="28" cy="86" r="2.5" fill="#C5A059" />
-        <line x1="34" y1="65" x2="34" y2="76" stroke="#C5A059" stroke-width="1" />
-        <circle cx="34" cy="78" r="2" fill="#C5A059" />
-    </svg>
-
-    <div class="container position-relative" style="z-index: 3;">
-        <!-- Header Row -->
-        <div class="rss-featured-header-row">
-            <div class="rss-featured-head-left">
-                <!-- Floral / Mandala Emblem -->
-                <div class="rss-featured-emblem">
-                    <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
-                        <circle cx="23" cy="23" r="4" fill="#C5A059" />
-                        <circle cx="23" cy="23" r="14" stroke="#C5A059" stroke-width="1" stroke-dasharray="2 3" />
-                        <path d="M23 4v6M23 36v6M4 23h6M36 23h6" stroke="#721428" stroke-width="2"
-                            stroke-linecap="round" />
-                        <path d="M9.5 9.5l4.5 4.5M32 32l4.5 4.5M9.5 36.5l4.5-4.5M32 14l4.5-4.5" stroke="#721428"
-                            stroke-width="1.8" stroke-linecap="round" />
-                        <circle cx="23" cy="3" r="2.2" fill="#721428" />
-                        <circle cx="23" cy="43" r="2.2" fill="#721428" />
-                        <circle cx="3" cy="23" r="2.2" fill="#721428" />
-                        <circle cx="43" cy="23" r="2.2" fill="#721428" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="rss-featured-eyebrow">
-                        <span class="eyebrow-text">SIGNATURE SERIES</span>
-                        <span class="eyebrow-line"></span>
-                    </div>
-                    <h2 class="rss-featured-title">Featured Saree Collections</h2>
-                    <p class="rss-featured-subtitle">Curated with tradition, woven for your special moments.</p>
-                </div>
-            </div>
-            <div>
-                <a href="{% url 'shop:catalog' %}?featured=true" class="rss-featured-view-all-btn">
-                    <span>View All</span>
+        <div class="container">
+            <div class="text-center mt-4">
+                <a href="{% url 'shop:catalog' %}" class="editorial-link-btn">
+                    <span>Explore Complete Saree Catalog</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
+    </section>
+    {% endif %}
 
-        <!-- Product Cards Showcase (Responsive Grid on Desktop, Side-Scroll Slider with Navigation Arrows on Mobile) -->
-        <div class="rss-featured-slider-wrap position-relative">
-            <!-- Mobile Navigation Arrow Left -->
-            <button type="button" class="rss-featured-nav-btn rss-featured-nav-prev" id="featuredNavPrev"
-                aria-label="Scroll left">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-
-            <!-- Scrollable Track -->
-            <div class="rss-featured-track" id="featuredScrollTrack">
-                {% for product in featured_products %}
-                <div class="rss-featured-col">
-                    <div class="rss-prod-card">
-                        <!-- Image Box -->
-                        <div class="rss-prod-img-box">
-                            <a href="{{ product.get_absolute_url }}"
-                                class="d-block w-100 h-100 position-absolute top-0 start-0">
-                                {% if product.images.all %}
-                                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}"
-                                    class="rss-prod-img" loading="lazy">
-                                {% else %}
-                                <img src="{% static 'images/catalog-hero-saree.png' %}" alt="{{ product.name }}"
-                                    class="rss-prod-img" loading="lazy">
-                                {% endif %}
-                            </a>
-
-                            <!-- NEW Badge -->
-                            <span class="rss-prod-badge-new">NEW</span>
-
-                            <!-- Action Icons Floating Pill (Compare, Quick View, Wishlist) -->
-                            <div class="rss-prod-actions-pill" aria-label="Product Actions">
-                                <!-- Compare Icon -->
-                                <a href="{% url 'shop:compare_add' product.id %}" class="rss-action-btn compare-btn"
-                                    data-product-id="{{ product.id }}" title="Compare Product"
-                                    aria-label="Compare Product">
-                                    <i class="bi bi-shuffle"></i>
-                                </a>
-
-                                <!-- Quick View Icon -->
-                                <button type="button" class="rss-action-btn quickview-btn"
-                                    data-product-id="{{ product.id }}" title="Quick View" aria-label="Quick View">
-                                    <i class="bi bi-search"></i>
-                                </button>
-
-                                <!-- Wishlist Icon -->
-                                <button type="button" class="rss-action-btn wishlist-btn"
-                                    data-product-id="{{ product.id }}" title="Add to Wishlist"
-                                    aria-label="Add to Wishlist">
-                                    <i
-                                        class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Card Body -->
-                        <div class="rss-prod-body">
-                            <!-- Product Title -->
-                            <h3 class="rss-prod-title">
-                                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
-                            </h3>
-
-                            <!-- Rating Row (Only shown when customer reviews have been given) -->
-                            {% if product.review_count > 0 %}
-                            <div class="rss-prod-rating">
-                                <span class="star-icon">★</span>
-                                <span class="rating-score">{{ product.average_rating }}</span>
-                                <span class="rating-reviews">({{ product.review_count }})</span>
-                            </div>
-                            {% endif %}
-
-                            <!-- Price Row: Strikethrough Original Price first, then Bold Crimson Offer Price -->
-                            <div class="rss-prod-price-row">
-                                {% if product.offer_price and product.price > product.offer_price %}
-                                <span class="rss-prod-price-orig">₹{{ product.price|floatformat:0 }}</span>
-                                <span class="rss-prod-price-current">₹{{ product.offer_price|floatformat:0 }}</span>
-                                {% else %}
-                                <span class="rss-prod-price-current">₹{{ product.price|floatformat:0 }}</span>
-                                {% endif %}
-                            </div>
-
-                            <!-- Stock Row: Soft Green Pill Badge -->
-                            <div class="rss-prod-stock">
-                                {% if product.stock <= 5 %}
-                                <span class="rss-prod-stock-pill in-stock" style="background-color: #fef3c7; color: #92400e; border-color: #fde68a;">Only {{ product.stock }} Left</span>
-                                {% else %}
-                                <span class="rss-prod-stock-pill in-stock">In Stock</span>
-                                {% endif %}
-                            </div>
-
-                            <!-- Add to Cart Form -->
-                            <form action="{% url 'shop:cart_add' product.id %}" method="POST" class="w-100 mt-auto">
-                                {% csrf_token %}
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="rss-prod-cart-btn" {% if product.stock == 0 %}disabled{% endif %}>
-                                    <i class="bi bi-cart3"></i>
-                                    <span>Add to Cart</span>
-                                    <span class="rss-cart-sparkle">✦</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <!-- =====================================================================
+         8. LATEST TRENDS / EDITORIAL SECTION (Asymmetric Fashion Grid)
+         ===================================================================== -->
+    <section class="editorial-trends-section" id="editorial-trends">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>SEASONAL EDIT</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
                 </div>
-                {% endfor %}
-            </div>
-
-            <!-- Mobile Navigation Arrow Right -->
-            <button type="button" class="rss-featured-nav-btn rss-featured-nav-next" id="featuredNavNext"
-                aria-label="Scroll right">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<!-- Trust & Craftsmanship Highlights (Standalone Section) -->
-<section class="rss-trust-section py-4 py-lg-5">
-    <div class="container">
-        <div class="rss-trust-card position-relative">
-            <!-- 4 Trust Features Row -->
-            <div class="row g-0 align-items-center justify-content-center">
-                <!-- Feature 1: Handwoven Craftsmanship -->
-                <div class="col-12 col-sm-6 col-lg-3 position-relative">
-                    <div class="rss-trust-box">
-                        <div class="rss-trust-icon-box">
-                            <img src="{% static 'images/trust-handwoven.png' %}" alt="Handwoven Craftsmanship"
-                                class="rss-trust-icon-img">
-                        </div>
-                        <h4 class="rss-trust-title">Handwoven Craftsmanship</h4>
-                        <p class="rss-trust-desc">By skilled artisans</p>
-                    </div>
-                    <div class="rss-trust-divider d-none d-lg-block"></div>
-                </div>
-
-                <!-- Feature 2: Pure Silk Quality -->
-                <div class="col-12 col-sm-6 col-lg-3 position-relative">
-                    <div class="rss-trust-box">
-                        <div class="rss-trust-icon-box">
-                            <img src="{% static 'images/trust-puresilk.png' %}" alt="Pure Silk Quality"
-                                class="rss-trust-icon-img">
-                        </div>
-                        <h4 class="rss-trust-title">Pure Silk Quality</h4>
-                        <p class="rss-trust-desc">Finest yarns, authentic weaves</p>
-                    </div>
-                    <div class="rss-trust-divider d-none d-lg-block"></div>
-                </div>
-
-                <!-- Feature 3: Timeless Tradition -->
-                <div class="col-12 col-sm-6 col-lg-3 position-relative">
-                    <div class="rss-trust-box">
-                        <div class="rss-trust-icon-box">
-                            <img src="{% static 'images/trust-tradition.png' %}" alt="Timeless Tradition"
-                                class="rss-trust-icon-img">
-                        </div>
-                        <h4 class="rss-trust-title">Timeless Tradition</h4>
-                        <p class="rss-trust-desc">Heritage in every drape</p>
-                    </div>
-                    <div class="rss-trust-divider d-none d-lg-block"></div>
-                </div>
-
-                <!-- Feature 4: Safe & Secure Delivery -->
-                <div class="col-12 col-sm-6 col-lg-3 position-relative">
-                    <div class="rss-trust-box">
-                        <div class="rss-trust-icon-box">
-                            <img src="{% static 'images/trust-delivery.png' %}" alt="Safe & Secure Delivery"
-                                class="rss-trust-icon-img">
-                        </div>
-                        <h4 class="rss-trust-title">Safe & Secure Delivery</h4>
-                        <p class="rss-trust-desc">Carefully packed, across India</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Behind The Weave - Every Saree Has a Story (Full-Width Native Section with Real Typography & Images) -->
-<section class="rss-story-fullwidth-section" id="behind-the-weave">
-    <div class="rss-story-container-fluid">
-        <!-- Left Visual: Artisan Weaver Photo -->
-        <div class="rss-story-visual-left">
-            <img src="{% static 'images/story-weaver-left.png' %}"
-                alt="Artisan Weaver at Handloom - Rangam Saradha Silks" class="rss-story-weaver-img" loading="lazy">
-        </div>
-
-        <!-- Center Column: Real Typography, Interactive CTA, and Feature Badges -->
-        <div class="rss-story-content-center">
-            <!-- Eyebrow -->
-            <div class="rss-story-eyebrow">
-                <span class="rss-story-eyebrow-text">BEHIND THE WEAVE</span>
-                <span class="rss-story-eyebrow-line"></span>
-            </div>
-
-            <!-- Main Heading -->
-            <h2 class="rss-story-title">Every Saree Has a Story</h2>
-
-            <!-- Narrative Paragraph -->
-            <p class="rss-story-desc">
-                From the first thread to the final zari motif, every Rangam saree carries the hands, patience and
-                tradition of the artisan who created it.
-            </p>
-
-            <!-- Interactive CTA Button -->
-            <div class="rss-story-action">
-                <button type="button" class="rss-story-cta-btn" data-bs-toggle="modal"
-                    data-bs-target="#discoverCraftModal" style="border: none; cursor: pointer;">
-                    <span>Discover Our Craft</span>
-                    <i class="bi bi-arrow-right ms-2"></i>
-                </button>
-            </div>
-
-            <!-- 3 Trust / Feature Badges -->
-            <div class="rss-story-badges-row">
-                <div class="rss-story-badge-item">
-                    <div class="rss-story-badge-icon">
-                        <img src="{% static 'images/story-icon-expertise.png' %}" alt="Generations of Expertise"
-                            loading="lazy">
-                    </div>
-                    <span class="rss-story-badge-text">Generations<br>of Expertise</span>
-                </div>
-
-                <div class="rss-story-badge-divider"></div>
-
-                <div class="rss-story-badge-item">
-                    <div class="rss-story-badge-icon">
-                        <img src="{% static 'images/story-icon-handloom.png' %}" alt="Authentic Handloom"
-                            loading="lazy">
-                    </div>
-                    <span class="rss-story-badge-text">Authentic<br>Handloom</span>
-                </div>
-
-                <div class="rss-story-badge-divider"></div>
-
-                <div class="rss-story-badge-item">
-                    <div class="rss-story-badge-icon">
-                        <img src="{% static 'images/story-icon-artisans.png' %}" alt="Support Artisans" loading="lazy">
-                    </div>
-                    <span class="rss-story-badge-text">Support<br>Artisans</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Legacy Heritage Sketch Panel -->
-        <div class="rss-story-visual-right d-none d-lg-block">
-            <img src="{% static 'images/story-legacy-right.png' %}" alt="More Than A Saree - A Legacy"
-                class="rss-story-legacy-img" loading="lazy">
-        </div>
-    </div>
-</section>
-
-<!-- Discover Our Craft Modal (Behind The Weave Story & Craftsmanship Matter) -->
-<div class="modal fade" id="discoverCraftModal" tabindex="-1" aria-labelledby="discoverCraftModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-2xl rounded-4"
-            style="background: #180309; border: 1.5px solid rgba(197, 160, 89, 0.4) !important; color: #FFFFFF; overflow: hidden;">
-            <!-- Modal Header -->
-            <div class="modal-header border-bottom border-secondary border-opacity-25 py-3 px-4"
-                style="background: rgba(33, 3, 14, 0.95);">
-                <div>
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge"
-                            style="background: rgba(197, 160, 89, 0.15); color: #C5A059; border: 1px solid rgba(197, 160, 89, 0.4); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">
-                            Authentic Handloom Heritage
-                        </span>
-                    </div>
-                    <h4 class="modal-title font-playfair mb-0" id="discoverCraftModalLabel"
-                        style="color: #FDF4E3; letter-spacing: 0.02em; font-weight: 700;">
-                        The Craft Behind Rangam Saradha Silks
-                    </h4>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-4 p-md-5" style="background: linear-gradient(180deg, #180309 0%, #120207 100%);">
-                <!-- Introduction Quote -->
-                <div class="p-3 mb-4 rounded-3"
-                    style="background: rgba(197, 160, 89, 0.08); border-left: 3px solid #C5A059;">
-                    <p class="mb-0 fst-italic" style="color: #E2D3C4; font-size: 0.95rem; line-height: 1.6;">
-                        “Every warp and weft is a sacred dialogue between human hands and pure mulberry silk — taking
-                        over 150 hours of undivided artisan dedication to produce a single heirloom drape.”
-                    </p>
-                </div>
-
-                <!-- 4 Craft Journey Steps -->
-                <div class="row g-4 mb-4">
-                    <!-- Step 1 -->
-                    <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3"
-                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <div
-                                    style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #AF0446, #721428); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem;">
-                                    1
-                                </div>
-                                <h6 class="mb-0 fw-bold" style="color: #C5A059;">100% Pure Mulberry Silk</h6>
-                            </div>
-                            <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.55;">
-                                We hand-select premium Grade-A raw mulberry silk yarn. Double-twisted and rigorously
-                                inspected for high tensile strength, natural pearl-like luster, and lightweight drape.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3"
-                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <div
-                                    style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #AF0446, #721428); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem;">
-                                    2
-                                </div>
-                                <h6 class="mb-0 fw-bold" style="color: #C5A059;">Ancestral Pitloom Weaving</h6>
-                            </div>
-                            <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.55;">
-                                Master weavers maneuver pedals and shuttles on traditional wooden pitlooms. Each saree
-                                is created using generations of muscle memory and artisan wisdom with no automated
-                                machinery.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3"
-                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <div
-                                    style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #AF0446, #721428); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem;">
-                                    3
-                                </div>
-                                <h6 class="mb-0 fw-bold" style="color: #C5A059;">Authentic Zari & Motifs</h6>
-                            </div>
-                            <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.55;">
-                                Real electroplated silver and gold zari threads are meticulously woven into traditional
-                                royal motifs — Mayil (peacock), Annam (swan), Rudraksha, and majestic temple borders.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3"
-                            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <div
-                                    style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #AF0446, #721428); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem;">
-                                    4
-                                </div>
-                                <h6 class="mb-0 fw-bold" style="color: #C5A059;">15 to 25 Days of Mastery</h6>
-                            </div>
-                            <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.55;">
-                                A single masterpiece takes up to 3 weeks of patient weaving. Once completed, every piece
-                                undergoes a rigorous 14-point quality inspection before reaching your wardrobe.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3 Pillars Row -->
-                <div class="p-3 rounded-3 mb-2"
-                    style="background: rgba(197, 160, 89, 0.05); border: 1px dashed rgba(197, 160, 89, 0.35);">
-                    <div class="row text-center g-3">
-                        <div class="col-4">
-                            <i class="bi bi-shield-check fs-4 mb-1 d-block" style="color: #C5A059;"></i>
-                            <span class="fw-semibold text-white d-block" style="font-size: 0.82rem;">Silk Mark
-                                Certified</span>
-                            <span class="text-white-50 small" style="font-size: 0.72rem;">100% Purity</span>
-                        </div>
-                        <div class="col-4"
-                            style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);">
-                            <i class="bi bi-flower1 fs-4 mb-1 d-block" style="color: #C5A059;"></i>
-                            <span class="fw-semibold text-white d-block" style="font-size: 0.82rem;">Skin-Safe
-                                Dyes</span>
-                            <span class="text-white-50 small" style="font-size: 0.72rem;">Rich Colorfast</span>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-people fs-4 mb-1 d-block" style="color: #C5A059;"></i>
-                            <span class="fw-semibold text-white d-block" style="font-size: 0.82rem;">Direct From
-                                Weavers</span>
-                            <span class="text-white-50 small" style="font-size: 0.72rem;">Fair Trade Artisan
-                                Support</span>
-                        </div>
-                    </div>
+                <h2 class="editorial-title">Latest Weaves &amp; Editorial Inspiration</h2>
+                <p class="editorial-subtitle">A curated preview into this festive season's most sought-after color palettes, temple motifs, and bridal heirlooms.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
                 </div>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="modal-footer border-top border-secondary border-opacity-25 py-3 px-4 justify-content-between"
-                style="background: rgba(33, 3, 14, 0.95);">
-                <button type="button" class="btn btn-outline-light btn-sm px-3" data-bs-dismiss="modal"
-                    style="border-radius: 6px; font-size: 0.85rem;">
-                    Close
-                </button>
-                <a href="{% url 'shop:catalog' %}" class="btn btn-sm px-4 fw-semibold"
-                    style="background: #C5A059; color: #180309; border-radius: 6px; font-size: 0.88rem; transition: all 0.2s ease;">
-                    Explore Saree Collection <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- New Arrivals Section - Carousel View (Reference Matched) -->
-{% if new_arrivals %}
-<section class="rss-new-arrivals-section" id="new-arrivals">
-    <div class="container-fluid rss-new-arrivals-container px-3 px-xl-5">
-        <!-- Section Header -->
-        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-            <div class="d-flex align-items-center">
-                <svg width="36" height="36" viewBox="0 0 48 48" fill="none"
-                    class="rss-new-arrivals-motif me-3 flex-shrink-0">
-                    <circle cx="24" cy="24" r="4" fill="#8C0338" />
-                    <circle cx="24" cy="11" r="2.5" fill="#8C0338" />
-                    <circle cx="24" cy="37" r="2.5" fill="#8C0338" />
-                    <circle cx="11" cy="24" r="2.5" fill="#8C0338" />
-                    <circle cx="37" cy="24" r="2.5" fill="#8C0338" />
-                    <circle cx="15" cy="15" r="2.2" fill="#8C0338" />
-                    <circle cx="33" cy="15" r="2.2" fill="#8C0338" />
-                    <circle cx="15" cy="33" r="2.2" fill="#8C0338" />
-                    <circle cx="33" cy="33" r="2.2" fill="#8C0338" />
-                    <path d="M24 16v4M24 28v4M16 24h4M28 24h4M18.5 18.5l3 3M26.5 26.5l3 3M18.5 29.5l3-3M26.5 21.5l3-3"
-                        stroke="#8C0338" stroke-width="1.8" stroke-linecap="round" />
-                </svg>
-                <div>
-                    <span class="rss-new-arrivals-eyebrow">FRESHLY ADDED</span>
-                    <h2 class="rss-new-arrivals-title font-heading">New Arrivals</h2>
-                    <p class="rss-new-arrivals-subtitle mb-0">Be the first to explore our latest handpicked sarees.</p>
+            <!-- Asymmetric Editorial Mosaic Grid -->
+            <div class="editorial-mosaic-grid">
+                <!-- Focal Big Portrait Frame -->
+                <div class="mosaic-hero-col">
+                    <img src="{% if site_settings.mosaic_hero_image %}{{ site_settings.mosaic_hero_image.url }}{% else %}{% static 'images/saree_detail_zari.jpg' %}{% endif %}" alt="Exquisite Gold Zari Craftsmanship Detail" class="mosaic-hero-img editorial-parallax-target" data-parallax-speed="0.04" loading="lazy">
+                    <div class="mosaic-hero-content">
+                        <span class="collection-badge-tag">THE GOLD WEFT</span>
+                        <h3 class="editorial-title text-white mb-2" style="font-size: 2rem;">Heirloom Zari Artistry</h3>
+                        <p class="text-white-50 mb-3" style="max-width: 480px; font-size: 0.9rem;">Witness the immaculate intricacy of pure zari jacquards crafted to remain as luminous decades from now as on your special day.</p>
+                        <a href="{% url 'shop:category_detail' category_slug='silk-sarees' %}" class="editorial-link-btn">
+                            <span>Explore Zari Sarees</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div>
-                <a href="{% url 'shop:catalog' %}?filter=new_arrivals" class="rss-new-arrivals-viewall-btn">
-                    View All &rarr;
-                </a>
-            </div>
-        </div>
 
-        <!-- Carousel Track Wrapper with Navigation Arrows -->
-        <div class="rss-new-arrivals-carousel-wrapper position-relative">
-            {% if new_arrivals|length > 5 %}
-            <button class="rss-new-arrivals-nav-btn prev" id="newArrivalsPrev" aria-label="Previous Products">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            {% endif %}
-
-            <div class="rss-new-arrivals-track{% if new_arrivals|length <= 5 %} no-scroll{% endif %}"
-                id="newArrivalsTrack">
-                {% for product in new_arrivals %}
-                <div class="rss-new-arrivals-card">
-                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
-                        <div class="rss-new-arrivals-img-wrap">
-                            {% if product.images.all %}
-                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}"
-                                class="rss-new-arrivals-img" loading="lazy">
-                            {% else %}
-                            <img src="{% static 'images/categories/silk-sarees.jpg' %}" alt="{{ product.name }}"
-                                class="rss-new-arrivals-img" loading="lazy">
-                            {% endif %}
-                            <button type="button" class="rss-new-arrivals-wishlist-btn wishlist-btn"
-                                data-product-id="{{ product.id }}" title="Add to Wishlist" aria-label="Add to Wishlist">
-                                <i
-                                    class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
-                            </button>
+                <!-- Two Supporting Frames -->
+                <div class="mosaic-supporting-col">
+                    <a href="{% url 'shop:category_detail' category_slug='party-wear-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-1 text-decoration-none d-block">
+                        <img src="{% if site_settings.mosaic_festive_image %}{{ site_settings.mosaic_festive_image.url }}{% else %}{% static 'images/contact_saree_drape.jpg' %}{% endif %}" alt="Traditional Saree Drapery Elegance" class="mosaic-sub-img" loading="lazy">
+                        <div class="mosaic-sub-caption">
+                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Festive Drapery Collections</h4>
+                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Vibrant festive silks with graceful contrast borders</p>
                         </div>
-                        <h3 class="rss-new-arrivals-name">{{ product.name }}</h3>
-                        <div class="rss-new-arrivals-price-row"
-                            style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
-                            {% if product.offer_price and product.price > product.offer_price %}
-                            <span class="rss-new-arrivals-price-orig" style="color: #8C756B !important; font-size: 0.85rem; text-decoration: line-through !important; font-family: 'Poppins', sans-serif;">&#8377;{{ product.price|floatformat:0 }}</span>
-                            <span class="rss-new-arrivals-price-current" style="color: #721428 !important; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif;">&#8377;{{ product.offer_price|floatformat:0 }}</span>
-                            {% else %}
-                            <span class="rss-new-arrivals-price-current" style="color: #721428 !important; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif;">&#8377;{{ product.price|floatformat:0 }}</span>
-                            {% endif %}
+                    </a>
+
+                    <a href="{% url 'shop:category_detail' category_slug='handloom-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-2 text-decoration-none d-block">
+                        <img src="{% if site_settings.mosaic_handloom_image %}{{ site_settings.mosaic_handloom_image.url }}{% else %}{% static 'images/catalog-hero-saree.png' %}{% endif %}" alt="Signature Handloom Saree" class="mosaic-sub-img" loading="lazy">
+                        <div class="mosaic-sub-caption">
+                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Dharmavaram Hallmarks</h4>
+                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Authentic double-pallu master weaves</p>
                         </div>
                     </a>
                 </div>
-                {% endfor %}
             </div>
-
-            {% if new_arrivals|length > 5 %}
-            <button class="rss-new-arrivals-nav-btn next" id="newArrivalsNext" aria-label="Next Products">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-            {% endif %}
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
 
-<!-- Bridal Collection Showcase (Full-Width Edge-to-Edge with Native Typography & Interactive CTA) -->
-<section class="rss-bridal-showcase-section position-relative overflow-hidden" id="bridal-collection"
-    style="background-image: url('{% if site_settings.bridal_banner_image %}{{ site_settings.bridal_banner_image.url }}{% else %}{% static 'images/bridal-banner-luxury.jpg' %}{% endif %}');">
-    <!-- Subtle Gradient Overlay to Ensure Left Text Contrast while preserving the Bride Photo on the Right -->
-    <div class="rss-bridal-overlay"></div>
-
-    <div class="rss-bridal-container-fluid position-relative z-3">
-        <div class="row align-items-center m-0 w-100 min-vh-50 py-5">
-            <!-- Left Content Column -->
-            <div class="col-12 col-lg-7 col-xl-6 ps-lg-5 ps-xl-5 pe-lg-4">
-                <!-- Eyebrow with Gold Star/Flourish -->
-                <div class="rss-bridal-eyebrow">
-                    <span class="rss-bridal-eyebrow-text">BRIDAL COLLECTION</span>
-                    <span class="rss-bridal-star">✦</span>
-                </div>
-                <div class="rss-bridal-flourish">
-                    <span class="flourish-line"></span>
-                    <span class="flourish-center">❖</span>
-                    <span class="flourish-line"></span>
+    <!-- =====================================================================
+         9. BRAND STORY (Tradition Woven With Elegance)
+         ===================================================================== -->
+    <section class="editorial-brand-story-section" id="brand-story">
+        <div class="brand-story-bg-pattern"></div>
+        <div class="container position-relative" style="z-index: 2;">
+            <div class="editorial-split-grid">
+                <!-- Visual with Stat Card -->
+                <div class="brand-story-visual-wrap editorial-reveal-left">
+                    <img src="{% if site_settings.brand_story_image %}{{ site_settings.brand_story_image.url }}{% else %}{% static 'images/hero-handloom.jpg' %}{% endif %}" alt="Rangam Saradha Silks Handloom Heritage" class="brand-story-img" loading="lazy">
+                    <div class="brand-story-stat-card">
+                        <div class="stat-number">40+</div>
+                        <div class="stat-label">Years of Handloom Legacy</div>
+                    </div>
                 </div>
 
-                <!-- Main Heading in Playfair Display Serif -->
-                <h2 class="rss-bridal-title font-heading">{{ site_settings.bridal_banner_title|default:"For Your Most Precious Moments" }}</h2>
+                <!-- Content Column -->
+                <div class="brand-story-content-col editorial-reveal-right">
+                    <div class="editorial-eyebrow" style="color: var(--rs-gold-light);">
+                        <span class="eyebrow-line"></span>
+                        <span class="eyebrow-motif">❦</span>
+                        <span style="color: var(--rs-gold-light);">OUR SACRED ROOTS</span>
+                        <span class="eyebrow-motif">❦</span>
+                        <span class="eyebrow-line"></span>
+                    </div>
 
-                <!-- Narrative Paragraph -->
-                <p class="rss-bridal-desc">
-                    {{ site_settings.bridal_banner_subtitle|default:"Exquisite handcrafted Kanchipuram bridal silks designed to make your special day unforgettable." }}
-                </p>
+                    <h2 class="brand-story-title">Tradition Woven With Elegance</h2>
 
-                <!-- Interactive CTA Button -->
-                <div class="rss-bridal-action">
-                    <a href="{{ site_settings.bridal_banner_button_url|default:'/shop/?category=bridal-collection' }}"
-                        class="rss-bridal-cta-btn">
-                        <span>{{ site_settings.bridal_banner_button_text|default:"Explore Bridal Collection" }}</span>
+                    <p class="brand-story-lead">
+                        Founded in the heart of Dharmavaram—the renowned capital of Indian handloom silks—Rangam Saradha Silks was born from a singular passion: to preserve the authenticity of master weavers.
+                    </p>
+
+                    <p class="brand-story-body">
+                        For over four decades, our family has worked hand-in-hand with multi-generational weaver families. Each saree is an ode to patience, pure silk yarns, and the sacred ceremonies that bring families together.
+                    </p>
+
+                    <div class="brand-pillars-row">
+                        <div class="pillar-col-item">
+                            <div class="pillar-val">100%</div>
+                            <div class="pillar-desc">Pure Certified Mulberry Silks</div>
+                        </div>
+                        <div class="pillar-col-item">
+                            <div class="pillar-val">50,000+</div>
+                            <div class="pillar-desc">Brides &amp; Families Adorned</div>
+                        </div>
+                        <div class="pillar-col-item">
+                            <div class="pillar-val">Direct</div>
+                            <div class="pillar-desc">Artisan Handloom Looms</div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'home:cms_page' slug='about-us' %}" class="final-cta-primary-btn">
+                        <span>About Our Brand</span>
                         <i class="bi bi-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Right Column: Tradition, Beauty, Forever Pillars -->
-            <div class="col-lg-5 col-xl-6 d-none d-lg-flex justify-content-end pe-lg-5 pe-xl-5">
-                <div class="rss-bridal-pillars">
-                    <div class="rss-bridal-pillar-line"></div>
-                    <div class="rss-bridal-pillar-words">
-                        <span class="pillar-word">Tradition</span>
-                        <span class="pillar-word">Beauty</span>
-                        <span class="pillar-word">Forever</span>
+    <!-- =====================================================================
+         10. WHY CHOOSE RANGAM SARADHA SILKS (6 Feature Blocks)
+         ===================================================================== -->
+    <section class="editorial-why-section" id="why-choose-us">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>THE SARADHA PROMISE</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title">Why Choose Rangam Saradha Silks</h2>
+                <p class="editorial-subtitle">Our commitment to unmatched silk purity, generational craftsmanship, and heartfelt service.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+
+            <div class="why-feature-grid">
+                <!-- 1. Pure Silk Mark Certified -->
+                <div class="why-feature-box editorial-reveal stagger-1">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-patch-check-fill"></i>
                     </div>
+                    <h3 class="why-box-title">Pure Silk Mark Certified</h3>
+                    <p class="why-box-desc">Every silk saree is certified by the Silk Mark Organisation of India, guaranteeing 100% genuine mulberry silk.</p>
+                </div>
+
+                <!-- 2. Authentic Handlooms -->
+                <div class="why-feature-box editorial-reveal stagger-2">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-flower1"></i>
+                    </div>
+                    <h3 class="why-box-title">Master Artisan Weaves</h3>
+                    <p class="why-box-desc">Handcrafted on traditional pit looms in Dharmavaram and Kanchipuram with generations of preserved technique.</p>
+                </div>
+
+                <!-- 3. Curated Bridal Collections -->
+                <div class="why-feature-box editorial-reveal stagger-3">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <h3 class="why-box-title">Curated Bridal Editions</h3>
+                    <p class="why-box-desc">Limited handloom editions with pure gold zari borders, intricate korvai drapes, and heritage temple motifs.</p>
+                </div>
+
+                <!-- 4. Live Video Saree Consultation -->
+                <div class="why-feature-box editorial-reveal stagger-4">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-camera-video-fill"></i>
+                    </div>
+                    <h3 class="why-box-title">Live Video Consultation</h3>
+                    <p class="why-box-desc">Connect with our silk specialists via 1-on-1 video call to view the real color, drape, and zari in daylight.</p>
+                </div>
+
+                <!-- 5. Trusted Family Heritage -->
+                <div class="why-feature-box editorial-reveal stagger-5">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="why-box-title">Secure &amp; Insured Shopping</h3>
+                    <p class="why-box-desc">100% secure payment gateways, authentic invoice verification, and transparent customer-first policies.</p>
+                </div>
+
+                <!-- 6. Worldwide Doorstep Delivery -->
+                <div class="why-feature-box editorial-reveal stagger-6">
+                    <div class="why-icon-bubble">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <h3 class="why-box-title">Prompt Doorstep Delivery</h3>
+                    <p class="why-box-desc">Fast, safely packaged delivery across India and internationally with end-to-end consignment tracking.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Find Your Piece (Shop By Budget) Section -->
-{% if budget_ranges %}
-<section class="rss-budget-section">
-    <div class="container-fluid rss-budget-container px-3 px-lg-4">
-        <div class="text-center mb-3">
-            <span class="rss-budget-eyebrow">BROWSE BY VALUE</span>
-            <h2 class="rss-budget-title">Find Your Piece</h2>
+    <!-- =====================================================================
+         11. FINAL CALL TO ACTION (Find the Saree That Tells Your Story)
+         ===================================================================== -->
+    <section class="editorial-final-cta-section" id="final-cta">
+        <div class="final-cta-bg-wrap">
+            <img src="{% static 'images/bridal-banner-luxury.jpg' %}" alt="Rangam Saradha Silks Final Saree Drape" class="final-cta-bg-img" loading="lazy">
         </div>
-
-        <div class="rss-budget-grid">
-            {% for range in budget_ranges %}
-            <a href="{% url 'shop:catalog' %}?{% if range.min_price %}min_price={{ range.min_price|floatformat:0 }}{% endif %}{% if range.min_price and range.max_price %}&{% endif %}{% if range.max_price %}max_price={{ range.max_price|floatformat:0 }}{% endif %}"
-                class="rss-budget-card-link text-decoration-none">
-                <div class="rss-budget-card">
-                    <div class="rss-budget-icon-wrap">
-                        <span class="rss-budget-rupee-icon">₹</span>
-                    </div>
-                    <div class="rss-budget-card-title">{{ range.title }}</div>
-                    <div class="rss-budget-explore">Explore <span class="rss-arrow">&rarr;</span></div>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<!-- Need Help Choosing Your Saree? (Personal Saree Consultation Banner - Full Width) -->
-<section class="rss-consult-section position-relative overflow-hidden" id="saree-consultation-banner">
-    <div class="rss-consult-container-fluid">
-        <div class="row align-items-center m-0 w-100 g-0">
-            <!-- Left Column: Specialist Consultant Photo with Soft Right Gradient Blend -->
-            <div class="col-12 col-md-4 col-lg-3 p-0 rss-consult-image-col">
-                <div class="rss-consult-img-wrapper">
-                    <img src="{% static 'images/saree-specialist-consultant.jpg' %}"
-                        alt="Personal Saree Specialist Consultant - Rangam Saradha Silks" class="rss-consult-img"
-                        loading="lazy">
-                </div>
+        <div class="final-cta-overlay"></div>
+        <div class="final-cta-container editorial-reveal">
+            <div class="editorial-eyebrow" style="color: var(--rs-gold-light);">
+                <span class="eyebrow-line"></span>
+                <span class="eyebrow-motif">✦</span>
+                <span style="color: var(--rs-gold-light);">YOUR TIMELESS MOMENT</span>
+                <span class="eyebrow-motif">✦</span>
+                <span class="eyebrow-line"></span>
             </div>
 
-            <!-- Center Column: Heading, Subtitle & Interactive Buttons -->
-            <div class="col-12 col-md-8 col-lg-6 px-3 px-md-4 px-lg-5 py-4 rss-consult-content-col">
-                <h2 class="rss-consult-title font-heading">Need Help Choosing Your Saree?</h2>
-                <p class="rss-consult-desc">Talk to our saree specialists and find the perfect weave for your occasion.
-                </p>
+            <h2 class="final-cta-title">Find the Saree That Tells Your Story</h2>
 
-                <div class="rss-consult-buttons d-flex flex-wrap align-items-center">
-                    <!-- Direct WhatsApp Chat (Dark Button) -->
-                    <a href="{% if contact_info.whatsapp_url %}{{ contact_info.whatsapp_url }}{% else %}https://wa.me/{{ contact_info.phone|default:'919999999999'|cut:' '|cut:'+'|cut:'-' }}?text=Hello%20Rangam%20Saradha%20Silks%2C%20I%20would%20like%20guidance%20from%20a%20saree%20specialist%20to%20find%20the%20perfect%20weave.{% endif %}"
-                        class="rss-consult-btn-whatsapp-dark" target="_blank" rel="noopener noreferrer">
-                        <i class="bi bi-whatsapp me-2"></i>
-                        <span>Chat on WhatsApp</span>
-                    </a>
-                </div>
-            </div>
+            <p class="final-cta-desc">
+                Whether for your wedding day, an auspicious celebration, or an heirloom to cherish across generations, let us help you find your dream silk drape.
+            </p>
 
-            <!-- Right Column: 4 Feature Highlights with Circular Icons -->
-            <div class="col-12 col-lg-3 px-3 px-md-4 py-3 py-lg-4 rss-consult-features-col">
-                <div class="rss-consult-features-list">
-                    <div class="rss-consult-feature-item">
-                        <div class="rss-consult-icon-circle">
-                            <i class="bi bi-scissors"></i>
-                        </div>
-                        <span class="rss-consult-feature-label">Personalized Suggestions</span>
-                    </div>
-
-                    <div class="rss-consult-feature-item">
-                        <div class="rss-consult-icon-circle">
-                            <i class="bi bi-palette"></i>
-                        </div>
-                        <span class="rss-consult-feature-label">Styling Guidance</span>
-                    </div>
-
-                    <div class="rss-consult-feature-item">
-                        <div class="rss-consult-icon-circle">
-                            <i class="bi bi-camera-video"></i>
-                        </div>
-                        <span class="rss-consult-feature-label">Video Call Support</span>
-                    </div>
-
-                    <div class="rss-consult-feature-item">
-                        <div class="rss-consult-icon-circle">
-                            <i class="bi bi-lightning-charge"></i>
-                        </div>
-                        <span class="rss-consult-feature-label">Quick Response</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Why Choose Rangam Saradha Silks Section -->
-<section class="rss-why-choose-banner-section position-relative overflow-hidden" id="why-choose-rangam">
-    <div class="rss-why-container-fluid">
-        <div class="row align-items-center m-0 w-100 g-0">
-            <!-- Left Column: Pure Folded Silk Sarees Photo with Soft Gradient -->
-            <div class="col-12 col-md-3 col-lg-3 col-xl-2 p-0 rss-why-image-col d-none d-md-block">
-                <div class="rss-why-img-wrapper">
-                    <img src="{% static 'images/why-sarees-clean.png' %}"
-                        alt="Handloom Silk Sarees - Rangam Saradha Silks" class="rss-why-img" loading="lazy">
-                </div>
-            </div>
-
-            <!-- Center Column: Title, Subtitle, and Know More Button Underneath -->
-            <div class="col-12 col-md-4 col-lg-4 col-xl-4 px-3 px-md-4 px-xl-5 py-3 py-lg-4 rss-why-content-col">
-                <div class="rss-why-heading-group">
-                    <div class="rss-why-ornament mb-1">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round" class="d-inline-block align-middle me-1">
-                            <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                            <path d="M12 22v-4" />
-                            <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-                        </svg>
-                        <span class="rss-why-ornament-line"></span>
-                    </div>
-                    <h2 class="rss-why-title font-heading mb-1">Why Choose Rangam Saradha Silks?</h2>
-                    <p class="rss-why-subtitle mb-3">Tradition you can trust. Quality you can feel.</p>
-
-                    <div class="rss-why-action-wrap">
-                        <a href="{% url 'home:cms_page' slug='about-us' %}" class="rss-why-btn-know-more">
-                            <span>Know More</span>
-                            <i class="bi bi-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: 4 Feature Badges (Premium Quality, Authentic Weaves, etc.) -->
-            <div class="col-12 col-md-5 col-lg-5 col-xl-6 px-2 px-md-3 px-xl-4 py-3 py-lg-4 rss-why-features-col">
-                <div
-                    class="rss-why-items-row d-flex align-items-center justify-content-center justify-content-md-end flex-wrap">
-                    <!-- Feature 1: Premium Quality (Diamond) -->
-                    <div class="rss-why-item">
-                        <div class="rss-why-icon-wrap">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A0026"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M6 3h12l4 6-10 12L2 9z" />
-                                <path d="M11 3L8 9l4 12 4-12-3-6" />
-                                <path d="M2 9h20" />
-                            </svg>
-                        </div>
-                        <h4 class="rss-why-item-title font-heading">Premium Quality</h4>
-                        <p class="rss-why-item-desc mb-0">Finest silk sarees</p>
-                    </div>
-
-                    <div class="rss-why-divider d-none d-lg-block"></div>
-
-                    <!-- Feature 2: Authentic Weaves (Loom / Handloom) -->
-                    <div class="rss-why-item">
-                        <div class="rss-why-icon-wrap">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A0026"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2.5" />
-                                <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
-                            </svg>
-                        </div>
-                        <h4 class="rss-why-item-title font-heading">Authentic Weaves</h4>
-                        <p class="rss-why-item-desc mb-0">Rich heritage</p>
-                    </div>
-
-                    <div class="rss-why-divider d-none d-lg-block"></div>
-
-                    <!-- Feature 3: Trusted by Families (Family & Hearts) -->
-                    <div class="rss-why-item">
-                        <div class="rss-why-icon-wrap">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A0026"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                            </svg>
-                        </div>
-                        <h4 class="rss-why-item-title font-heading">Trusted by Families</h4>
-                        <p class="rss-why-item-desc mb-0">Generations of love</p>
-                    </div>
-
-                    <div class="rss-why-divider d-none d-lg-block"></div>
-
-                    <!-- Feature 4: Personalized Support (Lotus / Care) -->
-                    <div class="rss-why-item">
-                        <div class="rss-why-icon-wrap">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A0026"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2C12 7 7 10 7 14a5 5 0 0 0 10 0c0-4-5-7-5-12z" />
-                                <path d="M12 22v-4" />
-                                <path d="M4 14c0 3 3 6 8 6s8-3 8-6" />
-                                <path d="M8 12c-2 2-3 5-1 7" />
-                                <path d="M16 12c2 2 3 5 1 7" />
-                            </svg>
-                        </div>
-                        <h4 class="rss-why-item-title font-heading">Personalized Support</h4>
-                        <p class="rss-why-item-desc mb-0">Always here to help</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-{% if fabric_curations %}
-<section class="section-luxury fabric-curation-section py-4">
-    <div class="container">
-        <div class="section-heading-wrapper text-center mb-4">
-            <span class="section-subtitle text-uppercase tracking-wider">{{ site_settings.fabric_curation_subtitle|default:"SHOP BY MATERIAL" }}</span>
-            <h2 class="section-title font-heading fw-bold">{{ site_settings.fabric_curation_title|default:"Fabric Curations" }}</h2>
-            <div class="gold-accent-line mx-auto mt-2"></div>
-        </div>
-
-        <div class="row g-4 justify-content-center row-cols-2 row-cols-md-3 row-cols-lg-4">
-            {% for item in fabric_curations %}
-            <div class="col">
-                <a href="{% url 'shop:catalog' %}?fabric={{ item.name }}" class="fabric-curation-card">
-                    <div class="fabric-curation-image-wrapper">
-                        {% if item.image %}
-                        <img src="{{ item.image.url }}" alt="Rangam Saradha Silks - {{ item.name }} Fabric Saree"
-                            class="fabric-curation-img" loading="lazy">
-                        {% else %}
-                        <img src="{% static 'images/about_offer.jpg' %}"
-                            alt="Rangam Saradha Silks - {{ item.name }} Fabric Saree" class="fabric-curation-img"
-                            loading="lazy">
-                        {% endif %}
-                    </div>
-                    <div class="fabric-curation-overlay">
-                        <h3 class="fabric-curation-title">{{ item.name }}</h3>
-                        <span class="fabric-curation-subtitle-text">Explore Weaves <i
-                                class="bi bi-arrow-right ms-1"></i></span>
-                    </div>
+            <div class="final-cta-btn-group">
+                <a href="{% url 'shop:catalog' %}" class="final-cta-primary-btn">
+                    <span>Explore All Sarees</span>
+                    <i class="bi bi-arrow-right"></i>
                 </a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
 
-<!-- Customer Reviews Section -->
-{% if testimonials %}
-<section class="section-luxury bg-white py-4">
-    <div class="container">
-        <div class="section-heading-wrapper text-center mb-5">
-            <span class="section-subtitle">⭐ Customer Reviews</span>
-            <h2 class="section-title">What Our Patrons Say</h2>
+                {% if user.is_authenticated %}
+                <button type="button" class="final-cta-video-btn" data-bs-toggle="modal" data-bs-target="#floatingBookCallModal">
+                    <i class="bi bi-camera-video-fill me-2"></i>
+                    <span>Book Video Consultation</span>
+                </button>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="final-cta-video-btn">
+                    <i class="bi bi-camera-video-fill me-2"></i>
+                    <span>Sign In for Consultation</span>
+                </a>
+                {% endif %}
+            </div>
         </div>
-        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner text-center max-w-600 mx-auto">
-                {% for t in testimonials %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %} p-4">
-                    <div class="mb-3 text-gold">
-                        {% for i in "12345" %}
-                        <i class="bi bi-star-fill"></i>
-                        {% endfor %}
-                    </div>
-                    <p class="fs-4 italic text-dark mb-4">"{{ t.comment }}"</p>
-                    <h5 class="fw-bold mb-1">{{ t.customer_name }}</h5>
-                    <span class="text-muted fs-7">{{ t.role_or_location }}</span>
+    </section>
+
+    <!-- =====================================================================
+         11B. SHOP BY BUDGET / BROWSE BY VALUE (Find Your Piece)
+         ===================================================================== -->
+    {% if budget_ranges %}
+    <section class="rss-budget-section py-5 position-relative overflow-hidden" id="budget-curations">
+        <div class="container-fluid px-lg-5">
+            <!-- Section Header -->
+            <div class="editorial-header-wrap text-center mb-5 editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">❖</span>
+                    <span>BROWSE BY VALUE</span>
+                    <span class="eyebrow-motif">❖</span>
+                    <span class="eyebrow-line"></span>
                 </div>
-                {% endfor %}
+                <h2 class="rss-budget-title font-heading">Find Your Piece</h2>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">✦</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel"
-                data-bs-slide="prev">
-                <span class="carousel-control-prev-icon filter-dark" aria-hidden="true"
-                    style="filter: invert(1);"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel"
-                data-bs-slide="next">
-                <span class="carousel-control-next-icon filter-dark" aria-hidden="true"
-                    style="filter: invert(1);"></span>
-            </button>
-        </div>
-    </div>
-</section>
-{% endif %}
 
-<!-- Instagram Gallery Section -->
-{% if insta_posts %}
-<section class="section-luxury bg-luxury">
-    <div class="container">
-        <div class="section-heading-wrapper text-center">
-            <span class="section-subtitle">📸 Instagram Gallery</span>
-            <h2 class="section-title">Follow Us @RangamSaradha</h2>
-        </div>
-        <div class="row g-3">
-            {% for post in insta_posts %}
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="card border-0 overflow-hidden shadow-sm product-card" style="border-radius: 12px;">
-                    <a href="{{ post.link }}" target="_blank">
-                        <img src="{{ post.image.url }}" alt="Rangam Saradha Silks Instagram Gallery Post"
-                            class="w-100 img-fluid" style="aspect-ratio: 1/1; object-fit: cover;">
+            <!-- Responsive Budget Cards Grid -->
+            <div class="rss-budget-grid-wrapper">
+                <div class="rss-budget-grid">
+                    {% for range in budget_ranges %}
+                    <a href="{% url 'shop:catalog' %}?{% if range.min_price %}min_price={{ range.min_price|floatformat:0 }}{% endif %}{% if range.min_price and range.max_price %}&{% endif %}{% if range.max_price %}max_price={{ range.max_price|floatformat:0 }}{% endif %}" 
+                       class="rss-budget-card-link editorial-reveal stagger-{{ forloop.counter }}"
+                       aria-label="Shop sarees {{ range.title }}">
+                        <div class="rss-budget-card">
+                            <div class="rss-budget-shimmer"></div>
+                            <div class="rss-budget-icon-wrap">
+                                <span class="rss-budget-rupee-icon">{{ site_settings.currency|default:'₹' }}</span>
+                            </div>
+                            <h3 class="rss-budget-card-title">{{ range.title }}</h3>
+                            <span class="rss-budget-explore">
+                                <span>Explore</span>
+                                <i class="bi bi-arrow-right rss-arrow"></i>
+                            </span>
+                        </div>
                     </a>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-<!-- Join the Rangam Family Section (Reference Matched) -->
-<section class="rss-family-section position-relative overflow-hidden" id="newsletter">
-    <!-- Decorative Corner Filigrees in Antique Gold -->
-    <svg class="rss-family-corner-left" width="120" height="120" viewBox="0 0 120 120" fill="none">
-        <path d="M4 116V24C4 12.9543 12.9543 4 24 4H116" stroke="#C5A059" stroke-width="2" stroke-opacity="0.4" />
-        <path d="M14 116V30C14 21.1634 21.1634 14 30 14H116" stroke="#C5A059" stroke-width="1.2"
-            stroke-opacity="0.25" />
-        <path d="M4 28C10 20 20 10 28 4" stroke="#C5A059" stroke-width="1.8" stroke-opacity="0.5" />
-        <circle cx="24" cy="24" r="4" fill="#C5A059" fill-opacity="0.5" />
-        <path d="M24 24Q38 16 50 26Q32 42 24 24Z" stroke="#C5A059" stroke-width="1.2" fill="#C5A059"
-            fill-opacity="0.15" />
-        <path d="M24 24Q16 38 26 50Q42 32 24 24Z" stroke="#C5A059" stroke-width="1.2" fill="#C5A059"
-            fill-opacity="0.15" />
-        <path d="M4 72C12 62 22 62 30 72" stroke="#C5A059" stroke-width="1.2" stroke-opacity="0.3" />
-        <path d="M72 4C62 12 62 22 72 30" stroke="#C5A059" stroke-width="1.2" stroke-opacity="0.3" />
-    </svg>
-    <svg class="rss-family-corner-right" width="120" height="120" viewBox="0 0 120 120" fill="none">
-        <path d="M116 116V24C116 12.9543 107.046 4 96 4H4" stroke="#C5A059" stroke-width="2" stroke-opacity="0.4" />
-        <path d="M106 116V30C106 21.1634 98.8366 14 90 14H4" stroke="#C5A059" stroke-width="1.2"
-            stroke-opacity="0.25" />
-        <path d="M116 28C110 20 100 10 92 4" stroke="#C5A059" stroke-width="1.8" stroke-opacity="0.5" />
-        <circle cx="96" cy="24" r="4" fill="#C5A059" fill-opacity="0.5" />
-        <path d="M96 24Q82 16 70 26Q88 42 96 24Z" stroke="#C5A059" stroke-width="1.2" fill="#C5A059"
-            fill-opacity="0.15" />
-        <path d="M96 24Q104 38 94 50Q78 32 96 24Z" stroke="#C5A059" stroke-width="1.2" fill="#C5A059"
-            fill-opacity="0.15" />
-        <path d="M116 72C108 62 98 62 90 72" stroke="#C5A059" stroke-width="1.2" stroke-opacity="0.3" />
-        <path d="M48 4C58 12 58 22 48 30" stroke="#C5A059" stroke-width="1.2" stroke-opacity="0.3" />
-    </svg>
-
-    <div class="container-fluid rss-family-container position-relative z-2">
-        <div class="row align-items-center g-4 justify-content-between">
-            <!-- Left Text Content -->
-            <div class="col-12 col-lg-6 col-xl-7">
-                <h2 class="rss-family-title font-heading text-white">Join the Rangam Family</h2>
-                <p class="rss-family-subtitle mb-0">Get first access to new weaves, festive collections &amp; exclusive
-                    offers.</p>
+    <!-- =====================================================================
+         12. NEWSLETTER SUBSCRIPTION (Join the Rangam Family)
+         ===================================================================== -->
+    <section class="rss-family-section position-relative overflow-hidden py-5" style="background-color: var(--rs-wine-deep);" id="newsletter">
+        <div class="container position-relative" style="z-index: 2;">
+            <div class="row align-items-center g-4">
+                <div class="col-12 col-lg-6 col-xl-7">
+                    <h2 class="editorial-title text-white mb-2" style="font-size: 2.2rem;">Join the Rangam Family</h2>
+                    <p class="text-white-50 mb-0">Receive exclusive previews of new handloom drops, bridal collections &amp; festive celebrations.</p>
+                </div>
+                <div class="col-12 col-lg-6 col-xl-5">
+                    <form class="rss-family-pill-form" id="rangamFamilyForm" onsubmit="event.preventDefault(); handleNewsletterSubmit(this);">
+                        <input type="email" class="rss-family-input" placeholder="Enter your email address" required aria-label="Email address">
+                        <button type="submit" class="rss-family-btn">Subscribe</button>
+                    </form>
+                </div>
             </div>
+        </div>
+    </section>
+</main>
 
-            <!-- Right Integrated Pill Form -->
-            <div class="col-12 col-lg-6 col-xl-5">
-                <form class="rss-family-pill-form" id="rangamFamilyForm"
-                    onsubmit="event.preventDefault(); handleNewsletterSubmit(this);">
-                    <input type="email" class="rss-family-input" placeholder="Enter your email address" required
-                        aria-label="Email address">
-                    <button type="submit" class="rss-family-btn">Subscribe</button>
-                </form>
+<!-- Heritage Story Video Modal -->
+<div class="modal fade" id="heroStoryModal" tabindex="-1" aria-labelledby="heroStoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="background-color: #120207; border: 1px solid rgba(197, 160, 89, 0.45) !important; border-radius: 16px;">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 py-3 px-4">
+                <h5 class="modal-title font-playfair mb-0" id="heroStoryModalLabel" style="color: #C5A059; letter-spacing: 0.05em;">Our Heritage &amp; Craftsmanship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="heroStoryIframe" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1" title="Rangam Saradha Silks Story" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
             </div>
         </div>
     </div>
-</section>
+</div>
+{% endblock %}
 
+{% block extra_js %}
+<!-- Homepage Editorial Controller Script -->
+<script src="{% static 'js/homepage-editorial.js' %}?v=2.3"></script>
 <script>
     function handleNewsletterSubmit(form) {
         var btn = form.querySelector('.rss-family-btn');
         var input = form.querySelector('.rss-family-input');
+        if (!btn || !input) return;
         btn.disabled = true;
         btn.textContent = 'Subscribed!';
-        btn.style.backgroundColor = '#25D366';
+        btn.style.backgroundColor = '#0D7B48';
         if (typeof showPremiumToast === 'function') {
             showPremiumToast('Welcome to the Rangam Family! Thank you for subscribing.', 'success');
         }
@@ -1373,501 +1000,9 @@
             btn.style.backgroundColor = '';
         }, 3000);
     }
-</script>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    function setupContinuousScroller({
-        trackId,
-        prevBtnId,
-        nextBtnId,
-        speed = 0.65,
-        stepAmount = 300
-    }) {
-        const track = document.getElementById(trackId);
-        if (!track) return;
-        const prevBtn = prevBtnId ? document.getElementById(prevBtnId) : null;
-        const nextBtn = nextBtnId ? document.getElementById(nextBtnId) : null;
-
-        const originalItems = Array.from(track.querySelectorAll('.cat-showcase-item:not([data-clone="true"])'));
-        if (originalItems.length <= 1) {
-            if (prevBtn) prevBtn.style.display = 'none';
-            if (nextBtn) nextBtn.style.display = 'none';
-            return;
-        }
-
-        let isPaused = false;
-        let isDragging = false;
-        let startX = 0;
-        let scrollStart = 0;
-        let hasMoved = false;
-        let resumeTimer = null;
-        let animId = null;
-        let singleSetWidth = 0;
-
-        const pauseFor = (ms = 2200) => {
-            isPaused = true;
-            clearTimeout(resumeTimer);
-            resumeTimer = setTimeout(() => {
-                isPaused = false;
-            }, ms);
-        };
-
-        const cloneBatch = () => {
-            const frag = document.createDocumentFragment();
-            originalItems.forEach(item => {
-                const clone = item.cloneNode(true);
-                clone.setAttribute('data-clone', 'true');
-                clone.setAttribute('aria-hidden', 'true');
-                clone.querySelectorAll('a, button').forEach(el => el.setAttribute('tabindex', '-1'));
-                frag.appendChild(clone);
-            });
-            track.appendChild(frag);
-        };
-
-        const initClonesAndMetrics = () => {
-            // Remove any previously created clones (e.g. on resize reinit)
-            track.querySelectorAll('[data-clone="true"]').forEach(c => c.remove());
-
-            // Append first batch of clones to measure exact width difference
-            cloneBatch();
-
-            const firstClone = track.querySelector('[data-clone="true"]');
-            if (firstClone && originalItems[0]) {
-                singleSetWidth = firstClone.offsetLeft - originalItems[0].offsetLeft;
-            }
-            if (!singleSetWidth || singleSetWidth < 50) {
-                const itemWidth = originalItems[0].offsetWidth || 148;
-                singleSetWidth = originalItems.length * (itemWidth + 24);
-            }
-
-            // Ensure track is wide enough for seamless looping on any viewport
-            // Needs to cover clientWidth + at least 2.5 * singleSetWidth
-            const targetWidth = Math.max(track.clientWidth, window.innerWidth) * 2.5 + singleSetWidth * 2;
-            let safety = 0;
-            while (track.scrollWidth < targetWidth && safety < 8) {
-                cloneBatch();
-                safety++;
-            }
-
-            // Position initial scroll at exactly singleSetWidth (start of Set 1)
-            // Visually identical to 0, but allows seamless bidirectional scrolling (both prev and next)
-            track.scrollLeft = singleSetWidth;
-        };
-
-        initClonesAndMetrics();
-
-        // Infinite loop wrapping logic
-        const checkInfiniteLoop = () => {
-            if (!singleSetWidth || singleSetWidth < 50) return;
-
-            // When scrolling forward past Set 1 into Set 2
-            if (track.scrollLeft >= singleSetWidth * 2) {
-                track.scrollLeft -= singleSetWidth;
-                if (isDragging) {
-                    scrollStart -= singleSetWidth;
-                }
-            }
-            // When scrolling backward past Set 1 into Set 0
-            else if (track.scrollLeft <= singleSetWidth * 0.2) {
-                track.scrollLeft += singleSetWidth;
-                if (isDragging) {
-                    scrollStart += singleSetWidth;
-                }
-            }
-
-            // Failsafe: if ever approaching physical end of scroll container
-            const maxScroll = track.scrollWidth - track.clientWidth;
-            if (maxScroll > 10 && track.scrollLeft >= maxScroll - 4) {
-                track.scrollLeft = singleSetWidth;
-            }
-        };
-
-        // Continuous silky smooth auto-scroll tick
-        const tick = () => {
-            if (!isPaused && !isDragging) {
-                track.scrollLeft += speed;
-                checkInfiniteLoop();
-            }
-            animId = requestAnimationFrame(tick);
-        };
-        animId = requestAnimationFrame(tick);
-
-        // Track real-time scroll events from user interaction (smooth scroll, trackpad, touch)
-        track.addEventListener('scroll', () => {
-            checkInfiniteLoop();
-        }, { passive: true });
-
-        // Hover pause
-        track.addEventListener('mouseenter', () => { isPaused = true; });
-        track.addEventListener('mouseleave', () => {
-            if (!isDragging) isPaused = false;
-        });
-
-        // Touch swipe handling
-        track.addEventListener('touchstart', () => {
-            isPaused = true;
-            clearTimeout(resumeTimer);
-        }, { passive: true });
-
-        track.addEventListener('touchend', () => {
-            pauseFor(1600);
-        }, { passive: true });
-
-        // Mouse Drag-to-Scroll
-        const DRAG_THRESHOLD = 12;
-
-        track.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return;
-            isDragging = true;
-            hasMoved = false;
-            startX = e.pageX - track.offsetLeft;
-            scrollStart = track.scrollLeft;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const x = e.pageX - track.offsetLeft;
-            const dist = x - startX;
-            if (Math.abs(dist) > DRAG_THRESHOLD) {
-                hasMoved = true;
-                track.classList.add('is-dragging');
-                track.scrollLeft = scrollStart - dist;
-                checkInfiniteLoop();
-            }
-        });
-
-        const endDrag = () => {
-            if (isDragging) {
-                isDragging = false;
-                track.classList.remove('is-dragging');
-                pauseFor(1400);
-                setTimeout(() => {
-                    hasMoved = false;
-                }, 80);
-            }
-        };
-        window.addEventListener('mouseup', endDrag);
-
-        // Prevent clicking inside cards ONLY if user was actually dragging (> 12px)
-        track.addEventListener('click', (e) => {
-            if (hasMoved) {
-                e.preventDefault();
-                e.stopPropagation();
-                hasMoved = false;
-            }
-        }, true);
-
-        // Horizontal mouse wheel scrolling
-        track.addEventListener('wheel', (e) => {
-            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                track.scrollLeft += e.deltaY;
-                checkInfiniteLoop();
-                e.preventDefault();
-                pauseFor(1500);
-            }
-        }, { passive: false });
-
-        // Chevron Prev / Next buttons
-        if (prevBtn) {
-            prevBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                pauseFor(2500);
-                track.scrollBy({ left: -stepAmount, behavior: 'smooth' });
-            });
-            prevBtn.addEventListener('mouseenter', () => { isPaused = true; });
-            prevBtn.addEventListener('mouseleave', () => { isPaused = false; });
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                pauseFor(2500);
-                track.scrollBy({ left: stepAmount, behavior: 'smooth' });
-            });
-            nextBtn.addEventListener('mouseenter', () => { isPaused = true; });
-            nextBtn.addEventListener('mouseleave', () => { isPaused = false; });
-        }
-
-        // Window resize handler
-        let resizeTimer = null;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                const targetWidth = Math.max(track.clientWidth, window.innerWidth) * 2.5 + singleSetWidth * 2;
-                let safety = 0;
-                while (track.scrollWidth < targetWidth && safety < 6) {
-                    cloneBatch();
-                    safety++;
-                }
-                checkInfiniteLoop();
-            }, 250);
-        });
-    }
-
-    // New Arrivals Scroller (only scrolls if more than 5 products)
-    function setupNewArrivalsScroller({
-        trackId,
-        prevBtnId,
-        nextBtnId,
-        speed = 0.65,
-        stepAmount = 260
-    }) {
-        const track = document.getElementById(trackId);
-        if (!track) return;
-        const prevBtn = prevBtnId ? document.getElementById(prevBtnId) : null;
-        const nextBtn = nextBtnId ? document.getElementById(nextBtnId) : null;
-        const cards = track.querySelectorAll('.rss-new-arrivals-card');
-
-        // Only scroll if more than 5 products
-        if (cards.length <= 5) {
-            if (prevBtn) prevBtn.style.display = 'none';
-            if (nextBtn) nextBtn.style.display = 'none';
-            return;
-        }
-
-        let isPaused = false;
-        let isDragging = false;
-        let startX = 0;
-        let scrollStart = 0;
-        let hasMoved = false;
-        let resumeTimer = null;
-        let animId = null;
-
-        const pauseFor = (ms = 2200) => {
-            isPaused = true;
-            clearTimeout(resumeTimer);
-            resumeTimer = setTimeout(() => {
-                isPaused = false;
-            }, ms);
-        };
-
-        // Smooth continuous scroll when > 5 items
-        const tick = () => {
-            if (!isPaused && !isDragging) {
-                const maxScroll = track.scrollWidth - track.clientWidth;
-                if (maxScroll > 10) {
-                    if (track.scrollLeft >= maxScroll - 2) {
-                        pauseFor(3000);
-                        track.scrollTo({ left: 0, behavior: 'smooth' });
-                    } else {
-                        track.scrollLeft += speed;
-                    }
-                }
-            }
-            animId = requestAnimationFrame(tick);
-        };
-        animId = requestAnimationFrame(tick);
-
-        track.addEventListener('mouseenter', () => { isPaused = true; });
-        track.addEventListener('mouseleave', () => {
-            if (!isDragging) isPaused = false;
-        });
-
-        track.addEventListener('touchstart', () => {
-            isPaused = true;
-            clearTimeout(resumeTimer);
-        }, { passive: true });
-        track.addEventListener('touchend', () => {
-            pauseFor(1600);
-        }, { passive: true });
-
-        // Mouse Drag-to-Scroll
-        const DRAG_THRESHOLD = 14;
-        track.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return;
-            isDragging = true;
-            hasMoved = false;
-            startX = e.pageX - track.offsetLeft;
-            scrollStart = track.scrollLeft;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const x = e.pageX - track.offsetLeft;
-            const dist = x - startX;
-            if (Math.abs(dist) > DRAG_THRESHOLD) {
-                hasMoved = true;
-                track.classList.add('is-dragging');
-                track.scrollLeft = scrollStart - dist;
-            }
-        });
-
-        const endDrag = () => {
-            if (isDragging) {
-                isDragging = false;
-                track.classList.remove('is-dragging');
-                pauseFor(1400);
-                setTimeout(() => {
-                    hasMoved = false;
-                }, 80);
-            }
-        };
-        window.addEventListener('mouseup', endDrag);
-
-        track.addEventListener('click', (e) => {
-            if (hasMoved) {
-                e.preventDefault();
-                e.stopPropagation();
-                hasMoved = false;
-            }
-        }, true);
-
-        // Prev / Next button click handlers
-        if (prevBtn) {
-            prevBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                pauseFor(2500);
-                track.scrollBy({ left: -stepAmount, behavior: 'smooth' });
-            });
-            prevBtn.addEventListener('mouseenter', () => { isPaused = true; });
-            prevBtn.addEventListener('mouseleave', () => { isPaused = false; });
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                pauseFor(2500);
-                track.scrollBy({ left: stepAmount, behavior: 'smooth' });
-            });
-            nextBtn.addEventListener('mouseenter', () => { isPaused = true; });
-            nextBtn.addEventListener('mouseleave', () => { isPaused = false; });
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Categories Showcase Continuous Scroller
-        setupContinuousScroller({
-            trackId: 'catShowcaseTrack',
-            prevBtnId: 'catSliderPrev',
-            nextBtnId: 'catSliderNext',
-            speed: 0.6,
-            stepAmount: 320
-        });
-
-        // Initialize New Arrivals Scroller (only active if > 5 products)
-        setupNewArrivalsScroller({
-            trackId: 'newArrivalsTrack',
-            prevBtnId: 'newArrivalsPrev',
-            nextBtnId: 'newArrivalsNext',
-            speed: 0.7,
-            stepAmount: 260
-        });
-    });
-
-    // Why Choose Us Mobile Carousel Controls
+    // Modal Video Cleanup
     document.addEventListener('DOMContentLoaded', function () {
-        const slider = document.getElementById('whyChooseMobileSlider');
-        const prevBtn = document.getElementById('whyChoosePrevBtn');
-        const nextBtn = document.getElementById('whyChooseNextBtn');
-        const dots = document.querySelectorAll('.why-choose-dot');
-
-        if (slider && prevBtn && nextBtn) {
-            const getSlideWidth = () => {
-                const firstSlide = slider.querySelector('.why-choose-mobile-slide');
-                return firstSlide ? firstSlide.offsetWidth + 20 : slider.clientWidth * 0.88;
-            };
-
-            prevBtn.addEventListener('click', () => {
-                slider.scrollBy({ left: -getSlideWidth(), behavior: 'smooth' });
-            });
-
-            nextBtn.addEventListener('click', () => {
-                slider.scrollBy({ left: getSlideWidth(), behavior: 'smooth' });
-            });
-
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    const slides = slider.querySelectorAll('.why-choose-mobile-slide');
-                    if (slides[index]) {
-                        slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    }
-                });
-            });
-
-            slider.addEventListener('scroll', () => {
-                const slides = slider.querySelectorAll('.why-choose-mobile-slide');
-                const sliderCenter = slider.scrollLeft + slider.clientWidth / 2;
-                let closestIndex = 0;
-                let minDistance = Infinity;
-
-                slides.forEach((slide, idx) => {
-                    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-                    const distance = Math.abs(sliderCenter - slideCenter);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestIndex = idx;
-                    }
-                });
-
-                dots.forEach((d, i) => {
-                    if (i === closestIndex) {
-                        d.classList.add('active');
-                    } else {
-                        d.classList.remove('active');
-                    }
-                });
-            });
-        }
-        // Featured Saree Collections Mobile Side-Scroll Slider Controls
-        const featNavPrev = document.getElementById("featuredNavPrev");
-        const featNavNext = document.getElementById("featuredNavNext");
-        const featTrack = document.getElementById("featuredScrollTrack");
-
-        if (featTrack) {
-            const getFeatStep = () => {
-                const col = featTrack.querySelector(".rss-featured-col");
-                return col ? (col.offsetWidth + 16) : 280;
-            };
-
-            if (featNavPrev) {
-                featNavPrev.addEventListener("click", function () {
-                    featTrack.scrollBy({ left: -getFeatStep(), behavior: "smooth" });
-                });
-            }
-            if (featNavNext) {
-                featNavNext.addEventListener("click", function () {
-                    featTrack.scrollBy({ left: getFeatStep(), behavior: "smooth" });
-                });
-            }
-
-            const updateFeatArrows = () => {
-                if (!featNavPrev || !featNavNext) return;
-                const maxScroll = featTrack.scrollWidth - featTrack.clientWidth;
-                if (maxScroll <= 5) {
-                    featNavPrev.style.opacity = "0.35";
-                    featNavPrev.style.pointerEvents = "none";
-                    featNavNext.style.opacity = "0.35";
-                    featNavNext.style.pointerEvents = "none";
-                } else {
-                    featNavPrev.style.opacity = featTrack.scrollLeft <= 5 ? "0.35" : "1";
-                    featNavPrev.style.pointerEvents = featTrack.scrollLeft <= 5 ? "none" : "auto";
-                    featNavNext.style.opacity = featTrack.scrollLeft >= maxScroll - 5 ? "0.35" : "1";
-                    featNavNext.style.pointerEvents = featTrack.scrollLeft >= maxScroll - 5 ? "none" : "auto";
-                }
-            };
-
-            featTrack.addEventListener("scroll", updateFeatArrows, { passive: true });
-            window.addEventListener("resize", updateFeatArrows);
-            updateFeatArrows();
-        }
-
-        // Hero Slider Counter Indicator Sync & Story Modal Cleanup
-        const heroCarousel = document.getElementById('rssHeroCarousel');
-        if (heroCarousel) {
-            heroCarousel.addEventListener('slide.bs.carousel', function (event) {
-                const counterNums = document.querySelectorAll('.rss-hero-counter .counter-num');
-                counterNums.forEach(function (el, idx) {
-                    if (idx === event.to) {
-                        el.classList.add('active');
-                    } else {
-                        el.classList.remove('active');
-                    }
-                });
-            });
-        }
-
         const heroStoryModal = document.getElementById('heroStoryModal');
         if (heroStoryModal) {
             heroStoryModal.addEventListener('hidden.bs.modal', function () {

@@ -1,0 +1,125 @@
+{% load static %}
+<!-- ==========================================================================
+     RANGAM SARADHA SILKS — LUXURY CURTAIN REVEAL INTRO ANIMATION
+     Opens from the exact center (50vw) left and right to reveal the store.
+     Plays once per session using sessionStorage.
+     ========================================================================== -->
+<div id="luxuryCurtainIntro" class="luxury-curtain-overlay" role="presentation" aria-hidden="true">
+    <!-- Left Curtain Panel (0 to 50% screen width) -->
+    <div class="curtain-panel curtain-panel-left">
+        <div class="curtain-fabric">
+            <div class="curtain-lighting-overlay"></div>
+            <div class="curtain-shadow-overlay"></div>
+            <!-- Gold Zari Border down center seam -->
+            <div class="curtain-gold-trim"></div>
+        </div>
+    </div>
+
+    <!-- Right Curtain Panel (50% to 100% screen width) -->
+    <div class="curtain-panel curtain-panel-right">
+        <div class="curtain-fabric">
+            <div class="curtain-lighting-overlay"></div>
+            <div class="curtain-shadow-overlay"></div>
+            <!-- Gold Zari Border down center seam -->
+            <div class="curtain-gold-trim"></div>
+        </div>
+    </div>
+
+    <!-- Center Royal Emblem / Seal (Dissolves naturally as curtains part) -->
+    <div class="curtain-emblem-wrap" id="curtainEmblem">
+        <div class="curtain-emblem-halo"></div>
+        <div class="curtain-emblem-disc">
+            {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.website_name|default:'Rangam Saradha Silks' }}" class="curtain-emblem-logo">
+            {% else %}
+            <img src="{% static 'images/logo.jpg' %}" alt="{{ site_settings.website_name|default:'Rangam Saradha Silks' }}" class="curtain-emblem-logo">
+            {% endif %}
+            <div class="curtain-emblem-brand">RANGAM SARADHA</div>
+            <div class="curtain-emblem-subtitle">PURE SILK HERITAGE</div>
+            <div class="curtain-emblem-motif">
+                <span class="motif-line"></span>
+                <span class="motif-gem">✦</span>
+                <span class="motif-line"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+    
+    const curtainOverlay = document.getElementById('luxuryCurtainIntro');
+    if (!curtainOverlay) return;
+
+    // Support URL override for testing: ?replay_curtain=1 or ?curtain=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceReplay = urlParams.has('replay_curtain') || urlParams.has('curtain');
+    if (forceReplay) {
+        try { sessionStorage.removeItem('rangamCurtainShown'); } catch(e) {}
+    }
+
+    // Check if user already saw the curtain animation in this browser session
+    const hasSeenCurtain = (function() {
+        try {
+            return sessionStorage.getItem('rangamCurtainShown') === 'true';
+        } catch(e) {
+            return false;
+        }
+    })();
+
+    // Check accessibility: prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // If already seen or user prefers reduced motion, remove immediately without animation
+    if ((hasSeenCurtain && !forceReplay) || prefersReducedMotion) {
+        curtainOverlay.remove();
+        return;
+    }
+
+    // Lock scrolling while closed curtains are presenting
+    document.body.classList.add('curtain-presenting');
+
+    // CINEMATIC LUXURY TIMELINE:
+    // 0.0s – 1.2s: Completely CLOSED in center (user sees maroon silk curtains & emblem)
+    // 1.2s – 3.8s: Opening duration: 2.6s (2.2s on mobile) with slow start, smooth acceleration, slow finish
+    // 3.8s – 4.3s: Post-opening elegant pause (0.5s) while homepage is fully visible
+    // 4.3s+: Overlay dismissed and removed from DOM
+    const isMobile = window.innerWidth <= 768;
+    const HOLD_DELAY_MS = isMobile ? 1100 : 1200;       // 1.2s closed pause (1.1s on mobile)
+    const OPENING_DURATION_MS = isMobile ? 2200 : 2600; // 2.6s opening duration (2.2s on mobile)
+    const POST_OPEN_PAUSE_MS = 500;                     // 0.5s elegant pause (3.8s to 4.3s)
+
+    setTimeout(function() {
+        // 1.2s: Trigger slow cinematic curtain opening from center
+        curtainOverlay.classList.add('curtain-opening');
+        document.body.classList.add('curtain-revealed');
+
+        // 3.8s: Curtains have completed opening
+        setTimeout(function() {
+            
+            // 3.8s – 4.3s: Short elegant pause while homepage is fully visible
+            setTimeout(function() {
+                // 4.3s: Dismiss and unlock page interactions
+                curtainOverlay.classList.add('curtain-dismissed');
+                document.body.classList.remove('curtain-presenting');
+                
+                // Mark session as shown
+                try {
+                    sessionStorage.setItem('rangamCurtainShown', 'true');
+                } catch(e) {}
+
+                // Cleanly remove from DOM after fade-out transition
+                setTimeout(function() {
+                    if (curtainOverlay && curtainOverlay.parentNode) {
+                        curtainOverlay.remove();
+                    }
+                }, 400);
+
+            }, POST_OPEN_PAUSE_MS);
+
+        }, OPENING_DURATION_MS);
+
+    }, HOLD_DELAY_MS);
+})();
+</script>

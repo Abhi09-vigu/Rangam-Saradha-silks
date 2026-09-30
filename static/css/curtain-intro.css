@@ -1,0 +1,393 @@
+/* ==========================================================================
+   RANGAM SARADHA SILKS — LUXURY CURTAIN REVEAL INTRO ANIMATION
+   Concept: Grand Theatre / Royal Indian Silk Opening
+   Palette: Imperial Wine (#4A0817), Royal Crimson (#721428), Antique Gold (#C5A059)
+   ========================================================================== */
+
+/* If user already visited in this session or prefers reduced motion, hide immediately */
+html.curtain-already-seen #luxuryCurtainIntro,
+html.no-curtain #luxuryCurtainIntro {
+    display: none !important;
+}
+
+/* Prevent body scrolling while closed curtains are presenting */
+body.curtain-presenting {
+    overflow: hidden !important;
+    touch-action: none !important;
+}
+
+/* Full-Screen Curtain Overlay Container */
+.luxury-curtain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 99999999;
+    overflow: hidden;
+    pointer-events: auto;
+    background-color: #0e0104;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.luxury-curtain-overlay.curtain-dismissed {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   CURTAIN PANELS (Left 50%, Right 50% meeting at 50vw center)
+   -------------------------------------------------------------------------- */
+.curtain-panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50vw;
+    height: 100%;
+    overflow: hidden;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* LEFT CURTAIN PANEL */
+.curtain-panel-left {
+    left: 0;
+    transform-origin: left center;
+    transform: translate3d(0, 0, 0);
+}
+
+/* RIGHT CURTAIN PANEL */
+.curtain-panel-right {
+    left: 50vw;
+    transform-origin: right center;
+    transform: translate3d(0, 0, 0);
+}
+
+/* When opening trigger is active: 2.6s slow, cinematic heavy silk glide */
+.luxury-curtain-overlay.curtain-opening .curtain-panel-left {
+    animation: curtainOpenLeft 2.6s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+.luxury-curtain-overlay.curtain-opening .curtain-panel-right {
+    animation: curtainOpenRight 2.6s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+/* Organic Heavy Silk Movement: gathers subtle fabric weight into folds as it slides */
+@keyframes curtainOpenLeft {
+    0% {
+        transform: translate3d(0, 0, 0) scaleX(1);
+    }
+    38% {
+        transform: translate3d(-24%, 0, 0) scaleX(0.975);
+    }
+    72% {
+        transform: translate3d(-70%, 0, 0) scaleX(0.965);
+    }
+    100% {
+        transform: translate3d(-101%, 0, 0) scaleX(1);
+    }
+}
+
+@keyframes curtainOpenRight {
+    0% {
+        transform: translate3d(0, 0, 0) scaleX(1);
+    }
+    38% {
+        transform: translate3d(24%, 0, 0) scaleX(0.975);
+    }
+    72% {
+        transform: translate3d(70%, 0, 0) scaleX(0.965);
+    }
+    100% {
+        transform: translate3d(101%, 0, 0) scaleX(1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   CURTAIN FABRIC: Rich Silk / Velvet Folds & Indian Textile Sheen
+   -------------------------------------------------------------------------- */
+.curtain-fabric {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* Royal heavy mulberry silk vertical pleating simulation */
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #1d0208 0%,
+            #3b0612 3%,
+            #630c20 6.5%,
+            #7d132a 10%,
+            #4a0817 13.5%,
+            #22030a 16.5%,
+            #150105 20%
+        );
+    background-size: 200px 100%;
+    box-shadow: inset 0 25px 80px rgba(0, 0, 0, 0.75), inset 0 -35px 80px rgba(0, 0, 0, 0.85);
+}
+
+/* Soft overhead lighting spotlight on silk fabric */
+.curtain-lighting-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 90% 80% at 50% 15%, rgba(227, 197, 134, 0.12) 0%, rgba(114, 20, 40, 0.05) 50%, rgba(0, 0, 0, 0.65) 100%);
+    mix-blend-mode: screen;
+}
+
+/* Subtle fabric texture noise overlay */
+.curtain-shadow-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 15%, transparent 80%, rgba(0,0,0,0.7) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   GOLD ZARI SEAM BORDER: Meeting down the exact center line (50vw)
+   -------------------------------------------------------------------------- */
+.curtain-gold-trim {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    z-index: 5;
+    background: linear-gradient(
+        180deg,
+        #f5d77f 0%,
+        #c5a059 20%,
+        #8c6a2e 35%,
+        #fbf1cf 50%,
+        #c5a059 65%,
+        #8c6a2e 80%,
+        #f5d77f 100%
+    );
+    box-shadow: 0 0 16px rgba(197, 160, 89, 0.55), 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+/* Left panel has trim on its right edge */
+.curtain-panel-left .curtain-gold-trim {
+    right: 0;
+}
+
+/* Right panel has trim on its left edge */
+.curtain-panel-right .curtain-gold-trim {
+    left: 0;
+}
+
+/* --------------------------------------------------------------------------
+   CENTER ROYAL EMBLEM / SEAL (Visible while curtains are closed)
+   -------------------------------------------------------------------------- */
+.curtain-emblem-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-curtain-overlay.curtain-opening .curtain-emblem-wrap {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.1);
+    filter: blur(4px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease;
+}
+
+/* Outer golden halo pulse */
+.curtain-emblem-halo {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(197, 160, 89, 0.22) 0%, rgba(114, 20, 40, 0.08) 55%, transparent 75%);
+    animation: emblemHaloPulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes emblemHaloPulse {
+    0% {
+        transform: scale(0.92);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+}
+
+/* Main Medallion Disc */
+.curtain-emblem-disc {
+    position: relative;
+    width: 175px;
+    height: 175px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #4a0817 0%, #27040c 70%, #150105 100%);
+    border: 2px solid #C5A059;
+    box-shadow:
+        0 14px 45px rgba(0, 0, 0, 0.85),
+        0 0 25px rgba(197, 160, 89, 0.35),
+        inset 0 2px 10px rgba(255, 255, 255, 0.15),
+        inset 0 -4px 15px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 14px;
+    text-align: center;
+}
+
+/* Decorative inner gold ring */
+.curtain-emblem-disc::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(197, 160, 89, 0.5);
+    pointer-events: none;
+}
+
+/* Logo Image inside emblem */
+.curtain-emblem-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+    margin-bottom: 6px;
+    background: #ffffff;
+    padding: 3px;
+    border: 1px solid #C5A059;
+}
+
+/* Brand Name in emblem */
+.curtain-emblem-brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #f7e08b;
+    text-transform: uppercase;
+    line-height: 1.25;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(197, 160, 89, 0.4);
+}
+
+.curtain-emblem-subtitle {
+    font-family: 'Poppins', -apple-system, sans-serif;
+    font-size: 0.52rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: #e5c88e;
+    text-transform: uppercase;
+    margin-top: 3px;
+    opacity: 0.9;
+}
+
+/* Filigree ornament line */
+.curtain-emblem-motif {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 4px;
+    width: 70%;
+}
+
+.curtain-emblem-motif .motif-line {
+    flex-grow: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.7), transparent);
+}
+
+.curtain-emblem-motif .motif-gem {
+    font-size: 0.55rem;
+    color: #f7e08b;
+    line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   HOMEPAGE SUBTLE REVEAL UNDERNEATH (Scale 1.02 -> 1, Opacity 0.95 -> 1)
+   -------------------------------------------------------------------------- */
+body.curtain-presenting main,
+body.curtain-presenting #homeMainContent,
+body.curtain-presenting .navbar-premium {
+    transform: scale(1.02);
+    opacity: 0.94;
+    transition: transform 2.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 2.6s ease;
+}
+
+body.curtain-revealed main,
+body.curtain-revealed #homeMainContent,
+body.curtain-revealed .navbar-premium {
+    transform: scale(1);
+    opacity: 1;
+    transition: transform 2.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 2.6s ease;
+}
+
+/* --------------------------------------------------------------------------
+   MOBILE & RESPONSIVE REFINEMENTS
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+    .curtain-emblem-disc {
+        width: 140px;
+        height: 140px;
+        padding: 12px 10px;
+    }
+
+    .curtain-emblem-halo {
+        width: 180px;
+        height: 180px;
+    }
+
+    .curtain-emblem-logo {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 4px;
+    }
+
+    .curtain-emblem-brand {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+    }
+
+    .curtain-emblem-subtitle {
+        font-size: 0.46rem;
+        letter-spacing: 0.12em;
+    }
+
+    .curtain-gold-trim {
+        width: 4px;
+    }
+
+    /* Mobile opening duration: 2.2s (cinematic & smooth) */
+    .luxury-curtain-overlay.curtain-opening .curtain-panel-left {
+        animation-duration: 2.2s !important;
+    }
+
+    .luxury-curtain-overlay.curtain-opening .curtain-panel-right {
+        animation-duration: 2.2s !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   ACCESSIBILITY: prefers-reduced-motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    #luxuryCurtainIntro {
+        display: none !important;
+    }
+    body.curtain-presenting {
+        overflow: auto !important;
+        touch-action: auto !important;
+    }
+}

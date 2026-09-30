@@ -55,6 +55,45 @@ class WebsiteSettingAdmin(SingletonAdmin):
         ('Bridal Banner Section', {
             'fields': ('bridal_banner_title', 'bridal_banner_subtitle', 'bridal_banner_image', ('bridal_banner_button_text', 'bridal_banner_button_url')),
         }),
+        ('👑 Section 3: Featured Card 1 (Left)', {
+            'fields': (
+                'collection_card_1_image',
+                'collection_card_1_tag',
+                'collection_card_1_title',
+                'collection_card_1_desc',
+                ('collection_card_1_button_text', 'collection_card_1_button_url'),
+            ),
+            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 1 (Left: e.g. Kanchipuram Silks).',
+        }),
+        ('👑 Section 3: Featured Card 2 (Center)', {
+            'fields': (
+                'collection_card_2_image',
+                'collection_card_2_tag',
+                'collection_card_2_title',
+                'collection_card_2_desc',
+                ('collection_card_2_button_text', 'collection_card_2_button_url'),
+            ),
+            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 2 (Center: e.g. Banarasi Brocades).',
+        }),
+        ('👑 Section 3: Featured Card 3 (Right)', {
+            'fields': (
+                'collection_card_3_image',
+                'collection_card_3_tag',
+                'collection_card_3_title',
+                'collection_card_3_desc',
+                ('collection_card_3_button_text', 'collection_card_3_button_url'),
+            ),
+            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 3 (Right: e.g. Bridal Masterpieces).',
+        }),
+        ('🖼️ Other Homepage Editorial Section Images', {
+            'fields': (
+                'bridal_spotlight_image',
+                'artisan_weaving_image',
+                ('mosaic_hero_image', 'mosaic_festive_image', 'mosaic_handloom_image'),
+                'brand_story_image',
+            ),
+            'description': 'Upload custom images for the other homepage editorial sections anytime. If an image is left blank, the curated default image will be displayed automatically.',
+        }),
         ('Why Choose Us Section', {
             'fields': ('why_choose_subtitle', 'why_choose_title'),
         }),
@@ -132,7 +171,7 @@ class HeroSliderAdmin(admin.ModelAdmin):
     search_fields = ['title', 'subtitle', 'description']
     fieldsets = (
         ('Banner Media (Image or Video)', {
-            'fields': ('image', 'mobile_image', 'video_file', 'video_url'),
+            'fields': ('image', 'tablet_image', 'mobile_image', 'video_file', 'video_url'),
             'description': 'Upload a background image or a looping background video (.mp4/.webm file or URL). If video is provided, it will autoplay seamlessly.'
         }),
         ('Headings & Content', {
@@ -156,6 +195,15 @@ class OfferBannerAdmin(admin.ModelAdmin):
     list_display = ['title', 'display_order', 'is_active']
     list_filter = ['is_active']
     search_fields = ['title']
+    fieldsets = (
+        ('Banner Details', {
+            'fields': ('title', 'link', 'display_order', 'is_active')
+        }),
+        ('Banner Media', {
+            'fields': ('image', 'tablet_image', 'mobile_image'),
+            'description': 'Upload the desktop banner image, and optionally tablet-optimized (iPad / medium screen) and mobile-optimized (phone) images.'
+        }),
+    )
 
 class TestimonialAdmin(admin.ModelAdmin):
     list_display = ['customer_name', 'role_or_location', 'rating', 'is_active']

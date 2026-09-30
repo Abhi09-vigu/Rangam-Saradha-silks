@@ -121,54 +121,608 @@ h6,
     box-shadow: 0 4px 12px rgba(174, 111, 33, 0.25);
 }
 
-/* Premium Navbar Styling */
+/* ==========================================================================
+   GLOBAL NAVBAR SYSTEM
+   - Home Page (.home-editorial-page): Floating Transparent over hero, Solid Black on Hover/Scroll
+   - All Other Pages (Default): Pure White Luxury Navbar with Burgundy/Dark Accents
+   ========================================================================== */
+
+/* Logo Image - ALWAYS strictly constrained on every page */
+.drape-brand-logo-img {
+    height: 42px !important;
+    width: auto !important;
+    max-width: 180px !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* ==========================================================================
+   1. DEFAULT: WHITE NAVBAR (For All Other Pages: Shop, Cart, Detail, About, Contact, Account, etc.)
+   ========================================================================== */
 .navbar-premium {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
-    transition: var(--transition);
-    padding: 0.8rem 0;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05) !important;
+    padding: 0.85rem 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    transition: background 0.25s ease, padding 0.25s ease, box-shadow 0.25s ease;
 }
 
-.navbar-brand {
-    font-family: var(--font-heading);
-    font-weight: 800;
-    color: var(--primary) !important;
-    letter-spacing: -0.01em;
+/* Brand Text on White Navbar */
+.drape-brand-text {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: clamp(1.15rem, 1.6vw, 1.45rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: var(--primary, #721428) !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
 }
 
-.nav-link {
-    color: var(--text-color) !important;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: var(--transition);
+/* Nav Links on White Navbar */
+.drape-nav-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.drape-nav-list .nav-link {
     position: relative;
+    color: #1a1a1a !important;
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
     padding: 0.5rem 1rem !important;
+    text-shadow: none !important;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    display: inline-block;
+    text-decoration: none !important;
 }
 
-.nav-link:hover {
-    color: var(--primary) !important;
+.drape-nav-list .nav-link:hover {
+    color: var(--primary, #721428) !important;
+    opacity: 1 !important;
 }
 
-.navbar-premium .dropdown-toggle::after {
-    border: 0 !important;
+/* Wine/Burgundy Underline on White Navbar */
+.drape-nav-list .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background-color: var(--primary, #721428) !important;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drape-nav-list .nav-link:hover::after,
+.drape-nav-list .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* Dropdown Menu on White Navbar */
+.drape-dropdown-menu {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 10px;
+    padding: 10px 0;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1) !important;
+}
+
+.drape-dropdown-menu .dropdown-item {
+    color: #2b2b2b !important;
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    transition: all 0.2s ease;
+}
+
+.drape-dropdown-menu .dropdown-item:hover {
+    background: rgba(114, 20, 40, 0.06) !important;
+    color: var(--primary, #721428) !important;
+}
+
+.drape-dropdown-menu .dropdown-divider {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Vertical dividers on White Navbar */
+.drape-nav-divider {
+    display: inline-block;
+    width: 1px;
+    height: 18px;
+    background: rgba(0, 0, 0, 0.15) !important;
+    margin: 0 0.55rem;
+    vertical-align: middle;
+}
+
+/* Right Nav Icons on White Navbar */
+.drape-nav-icon {
+    color: #1a1a1a !important;
+    font-size: 1.2rem !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+    padding: 0.25rem 0.3rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.drape-nav-icon:hover {
+    transform: scale(1.12);
+    color: var(--primary, #721428) !important;
+}
+
+/* Bag count badge on White Navbar */
+.drape-bag-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: var(--primary, #721428) !important;
+    color: #ffffff !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(114, 20, 40, 0.35);
+}
+
+.drape-nav-toggler {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    filter: none !important;
+}
+
+/* ==========================================================================
+   Mobile Header (Drape Divaa UI: Hamburger Left, Center Brand, Right Icons)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .navbar-premium {
+        padding: 0.75rem 0 !important;
+    }
+
+    .navbar-premium .container-fluid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    /* Mobile Hamburger (3 clean lines) */
+    .mobile-drape-toggler {
+        background: transparent;
+        border: none;
+        padding: 8px 4px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        cursor: pointer;
+        z-index: 5;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .mobile-drape-toggler .bar {
+        display: block;
+        width: 24px;
+        height: 2.2px;
+        background-color: #1a1a1a;
+        border-radius: 2px;
+        transition: background-color 0.25s ease;
+    }
+
+    /* Homepage: Keep hamburger bars white both at top and when scrolled down over dark navbar */
+    .home-editorial-page .navbar-premium .mobile-drape-toggler .bar {
+        background-color: #ffffff !important;
+    }
+
+    /* Center Brand on Mobile */
+    .navbar-premium .navbar-brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0 !important;
+        padding: 0;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .navbar-premium .navbar-brand .drape-brand-logo-img {
+        height: 34px !important;
+        max-height: 36px !important;
+        width: auto !important;
+        display: block !important;
+    }
+
+    /* Hide brand title on mobile responsive only */
+    .navbar-premium .navbar-brand .drape-brand-text {
+        display: none !important;
+    }
+
+    /* Mobile Right Icons (Search & Bag) */
+    .mobile-nav-icons {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        z-index: 5;
+    }
+
+    .mobile-nav-icon {
+        color: #1a1a1a;
+        font-size: 1.25rem;
+        line-height: 1;
+        position: relative;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease, transform 0.15s ease;
+    }
+
+    /* Homepage: Keep search and cart icons white both at top and when scrolled down */
+    .home-editorial-page .navbar-premium .mobile-nav-icon {
+        color: #ffffff !important;
+    }
+
+    .home-editorial-page .navbar-premium .mobile-nav-icon .drape-bag-badge {
+        background: #ffffff !important;
+        color: #111111 !important;
+    }
+
+    .mobile-nav-icon:hover {
+        color: #AF0446;
+        transform: scale(1.08);
+    }
+
+    .mobile-nav-icon .drape-bag-badge {
+        position: absolute;
+        top: -6px;
+        right: -9px;
+        background: #111111;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        min-width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* ==========================================================================
+   Mobile Slide-Over Offcanvas Drawer (Drape Divaa UI Reference)
+   ========================================================================== */
+.mobile-drape-offcanvas {
+    width: 320px !important;
+    max-width: 85vw !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 12px 0 45px rgba(0, 0, 0, 0.22) !important;
+    z-index: 1060 !important;
+}
+
+.mobile-drape-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eeeeee;
+    background: #ffffff;
+}
+
+.mobile-drape-brand-text {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 1.12rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    color: #111111 !important;
+    text-transform: uppercase !important;
+    line-height: 1.25 !important;
+    display: inline-block !important;
+}
+
+.mobile-drape-close {
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.25rem !important;
+    color: #111111 !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.2s ease, color 0.2s ease !important;
+}
+
+.mobile-drape-close:hover {
+    color: #AF0446 !important;
+    transform: scale(1.15) !important;
+}
+
+.mobile-drape-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mobile-drape-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
     margin: 0 !important;
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background-color: var(--primary);
-    transition: var(--transition);
-    transform: translateX(-50%);
+/* List Items */
+.mobile-drape-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 24px !important;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    background: transparent !important;
+    transition: background-color 0.15s ease, color 0.15s ease, padding-left 0.2s ease !important;
 }
 
-.nav-link:hover::after {
-    width: 60%;
+.mobile-drape-item span {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.mobile-drape-item:hover,
+.mobile-drape-item:active {
+    background-color: #faf7f5 !important;
+    color: #AF0446 !important;
+    padding-left: 28px !important;
+}
+
+.mobile-drape-item:hover span,
+.mobile-drape-item:active span {
+    color: #AF0446 !important;
+}
+
+/* Accordion Rows (+ icon) */
+.mobile-drape-accordion-btn {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 24px !important;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.mobile-drape-accordion-btn span {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.mobile-drape-accordion-btn:hover {
+    background-color: #faf7f5 !important;
+    color: #AF0446 !important;
+}
+
+.mobile-drape-accordion-btn:hover span {
+    color: #AF0446 !important;
+}
+
+.mobile-drape-plus {
+    font-size: 1.35rem !important;
+    font-weight: 400 !important;
+    color: #1a1a1a !important;
+    transition: transform 0.25s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    width: 22px !important;
+    height: 22px !important;
+}
+
+.mobile-drape-accordion-btn:not(.collapsed) .mobile-drape-plus {
+    transform: rotate(45deg) !important;
+}
+
+/* Submenu inside Accordion */
+.mobile-drape-submenu {
+    background: #faf8f6;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.mobile-drape-subitem {
+    display: block;
+    padding: 12px 24px 12px 36px;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #4b5563 !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid #f0ece8;
+    transition: color 0.15s ease, padding-left 0.15s ease;
+}
+
+.mobile-drape-subitem:hover {
+    color: #AF0446 !important;
+    padding-left: 40px;
+}
+
+/* Drawer Footer Social Media Row (Aligned to Left per Drape Divaa UI) */
+.mobile-drape-footer {
+    padding: 20px 24px !important;
+    margin-top: auto !important;
+    border-top: 1px solid #eeeeee !important;
+    background: #ffffff !important;
+}
+
+.mobile-drape-socials {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 20px !important;
+}
+
+.mobile-social-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+    color: #555555;
+    text-decoration: none !important;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.mobile-social-icon:hover {
+    transform: translateY(-2px) scale(1.18);
+    opacity: 0.9;
+}
+
+.mobile-social-icon.social-x { color: #000000; }
+.mobile-social-icon.social-fb { color: #3b5998; }
+.mobile-social-icon.social-pinterest { color: #bd081c; }
+.mobile-social-icon.social-insta { color: #e1306c; }
+.mobile-social-icon.social-yt { color: #ff0000; }
+
+/* Hide floating contact & book video call widget when mobile drawer is open */
+body:has(.mobile-drape-offcanvas.show) .floating-contact-widget,
+.mobile-drape-offcanvas.show ~ .floating-contact-widget,
+body.drawer-open .floating-contact-widget {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* ==========================================================================
+   2. HOMEPAGE ONLY: DRAPE DIVAA FLOATING NAVBAR (.home-editorial-page)
+   ========================================================================== */
+.home-editorial-page .navbar-premium {
+    position: fixed !important;
+    background: transparent !important;
+    border-bottom: 1px solid transparent !important;
+    box-shadow: none !important;
+    padding: 1.15rem 0 !important;
+}
+
+.home-editorial-page .navbar-premium:hover,
+.home-editorial-page .navbar-premium:focus-within,
+.home-editorial-page .navbar-premium.navbar-scrolled {
+    background: #000000 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.75) !important;
+}
+
+.home-editorial-page .navbar-premium.navbar-scrolled {
+    padding: 0.75rem 0 !important;
+}
+
+.home-editorial-page .drape-brand-text {
+    color: #ffffff !important;
+}
+
+.home-editorial-page .drape-nav-list .nav-link {
+    color: #ffffff !important;
+}
+
+.home-editorial-page .drape-nav-list .nav-link:hover {
+    color: #ffffff !important;
+}
+
+.home-editorial-page .drape-nav-list .nav-link::after {
+    background-color: #ffffff !important;
+}
+
+.home-editorial-page .drape-dropdown-menu {
+    background: #111111 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+}
+
+.home-editorial-page .drape-dropdown-menu .dropdown-item {
+    color: #e5e5e5 !important;
+}
+
+.home-editorial-page .drape-dropdown-menu .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.home-editorial-page .drape-nav-divider {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+.home-editorial-page .drape-nav-icon {
+    color: #ffffff !important;
+}
+
+.home-editorial-page .drape-bag-badge {
+    background: #ffffff !important;
+    color: #111111 !important;
+}
+
+.home-editorial-page .drape-nav-toggler {
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    filter: invert(1) !important;
+}
+
+@media (max-width: 991.98px) {
+    .home-editorial-page .navbar-premium #navbarContent {
+        background: #000000 !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85) !important;
+    }
+    .home-editorial-page .navbar-premium #navbarContent .nav-link {
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
 }
 
 /* Desktop Hover Dropdown Support for Navbar */
@@ -1010,14 +1564,18 @@ h6,
 
 /* Floating Contact & Book Video Call Widget Group */
 .floating-contact-widget {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 9999;
-    gap: 8px;
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    z-index: 99999 !important;
+    gap: 8px !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
 }
 
 /* Floating WhatsApp / Customer Care Icon Button (Top) */
@@ -1159,32 +1717,32 @@ h6,
 
 @media (max-width: 576px) {
     .floating-contact-widget {
-        bottom: 16px;
-        right: 14px;
-        gap: 6px;
+        bottom: 16px !important;
+        right: 14px !important;
+        gap: 6px !important;
     }
 
     .floating-support-btn,
     .whatsapp-float-btn {
-        width: 46px;
-        height: 46px;
-        padding: 7px;
-        margin-right: 12px;
+        width: 46px !important;
+        height: 46px !important;
+        padding: 7px !important;
+        margin-right: 12px !important;
     }
 
     .floating-book-call-btn {
-        padding: 5px 14px 5px 6px;
-        gap: 7px;
+        padding: 5px 14px 5px 6px !important;
+        gap: 7px !important;
     }
 
     .floating-book-call-btn .video-icon-badge {
-        width: 28px;
-        height: 28px;
-        font-size: 0.85rem;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.85rem !important;
     }
 
     .floating-book-call-btn .video-btn-label {
-        font-size: 0.82rem;
+        font-size: 0.82rem !important;
     }
 }
 
