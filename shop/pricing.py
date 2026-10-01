@@ -4,21 +4,16 @@ from home.models import WebsiteSetting
 def get_website_settings():
     return WebsiteSetting.objects.first() or WebsiteSetting()
 
-def calculate_order_pricing(subtotal, discount=Decimal('0.00'), payment_method='COD', settings_obj=None):
+def calculate_order_pricing(subtotal, discount=Decimal('0.00'), payment_method='ONLINE', settings_obj=None):
     """
     Unified, authoritative pricing & eligibility calculation engine for Rangam Saradha Silks.
     Used across Cart, Checkout, Order Creation, Invoices, Customer Receipt & Owner Notification.
 
     Business Rules:
-    1. Every product/order has 5% GST calculated internally.
-    2. Customer views show tax-inclusive totals (no separate GST line displayed to customer).
-    3. Orders strictly BELOW ₹2,000 (order total before COD fee):
-       - COD is available.
-       - Applicable COD fee (default ₹49.00) is added when COD is selected.
-    4. Orders ₹2,000 OR ABOVE:
-       - COD is strictly UNAVAILABLE.
-       - Only Online Payment is allowed.
-       - COD fee is ₹0.00.
+    1. Every product/order has GST calculated internally based on Website Settings.
+    2. Customer views show tax-inclusive totals.
+    3. Shipping is FREE for orders above free_shipping_limit.
+    4. Cash on Delivery is completely removed. Only 100% secure online payments are accepted.
     """
     if settings_obj is None:
         settings_obj = get_website_settings()
@@ -53,30 +48,21 @@ def calculate_order_pricing(subtotal, discount=Decimal('0.00'), payment_method='
     shipping_charge = Decimal(str(getattr(settings_obj, 'shipping_charge', 0.00) or 0.00))
     shipping = Decimal('0.00') if product_total_with_tax >= free_limit else shipping_charge
 
-    # 3. Order Total (Product Total with 5% GST directly added + Shipping)
+    # 3. Order Total (Product Total with GST + Shipping)
     order_amount_before_cod = product_total_with_tax + shipping
 
-    # 4. COD Eligibility & Free COD Threshold
-    # COD is available for ALL orders.
-    # Orders below cod_max_limit (default ₹2,000) have a standard COD fee (default ₹49).
-    # Orders at or above cod_max_limit (₹2,000+) receive FREE Cash On Delivery (₹0 COD fee).
-    cod_max_limit = Decimal(str(getattr(settings_obj, 'cod_max_limit', 2000.00) or 2000.00))
-    is_cod_eligible = True
-    cod_is_free = order_amount_before_cod >= cod_max_limit
+    # 4. COD completely removed - only online payments
+    is_cod_eligible = False
+    cod_is_free = False
+    cod_max_limit = Decimal('0.00')
+    standard_cod_fee = Decimal('0.00')
+    cod_charge = Decimal('0.00')
+    effective_payment_method = 'ONLINE' if payment_method in ['COD', None, ''] else payment_method
 
-    # 5. COD Charge Application
-    standard_cod_fee = Decimal(str(getattr(settings_obj, 'cod_charge', 49.00) or 49.00))
-    if payment_method == 'COD':
-        effective_payment_method = 'COD'
-        cod_charge = Decimal('0.00') if cod_is_free else standard_cod_fee
-    else:
-        effective_payment_method = 'ONLINE'
-        cod_charge = Decimal('0.00')
+    # 5. Grand Total (No COD fee added)
+    grand_total = order_amount_before_cod
 
-    # 6. Grand Total
-    grand_total = order_amount_before_cod + cod_charge
-
-    # 7. Accounting CGST / SGST breakdown (for owner invoice / admin email)
+    # 6. Accounting CGST / SGST breakdown (for owner invoice / admin email)
     cgst_rate = (tax_percent / Decimal('2')).quantize(Decimal('0.01'))
     sgst_rate = (tax_percent / Decimal('2')).quantize(Decimal('0.01'))
     cgst_amount = (tax_amount / Decimal('2')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)

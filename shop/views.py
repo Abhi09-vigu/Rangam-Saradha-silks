@@ -463,11 +463,11 @@ def cart_detail(request):
         'tax': pricing['tax_amount'],
         'shipping': pricing['shipping'],
         'order_amount_before_cod': pricing['order_amount_before_cod'],
-        'is_cod_eligible': pricing['is_cod_eligible'],
-        'cod_is_free': pricing['cod_is_free'],
-        'cod_free_threshold': pricing['cod_free_threshold'],
-        'cod_max_limit': pricing['cod_max_limit'],
-        'standard_cod_fee': pricing['standard_cod_fee'],
+        'is_cod_eligible': False,
+        'cod_is_free': False,
+        'cod_free_threshold': Decimal('0.00'),
+        'cod_max_limit': Decimal('0.00'),
+        'standard_cod_fee': Decimal('0.00'),
         'grand_total': pricing['grand_total'],
         'site_settings': settings_obj,
     }
@@ -666,9 +666,9 @@ def checkout(request):
         except Coupon.DoesNotExist:
             pass
             
-    # Pricing evaluation
-    pricing = calculate_order_pricing(subtotal, discount=discount, payment_method='COD', settings_obj=settings_obj)
-    default_payment = 'COD'
+    # Pricing evaluation - 100% online payment only
+    pricing = calculate_order_pricing(subtotal, discount=discount, payment_method='ONLINE', settings_obj=settings_obj)
+    default_payment = 'ONLINE'
 
     context = {
         'cart': cart,
@@ -679,12 +679,12 @@ def checkout(request):
         'tax': pricing['tax_amount'],
         'shipping': pricing['shipping'],
         'order_amount_before_cod': pricing['order_amount_before_cod'],
-        'is_cod_eligible': pricing['is_cod_eligible'],
-        'cod_is_free': pricing['cod_is_free'],
-        'cod_free_threshold': pricing['cod_free_threshold'],
-        'cod_max_limit': pricing['cod_max_limit'],
-        'standard_cod_fee': pricing['standard_cod_fee'],
-        'cod_charge': pricing['cod_charge'],
+        'is_cod_eligible': False,
+        'cod_is_free': False,
+        'cod_free_threshold': Decimal('0.00'),
+        'cod_max_limit': Decimal('0.00'),
+        'standard_cod_fee': Decimal('0.00'),
+        'cod_charge': Decimal('0.00'),
         'default_payment_method': default_payment,
         'grand_total': pricing['grand_total'],
         'site_settings': settings_obj,
@@ -694,129 +694,11 @@ def checkout(request):
 
 @customer_required
 def order_create(request):
-    from django.db import transaction
-    if request.method == 'POST':
-        cart = _get_or_create_cart(request)
-        if not cart.items.exists():
-            messages.error(request, "Your cart is empty.")
-            return redirect('shop:cart_detail')
-            
-        address_id = request.POST.get('address_id')
-        if not address_id:
-            messages.error(request, "Please select a delivery address.")
-            return redirect('shop:checkout')
-            
-        address = get_object_or_404(Address, id=address_id, user=request.user)
-        payment_method = request.POST.get('payment_method', 'COD').upper()
-        if payment_method not in ['COD', 'ONLINE']:
-            payment_method = 'ONLINE'
-        
-        try:
-            with transaction.atomic():
-                # Lock products using select_for_update to avoid race conditions/overselling
-                cart_items = list(cart.items.all())
-                product_ids = [item.product_id for item in cart_items]
-                
-                locked_products = {
-                    p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
-                }
-                
-                # Validate stock for all items
-                for item in cart_items:
-                    product = locked_products.get(item.product_id)
-                    if not product or not product.is_active:
-                        raise ValueError(f"Product '{item.product.name}' is no longer active.")
-                    if product.stock < item.quantity:
-                        raise ValueError(f"Product '{product.name}' has insufficient stock. Only {product.stock} left.")
-                
-                # Calculate pricing directly on the server - NEVER trust frontend amounts
-                settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
-                subtotal = sum(item.get_total_price() for item in cart_items)
-                
-                # Coupon
-                coupon_code = request.session.get('coupon_code')
-                coupon = None
-                discount = Decimal('0.00')
-                if coupon_code:
-                    try:
-                        coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-                        if coupon.is_valid(subtotal, cart=cart):
-                            discount = coupon.calculate_discount(subtotal, cart=cart)
-                    except Coupon.DoesNotExist:
-                        pass
-                        
-                pricing = calculate_order_pricing(subtotal, discount=discount, payment_method=payment_method, settings_obj=settings_obj)
-                
-                # STRICT BACKEND COD SECURITY VALIDATION
-                if payment_method == 'COD' and not pricing['is_cod_eligible']:
-                    messages.error(request, f"Cash on Delivery is available only for orders below ₹{pricing['cod_max_limit']:.0f}. Please choose Online Payment.")
-                    return redirect('shop:checkout')
-
-                tax = pricing['tax_amount']
-                shipping = pricing['shipping']
-                cod_charge = pricing['cod_charge']
-                grand_total = pricing['grand_total']
-                final_payment_method = pricing['effective_payment_method']
-                
-                # Generate Order Number
-                order_number = f"RS-{uuid.uuid4().hex[:8].upper()}"
-                
-                # Create Order
-                order = Order.objects.create(
-                    user=request.user,
-                    order_number=order_number,
-                    full_name=address.full_name,
-                    phone_number=str(address.phone_number),
-                    email=request.user.email,
-                    address_line_1=address.address_line_1,
-                    address_line_2=address.address_line_2,
-                    city=address.city,
-                    state=address.state,
-                    pincode=address.pincode,
-                    landmark=address.landmark,
-                    payment_method=final_payment_method,
-                    payment_status='PENDING' if final_payment_method == 'COD' else 'PAID',
-                    order_status='PENDING',
-                    subtotal=pricing['subtotal'],
-                    shipping_cost=shipping,
-                    tax_amount=tax,
-                    cod_charge=cod_charge,
-                    discount_amount=pricing['discount'],
-                    grand_total=grand_total,
-                    coupon_used=coupon
-                )
-                
-                # Move CartItems to OrderItems and decrement stock
-                for item in cart_items:
-                    product = locked_products.get(item.product_id)
-                    OrderItem.objects.create(
-                        order=order,
-                        product=product,
-                        quantity=item.quantity,
-                        price=item.get_unit_price_with_tax()
-                    )
-                    product.stock -= item.quantity
-                    product.save()
-                    
-                # Update Coupon usage
-                if coupon:
-                    coupon.used_count += 1
-                    coupon.save()
-                    del request.session['coupon_code']
-                    
-                # Clear Cart
-                cart.items.all().delete()
-                
-                # Dispatch comprehensive accounting order notification to store owner/admin
-                send_owner_order_notification_email(order)
-                
-                messages.success(request, f"Order #{order_number} placed successfully!")
-                return render(request, 'shop/order_success.html', {'order': order, 'site_settings': settings_obj})
-                
-        except ValueError as e:
-            messages.error(request, str(e))
-            return redirect('shop:cart_detail')
-            
+    """
+    Cash on Delivery is discontinued. Online payment via Razorpay is mandatory.
+    Direct form submission attempts to create COD orders are safely rejected.
+    """
+    messages.error(request, "Cash on Delivery is no longer available. Please complete your order securely online.")
     return redirect('shop:checkout')
 
 

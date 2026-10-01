@@ -25,7 +25,7 @@ def order_pre_save(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def order_post_save(sender, instance, created, **kwargs):
     """
-    Triggers after saving. If the order is newly created (e.g. COD), it sends the confirmation receipt.
+    Triggers after saving.
     For Razorpay/Online orders, confirmation email is sent once payment is verified and confirmed.
     Otherwise, if the status has changed, it sends an update email notification.
     """

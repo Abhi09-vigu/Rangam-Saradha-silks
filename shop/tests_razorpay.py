@@ -25,8 +25,6 @@ class RazorpayIntegrationTests(TestCase):
             tax_percentage=5.00,
             shipping_charge=50.00,
             free_shipping_limit=1000.00,
-            cod_charge=49.00,
-            cod_max_limit=2000.00,
             currency="₹"
         )
 
@@ -346,13 +344,10 @@ class RazorpayIntegrationTests(TestCase):
         self.assertEqual(self.product.stock, 5)
         self.assertTrue(self.cart.items.exists())
 
-    def test_cod_flow_remains_unchanged(self):
+    def test_cod_flow_is_rejected(self):
         """
-        COD orders continue to function through the original order_create flow:
-        - Does NOT call Razorpay.
-        - Creates order with payment_method='COD'.
-        - Deducts stock.
-        - Clears cart.
+        Cash on Delivery is discontinued. Any attempt to submit COD via order_create
+        is safely rejected with an error message and redirects to checkout.
         """
         initial_stock = self.product.stock
         url = reverse('shop:order_create')
@@ -360,20 +355,19 @@ class RazorpayIntegrationTests(TestCase):
             'address_id': self.address.id,
             'payment_method': 'COD'
         })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Order Placed Successfully")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('shop:checkout'), response.url)
 
-        # Check order created
+        # Check no COD order was created
         cod_order = Order.objects.filter(user=self.user, payment_method='COD').first()
-        self.assertIsNotNone(cod_order)
-        self.assertEqual(cod_order.payment_status, 'PENDING')
+        self.assertIsNone(cod_order)
 
-        # Stock deducted
+        # Stock intact
         self.product.refresh_from_db()
-        self.assertEqual(self.product.stock, initial_stock - 1)
+        self.assertEqual(self.product.stock, initial_stock)
 
-        # Cart cleared
-        self.assertFalse(self.cart.items.exists())
+        # Cart still exists
+        self.assertTrue(self.cart.items.exists())
 
     def test_service_signature_verification_hmac(self):
         """

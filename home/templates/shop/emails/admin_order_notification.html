@@ -304,27 +304,12 @@
                         <td><strong>Total GST Included (5%):</strong></td>
                         <td class="val"><strong>{{ currency }}{{ total_gst_amount|floatformat:2 }}</strong></td>
                     </tr>
+                    {% if order.cod_charge > 0 %}
                     <tr>
-                        <td>
-                            COD Charge:
-                            {% if order.payment_method == 'COD' %}
-                                {% if order.cod_charge > 0 %}
-                                <span class="badge badge-cod">Applied</span>
-                                {% else %}
-                                <span class="badge" style="background-color: #ecfdf5; color: #065f46;">Free COD (₹2,000+)</span>
-                                {% endif %}
-                            {% else %}
-                            <span style="font-size: 11px; color: #64748b;">(Not Applicable - Online)</span>
-                            {% endif %}
-                        </td>
-                        <td class="val">
-                            {% if order.payment_method == 'COD' and order.cod_charge > 0 %}
-                            {{ currency }}{{ order.cod_charge|floatformat:2 }}
-                            {% else %}
-                            {{ currency }}0.00
-                            {% endif %}
-                        </td>
+                        <td>COD Charge:</td>
+                        <td class="val">{{ currency }}{{ order.cod_charge|floatformat:2 }}</td>
                     </tr>
+                    {% endif %}
                     <tr>
                         <td>Shipping Charges:</td>
                         <td class="val">

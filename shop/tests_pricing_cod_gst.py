@@ -30,8 +30,7 @@ class PricingCodGstTestCase(TestCase):
             gst_number="33AAAAA0000A1Z5",
             shipping_charge=Decimal('0.00'),
             free_shipping_limit=Decimal('0.00'),
-            cod_charge=Decimal('49.00'),
-            cod_max_limit=Decimal('2000.00')
+            tax_percentage=Decimal('5.00')
         )
         
         self.user = User.objects.create_user(
@@ -110,16 +109,16 @@ class PricingCodGstTestCase(TestCase):
         )
 
     def test_case_a_cart_1500_cod_selected(self):
-        """Case A: Cart with item ₹1,500, COD selected -> 5% GST directly added (₹75), Subtotal = ₹1,575. Below ₹2,000, ₹49 COD charge added, final total = ₹1,624."""
+        """Case A: Cart with item ₹1,500, COD requested -> COD is disabled, 0 COD charge added, final total = ₹1,575."""
         pricing = calculate_order_pricing(
             subtotal=Decimal('1500.00'),
             payment_method='COD',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible'])
-        self.assertEqual(pricing['cod_charge'], Decimal('49.00'))
+        self.assertFalse(pricing['is_cod_eligible'])
+        self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
         self.assertEqual(pricing['subtotal'], Decimal('1575.00'))
-        self.assertEqual(pricing['grand_total'], Decimal('1624.00'))
+        self.assertEqual(pricing['grand_total'], Decimal('1575.00'))
         # 5% GST added: 1500 * 0.05 = 75.00
         self.assertEqual(pricing['tax_amount'], Decimal('75.00'))
         self.assertEqual(pricing['cgst_amount'], Decimal('37.50'))
@@ -132,65 +131,61 @@ class PricingCodGstTestCase(TestCase):
             payment_method='ONLINE',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible']) # COD is available to pick, but not selected
+        self.assertFalse(pricing['is_cod_eligible'])
         self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
         self.assertEqual(pricing['subtotal'], Decimal('1575.00'))
         self.assertEqual(pricing['grand_total'], Decimal('1575.00'))
         self.assertEqual(pricing['effective_payment_method'], 'ONLINE')
 
     def test_case_c_cart_2000_cod_available_free(self):
-        """Case C: Cart with item ₹2,000 -> 5% GST added (₹100), Subtotal = ₹2,100 -> FREE COD (₹0 COD charge), Total = ₹2,100."""
+        """Case C: Cart with item ₹2,000 -> 5% GST added (₹100), Subtotal = ₹2,100 -> ₹0 COD charge, Total = ₹2,100."""
         pricing = calculate_order_pricing(
             subtotal=Decimal('2000.00'),
             payment_method='COD',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible'])
-        self.assertTrue(pricing['cod_is_free'])
+        self.assertFalse(pricing['is_cod_eligible'])
         self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
-        self.assertEqual(pricing['effective_payment_method'], 'COD')
+        self.assertEqual(pricing['effective_payment_method'], 'ONLINE')
         self.assertEqual(pricing['subtotal'], Decimal('2100.00'))
         self.assertEqual(pricing['grand_total'], Decimal('2100.00'))
 
     def test_case_d_cart_2500_cod_available_free(self):
-        """Case D: Cart with item ₹2,500 -> 5% GST added (₹125), Subtotal = ₹2,625 -> FREE COD (₹0 COD charge), Total = ₹2,625."""
+        """Case D: Cart with item ₹2,500 -> 5% GST added (₹125), Subtotal = ₹2,625 -> ₹0 COD charge, Total = ₹2,625."""
         pricing = calculate_order_pricing(
             subtotal=Decimal('2500.00'),
             payment_method='COD',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible'])
-        self.assertTrue(pricing['cod_is_free'])
+        self.assertFalse(pricing['is_cod_eligible'])
         self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
-        self.assertEqual(pricing['effective_payment_method'], 'COD')
+        self.assertEqual(pricing['effective_payment_method'], 'ONLINE')
         self.assertEqual(pricing['subtotal'], Decimal('2625.00'))
         self.assertEqual(pricing['grand_total'], Decimal('2625.00'))
 
     def test_case_e_cart_multiple_items_1800_cod_available(self):
-        """Case E: Cart with multiple items totaling ₹1,800 -> 5% GST added (₹90), Subtotal = ₹1,890. Below ₹2,000, ₹49 fee added if COD selected, Total = ₹1,939."""
+        """Case E: Cart with multiple items totaling ₹1,800 -> 5% GST added (₹90), Subtotal = ₹1,890. COD charge = ₹0, Total = ₹1,890."""
         pricing = calculate_order_pricing(
             subtotal=Decimal('1800.00'),
             payment_method='COD',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible'])
-        self.assertFalse(pricing['cod_is_free'])
-        self.assertEqual(pricing['cod_charge'], Decimal('49.00'))
+        self.assertFalse(pricing['is_cod_eligible'])
+        self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
         self.assertEqual(pricing['subtotal'], Decimal('1890.00'))
-        self.assertEqual(pricing['grand_total'], Decimal('1939.00'))
-        self.assertEqual(pricing['effective_payment_method'], 'COD')
+        self.assertEqual(pricing['grand_total'], Decimal('1890.00'))
+        self.assertEqual(pricing['effective_payment_method'], 'ONLINE')
 
     def test_case_f_cart_multiple_items_2200_cod_available_free(self):
-        """Case F: Cart with multiple items totaling ₹2,200 -> 5% GST added (₹110), Subtotal = ₹2,310 -> FREE COD (₹0 COD charge), Total = ₹2,310."""
+        """Case F: Cart with multiple items totaling ₹2,200 -> 5% GST added (₹110), Subtotal = ₹2,310 -> ₹0 COD charge, Total = ₹2,310."""
         pricing = calculate_order_pricing(
             subtotal=Decimal('2200.00'),
             payment_method='COD',
             settings_obj=self.settings
         )
-        self.assertTrue(pricing['is_cod_eligible'])
-        self.assertTrue(pricing['cod_is_free'])
+        self.assertFalse(pricing['is_cod_eligible'])
         self.assertEqual(pricing['cod_charge'], Decimal('0.00'))
-        self.assertEqual(pricing['effective_payment_method'], 'COD')
+        self.assertEqual(pricing['effective_payment_method'], 'ONLINE')
         self.assertEqual(pricing['subtotal'], Decimal('2310.00'))
         self.assertEqual(pricing['grand_total'], Decimal('2310.00'))
 
@@ -318,31 +313,24 @@ class PricingCodGstTestCase(TestCase):
         self.assertIn('TAX INVOICE', html_detail)
         self.assertIn('invoice-print-footer', html_detail)
 
-    def test_checkout_and_order_create_above_2000_with_free_cod(self):
-        """Verify user can place a COD order for ₹2,500 with FREE COD (₹0 fee)."""
+    def test_checkout_and_order_create_rejects_cod(self):
+        """Verify COD is rejected on order_create and redirects to checkout."""
         client = Client()
         client.force_login(self.user)
         
-        # Add ₹2,500 product to cart
+        # Add product to cart
         cart = Cart.objects.create(user=self.user)
-        CartItem.objects.create(cart=cart, product=self.prod_2500, quantity=1)
+        CartItem.objects.create(cart=cart, product=self.prod_2000, quantity=1)
         
         response = client.post(reverse('shop:order_create'), {
             'address_id': self.address.id,
             'payment_method': 'COD'
-        }, follow=True)
+        })
         
-        # Should succeed
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Order Placed Successfully!")
-        
-        # Check order created
-        order = Order.objects.first()
-        self.assertIsNotNone(order)
-        self.assertEqual(order.payment_method, 'COD')
-        self.assertEqual(order.cod_charge, Decimal('0.00')) # FREE COD for orders >= 2000
-        self.assertEqual(order.grand_total, Decimal('2625.00'))
-        self.assertEqual(order.subtotal, Decimal('2625.00'))
+        # Should redirect to checkout
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('shop:checkout'), response.url)
+        self.assertEqual(Order.objects.count(), 0)
 
     def test_admin_can_edit_invoice_from_backend(self):
         """Verify that an admin can edit customer name, billing GST number, and address from backend, while amounts remain locked."""

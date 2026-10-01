@@ -42,14 +42,39 @@ document.addEventListener('DOMContentLoaded', function () {
         thumbItems.forEach((t, i) => {
             if (i === currentIndex) {
                 t.classList.add('active');
-                // Scroll thumbnail into view if needed
-                if (thumbsList) {
-                    targetThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
             } else {
                 t.classList.remove('active');
             }
         });
+
+        // Scroll ONLY the thumbsList container internally without ever moving the window/page scroll position
+        if (thumbsList && targetThumb) {
+            const isHorizontal = thumbsList.scrollWidth > thumbsList.clientWidth && thumbsList.scrollHeight <= thumbsList.clientHeight;
+
+            if (isHorizontal) {
+                const thumbLeft = targetThumb.offsetLeft;
+                const thumbRight = thumbLeft + targetThumb.offsetWidth;
+                const listLeft = thumbsList.scrollLeft;
+                const listRight = listLeft + thumbsList.clientWidth;
+
+                if (thumbLeft < listLeft) {
+                    thumbsList.scrollTo({ left: thumbLeft, behavior: 'smooth' });
+                } else if (thumbRight > listRight) {
+                    thumbsList.scrollTo({ left: thumbRight - thumbsList.clientWidth, behavior: 'smooth' });
+                }
+            } else {
+                const thumbTop = targetThumb.offsetTop;
+                const thumbBottom = thumbTop + targetThumb.offsetHeight;
+                const listTop = thumbsList.scrollTop;
+                const listBottom = listTop + thumbsList.clientHeight;
+
+                if (thumbTop < listTop) {
+                    thumbsList.scrollTo({ top: thumbTop, behavior: 'smooth' });
+                } else if (thumbBottom > listBottom) {
+                    thumbsList.scrollTo({ top: thumbBottom - thumbsList.clientHeight, behavior: 'smooth' });
+                }
+            }
+        }
 
         // 2. Smooth fade transition to new image
         mainImg.style.opacity = '0.35';
@@ -112,7 +137,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Scroll Down / Next Thumbnail Button
     if (thumbsNavBtn) {
-        thumbsNavBtn.addEventListener('click', function () {
+        thumbsNavBtn.addEventListener('click', function (e) {
+            if (e) e.preventDefault();
             const nextIdx = (currentIndex + 1) % thumbItems.length;
             switchToIndex(nextIdx, false);
             restartAutoSlide();

@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from zoneinfo import ZoneInfo
 from django.db import models
 from django.utils.text import slugify
@@ -16,8 +17,6 @@ class WebsiteSetting(models.Model):
     gst_number = models.CharField(max_length=30, default="33AAAAA0000A1Z5", blank=True, help_text="Business GSTIN for invoices and tax compliance")
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     free_shipping_limit = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00)
-    cod_charge = models.DecimalField(max_digits=10, decimal_places=2, default=49.00, help_text="Cash On Delivery fee for orders below the threshold")
-    cod_max_limit = models.DecimalField(max_digits=10, decimal_places=2, default=2000.00, help_text="Orders at or above this amount receive FREE Cash On Delivery (₹0 COD fee)")
     call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
 
@@ -83,8 +82,16 @@ class WebsiteSetting(models.Model):
         return now < target
 
     @property
+    def cod_charge(self):
+        return Decimal('0.00')
+
+    @property
+    def cod_max_limit(self):
+        return Decimal('0.00')
+
+    @property
     def cod_free_threshold(self):
-        return self.cod_max_limit
+        return Decimal('0.00')
 
     def get_priority_sku_prefixes(self):
         """

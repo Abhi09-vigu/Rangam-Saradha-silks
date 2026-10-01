@@ -28,7 +28,7 @@ class WebsiteSettingAdminForm(forms.ModelForm):
 
 class WebsiteSettingAdmin(SingletonAdmin):
     form = WebsiteSettingAdminForm
-    list_display = ['website_name', 'priority_sku_prefixes', 'hero_display_mode', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'cod_charge', 'cod_max_limit', 'shipping_charge', 'free_shipping_limit']
+    list_display = ['website_name', 'priority_sku_prefixes', 'hero_display_mode', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'shipping_charge', 'free_shipping_limit']
     fieldsets = (
         ('🌟 TEMP POPUP: Mandatory Full-Screen Launch Overlay', {
             'fields': ('launch_mode_active', 'launch_datetime', 'launch_title', 'launch_tagline_1', 'launch_tagline_2'),
@@ -43,7 +43,7 @@ class WebsiteSettingAdmin(SingletonAdmin):
             'description': 'Control the product display order on the shop and catalog listing pages. Enter SKU prefixes separated by commas (e.g. RSS-GB, KJM-SUB). Products matching these prefixes will appear first on the shop page in this exact order, followed by all remaining products.',
         }),
         ('General Website Settings', {
-            'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), ('cod_charge', 'cod_max_limit', 'call_booking_fee'), 'maintenance_mode'),
+            'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), 'call_booking_fee', 'maintenance_mode'),
         }),
         ('Traditional Saree Collections Section (Categories)', {
             'fields': ('category_subtitle', 'category_title', 'category_description', ('category_button_text', 'category_button_url')),

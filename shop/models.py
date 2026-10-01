@@ -424,10 +424,10 @@ class Order(models.Model):
     )
     
     PAYMENT_METHODS = (
-        ('COD', 'Cash On Delivery'),
-        ('RAZORPAY', 'Pay Online (Razorpay)'),
         ('ONLINE', 'Online Payment (Razorpay)'),
+        ('RAZORPAY', 'Pay Online (Razorpay)'),
         ('OFFLINE', 'Offline Store'),
+        ('COD', 'Cash On Delivery (Disabled)'),
     )
 
     PAYMENT_STATUS_CHOICES = (
@@ -459,7 +459,7 @@ class Order(models.Model):
     landmark = models.CharField(max_length=100, blank=True, null=True)
     
     # Payment / Order Details
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='COD')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='ONLINE')
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     order_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     

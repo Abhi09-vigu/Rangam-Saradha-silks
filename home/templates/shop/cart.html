@@ -108,14 +108,10 @@
                         <span>(Inclusive of all taxes)</span>
                     </div>
 
-                    <!-- COD / Payment Notice -->
+                    <!-- Payment Trust Notice -->
                     <div class="p-2.5 rounded-3 mb-3 fs-8 bg-light text-muted border border-light">
-                        <i class="bi bi-truck me-1 text-success"></i> <strong>Cash on Delivery (COD) Available</strong>
-                        {% if cod_is_free %}
-                        <span class="badge bg-success ms-1">FREE COD</span>
-                        {% else %}
-                        <div class="text-muted mt-0.5 fs-8">({{ site_settings.currency }}{{ standard_cod_fee|floatformat:0 }} COD fee; Free COD on orders {{ site_settings.currency }}{{ cod_free_threshold|floatformat:0 }}+)</div>
-                        {% endif %}
+                        <i class="bi bi-shield-check me-1 text-success"></i> <strong>100% Secure Online Payment</strong>
+                        <div class="text-muted mt-0.5 fs-8">UPI, Credit/Debit Cards, Net Banking &amp; Wallets supported via Razorpay.</div>
                     </div>
 
                     <a href="{% url 'shop:checkout' %}" class="btn btn-primary w-100 py-2.5 rounded-pill text-uppercase fw-semibold fs-7 letter-spacing-1">Proceed to Checkout</a>
