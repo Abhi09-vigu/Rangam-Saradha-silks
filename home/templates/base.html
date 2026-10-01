@@ -82,6 +82,39 @@
             }
         } catch(e) {}
     </script>
+
+    <!-- Automatic Back/Forward Cache (bfcache) & Auth Sync handler -->
+    <script>
+        (function() {
+            function checkAuthStateSync() {
+                try {
+                    const match = document.cookie.match(/(?:^|; )rss_auth_state=([^;]*)/);
+                    if (!match) return;
+                    const cookieAuth = decodeURIComponent(match[1]);
+                    const domAuth = document.body ? document.body.getAttribute('data-auth-state') : null;
+                    if (domAuth !== null && cookieAuth !== '' && cookieAuth !== domAuth) {
+                        window.location.reload();
+                    }
+                } catch (e) {}
+            }
+
+            // Immediately reload if page was restored from browser bfcache (Back/Forward navigation)
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                    return;
+                }
+                checkAuthStateSync();
+            });
+
+            // Re-sync auth state if user authenticated or changed state in another tab
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    checkAuthStateSync();
+                }
+            });
+        })();
+    </script>
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -248,7 +281,7 @@
     {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if show_temp_popup %}temp-popup-active{% endif %} {% block body_class %}{% endblock %}">
+<body data-auth-state="{% if user.is_authenticated %}1{% else %}0{% endif %}" class="{% if show_temp_popup %}temp-popup-active{% endif %} {% block body_class %}{% endblock %}">
 
     <!-- Luxury Royal Curtain Reveal Intro Animation -->
     {% include 'includes/curtain_intro.html' %}

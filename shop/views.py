@@ -36,7 +36,13 @@ def _get_or_create_cart(request):
             request.session.create()
         session_key = request.session.session_key
         cart, created = Cart.objects.get_or_create(session_key=session_key)
+        request.session['guest_cart_id'] = cart.id
+        request.session.modified = True
     return cart
+
+def merge_carts_after_login(request, user, old_session_key=None):
+    from accounts.views import merge_carts_after_login as _merge
+    return _merge(request, user, old_session_key)
 
 
 def categories_list(request):
@@ -494,6 +500,12 @@ def cart_add(request, product_id):
     
     messages.success(request, f"Added {product.name} to your Cart.")
     if buy_now:
+        checkout_url = reverse('shop:checkout')
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            login_url = reverse('accounts:login')
+            next_dest = request.POST.get('next') or request.GET.get('next') or checkout_url
+            return redirect_to_login(next_dest, login_url)
         return redirect('shop:checkout')
     return redirect('shop:cart_detail')
 

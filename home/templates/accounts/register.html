@@ -886,8 +886,9 @@
                         <p class="signup-form-subtitle">Join Rangam Saradha Silks and be a part of our tradition.</p>
                     </div>
 
-                    <form action="{% url 'accounts:register' %}" method="POST" id="registerForm" class="auth-form">
+                    <form action="{% url 'accounts:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="POST" id="registerForm" class="auth-form">
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next_url|default:'' }}">
                         <!-- Auto-synced username fallback -->
                         <input type="hidden" name="username" id="hidden_username" value="">
 
@@ -1020,7 +1021,7 @@
 
                     <!-- Already have an account? Login Now -->
                     <p class="login-prompt">
-                        Already have an account? <a href="{% url 'accounts:login' %}" class="login-prompt-link">Login Now</a>
+                        Already have an account? <a href="{% url 'accounts:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="login-prompt-link">Login Now</a>
                     </p>
                 </div>
 
@@ -1198,7 +1199,7 @@
             if (credential) payload.credential = credential;
             if (accessToken) payload.access_token = accessToken;
 
-            const nextParam = new URLSearchParams(window.location.search).get('next');
+            const nextParam = new URLSearchParams(window.location.search).get('next') || "{{ next_url|default:'' }}";
             if (nextParam) payload.next = nextParam;
 
             fetch("{% url 'accounts:google_login' %}", {
@@ -1248,7 +1249,7 @@
                 `;
             }
 
-            const nextParam = new URLSearchParams(window.location.search).get('next');
+            const nextParam = new URLSearchParams(window.location.search).get('next') || "{{ next_url|default:'' }}";
             const payload = {
                 id_token: idToken,
                 next: nextParam || '/'

@@ -783,9 +783,10 @@
                 </div>
 
                 <!-- Password Login Form -->
-                <form action="{% url 'accounts:login' %}" method="POST" class="auth-form">
+                <form action="{% url 'accounts:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="POST" class="auth-form">
                     {% csrf_token %}
                     <input type="hidden" name="login_type" value="password">
+                    <input type="hidden" name="next" value="{{ next_url|default:'' }}">
 
                     <!-- Username Field -->
                     <div class="form-field-group">
@@ -823,7 +824,7 @@
 
                 <!-- Register Link Prompt -->
                 <p class="register-prompt">
-                    Don't have an account? <a href="{% url 'accounts:register' %}" class="register-prompt-link">Register Now</a>
+                    Don't have an account? <a href="{% url 'accounts:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="register-prompt-link">Register Now</a>
                 </p>
 
                 <!-- 4 Trust Badges -->
@@ -951,7 +952,7 @@
             if (credential) payload.credential = credential;
             if (accessToken) payload.access_token = accessToken;
 
-            const nextParam = new URLSearchParams(window.location.search).get('next');
+            const nextParam = new URLSearchParams(window.location.search).get('next') || "{{ next_url|default:'' }}";
             if (nextParam) payload.next = nextParam;
 
             fetch("{% url 'accounts:google_login' %}", {
@@ -1002,7 +1003,7 @@
                 `;
             }
 
-            const nextParam = new URLSearchParams(window.location.search).get('next');
+            const nextParam = new URLSearchParams(window.location.search).get('next') || "{{ next_url|default:'' }}";
             const payload = {
                 id_token: idToken,
                 next: nextParam || '/'

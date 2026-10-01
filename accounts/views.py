@@ -9,6 +9,8 @@ from django.http import JsonResponse, Http404
 from django.db.models import Q
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
 import random
 from datetime import timedelta
 import logging
@@ -29,6 +31,23 @@ import threading
 from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
+
+def get_safe_next_url(request, next_url, default=None):
+    """
+    Validates that next_url is a safe internal redirect and does not redirect to admin
+    for customer logins. Returns validated URL or default.
+    """
+    if next_url and isinstance(next_url, str):
+        next_url = next_url.strip()
+        if url_has_allowed_host_and_scheme(
+            url=next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure()
+        ):
+            if not next_url.startswith('/admin'):
+                return next_url
+    return default
+
 
 def _send_welcome_email_worker(email, first_name, from_email, subject, body):
     try:
@@ -177,18 +196,36 @@ def check_rate_limit(request):
     request.session['last_otp_sent_time'] = now.isoformat()
     return True, None
 
-def merge_carts_after_login(request, user, old_session_key):
+def merge_carts_after_login(request, user, old_session_key=None):
     """
     Transfers any session-based cart items to the authenticated user's cart on login.
     """
     from shop.models import Cart, CartItem
-    if not old_session_key:
-        return
-        
-    guest_cart = Cart.objects.filter(session_key=old_session_key).first()
-    if guest_cart and guest_cart.items.exists():
-        user_cart, created = Cart.objects.get_or_create(user=user)
-        
+    user_cart, _ = Cart.objects.get_or_create(user=user)
+
+    guest_carts = []
+    
+    # Check 1: By guest_cart_id stored in session
+    if request and hasattr(request, 'session'):
+        guest_cart_id = request.session.pop('guest_cart_id', None)
+        if guest_cart_id:
+            c = Cart.objects.filter(id=guest_cart_id).first()
+            if c and c != user_cart and c not in guest_carts:
+                guest_carts.append(c)
+                
+    # Check 2: By old_session_key
+    if old_session_key:
+        c = Cart.objects.filter(session_key=old_session_key).first()
+        if c and c != user_cart and c not in guest_carts:
+            guest_carts.append(c)
+
+    # Check 3: By current session_key
+    if request and hasattr(request, 'session') and request.session.session_key:
+        c = Cart.objects.filter(session_key=request.session.session_key).first()
+        if c and c != user_cart and c not in guest_carts:
+            guest_carts.append(c)
+
+    for guest_cart in guest_carts:
         for guest_item in guest_cart.items.all():
             user_item = CartItem.objects.filter(cart=user_cart, product=guest_item.product).first()
             if user_item:
@@ -203,10 +240,15 @@ def merge_carts_after_login(request, user, old_session_key):
         guest_cart.delete()
 
 def register_view(request):
+    raw_next = request.POST.get('next') or request.GET.get('next')
+    safe_next = get_safe_next_url(request, raw_next, default=None)
+
     if request.user.is_authenticated:
         if request.user.is_staff or request.user.is_superuser:
             logout(request)
         else:
+            if safe_next:
+                return redirect(safe_next)
             return redirect('home:index')
     
     if request.method == 'POST':
@@ -222,21 +264,22 @@ def register_view(request):
             merge_carts_after_login(request, user, old_session_key)
             send_registration_welcome_email(user)
             
-            next_url = request.GET.get('next')
-            if not next_url or next_url.startswith('/admin'):
-                next_url = 'home:index'
-            
+            target_url = safe_next or 'home:index'
             messages.success(request, f"Account created successfully! Welcome to Rangam Saradha Silks, {user.username}.")
-            return redirect(next_url)
+            return redirect(target_url)
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {
         'form': form,
+        'next_url': safe_next,
         'google_client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
         'firebase_config': getattr(settings, 'FIREBASE_CONFIG', {})
     })
 
 def verify_otp(request):
+    raw_next = request.POST.get('next') or request.GET.get('next') or request.session.get('otp_next_url')
+    safe_next = get_safe_next_url(request, raw_next, default=None)
+
     phone_number = request.session.get('otp_phone_number')
     username = request.session.get('registration_username')
     
@@ -256,6 +299,7 @@ def verify_otp(request):
                 if attempts >= 5:
                     request.session.pop('otp_phone_number', None)
                     request.session.pop('otp_verify_attempts', None)
+                    request.session.pop('otp_next_url', None)
                     messages.error(request, "Too many failed attempts. Please request a new verification code.")
                     return redirect('accounts:login')
                 
@@ -291,13 +335,12 @@ def verify_otp(request):
                     
                     request.session.pop('otp_phone_number', None)
                     request.session.pop('otp_verify_attempts', None)
+                    request.session.pop('otp_next_url', None)
                     
                     messages.success(request, f"Welcome back, {user.username}!")
                     
-                    next_url = request.GET.get('next')
-                    if not next_url or next_url.startswith('/admin'):
-                        next_url = 'home:index'
-                    return redirect(next_url)
+                    target_url = safe_next or 'home:index'
+                    return redirect(target_url)
                 else:
                     attempts += 1
                     request.session['otp_verify_attempts'] = attempts
@@ -316,8 +359,10 @@ def verify_otp(request):
                     merge_carts_after_login(request, user, old_session_key)
                     
                     del request.session['registration_username']
+                    request.session.pop('otp_next_url', None)
                     messages.success(request, "Account verified and logged in successfully!")
-                    return redirect('home:index')
+                    target_url = safe_next or 'home:index'
+                    return redirect(target_url)
                 else:
                     messages.error(request, "Invalid or expired OTP.")
     else:
@@ -327,14 +372,20 @@ def verify_otp(request):
         'form': form,
         'phone_number': phone_number,
         'username': username,
-        'is_phone_login': is_phone_login
+        'is_phone_login': is_phone_login,
+        'next_url': safe_next,
     })
 
 def login_view(request):
+    raw_next = request.POST.get('next') or request.GET.get('next')
+    safe_next = get_safe_next_url(request, raw_next, default=None)
+
     if request.user.is_authenticated:
         if request.user.is_staff or request.user.is_superuser:
             logout(request)
         else:
+            if safe_next:
+                return redirect(safe_next)
             return redirect('home:index')
             
     phone_form = PhoneLoginForm()
@@ -352,7 +403,8 @@ def login_view(request):
                     messages.error(request, err_msg)
                     return render(request, 'accounts/login.html', {
                         'phone_form': phone_form,
-                        'active_tab': 'phone'
+                        'active_tab': 'phone',
+                        'next_url': safe_next,
                     })
                 
                 if is_mock_mode():
@@ -365,15 +417,22 @@ def login_view(request):
                 if success:
                     request.session['otp_phone_number'] = phone_number
                     request.session['otp_verify_attempts'] = 0
+                    if safe_next:
+                        request.session['otp_next_url'] = safe_next
                     messages.success(request, f"Verification code sent to {phone_number}. " + (msg if is_mock_mode() else ""))
-                    return redirect('accounts:verify_otp')
+                    verify_url = reverse('accounts:verify_otp')
+                    if safe_next:
+                        from urllib.parse import quote
+                        verify_url += f"?next={quote(safe_next)}"
+                    return redirect(verify_url)
                 else:
                     messages.error(request, f"Error sending verification code: {msg}")
             else:
                 messages.error(request, "Please enter a valid mobile number.")
                 return render(request, 'accounts/login.html', {
                     'phone_form': phone_form,
-                    'active_tab': 'phone'
+                    'active_tab': 'phone',
+                    'next_url': safe_next,
                 })
         else:
             username_or_email = request.POST.get('username', '').strip()
@@ -405,10 +464,8 @@ def login_view(request):
                     merge_carts_after_login(request, user, old_session_key)
                     
                     messages.success(request, f"Welcome back, {user.username}!")
-                    next_url = request.GET.get('next')
-                    if not next_url or next_url.startswith('/admin'):
-                        next_url = 'home:index'
-                    return redirect(next_url)
+                    target_url = safe_next or 'home:index'
+                    return redirect(target_url)
                 else:
                     messages.error(request, "Account is disabled. Please contact support.")
                     return redirect('accounts:login')
@@ -418,6 +475,7 @@ def login_view(request):
     return render(request, 'accounts/login.html', {
         'phone_form': phone_form,
         'active_tab': request.POST.get('login_type', 'password'),
+        'next_url': safe_next,
         'google_client_id': getattr(settings, 'GOOGLE_CLIENT_ID', ''),
         'firebase_config': getattr(settings, 'FIREBASE_CONFIG', {})
     })
@@ -825,26 +883,26 @@ def google_login_view(request):
         # Log in user persistently
         login(request, user)
 
-        # Merge guest cart if helper is defined in module
+        # Merge guest cart
         try:
-            from shop.views import merge_carts_after_login
             merge_carts_after_login(request, user, old_session_key)
         except Exception as e:
             logger.info(f"Cart merge check: {e}")
 
         # Redirect destination
-        next_url = data.get('next') or request.GET.get('next')
-        if not next_url or next_url.startswith('/admin'):
-            next_url = '/'
+        raw_next = data.get('next') or request.GET.get('next')
+        safe_next = get_safe_next_url(request, raw_next, default='/')
+        if safe_next == 'home:index':
+            safe_next = '/'
 
         # If user has no phone number, prompt them to complete profile
         if not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
-            if next_url != '/':
-                redirect_url += f"?next={next_url}"
+            if safe_next != '/':
+                redirect_url += f"?next={safe_next}"
         else:
-            redirect_url = next_url
+            redirect_url = safe_next
             messages.success(request, f"Welcome back, {user.first_name or user.username}! Authenticated via Google.")
 
         return JsonResponse({
@@ -957,23 +1015,23 @@ def firebase_login_view(request):
 
         # Merge guest cart items
         try:
-            from shop.views import merge_carts_after_login
             merge_carts_after_login(request, user, old_session_key)
         except Exception as e:
             logger.info(f"Cart merge error check: {e}")
 
-        next_url = data.get('next') or request.GET.get('next')
-        if not next_url or next_url.startswith('/admin'):
-            next_url = '/'
+        raw_next = data.get('next') or request.GET.get('next')
+        safe_next = get_safe_next_url(request, raw_next, default='/')
+        if safe_next == 'home:index':
+            safe_next = '/'
 
         # If user has no phone number, prompt them to complete profile
         if not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
-            if next_url != '/':
-                redirect_url += f"?next={next_url}"
+            if safe_next != '/':
+                redirect_url += f"?next={safe_next}"
         else:
-            redirect_url = next_url
+            redirect_url = safe_next
             messages.success(request, f"Welcome, {user.first_name or user.username}! Authenticated via Firebase Google Sign-In.")
 
         return JsonResponse({

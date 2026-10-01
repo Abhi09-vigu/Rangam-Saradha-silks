@@ -372,4 +372,265 @@ class CallBookingHistoryTests(TestCase):
         self.assertIn('BK-USER1-01', content)
 
 
+class BuyNowAuthRedirectFlowTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.password = "SecretPass123!"
+        self.user = User.objects.create_user(
+            username="buynow_user",
+            email="buynow@example.com",
+            phone_number="9876543210",
+            password=self.password,
+            is_active=True,
+            is_verified=True
+        )
+
+        self.category = Category.objects.create(
+            name="Semi Kanchipattu",
+            slug="semi-kanchipattu"
+        )
+        self.product = Product.objects.create(
+            name="Semi Kanchipattu Saree 01",
+            slug="semi-kanchipattu-saree-01",
+            price=5999.00,
+            offer_price=4999.00,
+            stock=10,
+            is_active=True
+        )
+        self.product.categories.add(self.category)
+
+    def test_case_1_logged_in_user_product_buy_now(self):
+        """
+        CASE 1: Logged-in user -> Product -> Buy Now
+        Expected: existing Buy Now flow works normally (redirects directly to checkout).
+        """
+        self.client.login(username="buynow_user", password=self.password)
+        cart_add_url = reverse('shop:cart_add', args=[self.product.id])
+        
+        response = self.client.post(cart_add_url, {'quantity': 1, 'buy_now': 'true'})
+        # Should redirect directly to checkout
+        self.assertRedirects(response, reverse('shop:checkout'))
+
+    def test_case_2_logged_out_user_product_buy_now_and_login(self):
+        """
+        CASE 2: Logged-out user -> Product -> Buy Now -> Login
+        Expected: after successful login, return to that exact Buy Now destination (checkout),
+        preserving the selected product.
+        """
+        cart_add_url = reverse('shop:cart_add', args=[self.product.id])
+        
+        # 1. Logged-out user clicks Buy Now
+        response = self.client.post(cart_add_url, {'quantity': 1, 'buy_now': 'true'})
+        checkout_url = reverse('shop:checkout')
+        login_url = reverse('accounts:login')
+        expected_redirect_url = f"{login_url}?next={checkout_url}"
+        
+        self.assertRedirects(response, expected_redirect_url)
+
+        # 2. View login page (GET): should retain next in form and context
+        login_get = self.client.get(expected_redirect_url)
+        self.assertEqual(login_get.status_code, 200)
+        self.assertContains(login_get, f'value="{checkout_url}"')
+
+        # 3. Submit credentials via POST with next parameter
+        login_post = self.client.post(login_url, {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+            'next': checkout_url,
+        })
+        
+        # Should redirect to checkout (NOT home:index)
+        self.assertRedirects(login_post, checkout_url)
+
+    def test_case_3_logged_out_user_category_product_buy_now_and_login(self):
+        """
+        CASE 3: Logged-out user -> Category -> Product -> Buy Now -> Login
+        Expected: after login, continue with the selected product, NOT homepage.
+        """
+        # 1. Visit category page
+        category_url = reverse('shop:category_detail', args=[self.category.slug])
+        cat_resp = self.client.get(category_url)
+        self.assertEqual(cat_resp.status_code, 200)
+
+        # 2. Visit product detail page
+        product_url = reverse('shop:product_detail', args=[self.product.slug])
+        prod_resp = self.client.get(product_url)
+        self.assertEqual(prod_resp.status_code, 200)
+
+        # 3. Click Buy Now
+        cart_add_url = reverse('shop:cart_add', args=[self.product.id])
+        response = self.client.post(cart_add_url, {'quantity': 1, 'buy_now': 'true'}, HTTP_REFERER=product_url)
+        checkout_url = reverse('shop:checkout')
+        
+        # 4. User is redirected to login with next
+        self.assertIn(f"next={checkout_url}", response.url)
+
+        # 5. User logs in
+        login_url = reverse('accounts:login')
+        login_post = self.client.post(f"{login_url}?next={checkout_url}", {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+            'next': checkout_url,
+        })
+
+        # Must redirect to checkout with selected product, NOT homepage
+        self.assertRedirects(login_post, checkout_url)
+
+    def test_case_4_shared_url_buy_now_flow(self):
+        """
+        CASE 4: User opens category page from a shared URL, selects any product, clicks Buy Now, logs in.
+        Expected: return to the selected product's Buy Now flow.
+        """
+        shared_cat_url = f"/shop/category/{self.category.slug}/"
+        resp = self.client.get(shared_cat_url)
+        self.assertEqual(resp.status_code, 200)
+
+        cart_add_url = reverse('shop:cart_add', args=[self.product.id])
+        buy_now_resp = self.client.post(cart_add_url, {'quantity': 1, 'buy_now': 'true'})
+        checkout_url = reverse('shop:checkout')
+        
+        self.assertIn(f"next={checkout_url}", buy_now_resp.url)
+
+        # Login
+        login_url = reverse('accounts:login')
+        login_post = self.client.post(login_url, {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+            'next': checkout_url,
+        })
+        self.assertRedirects(login_post, checkout_url)
+
+    def test_case_5_login_without_next_parameter(self):
+        """
+        CASE 5: Login without a next parameter.
+        Expected: use the existing default redirect ('home:index').
+        """
+        login_url = reverse('accounts:login')
+        response = self.client.post(login_url, {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+        })
+        self.assertRedirects(response, reverse('home:index'))
+
+    def test_login_with_direct_product_next_parameter(self):
+        """
+        Direct next parameter pointing to product URL preserves and redirects to that exact product.
+        """
+        product_url = reverse('shop:product_detail', args=[self.product.slug])
+        login_url = reverse('accounts:login')
+        response = self.client.post(f"{login_url}?next={product_url}", {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+            'next': product_url,
+        })
+        self.assertRedirects(response, product_url)
+
+    def test_open_redirect_vulnerability_prevention(self):
+        """
+        External and malicious URLs in next parameter are rejected and safely fallback to home:index.
+        """
+        malicious_urls = [
+            'https://evil.com/phishing',
+            '//evil.com/phishing',
+            'http://attacker.com',
+            'javascript:alert(1)',
+        ]
+        login_url = reverse('accounts:login')
+        for bad_url in malicious_urls:
+            response = self.client.post(f"{login_url}?next={bad_url}", {
+                'login_type': 'password',
+                'username': 'buynow_user',
+                'password': self.password,
+                'next': bad_url,
+            })
+            self.assertRedirects(response, reverse('home:index'))
+
+    def test_admin_redirect_blocked_for_customer(self):
+        """
+        Customer logging in cannot be redirected to /admin paths; should fallback to home:index.
+        """
+        login_url = reverse('accounts:login')
+        response = self.client.post(f"{login_url}?next=/admin/shop/order/", {
+            'login_type': 'password',
+            'username': 'buynow_user',
+            'password': self.password,
+            'next': '/admin/shop/order/',
+        })
+        self.assertRedirects(response, reverse('home:index'))
+
+    def test_already_authenticated_user_with_next_redirects_to_destination(self):
+        """
+        Requirement 2: Do NOT redirect authenticated users to the homepage after login when a valid next destination exists.
+        """
+        self.client.login(username="buynow_user", password=self.password)
+        product_url = reverse('shop:product_detail', args=[self.product.slug])
+        login_url = reverse('accounts:login')
+        response = self.client.get(f"{login_url}?next={product_url}")
+        self.assertRedirects(response, product_url)
+
+    def test_already_authenticated_user_without_next_redirects_to_home(self):
+        """
+        Requirement 3: If there is no next destination, keep the existing default login redirect behavior.
+        """
+        self.client.login(username="buynow_user", password=self.password)
+        login_url = reverse('accounts:login')
+        response = self.client.get(login_url)
+        self.assertRedirects(response, reverse('home:index'))
+
+    @patch('requests.get')
+    def test_google_login_with_buy_now_merges_cart_and_redirects_to_checkout(self, mock_get):
+        """
+        Verify that when a guest user clicks Buy Now and logs in via Google,
+        their guest cart items are merged into their user account and they are redirected to checkout,
+        where the cart is NOT empty (does not redirect to /shop/cart/).
+        """
+        from shop.models import Cart, CartItem
+        # 1. Guest clicks Buy Now
+        cart_add_url = reverse('shop:cart_add', args=[self.product.id])
+        response = self.client.post(cart_add_url, {'quantity': 2, 'buy_now': 'true'})
+        checkout_url = reverse('shop:checkout')
+        self.assertIn(f"next={checkout_url}", response.url)
+
+        # 2. Mock Google auth
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'email': 'buynow@example.com',
+            'email_verified': 'true',
+            'sub': '987654321_google_sub',
+            'name': 'Buy Now User',
+            'picture': 'https://lh3.googleusercontent.com/mock.jpg'
+        }
+        mock_get.return_value = mock_response
+
+        # 3. Perform Google login via AJAX POST with next parameter
+        google_login_url = reverse('accounts:google_login')
+        login_resp = self.client.post(
+            google_login_url,
+            {'id_token': 'mock_token', 'next': checkout_url},
+            content_type='application/json'
+        )
+        self.assertEqual(login_resp.status_code, 200)
+        data = login_resp.json()
+        self.assertEqual(data['status'], 'success')
+        self.assertEqual(data['redirect_url'], checkout_url)
+
+        # 4. User's cart should now contain the product
+        user_cart = Cart.objects.get(user=self.user)
+        self.assertTrue(user_cart.items.filter(product=self.product).exists())
+        self.assertEqual(user_cart.items.get(product=self.product).quantity, 2)
+
+        # 5. Access checkout: should succeed (200 OK), NOT redirect to /shop/cart/
+        checkout_resp = self.client.get(checkout_url)
+        self.assertEqual(checkout_resp.status_code, 200)
+        self.assertContains(checkout_resp, "Semi Kanchipattu Saree 01")
+
+
+
+
 

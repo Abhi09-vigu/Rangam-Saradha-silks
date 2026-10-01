@@ -130,5 +130,25 @@ class CustomMiddleware:
         if setting and setting.maintenance_mode:
             return render(request, 'home/maintenance.html', status=503)
 
-        return self.get_response(request)
+        response = self.get_response(request)
+
+        # Sync lightweight auth state cookie for client-side bfcache / back-forward detection
+        is_auth = '1' if (hasattr(request, 'user') and request.user.is_authenticated) else '0'
+        if request.COOKIES.get('rss_auth_state') != is_auth:
+            response.set_cookie(
+                'rss_auth_state',
+                is_auth,
+                path='/',
+                samesite='Lax',
+                secure=settings.SESSION_COOKIE_SECURE or None,
+            )
+
+        # Prevent browser back/forward cache (bfcache) from serving stale dynamic HTML (e.g. stale login / cart)
+        content_type = response.get('Content-Type', '')
+        if 'text/html' in content_type and not response.has_header('Cache-Control'):
+            response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = '0'
+
+        return response
 
