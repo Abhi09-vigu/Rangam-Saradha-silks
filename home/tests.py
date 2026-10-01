@@ -599,3 +599,82 @@ class PopupManagementTests(TestCase):
         self.assertLess(rss_idx, kjm_idx)
         self.assertLess(kjm_idx, gen_idx)
 
+
+class HomepageProductSectionsTest(TestCase):
+    def setUp(self):
+        self.setting, _ = WebsiteSetting.objects.get_or_create(website_name="Rangam Saradha Silks")
+
+    def test_get_available_sku_prefixes_dynamic(self):
+        Product.objects.create(name="Saree 1", slug="s-1", sku="RSS-SA-001", price=5000, stock=5, is_active=True)
+        Product.objects.create(name="Saree 2", slug="s-2", sku="RSS-GB-002", price=6000, stock=5, is_active=True)
+        Product.objects.create(name="Saree 3", slug="s-3", sku="RSS-KJM-10", price=7000, stock=5, is_active=True)
+        Product.objects.create(name="Saree 4", slug="s-4", sku="RSS-SA-002", price=5500, stock=5, is_active=True)
+
+        from home.utils import get_available_sku_prefixes
+        prefixes = get_available_sku_prefixes()
+        self.assertIn("RSS-SA", prefixes)
+        self.assertIn("RSS-GB", prefixes)
+        self.assertIn("RSS-KJM", prefixes)
+
+    def test_admin_form_has_dynamic_sku_choices(self):
+        Product.objects.create(name="Saree A", slug="s-a", sku="RSS-SA-001", price=5000, stock=5, is_active=True)
+        Product.objects.create(name="Saree B", slug="s-b", sku="RSS-GB-001", price=6000, stock=5, is_active=True)
+
+        from home.admin import WebsiteSettingAdminForm
+        form = WebsiteSettingAdminForm(instance=self.setting)
+
+        td_choice_values = [c[0] for c in form.fields['todays_deals_sku_prefix'].choices]
+        na_choice_values = [c[0] for c in form.fields['new_arrivals_sku_prefix'].choices]
+
+        self.assertIn("RSS-SA", td_choice_values)
+        self.assertIn("RSS-GB", td_choice_values)
+        self.assertIn("RSS-SA", na_choice_values)
+        self.assertIn("RSS-GB", na_choice_values)
+        self.assertIn("", td_choice_values)
+
+    def test_todays_deals_sku_prefix_filtering(self):
+        p_deal = Product.objects.create(name="Deal Saree", slug="deal-saree", sku="RSS-SA-001", price=5000, stock=5, is_active=True)
+        p_other = Product.objects.create(name="Other Saree", slug="other-saree", sku="RSS-GB-001", price=6000, stock=5, is_active=True)
+
+        self.setting.todays_deals_sku_prefix = "RSS-SA"
+        self.setting.save()
+
+        resp = self.client.get(reverse('home:index'))
+        self.assertEqual(resp.status_code, 200)
+        today_deals = list(resp.context['today_deals'])
+        self.assertIn(p_deal, today_deals)
+        self.assertNotIn(p_other, today_deals)
+
+    def test_new_arrivals_sku_prefix_filtering(self):
+        p_arrival = Product.objects.create(name="Arrival Saree", slug="arrival-saree", sku="RSS-GB-001", price=6000, stock=5, is_active=True)
+        p_other = Product.objects.create(name="Other Saree", slug="other-saree", sku="RSS-SA-001", price=5000, stock=5, is_active=True)
+
+        self.setting.new_arrivals_sku_prefix = "RSS-GB"
+        self.setting.save()
+
+        resp = self.client.get(reverse('home:index'))
+        self.assertEqual(resp.status_code, 200)
+        new_arrivals = list(resp.context['new_arrivals'])
+        self.assertIn(p_arrival, new_arrivals)
+        self.assertNotIn(p_other, new_arrivals)
+
+    def test_graceful_fallback_when_prefix_empty_or_no_products(self):
+        p_fallback_deal = Product.objects.create(name="Fallback Deal", slug="fallback-deal", sku="RSS-FB-001", price=5000, stock=5, is_active=True, is_today_deal=True)
+        self.setting.todays_deals_sku_prefix = ""
+        self.setting.save()
+
+        resp = self.client.get(reverse('home:index'))
+        self.assertEqual(resp.status_code, 200)
+        today_deals = list(resp.context['today_deals'])
+        self.assertIn(p_fallback_deal, today_deals)
+
+        # Selected prefix has no products -> fallback gracefully
+        self.setting.todays_deals_sku_prefix = "NONEXISTENT-PREFIX"
+        self.setting.save()
+
+        resp = self.client.get(reverse('home:index'))
+        self.assertEqual(resp.status_code, 200)
+        today_deals = list(resp.context['today_deals'])
+        self.assertIn(p_fallback_deal, today_deals)
+
+

@@ -20,13 +20,29 @@ class WebsiteSetting(models.Model):
     call_booking_fee = models.DecimalField(max_digits=8, decimal_places=2, default=50.00, help_text="Fee required to book a live video saree consultation (default: ₹50.00)")
     maintenance_mode = models.BooleanField(default=False)
 
-    # Product Display Priority (SKU Prefixes)
+    # Homepage Product Sections (SKU Prefix Selection)
+    todays_deals_sku_prefix = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Today's Deals SKU Prefix",
+        help_text="Select a SKU prefix for the Today's Deals homepage section (e.g. RSS-SA). Products starting with this prefix will appear in Today's Deals."
+    )
+    new_arrivals_sku_prefix = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="New Arrivals SKU Prefix",
+        help_text="Select a SKU prefix for the Curated Silk Masterpieces / New Arrivals section (e.g. RSS-GB). Products starting with this prefix will appear in New Arrivals."
+    )
+
+    # Legacy manual field (maintained for backward compatibility)
     priority_sku_prefixes = models.CharField(
         max_length=500,
         blank=True,
         default="",
-        verbose_name="Priority SKU Prefixes",
-        help_text="Enter any comma-separated SKU prefixes (e.g. RSS-SA, KJM-SUB, RSS-GB, or any new SKU code you create). Products matching any prefix you enter will automatically appear first on the shop page and homepage in this exact priority order."
+        verbose_name="Priority SKU Prefixes (Legacy)",
+        help_text="Legacy manual SKU prefixes."
     )
 
     # Hero Slider vs Offer Banner Top Display Mode
@@ -96,15 +112,19 @@ class WebsiteSetting(models.Model):
     def get_priority_sku_prefixes(self):
         """
         Returns an ordered list of clean, non-empty, deduplicated SKU prefixes.
-        Example: 'RSS-GB, KJM-SUB' -> ['RSS-GB', 'KJM-SUB']
+        Combines todays_deals_sku_prefix, new_arrivals_sku_prefix, and legacy priority_sku_prefixes.
         """
-        if not self.priority_sku_prefixes:
-            return []
         prefixes = []
-        for p in self.priority_sku_prefixes.split(','):
-            cleaned = p.strip()
-            if cleaned and cleaned not in prefixes:
-                prefixes.append(cleaned)
+        for val in [self.todays_deals_sku_prefix, self.new_arrivals_sku_prefix]:
+            if val:
+                c = val.strip()
+                if c and c not in prefixes:
+                    prefixes.append(c)
+        if self.priority_sku_prefixes:
+            for p in self.priority_sku_prefixes.split(','):
+                c = p.strip()
+                if c and c not in prefixes:
+                    prefixes.append(c)
         return prefixes
 
     # Dynamic About Section

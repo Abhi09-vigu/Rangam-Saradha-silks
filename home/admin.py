@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.db import models
 from django.forms import Textarea
 from .models import WebsiteSetting, ContactInfo, HeroSlider, OfferBanner, Testimonial, CMSPage, FAQ, InstagramPost, ContactMessage, ContactSubmission, BudgetRange, WhyChooseUs, FabricCuration, Popup
+from .utils import get_available_sku_prefixes
 
 class SingletonAdmin(admin.ModelAdmin):
     # Prevents adding new items if one already exists
@@ -16,19 +17,63 @@ class SingletonAdmin(admin.ModelAdmin):
         return False
 
 class WebsiteSettingAdminForm(forms.ModelForm):
+    todays_deals_sku_prefix = forms.ChoiceField(
+        required=False,
+        label="Today's Deals SKU Prefix",
+        help_text="Select a SKU prefix for Today's Deals (e.g. RSS-SA). Products starting with this prefix will be displayed in the Today's Deals section on the homepage."
+    )
+    new_arrivals_sku_prefix = forms.ChoiceField(
+        required=False,
+        label="New Arrivals SKU Prefix",
+        help_text="Select a SKU prefix for New Arrivals / Curated Masterpieces (e.g. RSS-GB). Products starting with this prefix will be displayed in the New Arrivals section on the homepage."
+    )
+
     class Meta:
         model = WebsiteSetting
-        fields = '__all__'
-        widgets = {
-            'priority_sku_prefixes': forms.TextInput(attrs={
-                'placeholder': 'e.g. RSS-GB, KJM-SUB',
-                'style': 'max-width: 500px; width: 100%;',
-            }),
-        }
+        exclude = ['priority_sku_prefixes']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        prefixes = get_available_sku_prefixes()
+        prefix_choices = [('', '--------- None (Default Fallback) ---------')]
+        for p in prefixes:
+            prefix_choices.append((p, f"{p} (Prefix)"))
+
+        # Preserve saved values if not currently in catalog
+        inst = getattr(self, 'instance', None)
+        if inst and inst.pk:
+            saved_td = getattr(inst, 'todays_deals_sku_prefix', '')
+            if saved_td and saved_td not in [c[0] for c in prefix_choices]:
+                prefix_choices.append((saved_td, f"{saved_td} (Saved)"))
+            saved_na = getattr(inst, 'new_arrivals_sku_prefix', '')
+            if saved_na and saved_na not in [c[0] for c in prefix_choices]:
+                prefix_choices.append((saved_na, f"{saved_na} (Saved)"))
+
+        self.fields['todays_deals_sku_prefix'].choices = prefix_choices
+        self.fields['new_arrivals_sku_prefix'].choices = prefix_choices
+        self.fields['todays_deals_sku_prefix'].widget.attrs.update({
+            'style': 'min-width: 320px; font-weight: 500; font-size: 14px; padding: 6px 10px;',
+        })
+        self.fields['new_arrivals_sku_prefix'].widget.attrs.update({
+            'style': 'min-width: 320px; font-weight: 500; font-size: 14px; padding: 6px 10px;',
+        })
 
 class WebsiteSettingAdmin(SingletonAdmin):
     form = WebsiteSettingAdminForm
-    list_display = ['website_name', 'priority_sku_prefixes', 'hero_display_mode', 'launch_mode_active', 'launch_datetime', 'maintenance_mode', 'gst_number', 'tax_percentage', 'call_booking_fee', 'shipping_charge', 'free_shipping_limit']
+    list_display = [
+        'website_name',
+        'todays_deals_sku_prefix',
+        'new_arrivals_sku_prefix',
+        'hero_display_mode',
+        'launch_mode_active',
+        'launch_datetime',
+        'maintenance_mode',
+        'gst_number',
+        'tax_percentage',
+        'call_booking_fee',
+        'shipping_charge',
+        'free_shipping_limit'
+    ]
     fieldsets = (
         ('🌟 TEMP POPUP: Mandatory Full-Screen Launch Overlay', {
             'fields': ('launch_mode_active', 'launch_datetime', 'launch_title', 'launch_tagline_1', 'launch_tagline_2'),
@@ -38,9 +83,9 @@ class WebsiteSettingAdmin(SingletonAdmin):
             'fields': ('hero_display_mode',),
             'description': 'Choose whether to show the Hero Slider or the Offer Banner at the top of the homepage. Select "Automatic" (shows Hero Slider if active slides exist, otherwise automatically shows Offer Banner), "Hero Slider Only", or "Offer Banner Only". Only one will be displayed at a time, never both.',
         }),
-        ('🏷️ Product Display Priority (SKU Prefixes)', {
-            'fields': ('priority_sku_prefixes',),
-            'description': 'Control the product display order on the shop and catalog listing pages. Enter SKU prefixes separated by commas (e.g. RSS-GB, KJM-SUB). Products matching these prefixes will appear first on the shop page in this exact order, followed by all remaining products.',
+        ('✨ Homepage Product Sections (SKU Prefix Selection)', {
+            'fields': ('todays_deals_sku_prefix', 'new_arrivals_sku_prefix'),
+            'description': 'Select which product SKU prefix to showcase for the Today\'s Deals and New Arrivals sections on the homepage. Available prefixes are dynamically generated from existing products in your database. If no prefix is selected, the sections gracefully fall back to default product criteria.',
         }),
         ('General Website Settings', {
             'fields': ('website_name', 'gst_number', 'logo', 'favicon', ('primary_color', 'secondary_color'), 'currency', ('tax_percentage', 'shipping_charge', 'free_shipping_limit'), 'call_booking_fee', 'maintenance_mode'),

@@ -93,3 +93,44 @@ def sanitize_and_format_google_map(input_text):
     )
 
     return sanitized_iframe
+
+
+def get_available_sku_prefixes():
+    """
+    Extracts distinct SKU prefixes dynamically from all existing products in the database.
+    Examples:
+      - 'RSS-SA-001' or 'RSS-SA01' -> 'RSS-SA'
+      - 'RSS-GB-006' -> 'RSS-GB'
+      - 'KJM-SUB-026' -> 'KJM-SUB'
+      - 'RSS-KJM-10' -> 'RSS-KJM'
+      - 'DMS-055' -> 'DMS'
+      - 'KJ-12345' -> 'KJ'
+    Returns a sorted list of unique uppercase prefix strings.
+    """
+    try:
+        from shop.models import Product
+        raw_skus = Product.objects.exclude(sku__isnull=True).exclude(sku__exact='').values_list('sku', flat=True)
+    except Exception:
+        return []
+
+    prefixes = set()
+    for raw in raw_skus:
+        if not raw:
+            continue
+        sku = str(raw).strip()
+        # Skip purely numeric barcodes/SKUs (e.g. '54678886')
+        if sku.isdigit():
+            continue
+
+        # Match prefix before trailing sequence numbers (e.g. 'RSS-SA-001' -> 'RSS-SA', 'RSS-SA01' -> 'RSS-SA')
+        m = re.match(r'^(.*?)[\-_]?\d+$', sku)
+        if m and m.group(1):
+            p = m.group(1).rstrip('-_').strip()
+            if p:
+                prefixes.add(p.upper())
+        elif '-' in sku:
+            prefixes.add(sku.rsplit('-', 1)[0].strip().upper())
+        elif sku:
+            prefixes.add(sku.strip().upper())
+
+    return sorted(list(prefixes))
