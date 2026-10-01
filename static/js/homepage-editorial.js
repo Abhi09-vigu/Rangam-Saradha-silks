@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbarScroll();
     initContinuousTrack('categoryTrack', 'catTrackPrev', 'catTrackNext', 0.85);
     initContinuousTrack('productContinuousTrack', 'productTrackPrev', 'productTrackNext', 0.80);
+    initContinuousTrack('dealsContinuousTrack', 'dealsTrackPrev', 'dealsTrackNext', 0.80);
     initHeroParallax();
     initHeroSlideSync();
 });

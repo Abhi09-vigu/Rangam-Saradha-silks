@@ -456,56 +456,57 @@
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <tbody>
-                                {% if product.fabric %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3" style="width: 25%;">Fabric</th>
-                                    <td class="text-dark py-3">{{ product.fabric }}</td>
-                                </tr>
+                                {% if product.parsed_specifications %}
+                                    {% for item in product.parsed_specifications %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3" {% if forloop.first %}style="width: 25%;"{% endif %}>{{ item.0 }}</th>
+                                        <td class="text-dark py-3">{{ item.1 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    {% if product.fabric %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3" style="width: 25%;">Fabric</th>
+                                        <td class="text-dark py-3">{{ product.fabric }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.color %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Color</th>
+                                        <td class="text-dark py-3">{{ product.color }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.material %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Material</th>
+                                        <td class="text-dark py-3">{{ product.material }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.occasion %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Occasion</th>
+                                        <td class="text-dark py-3">{{ product.occasion }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.zari_type and product.zari_type != "Premium Gold Zari Traditional Weave" %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Zari Type</th>
+                                        <td class="text-dark py-3">{{ product.zari_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.saree_length and product.saree_length != "5.5 Meters (Approx.) + 0.8 Meter Running Blouse" %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Saree Length</th>
+                                        <td class="text-dark py-3">{{ product.saree_length }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if product.authenticity and product.authenticity != "Silk Mark Certified 100% Handcrafted Mulberry Silk" %}
+                                    <tr>
+                                        <th class="text-muted fw-semibold py-3">Authenticity</th>
+                                        <td class="text-dark py-3">{{ product.authenticity }}</td>
+                                    </tr>
+                                    {% endif %}
                                 {% endif %}
-                                {% if product.color %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Color</th>
-                                    <td class="text-dark py-3">{{ product.color }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.material %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Material</th>
-                                    <td class="text-dark py-3">{{ product.material }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.occasion %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Occasion</th>
-                                    <td class="text-dark py-3">{{ product.occasion }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.zari_type %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Zari Type</th>
-                                    <td class="text-dark py-3">{{ product.zari_type }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.saree_length %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Saree Length</th>
-                                    <td class="text-dark py-3">{{ product.saree_length }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.authenticity %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">Authenticity</th>
-                                    <td class="text-dark py-3">{{ product.authenticity }}</td>
-                                </tr>
-                                {% endif %}
-                                {% for item in product.parsed_specifications %}
-                                {% if item.0|lower != 'fabric' or not product.fabric %}
-                                <tr>
-                                    <th class="text-muted fw-semibold py-3">{{ item.0 }}</th>
-                                    <td class="text-dark py-3">{{ item.1 }}</td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

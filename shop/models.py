@@ -65,9 +65,9 @@ class Product(models.Model):
     color = models.CharField(max_length=100, blank=True, null=True)
     occasion = models.CharField(max_length=100, blank=True, null=True)
     fabric = models.CharField(max_length=100, blank=True, null=True)
-    zari_type = models.CharField(max_length=150, blank=True, default="Premium Gold Zari Traditional Weave", help_text="Zari specification (e.g., Premium Gold Zari Traditional Weave)")
-    saree_length = models.CharField(max_length=150, blank=True, default="5.5 Meters (Approx.) + 0.8 Meter Running Blouse", help_text="Length specification (e.g., 5.5 Meters + 0.8 Meter Running Blouse)")
-    authenticity = models.CharField(max_length=200, blank=True, default="Silk Mark Certified 100% Handcrafted Mulberry Silk", help_text="Certification / Authenticity (e.g., Silk Mark Certified)")
+    zari_type = models.CharField(max_length=150, blank=True, default="", help_text="Zari specification (e.g., Premium Gold Zari Traditional Weave)")
+    saree_length = models.CharField(max_length=150, blank=True, default="", help_text="Length specification (e.g., 5.5 Meters + 0.8 Meter Running Blouse)")
+    authenticity = models.CharField(max_length=200, blank=True, default="", help_text="Certification / Authenticity (e.g., Silk Mark Certified)")
     specifications = models.TextField(blank=True, default="", help_text="Additional specifications in plain text (enter one per line, e.g., 'Blouse: Contrast Brocade' or 'Border: Temple Border')")
     
     # SEO
@@ -112,57 +112,23 @@ class Product(models.Model):
         """
         Parses text specifications into a list of (label, value) tuples.
         Supports 'Key: Value' format or plain descriptive lines.
-        Deduplicates against dedicated model fields (Fabric, Color, Material, etc.) to prevent duplicate rows.
+        Directly reflects the specifications entered by the admin without suppression.
         """
         if not self.specifications:
             return []
         if isinstance(self.specifications, dict):
-            raw_items = list(self.specifications.items())
-        else:
-            raw_items = []
-            for line in str(self.specifications).splitlines():
-                line = line.strip()
-                if not line:
-                    continue
-                if ':' in line:
-                    key, val = line.split(':', 1)
-                    raw_items.append((key.strip(), val.strip()))
-                else:
-                    raw_items.append(('Specification', line))
-
-        import re
-        def normalize_key(k):
-            return re.sub(r'[^a-z0-9]', '', str(k).lower())
-
-        # Collect keys that are already displayed via direct model fields
-        existing_keys = set()
-        if self.fabric:
-            existing_keys.add(normalize_key('Fabric'))
-            existing_keys.add(normalize_key('Fabric Type'))
-            existing_keys.add(normalize_key('Saree Fabric'))
-        if self.color:
-            existing_keys.add(normalize_key('Color'))
-            existing_keys.add(normalize_key('Colour'))
-        if self.material:
-            existing_keys.add(normalize_key('Material'))
-        if self.occasion:
-            existing_keys.add(normalize_key('Occasion'))
-        if self.zari_type:
-            existing_keys.add(normalize_key('Zari Type'))
-            existing_keys.add(normalize_key('Zari'))
-        if self.saree_length:
-            existing_keys.add(normalize_key('Saree Length'))
-            existing_keys.add(normalize_key('Length'))
-        if self.authenticity:
-            existing_keys.add(normalize_key('Authenticity'))
+            return list(self.specifications.items())
 
         items = []
-        for key, val in raw_items:
-            k_norm = normalize_key(key)
-            if k_norm in existing_keys:
+        for line in str(self.specifications).splitlines():
+            line = line.strip()
+            if not line:
                 continue
-            existing_keys.add(k_norm)
-            items.append((key.strip(), val.strip()))
+            if ':' in line:
+                key, val = line.split(':', 1)
+                items.append((key.strip(), val.strip()))
+            else:
+                items.append(('Specification', line))
 
         return items
 
@@ -687,9 +653,9 @@ class BulkStockProduct(models.Model):
     color = models.CharField(max_length=100, blank=True, default='')
     material = models.CharField(max_length=100, blank=True, default='')
     occasion = models.CharField(max_length=100, blank=True, default='')
-    zari_type = models.CharField(max_length=150, blank=True, default="Premium Gold Zari Traditional Weave")
-    saree_length = models.CharField(max_length=150, blank=True, default="5.5 Meters (Approx.) + 0.8 Meter Running Blouse")
-    authenticity = models.CharField(max_length=200, blank=True, default="Silk Mark Certified 100% Handcrafted Mulberry Silk")
+    zari_type = models.CharField(max_length=150, blank=True, default='')
+    saree_length = models.CharField(max_length=150, blank=True, default='')
+    authenticity = models.CharField(max_length=200, blank=True, default='')
     specifications = models.TextField(blank=True, default='')
 
     # SEO Metadata

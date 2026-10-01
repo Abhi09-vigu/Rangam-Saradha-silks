@@ -26,7 +26,7 @@ class WebsiteSetting(models.Model):
         blank=True,
         default="",
         verbose_name="Priority SKU Prefixes",
-        help_text="Comma-separated SKU prefixes (e.g. RSS-GB, KJM-SUB) to control product display order on the shop page. Matching is prefix-based (e.g. RSS-GB matches RSS-GB-006)."
+        help_text="Enter any comma-separated SKU prefixes (e.g. RSS-SA, KJM-SUB, RSS-GB, or any new SKU code you create). Products matching any prefix you enter will automatically appear first on the shop page and homepage in this exact priority order."
     )
 
     # Hero Slider vs Offer Banner Top Display Mode

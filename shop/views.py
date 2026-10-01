@@ -215,14 +215,14 @@ def apply_sku_priority_and_sorting(queryset, sort_by=None, site_settings=None):
             clean_p = prefix.strip()
             if not clean_p:
                 continue
-            if clean_p.endswith('-'):
-                cond = Q(sku__istartswith=clean_p)
-            else:
-                # Matches prefix with hyphen (e.g. 'RSS-GB' matches 'RSS-GB-006') or exact prefix
-                cond = Q(sku__istartswith=f"{clean_p}-") | Q(sku__iexact=clean_p)
-                # If prefix contains no hyphen, also match direct prefix (e.g. 'KJ' matches 'KJ123' or 'KJ-123')
-                if '-' not in clean_p:
-                    cond |= Q(sku__istartswith=clean_p)
+            # Match prefix directly (e.g. 'RSS-SA' matches 'RSS-SA-001', 'RSS-SA01', 'RSS-SA'),
+            # with trailing hyphen, exact, or containing prefix (case-insensitive)
+            cond = (
+                Q(sku__istartswith=clean_p) |
+                Q(sku__istartswith=f"{clean_p}-") |
+                Q(sku__iexact=clean_p) |
+                Q(sku__icontains=clean_p)
+            )
             whens.append(When(cond, then=Value(idx)))
 
         if whens:
@@ -1022,17 +1022,19 @@ def product_quick_view(request, product_id):
     category = categories[0] if categories else "Silk Saree"
     
     highlights = []
-    if product.fabric:
-        highlights.append(f"Fabric: {product.fabric}")
-    if product.color:
-        highlights.append(f"Color: {product.color}")
-    if product.material:
-        highlights.append(f"Material: {product.material}")
-    if product.zari_type and len(highlights) < 6:
-        highlights.append(f"Zari: {product.zari_type}")
-    for item in product.parsed_specifications:
-        if len(highlights) < 6:
-            highlights.append(f"{item[0]}: {item[1]}")
+    if product.parsed_specifications:
+        for item in product.parsed_specifications:
+            if len(highlights) < 6:
+                highlights.append(f"{item[0]}: {item[1]}")
+    else:
+        if product.fabric:
+            highlights.append(f"Fabric: {product.fabric}")
+        if product.color:
+            highlights.append(f"Color: {product.color}")
+        if product.material:
+            highlights.append(f"Material: {product.material}")
+        if product.zari_type and product.zari_type != "Premium Gold Zari Traditional Weave" and len(highlights) < 6:
+            highlights.append(f"Zari: {product.zari_type}")
             
     in_wishlist = False
     if request.user.is_authenticated and not request.user.is_staff:

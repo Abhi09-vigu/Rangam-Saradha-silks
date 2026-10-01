@@ -178,21 +178,37 @@ def index(request):
     budget_ranges = BudgetRange.objects.filter(is_active=True).order_by('display_order')
     
     # Dynamic Homepage Product Sections (only in-stock products with Priority SKU Prefixes applied)
-    featured_qs = Product.objects.filter(is_active=True, stock__gt=0, is_featured=True).prefetch_related('images', 'categories')
-    if featured_qs.count() < 4:
-        featured_qs = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
-    featured_products = apply_sku_priority_and_sorting(featured_qs, site_settings=setting)[:8]
+    priority_prefixes = setting.get_priority_sku_prefixes() if setting else []
+    sku_priority_filter = Q()
+    for p in priority_prefixes:
+        clean_p = p.strip()
+        if clean_p:
+            sku_priority_filter |= Q(sku__istartswith=clean_p) | Q(sku__icontains=clean_p)
+
+    curated_condition = Q(is_featured=True) | Q(is_new_arrival=True)
+    if priority_prefixes:
+        curated_condition |= sku_priority_filter
+
+    curated_qs = Product.objects.filter(is_active=True, stock__gt=0).filter(curated_condition).distinct().prefetch_related('images', 'categories')
+    if curated_qs.count() < 4:
+        curated_qs = Product.objects.filter(is_active=True, stock__gt=0).prefetch_related('images', 'categories')
+    featured_products = apply_sku_priority_and_sorting(curated_qs, site_settings=setting)[:12]
 
     trending_qs = Product.objects.filter(is_active=True, stock__gt=0, is_trending=True).prefetch_related('images', 'categories')
     trending_products = apply_sku_priority_and_sorting(trending_qs, site_settings=setting)[:4]
 
-    new_arrivals_qs = Product.objects.filter(is_active=True, stock__gt=0, is_new_arrival=True).prefetch_related('images', 'categories')
+    new_arrivals_condition = Q(is_new_arrival=True)
+    if priority_prefixes:
+        new_arrivals_condition |= sku_priority_filter
+    new_arrivals_qs = Product.objects.filter(is_active=True, stock__gt=0).filter(new_arrivals_condition).distinct().prefetch_related('images', 'categories')
     new_arrivals = apply_sku_priority_and_sorting(new_arrivals_qs, site_settings=setting)[:12]
 
     best_sellers_qs = Product.objects.filter(is_active=True, stock__gt=0, is_best_seller=True).prefetch_related('images', 'categories')
     best_sellers = apply_sku_priority_and_sorting(best_sellers_qs, site_settings=setting)[:12]
 
     today_deals_qs = Product.objects.filter(is_active=True, stock__gt=0, is_today_deal=True).prefetch_related('images', 'categories')
+    if not today_deals_qs.exists():
+        today_deals_qs = Product.objects.filter(is_active=True, stock__gt=0, discount_percentage__gt=0).prefetch_related('images', 'categories')
     today_deals = apply_sku_priority_and_sorting(today_deals_qs, site_settings=setting)[:12]
     
     # Why Choose Us, Fabric Curations

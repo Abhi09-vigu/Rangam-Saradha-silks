@@ -443,7 +443,175 @@
     </section>
 
     <!-- =====================================================================
-         7. NEW ARRIVALS / FEATURED PRODUCTS (Database Data + Multi-Image Hover)
+         7. TODAY'S DEALS (Special Loom Offers & Limited Deals Scroller)
+         ===================================================================== -->
+    {% if today_deals %}
+    <section class="editorial-products-section position-relative py-5" id="todays-deals" style="background: radial-gradient(circle at 50% 30%, #2a0818 0%, #15020a 100%); border-top: 1px solid rgba(212, 175, 55, 0.15); border-bottom: 1px solid rgba(212, 175, 55, 0.15);">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal text-center mb-4">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✨</span>
+                    <span>TODAY'S SPECIAL OFFERS</span>
+                    <span class="eyebrow-motif">✨</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title text-white">Today's Deals</h2>
+                <p class="editorial-subtitle text-white-50">Handpicked limited-time festive specials and exclusive loom deals.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-horizontal-wrap position-relative">
+            <!-- Navigation Chevrons -->
+            <button type="button" class="cat-slider-arrow cat-slider-prev d-none d-md-flex" id="dealsTrackPrev" aria-label="Previous deals">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+
+            <!-- Scrollable Continuous Track -->
+            <div class="product-continuous-track" id="dealsContinuousTrack">
+                {% for product in today_deals %}
+                <div class="product-card-editorial product-continuous-item">
+                    <!-- Product Media Container with Multi-Image Hover -->
+                    <div class="product-card-media-box">
+                        <a href="{{ product.get_absolute_url }}" class="d-block w-100 h-100 position-relative">
+                            {% with product.images.all as images %}
+                                {% if images|length > 0 %}
+                                    <img src="{{ images.0.image.url }}" alt="{{ product.name }}" class="prod-img-primary" loading="lazy" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                    {% if images|length > 1 %}
+                                    <img src="{{ images.1.image.url }}" alt="{{ product.name }} detail" class="prod-img-secondary" loading="lazy" onerror="this.onerror=null; this.src='/static/images/catalog-hero-saree.png';">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{% static 'images/catalog-hero-saree.png' %}" alt="{{ product.name }}" class="prod-img-primary" loading="lazy">
+                                {% endif %}
+                            {% endwith %}
+                        </a>
+
+                        <!-- Product Badges -->
+                        <div class="prod-badge-strip">
+                            <span class="prod-badge-tag badge-new" style="background: linear-gradient(135deg, #c59b27, #e6ca65); color: #1a040d; font-weight: 700;">TODAY'S DEAL</span>
+                            {% if product.discount_percentage > 0 %}
+                            <span class="prod-badge-tag badge-discount">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Floating Quick Action Buttons Pill -->
+                        <div class="prod-floating-actions" aria-label="Product Actions">
+                            <a href="{% url 'shop:compare_add' product.id %}" class="prod-action-circle-btn compare-btn" data-product-id="{{ product.id }}" title="Compare Saree" aria-label="Compare Saree">
+                                <i class="bi bi-shuffle"></i>
+                            </a>
+                            <button type="button" class="prod-action-circle-btn quickview-btn" data-product-id="{{ product.id }}" title="Quick View Saree" aria-label="Quick View Saree">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <button type="button" class="prod-action-circle-btn wishlist-btn" data-product-id="{{ product.id }}" title="Save to Wishlist" aria-label="Save to Wishlist">
+                                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill active text-danger{% else %}bi-heart{% endif %}"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Information Box -->
+                    <div class="product-card-info-box">
+                        <div class="prod-category-sku-row">
+                            <span class="prod-category-link">
+                                {% if product.categories.all %}
+                                {{ product.categories.first.name }}
+                                {% else %}
+                                Pure Silk Saree
+                                {% endif %}
+                            </span>
+                            {% if product.sku %}
+                            <span class="prod-sku-code">{{ product.sku }}</span>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="prod-title-heading">
+                            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                        </h3>
+
+                        <div class="prod-price-row">
+                            <span class="price-current">{{ site_settings.currency }}{{ product.offer_price|floatformat:2|intcomma }}</span>
+                            {% if product.discount_percentage > 0 and product.price > product.offer_price %}
+                            <span class="price-original">{{ site_settings.currency }}{{ product.price|floatformat:2|intcomma }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="cat-slider-arrow cat-slider-next d-none d-md-flex" id="dealsTrackNext" aria-label="Next deals">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- =====================================================================
+         8. LATEST TRENDS / EDITORIAL SECTION (Asymmetric Fashion Grid)
+         ===================================================================== -->
+    <section class="editorial-trends-section" id="editorial-trends">
+        <div class="container">
+            <div class="editorial-header-wrap editorial-reveal">
+                <div class="editorial-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span>SEASONAL EDIT</span>
+                    <span class="eyebrow-motif">✦</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+                <h2 class="editorial-title">Latest Weaves &amp; Editorial Inspiration</h2>
+                <p class="editorial-subtitle">A curated preview into this festive season's most sought-after color palettes, temple motifs, and bridal heirlooms.</p>
+                <div class="editorial-flourish">
+                    <span class="flourish-line"></span>
+                    <span class="flourish-center">❖</span>
+                    <span class="flourish-line reverse"></span>
+                </div>
+            </div>
+
+            <!-- Asymmetric Editorial Mosaic Grid -->
+            <div class="editorial-mosaic-grid">
+                <!-- Focal Big Portrait Frame -->
+                <div class="mosaic-hero-col">
+                    <img src="{% if site_settings.mosaic_hero_image %}{{ site_settings.mosaic_hero_image.url }}{% else %}{% static 'images/saree_detail_zari.jpg' %}{% endif %}" alt="Exquisite Gold Zari Craftsmanship Detail" class="mosaic-hero-img editorial-parallax-target" data-parallax-speed="0.04" loading="lazy">
+                    <div class="mosaic-hero-content">
+                        <span class="collection-badge-tag">THE GOLD WEFT</span>
+                        <h3 class="editorial-title text-white mb-2" style="font-size: 2rem;">Heirloom Zari Artistry</h3>
+                        <p class="text-white-50 mb-3" style="max-width: 480px; font-size: 0.9rem;">Witness the immaculate intricacy of pure zari jacquards crafted to remain as luminous decades from now as on your special day.</p>
+                        <a href="{% url 'shop:category_detail' category_slug='silk-sarees' %}" class="editorial-link-btn">
+                            <span>Explore Zari Sarees</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Two Supporting Frames -->
+                <div class="mosaic-supporting-col">
+                    <a href="{% url 'shop:category_detail' category_slug='party-wear-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-1 text-decoration-none d-block">
+                        <img src="{% if site_settings.mosaic_festive_image %}{{ site_settings.mosaic_festive_image.url }}{% else %}{% static 'images/contact_saree_drape.jpg' %}{% endif %}" alt="Traditional Saree Drapery Elegance" class="mosaic-sub-img" loading="lazy">
+                        <div class="mosaic-sub-caption">
+                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Festive Drapery Collections</h4>
+                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Vibrant festive silks with graceful contrast borders</p>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'shop:category_detail' category_slug='handloom-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-2 text-decoration-none d-block">
+                        <img src="{% if site_settings.mosaic_handloom_image %}{{ site_settings.mosaic_handloom_image.url }}{% else %}{% static 'images/catalog-hero-saree.png' %}{% endif %}" alt="Signature Handloom Saree" class="mosaic-sub-img" loading="lazy">
+                        <div class="mosaic-sub-caption">
+                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Dharmavaram Hallmarks</h4>
+                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Authentic double-pallu master weaves</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         8B. NEW ARRIVALS / CURATED SILK MASTERPIECES (Continuous Scroller)
          ===================================================================== -->
     {% if featured_products or new_arrivals %}
     <section class="editorial-products-section" id="curated-sarees">
@@ -636,6 +804,7 @@
         {% endif %}
         {% endwith %}
 
+        <!-- Editorial Exploration Footnote -->
         <div class="container">
             <div class="text-center mt-4">
                 <a href="{% url 'shop:catalog' %}" class="editorial-link-btn">
@@ -646,66 +815,6 @@
         </div>
     </section>
     {% endif %}
-
-    <!-- =====================================================================
-         8. LATEST TRENDS / EDITORIAL SECTION (Asymmetric Fashion Grid)
-         ===================================================================== -->
-    <section class="editorial-trends-section" id="editorial-trends">
-        <div class="container">
-            <div class="editorial-header-wrap editorial-reveal">
-                <div class="editorial-eyebrow">
-                    <span class="eyebrow-line"></span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span>SEASONAL EDIT</span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span class="eyebrow-line"></span>
-                </div>
-                <h2 class="editorial-title">Latest Weaves &amp; Editorial Inspiration</h2>
-                <p class="editorial-subtitle">A curated preview into this festive season's most sought-after color palettes, temple motifs, and bridal heirlooms.</p>
-                <div class="editorial-flourish">
-                    <span class="flourish-line"></span>
-                    <span class="flourish-center">❖</span>
-                    <span class="flourish-line reverse"></span>
-                </div>
-            </div>
-
-            <!-- Asymmetric Editorial Mosaic Grid -->
-            <div class="editorial-mosaic-grid">
-                <!-- Focal Big Portrait Frame -->
-                <div class="mosaic-hero-col">
-                    <img src="{% if site_settings.mosaic_hero_image %}{{ site_settings.mosaic_hero_image.url }}{% else %}{% static 'images/saree_detail_zari.jpg' %}{% endif %}" alt="Exquisite Gold Zari Craftsmanship Detail" class="mosaic-hero-img editorial-parallax-target" data-parallax-speed="0.04" loading="lazy">
-                    <div class="mosaic-hero-content">
-                        <span class="collection-badge-tag">THE GOLD WEFT</span>
-                        <h3 class="editorial-title text-white mb-2" style="font-size: 2rem;">Heirloom Zari Artistry</h3>
-                        <p class="text-white-50 mb-3" style="max-width: 480px; font-size: 0.9rem;">Witness the immaculate intricacy of pure zari jacquards crafted to remain as luminous decades from now as on your special day.</p>
-                        <a href="{% url 'shop:category_detail' category_slug='silk-sarees' %}" class="editorial-link-btn">
-                            <span>Explore Zari Sarees</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Two Supporting Frames -->
-                <div class="mosaic-supporting-col">
-                    <a href="{% url 'shop:category_detail' category_slug='party-wear-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-1 text-decoration-none d-block">
-                        <img src="{% if site_settings.mosaic_festive_image %}{{ site_settings.mosaic_festive_image.url }}{% else %}{% static 'images/contact_saree_drape.jpg' %}{% endif %}" alt="Traditional Saree Drapery Elegance" class="mosaic-sub-img" loading="lazy">
-                        <div class="mosaic-sub-caption">
-                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Festive Drapery Collections</h4>
-                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Vibrant festive silks with graceful contrast borders</p>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'shop:category_detail' category_slug='handloom-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-2 text-decoration-none d-block">
-                        <img src="{% if site_settings.mosaic_handloom_image %}{{ site_settings.mosaic_handloom_image.url }}{% else %}{% static 'images/catalog-hero-saree.png' %}{% endif %}" alt="Signature Handloom Saree" class="mosaic-sub-img" loading="lazy">
-                        <div class="mosaic-sub-caption">
-                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Dharmavaram Hallmarks</h4>
-                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Authentic double-pallu master weaves</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- =====================================================================
          9. BRAND STORY (Tradition Woven With Elegance)
