@@ -178,3 +178,36 @@ class UniversalImageHandlingTests(TestCase):
         out_img = Image.open(cleaned)
         self.assertEqual(out_img.format, 'JPEG')
         self.assertEqual(out_img.size, (80, 80))
+
+    def test_heic_upload_above_2mb_up_to_5mb_conversion_to_jpeg(self):
+        """Test that a large iPhone HEIC image (>2MB up to 5MB) converts cleanly to JPEG within 5MB ceiling."""
+        import pillow_heif
+        import numpy as np
+
+        # Create a detailed high-resolution image that generates a ~3MB HEIF
+        arr = np.random.randint(50, 200, (1800, 1800, 3), dtype=np.uint8)
+        im = Image.fromarray(arr)
+        heif_buf = io.BytesIO()
+        heif_file = pillow_heif.from_pillow(im)
+        heif_file.save(heif_buf, quality=85)
+        raw_heic_bytes = heif_buf.getvalue()
+
+        # Verify the raw test HEIC image is actually above 2MB
+        self.assertGreater(len(raw_heic_bytes), 2 * 1024 * 1024, "Test requires raw HEIC image > 2MB")
+
+        heic_file = SimpleUploadedFile('large_iphone_saree.heic', raw_heic_bytes, content_type='image/heic')
+
+        field = forms.ImageField()
+        cleaned = field.clean(heic_file)
+
+        # Verify converted to JPEG
+        self.assertTrue(cleaned.name.endswith('.jpg'), f"Expected .jpg name, got {cleaned.name}")
+        self.assertEqual(cleaned.content_type, 'image/jpeg')
+
+        # Verify size conforms to 5MB ceiling
+        self.assertLessEqual(cleaned.size, 5 * 1024 * 1024, f"Cleaned image size {cleaned.size} must be under 5MB target")
+
+        # Verify image can be opened by Pillow
+        cleaned.seek(0)
+        out_img = Image.open(cleaned)
+        self.assertEqual(out_img.format, 'JPEG')

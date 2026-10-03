@@ -21,16 +21,26 @@ logger = logging.getLogger(__name__)
 
 
 def _process_uploaded_file(file, default_name='image.jpg'):
-    """Converts uploaded image (HEIC/RAW/large images) to high-quality web JPEG."""
+    """Converts uploaded image (HEIC/RAW/large images up to 5MB+) to high-quality web JPEG."""
     if not file:
         return None
     try:
         name = getattr(file, 'name', default_name)
+        if hasattr(file, 'seek') and callable(file.seek):
+            try:
+                file.seek(0)
+            except Exception:
+                pass
         if hasattr(file, 'temporary_file_path'):
             with open(file.temporary_file_path(), 'rb') as fp:
                 content = fp.read()
         else:
             content = file.read()
+            if hasattr(file, 'seek') and callable(file.seek):
+                try:
+                    file.seek(0)
+                except Exception:
+                    pass
         conv_bytes, new_name, mime = convert_image_data_to_web_friendly(content, name)
         return InMemoryUploadedFile(
             file=io.BytesIO(conv_bytes),
@@ -506,6 +516,11 @@ class BulkStockAdmin(admin.ModelAdmin):
 
         processed = _process_uploaded_file(file, 'image.jpg')
         file_name = getattr(processed, 'name', 'image.jpg')
+        if hasattr(processed, 'seek') and callable(processed.seek):
+            try:
+                processed.seek(0)
+            except Exception:
+                pass
         if hasattr(processed, 'read'):
             file_bytes = processed.read()
         else:

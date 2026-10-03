@@ -1245,7 +1245,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <div class="fw-bold fs-6 text-light">Product Images</div>
-                        <div class="fs-8 text-muted">Upload product photos. Slot 1 is the primary cover image. (Supports JPG, PNG, WEBP, and iPhone HEIC/HEIF)</div>
+                        <div class="fs-8 text-muted">Upload product photos. Slot 1 is the primary cover image. (Supports JPG, PNG, WEBP, and iPhone HEIC/HEIF up to 5MB)</div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-warning" id="btnAddExtraImgSlot">
                         <i class="bi bi-plus-lg me-1"></i> Add Another Image
@@ -1609,9 +1609,30 @@ document.addEventListener('DOMContentLoaded', function () {
         file = await normalizeUploadedImageFile(file);
 
         // Preview locally immediately
-        row.image_url = URL.createObjectURL(file);
+        row.image_url = file._serverUrl || URL.createObjectURL(file);
         row.image_file = file;
+        if (file._serverPath) {
+            row.image_path = file._serverPath;
+        }
         renderTable();
+
+        // If file was already processed and uploaded via server-side conversion, we don't need a redundant upload
+        if (file._serverUrl) {
+            if (row.id) {
+                // Attach to existing product ID
+                const formData = new FormData();
+                formData.append('product_id', row.id);
+                formData.append('image', file);
+                fetch(URL_UPLOAD_IMAGE, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': CSRF_TOKEN },
+                    body: formData
+                }).catch(() => {});
+            }
+            showToast('Image uploaded & optimized successfully.');
+            this.value = '';
+            return;
+        }
 
         // Upload asynchronously if item has an ID or save draft
         const formData = new FormData();
@@ -2095,7 +2116,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const isHeic = /\.(heic|heif)$/i.test(name) || file.type === 'image/heic' || file.type === 'image/heif';
         if (!isHeic) return file;
 
-        if (window.heic2any) {
+        const newName = name.replace(/\.(heic|heif)$/i, '.jpg');
+
+        // For files <= 2MB, try instant client-side conversion via heic2any
+        const isClientConvertible = file.size <= (2 * 1024 * 1024);
+        if (isClientConvertible && window.heic2any) {
             try {
                 showToast('Converting iPhone HEIC image for instant preview...');
                 const convertedBlob = await window.heic2any({
@@ -2104,13 +2129,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     quality: 0.92
                 });
                 const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-                const newName = name.replace(/\.(heic|heif)$/i, '.jpg');
                 return new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
             } catch (err) {
-                console.warn('Browser HEIC conversion failed, server will convert:', err);
-                return file;
+                console.warn('Browser HEIC conversion failed, falling back to server optimization:', err);
             }
         }
+
+        // For files above 2MB (up to 5MB+) or when browser conversion fails:
+        // Automatically utilize server-side pillow_heif endpoint for guaranteed, fast, loss-free conversion
+        try {
+            showToast('Optimizing high-res HEIC image (up to 5MB)...');
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch(URL_UPLOAD_IMAGE, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF_TOKEN },
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success && data.image_url) {
+                const imgRes = await fetch(data.image_url);
+                const blob = await imgRes.blob();
+                const convertedFile = new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+                convertedFile._serverUrl = data.image_url;
+                convertedFile._serverPath = data.image_path;
+                return convertedFile;
+            }
+        } catch (serverErr) {
+            console.warn('Server HEIC conversion fallback error:', serverErr);
+        }
+
         return file;
     }
 
@@ -2126,8 +2174,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         file = await normalizeUploadedImageFile(file);
 
-        const url = URL.createObjectURL(file);
-        modalSlotFiles[slot] = { file: file, url: url, isDeleted: false };
+        const url = file._serverUrl || URL.createObjectURL(file);
+        modalSlotFiles[slot] = { file: file, url: url, isDeleted: false, path: file._serverPath || '' };
 
         const img = document.getElementById('slotImg_' + slot);
         const emp = document.getElementById('slotEmpty_' + slot);

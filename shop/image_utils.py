@@ -55,9 +55,14 @@ CONVERT_TO_JPEG_EXTENSIONS = RAW_EXTENSIONS | {
 }
 
 
+# Image processing & storage size thresholds
+# Set to 5 MB per user requirement to comfortably accommodate HEIC images from iPhones & modern smartphones
 MAX_IMAGE_DIMENSION = 2560  # Ultra-crisp for 4K and saree zoom
 MAX_ALLOWED_FILE_BYTES = 5 * 1024 * 1024  # 5 MB target ceiling (Cloudinary limit is 10,485,760 bytes = 10 MB)
-AUTO_RESIZE_BYTES_THRESHOLD = 2 * 1024 * 1024  # 2 MB - files larger than this get compressed
+AUTO_RESIZE_BYTES_THRESHOLD = 5 * 1024 * 1024  # 5 MB - files up to 5MB are supported; larger files get auto-compressed
+
+# Allow high-resolution camera and iPhone photos without decompression bomb errors
+Image.MAX_IMAGE_PIXELS = None
 
 
 def convert_image_data_to_web_friendly(content_bytes, original_name):
@@ -66,8 +71,8 @@ def convert_image_data_to_web_friendly(content_bytes, original_name):
     - If it's SVG: validates and returns (content_bytes, original_name, 'image/svg+xml').
     - If it's RAW/DNG/HEIC/TIFF/BMP: develops/converts to high-quality JPEG.
     - If it's standard web format (JPG, PNG, WebP, GIF):
-      * If small (<= 2MB) and within 2560px dimensions, preserves original.
-      * If large (> 2MB) or huge dimensions (> 2560px), auto-resizes and optimizes to JPEG
+      * If small (<= 5MB) and within 2560px dimensions, preserves original.
+      * If large (> 5MB) or huge dimensions (> 2560px), auto-resizes and optimizes to JPEG
         so that file size is ~400KB-1.5MB and strictly stays below Cloudinary's 10MB limit.
     - Auto-rotates EXIF orientation to ensure smartphone photos always stand upright.
     """
@@ -128,7 +133,7 @@ def convert_image_data_to_web_friendly(content_bytes, original_name):
 
     # 2. Preserve PNG transparency if it is relatively small
     if ext == 'png' and (img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info)):
-        if len(content_bytes) <= 3 * 1024 * 1024 and max(img.size) <= MAX_IMAGE_DIMENSION:
+        if len(content_bytes) <= 5 * 1024 * 1024 and max(img.size) <= MAX_IMAGE_DIMENSION:
             out_buf = io.BytesIO()
             img.save(out_buf, format='PNG', optimize=True)
             png_bytes = out_buf.getvalue()
@@ -242,9 +247,17 @@ def setup_universal_image_handling():
             with open(data.temporary_file_path(), 'rb') as fp:
                 content_bytes = fp.read()
         elif hasattr(data, 'read'):
+            if hasattr(data, 'seek') and callable(data.seek):
+                try:
+                    data.seek(0)
+                except Exception:
+                    pass
             content_bytes = data.read()
             if hasattr(data, 'seek') and callable(data.seek):
-                data.seek(0)
+                try:
+                    data.seek(0)
+                except Exception:
+                    pass
         else:
             content_bytes = data.get('content', b'')
 
