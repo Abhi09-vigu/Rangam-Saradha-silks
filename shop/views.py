@@ -1007,6 +1007,25 @@ def add_review(request, product_id):
         rating = int(request.POST.get('rating', 5))
         comment = request.POST.get('comment')
         image = request.FILES.get('image')
+        if image:
+            try:
+                import io
+                from django.core.files.uploadedfile import InMemoryUploadedFile
+                from shop.image_utils import convert_image_data_to_web_friendly
+                name = getattr(image, 'name', 'review.jpg')
+                content = image.read()
+                conv_bytes, new_name, mime = convert_image_data_to_web_friendly(content, name)
+                image = InMemoryUploadedFile(
+                    file=io.BytesIO(conv_bytes),
+                    field_name='image',
+                    name=new_name,
+                    content_type=mime,
+                    size=len(conv_bytes),
+                    charset=None
+                )
+            except Exception as err:
+                import logging
+                logging.getLogger(__name__).error(f"Error converting review image: {err}")
         
         Review.objects.create(
             product=product,

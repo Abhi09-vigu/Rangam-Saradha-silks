@@ -1,5 +1,7 @@
 import json
 import uuid
+import io
+import logging
 from decimal import Decimal
 from django.contrib import admin, messages
 from django.urls import path
@@ -10,8 +12,37 @@ from django.utils.text import slugify
 from django.db import transaction
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from .models import BulkStockProduct, BulkStockProductImage, Category, Product, ProductImage
+from .image_utils import convert_image_data_to_web_friendly
+
+logger = logging.getLogger(__name__)
+
+
+def _process_uploaded_file(file, default_name='image.jpg'):
+    """Converts uploaded image (HEIC/RAW/large images) to high-quality web JPEG."""
+    if not file:
+        return None
+    try:
+        name = getattr(file, 'name', default_name)
+        if hasattr(file, 'temporary_file_path'):
+            with open(file.temporary_file_path(), 'rb') as fp:
+                content = fp.read()
+        else:
+            content = file.read()
+        conv_bytes, new_name, mime = convert_image_data_to_web_friendly(content, name)
+        return InMemoryUploadedFile(
+            file=io.BytesIO(conv_bytes),
+            field_name='image',
+            name=new_name,
+            content_type=mime,
+            size=len(conv_bytes),
+            charset=None
+        )
+    except Exception as err:
+        logger.error(f"Error converting image {getattr(file, 'name', 'unknown')}: {err}")
+        return file
 
 
 class BulkStockAdmin(admin.ModelAdmin):
@@ -233,7 +264,7 @@ class BulkStockAdmin(admin.ModelAdmin):
                         request.FILES.get(f"image_{item_id_key}")
                     )
                     if primary_file:
-                        bulk_obj.image = primary_file
+                        bulk_obj.image = _process_uploaded_file(primary_file, 'saree.jpg')
 
                     bulk_obj.save()
 
@@ -247,7 +278,7 @@ class BulkStockAdmin(admin.ModelAdmin):
                         if extra_file:
                             BulkStockProductImage.objects.create(
                                 bulk_product=bulk_obj,
-                                image=extra_file,
+                                image=_process_uploaded_file(extra_file, f"extra_{slot}.jpg"),
                                 display_order=slot
                             )
 
@@ -473,8 +504,15 @@ class BulkStockAdmin(admin.ModelAdmin):
         if not file:
             return JsonResponse({'success': False, 'error': 'No file uploaded'}, status=400)
 
+        processed = _process_uploaded_file(file, 'image.jpg')
+        file_name = getattr(processed, 'name', 'image.jpg')
+        if hasattr(processed, 'read'):
+            file_bytes = processed.read()
+        else:
+            file_bytes = file.read()
+
         # Save to bulk_stock directory
-        file_path = default_storage.save(f"bulk_stock/{uuid.uuid4().hex}_{file.name}", ContentFile(file.read()))
+        file_path = default_storage.save(f"bulk_stock/{uuid.uuid4().hex}_{file_name}", ContentFile(file_bytes))
         file_url = default_storage.url(file_path)
 
         # If existing product ID provided, attach it

@@ -187,89 +187,7 @@
         </div>
     </section>
 
-    <!-- =====================================================================
-         3. FEATURED COLLECTIONS (Large Visual Cards with Sequential Reveal)
-         ===================================================================== -->
-    <section class="editorial-collections-section" id="featured-collections">
-        <div class="container">
-            <div class="editorial-header-wrap editorial-reveal">
-                <div class="editorial-eyebrow">
-                    <span class="eyebrow-line"></span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span>CURATED ANTHOLOGY</span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span class="eyebrow-line"></span>
-                </div>
-                <h2 class="editorial-title">Featured Saree Collections</h2>
-                <p class="editorial-subtitle">Each masterpiece embodies centuries of handloom virtuosity, woven to celebrate the timeless grace of Indian womanhood.</p>
-                <div class="editorial-flourish">
-                    <span class="flourish-line"></span>
-                    <span class="flourish-center">❖</span>
-                    <span class="flourish-line reverse"></span>
-                </div>
-            </div>
 
-            <!-- Large Visual Cards (3 Columns) with Staggered Entrance -->
-            <div class="row g-4 row-cols-1 row-cols-md-3">
-                <!-- Card 1: Left Card -->
-                <div class="col">
-                    <a href="{{ site_settings.collection_card_1_button_url|default:'/shop/category/kanchipuram-sarees/' }}" class="collection-card-editorial editorial-reveal stagger-1">
-                        <div class="collection-card-img-wrap">
-                            <img src="{% if site_settings.collection_card_1_image %}{{ site_settings.collection_card_1_image.url }}{% else %}{% static 'images/categories/kanchipuram.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_1_title|default:'Royal Kanchipuram Silk Sarees' }}" class="collection-card-img" loading="lazy">
-                        </div>
-                        <div class="collection-card-overlay"></div>
-                        <div class="collection-card-content">
-                            <span class="collection-badge-tag">{{ site_settings.collection_card_1_tag|default:'ROYAL HERITAGE' }}</span>
-                            <h3 class="collection-card-title">{{ site_settings.collection_card_1_title|default:'Kanchipuram Silks' }}</h3>
-                            <p class="collection-card-desc">{{ site_settings.collection_card_1_desc|default:'Woven with authentic gold zari and sacred temple architecture borders for grand celebrations.' }}</p>
-                            <span class="collection-explore-btn">
-                                <span>{{ site_settings.collection_card_1_button_text|default:'Explore Collection' }}</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Card 2: Center Card -->
-                <div class="col">
-                    <a href="{{ site_settings.collection_card_2_button_url|default:'/shop/category/banarasi-sarees/' }}" class="collection-card-editorial editorial-reveal stagger-2">
-                        <div class="collection-card-img-wrap">
-                            <img src="{% if site_settings.collection_card_2_image %}{{ site_settings.collection_card_2_image.url }}{% else %}{% static 'images/categories/banarasi.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_2_title|default:'Opulent Banarasi Silk Sarees' }}" class="collection-card-img" loading="lazy">
-                        </div>
-                        <div class="collection-card-overlay"></div>
-                        <div class="collection-card-content">
-                            <span class="collection-badge-tag">{{ site_settings.collection_card_2_tag|default:'MUGHAL SPLENDOR' }}</span>
-                            <h3 class="collection-card-title">{{ site_settings.collection_card_2_title|default:'Banarasi Brocades' }}</h3>
-                            <p class="collection-card-desc">{{ site_settings.collection_card_2_desc|default:'Intricate floral jaal, meenakari embellishments, and cascading silk pallus for regal occasions.' }}</p>
-                            <span class="collection-explore-btn">
-                                <span>{{ site_settings.collection_card_2_button_text|default:'Explore Collection' }}</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Card 3: Right Card -->
-                <div class="col">
-                    <a href="{{ site_settings.collection_card_3_button_url|default:'/shop/category/bridal-collection/' }}" class="collection-card-editorial editorial-reveal stagger-3">
-                        <div class="collection-card-img-wrap">
-                            <img src="{% if site_settings.collection_card_3_image %}{{ site_settings.collection_card_3_image.url }}{% else %}{% static 'images/bridal-banner-luxury.jpg' %}{% endif %}" alt="{{ site_settings.collection_card_3_title|default:'Bridal Masterpieces' }}" class="collection-card-img" loading="lazy">
-                        </div>
-                        <div class="collection-card-overlay"></div>
-                        <div class="collection-card-content">
-                            <span class="collection-badge-tag">{{ site_settings.collection_card_3_tag|default:'MASTER WEAVES' }}</span>
-                            <h3 class="collection-card-title">{{ site_settings.collection_card_3_title|default:'Bridal Masterpieces' }}</h3>
-                            <p class="collection-card-desc">{{ site_settings.collection_card_3_desc|default:'Our hallmark bridal drapes infused with enduring warmth, double-warp silk, and artisanal soul.' }}</p>
-                            <span class="collection-explore-btn">
-                                <span>{{ site_settings.collection_card_3_button_text|default:'Explore Collection' }}</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- =====================================================================
          4. HORIZONTAL COLLECTION GALLERY (Smooth Desktop + Touch Mobile)
@@ -550,65 +468,7 @@
     </section>
     {% endif %}
 
-    <!-- =====================================================================
-         8. LATEST TRENDS / EDITORIAL SECTION (Asymmetric Fashion Grid)
-         ===================================================================== -->
-    <section class="editorial-trends-section" id="editorial-trends">
-        <div class="container">
-            <div class="editorial-header-wrap editorial-reveal">
-                <div class="editorial-eyebrow">
-                    <span class="eyebrow-line"></span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span>SEASONAL EDIT</span>
-                    <span class="eyebrow-motif">✦</span>
-                    <span class="eyebrow-line"></span>
-                </div>
-                <h2 class="editorial-title">Latest Weaves &amp; Editorial Inspiration</h2>
-                <p class="editorial-subtitle">A curated preview into this festive season's most sought-after color palettes, temple motifs, and bridal heirlooms.</p>
-                <div class="editorial-flourish">
-                    <span class="flourish-line"></span>
-                    <span class="flourish-center">❖</span>
-                    <span class="flourish-line reverse"></span>
-                </div>
-            </div>
 
-            <!-- Asymmetric Editorial Mosaic Grid -->
-            <div class="editorial-mosaic-grid">
-                <!-- Focal Big Portrait Frame -->
-                <div class="mosaic-hero-col">
-                    <img src="{% if site_settings.mosaic_hero_image %}{{ site_settings.mosaic_hero_image.url }}{% else %}{% static 'images/saree_detail_zari.jpg' %}{% endif %}" alt="Exquisite Gold Zari Craftsmanship Detail" class="mosaic-hero-img editorial-parallax-target" data-parallax-speed="0.04" loading="lazy">
-                    <div class="mosaic-hero-content">
-                        <span class="collection-badge-tag">THE GOLD WEFT</span>
-                        <h3 class="editorial-title text-white mb-2" style="font-size: 2rem;">Heirloom Zari Artistry</h3>
-                        <p class="text-white-50 mb-3" style="max-width: 480px; font-size: 0.9rem;">Witness the immaculate intricacy of pure zari jacquards crafted to remain as luminous decades from now as on your special day.</p>
-                        <a href="{% url 'shop:category_detail' category_slug='silk-sarees' %}" class="editorial-link-btn">
-                            <span>Explore Zari Sarees</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Two Supporting Frames -->
-                <div class="mosaic-supporting-col">
-                    <a href="{% url 'shop:category_detail' category_slug='party-wear-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-1 text-decoration-none d-block">
-                        <img src="{% if site_settings.mosaic_festive_image %}{{ site_settings.mosaic_festive_image.url }}{% else %}{% static 'images/contact_saree_drape.jpg' %}{% endif %}" alt="Traditional Saree Drapery Elegance" class="mosaic-sub-img" loading="lazy">
-                        <div class="mosaic-sub-caption">
-                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Festive Drapery Collections</h4>
-                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Vibrant festive silks with graceful contrast borders</p>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'shop:category_detail' category_slug='handloom-sarees' %}" class="mosaic-sub-card editorial-reveal stagger-2 text-decoration-none d-block">
-                        <img src="{% if site_settings.mosaic_handloom_image %}{{ site_settings.mosaic_handloom_image.url }}{% else %}{% static 'images/catalog-hero-saree.png' %}{% endif %}" alt="Signature Handloom Saree" class="mosaic-sub-img" loading="lazy">
-                        <div class="mosaic-sub-caption">
-                            <h4 class="text-white mb-1" style="color: #FFFFFF !important; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">Dharmavaram Hallmarks</h4>
-                            <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">Authentic double-pallu master weaves</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- =====================================================================
          8B. NEW ARRIVALS / CURATED SILK MASTERPIECES (Continuous Scroller)

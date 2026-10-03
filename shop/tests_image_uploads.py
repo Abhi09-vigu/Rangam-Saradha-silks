@@ -159,3 +159,22 @@ class UniversalImageHandlingTests(TestCase):
         images = list(product.images.all())
         self.assertEqual(len(images), 8)
         self.assertEqual([img.display_order for img in images], [1, 2, 3, 4, 5, 6, 7, 8])
+
+    def test_heic_upload_conversion_to_jpeg(self):
+        """Test that a HEIC image uploaded through forms/bulk upload is automatically converted to JPEG."""
+        import pillow_heif
+        im = Image.new('RGB', (80, 80), color='purple')
+        heif_buf = io.BytesIO()
+        heif_file = pillow_heif.from_pillow(im)
+        heif_file.save(heif_buf, quality=80)
+        heic_file = SimpleUploadedFile('iphone_saree.heic', heif_buf.getvalue(), content_type='image/heic')
+
+        field = forms.ImageField()
+        cleaned = field.clean(heic_file)
+        self.assertTrue(cleaned.name.endswith('.jpg'))
+        self.assertEqual(cleaned.content_type, 'image/jpeg')
+
+        cleaned.seek(0)
+        out_img = Image.open(cleaned)
+        self.assertEqual(out_img.format, 'JPEG')
+        self.assertEqual(out_img.size, (80, 80))

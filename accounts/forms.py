@@ -195,7 +195,7 @@ class UserProfileForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Last Name'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter Email Address'}),
-            'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,.heic,.HEIC,.heif,.HEIF'}),
         }
 
     def __init__(self, *args, **kwargs):

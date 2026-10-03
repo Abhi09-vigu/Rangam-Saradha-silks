@@ -100,41 +100,10 @@ class WebsiteSettingAdmin(SingletonAdmin):
         ('Bridal Banner Section', {
             'fields': ('bridal_banner_title', 'bridal_banner_subtitle', 'bridal_banner_image', ('bridal_banner_button_text', 'bridal_banner_button_url')),
         }),
-        ('👑 Section 3: Featured Card 1 (Left)', {
-            'fields': (
-                'collection_card_1_image',
-                'collection_card_1_tag',
-                'collection_card_1_title',
-                'collection_card_1_desc',
-                ('collection_card_1_button_text', 'collection_card_1_button_url'),
-            ),
-            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 1 (Left: e.g. Kanchipuram Silks).',
-        }),
-        ('👑 Section 3: Featured Card 2 (Center)', {
-            'fields': (
-                'collection_card_2_image',
-                'collection_card_2_tag',
-                'collection_card_2_title',
-                'collection_card_2_desc',
-                ('collection_card_2_button_text', 'collection_card_2_button_url'),
-            ),
-            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 2 (Center: e.g. Banarasi Brocades).',
-        }),
-        ('👑 Section 3: Featured Card 3 (Right)', {
-            'fields': (
-                'collection_card_3_image',
-                'collection_card_3_tag',
-                'collection_card_3_title',
-                'collection_card_3_desc',
-                ('collection_card_3_button_text', 'collection_card_3_button_url'),
-            ),
-            'description': 'Configure the image, category tag, title name, description, and button link URL for Card 3 (Right: e.g. Bridal Masterpieces).',
-        }),
         ('🖼️ Other Homepage Editorial Section Images', {
             'fields': (
                 'bridal_spotlight_image',
                 'artisan_weaving_image',
-                ('mosaic_hero_image', 'mosaic_festive_image', 'mosaic_handloom_image'),
                 'brand_story_image',
             ),
             'description': 'Upload custom images for the other homepage editorial sections anytime. If an image is left blank, the curated default image will be displayed automatically.',
