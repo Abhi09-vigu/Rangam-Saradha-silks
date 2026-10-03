@@ -333,8 +333,8 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     can_delete = False
-    fields = ['product', 'quantity', 'price', 'item_total_display']
-    readonly_fields = ['product', 'quantity', 'price', 'item_total_display']
+    fields = ['product_thumbnail', 'product', 'quantity', 'price', 'item_total_display']
+    readonly_fields = ['product_thumbnail', 'product', 'quantity', 'price', 'item_total_display']
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -348,6 +348,18 @@ class OrderItemInline(admin.TabularInline):
         Prefetches product and its related images.
         """
         return super().get_queryset(request).select_related('product').prefetch_related('product__images')
+
+    def product_thumbnail(self, obj):
+        if obj.product:
+            image_url = obj.product.primary_image_url
+            if image_url:
+                return format_html(
+                    '<a href="{0}" target="_blank"><img src="{0}" width="50" height="60" style="object-fit: cover; border-radius: 4px; display: block;" alt="{1}"></a>',
+                    image_url,
+                    obj.product.name
+                )
+        return "-"
+    product_thumbnail.short_description = "Image"
 
     def item_total_display(self, obj):
         if obj.pk and obj.price is not None and obj.quantity is not None:

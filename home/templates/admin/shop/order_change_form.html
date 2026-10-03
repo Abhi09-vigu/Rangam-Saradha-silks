@@ -100,6 +100,56 @@
         border-bottom: none;
     }
     
+    .order-items-table th.col-img,
+    .order-items-table td.col-img {
+        width: 72px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 10px 8px;
+    }
+    .order-item-thumbnail {
+        width: 54px;
+        height: 68px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: #f8fafc;
+        display: block;
+        margin: 0 auto;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .order-item-thumbnail:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border-color: var(--secondary, #AE6F21);
+    }
+    .order-item-thumbnail-placeholder {
+        width: 54px;
+        height: 68px;
+        border-radius: 6px;
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        margin: 0 auto;
+    }
+    .order-item-image-link {
+        display: inline-block;
+        text-decoration: none;
+    }
+    .order-product-link {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+    .order-product-link:hover {
+        color: var(--secondary, #AE6F21);
+        text-decoration: underline;
+    }
+
     .order-item-title {
         font-weight: 600;
         color: #1a1a1a;
@@ -321,6 +371,26 @@
     .order-item-total {
         color: #f770a1 !important;
     }
+    .order-item-thumbnail {
+        border-color: #3d1b24 !important;
+        background: #241419 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+    }
+    .order-item-thumbnail:hover {
+        border-color: #e5a452 !important;
+        box-shadow: 0 4px 14px rgba(229, 164, 82, 0.25) !important;
+    }
+    .order-item-thumbnail-placeholder {
+        border-color: #3d1b24 !important;
+        background: #241419 !important;
+        color: #7a6864 !important;
+    }
+    .order-product-link {
+        color: #f5ebe6 !important;
+    }
+    .order-product-link:hover {
+        color: #e5a452 !important;
+    }
     .order-summary-row {
         color: #d2c5bf !important;
     }
@@ -423,6 +493,7 @@
                             <table class="order-items-table">
                                 <thead>
                                     <tr>
+                                        <th class="col-img">Image</th>
                                         <th>Product / Saree</th>
                                         <th style="width: 90px; text-align: center;">Qty</th>
                                         <th style="width: 140px; text-align: right;">Unit Price (₹)</th>
@@ -433,10 +504,37 @@
                                     {% for form in inline_admin_formset.formset %}
                                         {% if form.instance.pk %}
                                         <tr>
-                                            <td>
+                                            <td class="col-img">
                                                 {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                                                {% with form.instance.product.images.first as first_img %}
+                                                    {% if first_img and first_img.image %}
+                                                        <a href="{{ first_img.image.url }}" target="_blank" class="order-item-image-link" title="Click to view full image - {{ form.instance.product.name }}">
+                                                            <img src="{{ first_img.image.url }}" alt="{{ form.instance.product.name }}" class="order-item-thumbnail">
+                                                        </a>
+                                                    {% elif form.instance.product.primary_image_url %}
+                                                        <a href="{{ form.instance.product.primary_image_url }}" target="_blank" class="order-item-image-link" title="Click to view full image - {{ form.instance.product.name }}">
+                                                            <img src="{{ form.instance.product.primary_image_url }}" alt="{{ form.instance.product.name }}" class="order-item-thumbnail">
+                                                        </a>
+                                                    {% else %}
+                                                        <div class="order-item-thumbnail-placeholder" title="No image available">
+                                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                                            </svg>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td>
                                                 <div class="order-item-title">
-                                                    {{ form.instance.product.name|default:"Product" }}
+                                                    {% if form.instance.product %}
+                                                        <a href="{% url 'admin:shop_product_change' form.instance.product.id %}" target="_blank" class="order-product-link" title="Edit {{ form.instance.product.name }} in admin">
+                                                            {{ form.instance.product.name }}
+                                                        </a>
+                                                    {% else %}
+                                                        Deleted Product
+                                                    {% endif %}
                                                 </div>
                                                 {% if form.instance.product.sku %}
                                                     <div class="order-item-sku">SKU: {{ form.instance.product.sku }}</div>
@@ -455,7 +553,7 @@
                                         {% endif %}
                                     {% empty %}
                                         <tr>
-                                            <td colspan="4" style="text-align: center; color: #888; padding: 20px;">No items in this order.</td>
+                                            <td colspan="5" style="text-align: center; color: #888; padding: 20px;">No items in this order.</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

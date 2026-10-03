@@ -188,6 +188,16 @@ class Product(models.Model):
             return round(avg, 1) if avg else 0
         return 0
 
+    @property
+    def primary_image(self):
+        first_img = self.images.first()
+        return first_img.image if first_img and first_img.image else None
+
+    @property
+    def primary_image_url(self):
+        img = self.primary_image
+        return img.url if img else ""
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
@@ -478,6 +488,12 @@ class OrderItem(models.Model):
 
     def get_total_price(self):
         return self.price * self.quantity
+
+    @property
+    def product_image_url(self):
+        if self.product:
+            return self.product.primary_image_url
+        return ""
 
     def __str__(self):
         return f"{self.product.name if self.product else 'Deleted Product'} ({self.quantity})"

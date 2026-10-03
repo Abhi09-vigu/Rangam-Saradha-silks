@@ -87,6 +87,26 @@ class OrderAdminTest(TestCase):
         self.assertIn("img", thumbnail_html)
         self.assertIn("saree1.jpg", thumbnail_html)
 
+    def test_order_item_inline_product_thumbnail(self):
+        """
+        Verify that OrderItemInline renders product thumbnail when image exists,
+        and gracefully falls back to '-' when not present.
+        """
+        item_without_img = OrderItem.objects.create(order=self.order, product=self.product_1, quantity=1, price=2999.00)
+        self.assertEqual(self.order_item_inline.product_thumbnail(item_without_img), "-")
+
+        ProductImage.objects.create(
+            product=self.product_1,
+            image=SimpleUploadedFile("saree_thumb.jpg", b"thumb_content", content_type="image/jpeg")
+        )
+        self.assertTrue(self.product_1.primary_image)
+        self.assertIn("saree_thumb.jpg", self.product_1.primary_image_url)
+        self.assertIn("saree_thumb.jpg", item_without_img.product_image_url)
+
+        thumb_html = self.order_item_inline.product_thumbnail(item_without_img)
+        self.assertIn("<img", thumb_html)
+        self.assertIn("saree_thumb.jpg", thumb_html)
+
     def test_product_name_column_single(self):
         """
         Verify that a single ordered product displays its name.
