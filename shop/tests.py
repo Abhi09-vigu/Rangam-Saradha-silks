@@ -437,6 +437,29 @@ class CatalogSkuFilterTest(TestCase):
         self.assertEqual(len(product_list), 1)
         self.assertEqual(product_list[0].sku, 'BBS-202')
 
+    def test_catalog_pagination_shows_50_sarees_per_page(self):
+        from django.urls import reverse
+        # Create 55 products to test that page 1 contains 50 sarees
+        new_products = [
+            Product(
+                name=f"Bulk Saree {i}",
+                slug=f"bulk-saree-{i}",
+                sku=f"BLK-{i:03d}",
+                price=5000.00,
+                stock=5,
+                is_active=True
+            )
+            for i in range(1, 55)
+        ]
+        Product.objects.bulk_create(new_products)
+
+        response = self.client.get(reverse('shop:catalog'))
+        self.assertEqual(response.status_code, 200)
+        page_obj = response.context['products']
+        self.assertEqual(page_obj.paginator.per_page, 50)
+        self.assertEqual(len(page_obj), 50)
+        self.assertTrue(page_obj.has_next())
+
     def test_sku_autocomplete_api(self):
         from django.urls import reverse
         response = self.client.get(reverse('shop:sku_autocomplete_api'), {'q': 'KJB'})

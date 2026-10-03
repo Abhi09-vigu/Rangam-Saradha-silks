@@ -362,9 +362,14 @@ def catalog(request, category_slug=None):
         any(v for v in request.GET.values() if v and str(v).strip())
     )
 
-    # Pagination
+    # Pagination (show 50 sarees on first page and each page)
     from django.core.paginator import Paginator
-    paginator = Paginator(products, 12)
+    per_page_param = request.GET.get('per_page')
+    try:
+        per_page = int(per_page_param) if per_page_param else 50
+    except (ValueError, TypeError):
+        per_page = 50
+    paginator = Paginator(products, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
