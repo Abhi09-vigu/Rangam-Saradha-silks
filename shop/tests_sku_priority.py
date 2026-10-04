@@ -153,12 +153,11 @@ class SkuPriorityOrderingTestCase(TestCase):
         # Last 2 must be unprioritized products
         self.assertEqual(set(skus[4:]), {"BAN-BLU-001", "DMS-055"})
 
-    def test_price_low_to_high_within_priority_groups(self):
+    def test_price_low_to_high_sorts_globally(self):
         """
-        Price Low to High sorting sorts within each priority group:
-        - Within RSS-GB: RSS-GB-011 (₹8,000) before RSS-GB-006 (₹12,000)
-        - Within KJM-SUB: KJM-SUB-028 (₹10,000) before KJM-SUB-027 (₹15,000)
-        - Within unprioritized: BAN-BLU-001 (₹6,000) before DMS-055 (₹18,000)
+        Price Low to High sorting sorts all products strictly by price ascending:
+        BAN-BLU-001 (₹6,000) -> RSS-GB-011 (₹8,000) -> KJM-SUB-028 (₹10,000) ->
+        RSS-GB-006 (₹12,000) -> KJM-SUB-027 (₹15,000) -> DMS-055 (₹18,000).
         """
         self.settings.priority_sku_prefixes = "RSS-GB, KJM-SUB"
         self.settings.save()
@@ -169,20 +168,19 @@ class SkuPriorityOrderingTestCase(TestCase):
         skus = [p.sku for p in products]
 
         self.assertEqual(skus, [
-            "RSS-GB-011",   # ₹8,000
-            "RSS-GB-006",   # ₹12,000
-            "KJM-SUB-028",  # ₹10,000
-            "KJM-SUB-027",  # ₹15,000
             "BAN-BLU-001",  # ₹6,000
+            "RSS-GB-011",   # ₹8,000
+            "KJM-SUB-028",  # ₹10,000
+            "RSS-GB-006",   # ₹12,000
+            "KJM-SUB-027",  # ₹15,000
             "DMS-055",      # ₹18,000
         ])
 
-    def test_price_high_to_low_within_priority_groups(self):
+    def test_price_high_to_low_sorts_globally(self):
         """
-        Price High to Low sorting sorts within each priority group:
-        - Within RSS-GB: RSS-GB-006 (₹12,000) before RSS-GB-011 (₹8,000)
-        - Within KJM-SUB: KJM-SUB-027 (₹15,000) before KJM-SUB-028 (₹10,000)
-        - Within unprioritized: DMS-055 (₹18,000) before BAN-BLU-001 (₹6,000)
+        Price High to Low sorting sorts all products strictly by price descending:
+        DMS-055 (₹18,000) -> KJM-SUB-027 (₹15,000) -> RSS-GB-006 (₹12,000) ->
+        KJM-SUB-028 (₹10,000) -> RSS-GB-011 (₹8,000) -> BAN-BLU-001 (₹6,000).
         """
         self.settings.priority_sku_prefixes = "RSS-GB, KJM-SUB"
         self.settings.save()
@@ -193,17 +191,17 @@ class SkuPriorityOrderingTestCase(TestCase):
         skus = [p.sku for p in products]
 
         self.assertEqual(skus, [
-            "RSS-GB-006",   # ₹12,000
-            "RSS-GB-011",   # ₹8,000
-            "KJM-SUB-027",  # ₹15,000
-            "KJM-SUB-028",  # ₹10,000
             "DMS-055",      # ₹18,000
+            "KJM-SUB-027",  # ₹15,000
+            "RSS-GB-006",   # ₹12,000
+            "KJM-SUB-028",  # ₹10,000
+            "RSS-GB-011",   # ₹8,000
             "BAN-BLU-001",  # ₹6,000
         ])
 
-    def test_popularity_sort_within_priority_groups(self):
+    def test_popularity_sort_globally(self):
         """
-        Popularity sorting sorts trending products first within each priority group.
+        Popularity sorting sorts trending products first globally across the catalog.
         """
         self.settings.priority_sku_prefixes = "RSS-GB, KJM-SUB"
         self.settings.save()
@@ -211,17 +209,11 @@ class SkuPriorityOrderingTestCase(TestCase):
         response = self.client.get(reverse('shop:catalog'), {'sort': 'popular'})
         self.assertEqual(response.status_code, 200)
         products = list(response.context['products'])
-        skus = [p.sku for p in products]
-
-        # RSS-GB: 006 is trending, 011 is not
-        self.assertEqual(skus[0], "RSS-GB-006")
-        self.assertEqual(skus[1], "RSS-GB-011")
-        # KJM-SUB: 028 is trending, 027 is not
-        self.assertEqual(skus[2], "KJM-SUB-028")
-        self.assertEqual(skus[3], "KJM-SUB-027")
-        # Unprioritized: DMS-055 is trending, BAN-BLU-001 is not
-        self.assertEqual(skus[4], "DMS-055")
-        self.assertEqual(skus[5], "BAN-BLU-001")
+        
+        # All trending products appear before non-trending products
+        trending_flags = [p.is_trending for p in products]
+        self.assertTrue(all(trending_flags[:3]))
+        self.assertFalse(any(trending_flags[3:]))
 
     def test_empty_priority_setting_falls_back_to_standard_sort(self):
         """If no priority SKU prefixes are configured, standard sorting applies."""
@@ -259,41 +251,41 @@ class SkuPriorityOrderingTestCase(TestCase):
         self.assertEqual(self.p_rss_1.sku, "RSS-GB-006")
         self.assertEqual(self.p_kjm_1.sku, "KJM-SUB-027")
 
-    def test_filters_with_sku_priority(self):
-        """Filters (such as min_price/max_price) operate correctly alongside SKU priority."""
+    def test_filters_with_price_sorting(self):
+        """Filters (such as min_price/max_price) operate correctly alongside price sorting."""
         self.settings.priority_sku_prefixes = "RSS-GB, KJM-SUB"
         self.settings.save()
 
-        # Filter products >= 10,000:
-        # Matches RSS-GB-006 (12,000), KJM-SUB-027 (15,000), KJM-SUB-028 (10,000), DMS-055 (18,000)
+        # Filter products >= 10,000 sorted price_low:
+        # Matches KJM-SUB-028 (10,000), RSS-GB-006 (12,000), KJM-SUB-027 (15,000), DMS-055 (18,000)
         response = self.client.get(reverse('shop:catalog'), {'min_price': '10000', 'sort': 'price_low'})
         self.assertEqual(response.status_code, 200)
         products = list(response.context['products'])
         skus = [p.sku for p in products]
 
         self.assertEqual(skus, [
-            "RSS-GB-006",   # RSS-GB group (12,000)
-            "KJM-SUB-028",  # KJM-SUB group (10,000)
-            "KJM-SUB-027",  # KJM-SUB group (15,000)
-            "DMS-055",      # Unprioritized group (18,000)
+            "KJM-SUB-028",  # 10,000
+            "RSS-GB-006",   # 12,000
+            "KJM-SUB-027",  # 15,000
+            "DMS-055",      # 18,000
         ])
 
-    def test_pagination_preserves_sku_priority_order(self):
-        """Pagination slices the prioritized and sorted queryset properly across pages."""
+    def test_pagination_preserves_sku_priority_order_on_default(self):
+        """Pagination slices the prioritized queryset properly across pages on default view."""
         from django.core.paginator import Paginator
         self.settings.priority_sku_prefixes = "RSS-GB, KJM-SUB"
         self.settings.save()
 
         from shop.views import apply_sku_priority_and_sorting
         qs = Product.objects.filter(is_active=True, stock__gt=0)
-        sorted_qs = apply_sku_priority_and_sorting(qs, sort_by='price_low', site_settings=self.settings)
+        sorted_qs = apply_sku_priority_and_sorting(qs, sort_by='new', site_settings=self.settings)
 
         paginator = Paginator(sorted_qs, 2)  # 2 items per page
         page1 = paginator.get_page(1)
         page2 = paginator.get_page(2)
         page3 = paginator.get_page(3)
 
-        self.assertEqual([p.sku for p in page1], ["RSS-GB-011", "RSS-GB-006"])
-        self.assertEqual([p.sku for p in page2], ["KJM-SUB-028", "KJM-SUB-027"])
-        self.assertEqual([p.sku for p in page3], ["BAN-BLU-001", "DMS-055"])
+        self.assertEqual(set(p.sku for p in page1), {"RSS-GB-006", "RSS-GB-011"})
+        self.assertEqual(set(p.sku for p in page2), {"KJM-SUB-027", "KJM-SUB-028"})
+        self.assertEqual(set(p.sku for p in page3), {"BAN-BLU-001", "DMS-055"})
 

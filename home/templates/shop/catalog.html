@@ -146,6 +146,8 @@
                         {% if current_filters.q %}
                         <input type="hidden" name="q" value="{{ current_filters.q }}">
                         {% endif %}
+                        <!-- Preserve sort selection across sidebar filters -->
+                        <input type="hidden" name="sort" id="filterSortInput" value="{{ current_filters.sort|default:'new' }}">
 
                         <!-- Search by SKU ID -->
                         <div class="mb-4">
@@ -322,11 +324,11 @@
             
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <label for="sortBy" class="text-muted fs-7 text-nowrap mb-0">Sort By:</label>
-                <select id="sortBy" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;">
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                    <option value="?{% if current_filters.q %}q={{ current_filters.q }}&{% endif %}{% if current_filters.sku %}sku={{ current_filters.sku }}&{% endif %}{% if category_param %}category={{ category_param }}&{% endif %}sort=popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
+                <select id="sortBy" name="sort" class="form-select form-select-sm fs-7 border-0" style="background-color: transparent;">
+                    <option value="new" {% if current_filters.sort == 'new' or not current_filters.sort %}selected{% endif %}>New Arrivals</option>
+                    <option value="price_low" {% if current_filters.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if current_filters.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="popular" {% if current_filters.sort == 'popular' %}selected{% endif %}>Popularity</option>
                 </select>
             </div>
         </div>
@@ -560,7 +562,11 @@
             const sortBy = document.getElementById("sortBy");
             if (sortBy) {
                 sortBy.addEventListener("change", function () {
-                    applyCatalogFilters(this.value, true, false);
+                    const filterSortInput = document.getElementById("filterSortInput");
+                    if (filterSortInput) {
+                        filterSortInput.value = this.value;
+                    }
+                    applyCatalogFilters(null, true, false);
                 });
             }
 

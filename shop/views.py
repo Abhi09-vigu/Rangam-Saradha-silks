@@ -214,6 +214,15 @@ def apply_sku_priority_and_sorting(queryset, sort_by=None, site_settings=None):
 
     priority_prefixes = site_settings.get_priority_sku_prefixes() if site_settings else []
 
+    # If the user explicitly selects a sort option, sort across all products directly
+    if sort_by == 'price_low':
+        return queryset.order_by('offer_price', '-created_at', 'id')
+    elif sort_by == 'price_high':
+        return queryset.order_by('-offer_price', '-created_at', 'id')
+    elif sort_by == 'popular':
+        return queryset.order_by('-is_trending', '-created_at', 'id')
+
+    # Default / New Arrivals: apply SKU priority if configured, followed by newest arrivals
     primary_order = []
     if priority_prefixes:
         whens = []
@@ -241,17 +250,7 @@ def apply_sku_priority_and_sorting(queryset, sort_by=None, site_settings=None):
             )
             primary_order = ['sku_priority']
 
-    # Determine secondary ordering based on user-selected sort
-    if sort_by == 'price_low':
-        secondary_order = ['offer_price', '-created_at', 'id']
-    elif sort_by == 'price_high':
-        secondary_order = ['-offer_price', '-created_at', 'id']
-    elif sort_by == 'popular':
-        secondary_order = ['-is_trending', '-created_at', 'id']
-    else:
-        # Default: newest arrivals (covers sort == 'new' and default)
-        secondary_order = ['-created_at', 'id']
-
+    secondary_order = ['-created_at', 'id']
     return queryset.order_by(*(primary_order + secondary_order))
 
 
