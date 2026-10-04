@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 import datetime
 import uuid
 import logging
@@ -271,18 +272,29 @@ def catalog(request, category_slug=None):
     category_param = request.GET.get('category') or category_slug
     active_category = None
     if category_param:
-        if isinstance(category_param, str) and category_param.isdigit():
-            products = products.filter(categories__id=category_param)
-            active_category = Category.objects.filter(id=category_param, is_active=True).first()
+        clean_cat = str(category_param).strip()
+        if clean_cat.isdigit():
+            products = products.filter(categories__id=clean_cat)
+            active_category = Category.objects.filter(id=clean_cat, is_active=True).first()
         else:
-            cat_obj = Category.objects.filter(slug=category_param, is_active=True).first()
-            if not cat_obj and category_param == 'bridal':
+            cat_obj = Category.objects.filter(slug=clean_cat, is_active=True).first()
+            if not cat_obj:
+                cat_obj = Category.objects.filter(slug=slugify(clean_cat), is_active=True).first()
+            if not cat_obj:
+                cat_obj = Category.objects.filter(name__iexact=clean_cat, is_active=True).first()
+            if not cat_obj:
+                cat_obj = Category.objects.filter(name__iexact=clean_cat.replace('-', ' '), is_active=True).first()
+            if not cat_obj and clean_cat == 'bridal':
                 cat_obj = Category.objects.filter(slug='bridal-collection', is_active=True).first()
             if cat_obj:
                 products = products.filter(categories=cat_obj)
                 active_category = cat_obj
             else:
-                products = products.filter(categories__slug=category_param)
+                products = products.filter(
+                    Q(categories__slug=clean_cat) |
+                    Q(categories__slug=slugify(clean_cat)) |
+                    Q(categories__name__iexact=clean_cat)
+                )
         
     color = request.GET.get('color')
     if color:
@@ -318,9 +330,21 @@ def catalog(request, category_slug=None):
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price:
-        products = products.filter(offer_price__gte=min_price)
+        try:
+            min_val = float(min_price)
+            products = products.filter(
+                Q(offer_price__gte=min_val) | (Q(offer_price__isnull=True) & Q(price__gte=min_val))
+            )
+        except (ValueError, TypeError):
+            pass
     if max_price:
-        products = products.filter(offer_price__lte=max_price)
+        try:
+            max_val = float(max_price)
+            products = products.filter(
+                Q(offer_price__lte=max_val) | (Q(offer_price__isnull=True) & Q(price__lte=max_val))
+            )
+        except (ValueError, TypeError):
+            pass
         
     discount = request.GET.get('discount')
     if discount == 'yes':
@@ -345,10 +369,20 @@ def catalog(request, category_slug=None):
                     seen[k] = val
         return sorted(seen.values(), key=lambda s: s.lower())
 
-    # Get distinct attribute values for filters (clear default ordering to prevent created_at duplication in SELECT DISTINCT)
-    raw_colors = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('color', flat=True).distinct()
-    raw_fabrics = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('fabric', flat=True).distinct()
-    raw_occasions = Product.objects.filter(is_active=True, stock__gt=0).order_by().values_list('occasion', flat=True).distinct()
+    # Get distinct attribute values for filters (scoped to active category if applicable)
+    base_filter_qs = Product.objects.filter(is_active=True, stock__gt=0)
+    scoped_qs = base_filter_qs.filter(categories=active_category) if active_category else base_filter_qs
+
+    raw_colors = scoped_qs.order_by().values_list('color', flat=True).distinct()
+    raw_fabrics = scoped_qs.order_by().values_list('fabric', flat=True).distinct()
+    raw_occasions = scoped_qs.order_by().values_list('occasion', flat=True).distinct()
+
+    if not any(raw_colors):
+        raw_colors = base_filter_qs.order_by().values_list('color', flat=True).distinct()
+    if not any(raw_fabrics):
+        raw_fabrics = base_filter_qs.order_by().values_list('fabric', flat=True).distinct()
+    if not any(raw_occasions):
+        raw_occasions = base_filter_qs.order_by().values_list('occasion', flat=True).distinct()
     
     # Clean filters (omit nulls/blanks, deduplicate case-insensitively, sort)
     colors = clean_unique_filter_list(raw_colors)
@@ -356,6 +390,16 @@ def catalog(request, category_slug=None):
     occasions = clean_unique_filter_list(raw_occasions)
 
     # Determine if any filter / query parameter is active in URL
+    has_attribute_filters = bool(
+        request.GET.get('color') or
+        request.GET.get('fabric') or
+        request.GET.get('occasion') or
+        request.GET.get('min_price') or
+        request.GET.get('max_price') or
+        request.GET.get('discount') or
+        request.GET.get('sku') or
+        request.GET.get('q')
+    )
     has_filters = bool(
         category_param or 
         any(v for v in request.GET.values() if v and str(v).strip())
@@ -396,6 +440,7 @@ def catalog(request, category_slug=None):
         'current_filters': request.GET,
         'category_param': category_param,
         'has_filters': has_filters,
+        'has_attribute_filters': has_attribute_filters,
         'active_category': active_category,
         'min_catalog_price': min_catalog_price,
         'max_catalog_price': max_catalog_price,

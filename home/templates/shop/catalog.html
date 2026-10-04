@@ -201,14 +201,14 @@
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Category</h5>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="" id="cat-all" {% if not category_param and not current_filters.category %}checked{% endif %} onchange="this.form.submit()">
+                                <input class="form-check-input" type="radio" name="category" value="" id="cat-all" {% if not category_param and not current_filters.category %}checked{% endif %}>
                                 <label class="form-check-label text-dark fs-7" for="cat-all">
                                     All Categories
                                 </label>
                             </div>
                             {% for cat in categories %}
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if category_param == cat.slug or current_filters.category == cat.slug %}checked{% endif %} onchange="this.form.submit()">
+                                <input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="cat-{{ cat.id }}" {% if category_param == cat.slug or current_filters.category == cat.slug %}checked{% endif %}>
                                 <label class="form-check-label text-dark fs-7" for="cat-{{ cat.id }}">
                                     {{ cat.name }}
                                 </label>
@@ -220,7 +220,7 @@
                         {% if occasions %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Occasion</h5>
-                            <select name="occasion" id="filterOccasion" class="form-select fs-7" onchange="this.form.submit()">
+                            <select name="occasion" id="filterOccasion" class="form-select fs-7">
                                 <option value="">Select Occasion</option>
                                 {% for o in occasions %}
                                 <option value="{{ o }}" {% if current_filters.occasion == o %}selected{% endif %}>{{ o }}</option>
@@ -233,7 +233,7 @@
                         {% if fabrics %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Fabric</h5>
-                            <select name="fabric" id="filterFabric" class="form-select fs-7" onchange="this.form.submit()">
+                            <select name="fabric" id="filterFabric" class="form-select fs-7">
                                 <option value="">Select Fabric</option>
                                 {% for f in fabrics %}
                                 <option value="{{ f }}" {% if current_filters.fabric == f %}selected{% endif %}>{{ f }}</option>
@@ -246,7 +246,7 @@
                         {% if colors %}
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Color</h5>
-                            <select name="color" id="filterColor" class="form-select fs-7" onchange="this.form.submit()">
+                            <select name="color" id="filterColor" class="form-select fs-7">
                                 <option value="">Select Color</option>
                                 {% for c in colors %}
                                 <option value="{{ c }}" {% if current_filters.color == c %}selected{% endif %}>{{ c }}</option>
@@ -283,7 +283,7 @@
                         <div class="mb-4">
                             <h5 class="fw-bold fs-7 text-uppercase text-muted mb-3" style="letter-spacing: 0.08em;">Offers</h5>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="discount" value="yes" id="filter-discount" {% if current_filters.discount == 'yes' %}checked{% endif %} onchange="this.form.submit()">
+                                <input class="form-check-input" type="checkbox" name="discount" value="yes" id="filter-discount" {% if current_filters.discount == 'yes' %}checked{% endif %}>
                                 <label class="form-check-label text-dark fs-7" for="filter-discount">
                                     On Discount
                                 </label>
@@ -334,40 +334,46 @@
         </div>
 
         <!-- Active Filter Pills -->
-        {% if current_filters.fabric or current_filters.occasion or current_filters.color or current_filters.discount or category_param %}
+        {% if current_filters.fabric or current_filters.occasion or current_filters.color or current_filters.discount or category_param or current_filters.min_price or current_filters.max_price %}
         <div class="d-flex flex-wrap gap-2 mb-4 align-items-center bg-white p-2.5 rounded-3 border">
             <span class="fs-8 text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Active Filters:</span>
             {% if active_category %}
-            <a href="?{% for k, v in request.GET.items %}{% if k != 'category' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Category Filter">
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'category' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Category Filter">
                 <span>Category: <strong>{{ active_category.name }}</strong></span>
                 <i class="bi bi-x-circle-fill text-muted"></i>
             </a>
             {% endif %}
             {% if current_filters.occasion %}
-            <a href="?{% for k, v in request.GET.items %}{% if k != 'occasion' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Occasion Filter">
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'occasion' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Occasion Filter">
                 <span>Occasion: <strong>{{ current_filters.occasion }}</strong></span>
                 <i class="bi bi-x-circle-fill text-muted"></i>
             </a>
             {% endif %}
             {% if current_filters.fabric %}
-            <a href="?{% for k, v in request.GET.items %}{% if k != 'fabric' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Fabric Filter">
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'fabric' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Fabric Filter">
                 <span>Fabric: <strong>{{ current_filters.fabric }}</strong></span>
                 <i class="bi bi-x-circle-fill text-muted"></i>
             </a>
             {% endif %}
             {% if current_filters.color %}
-            <a href="?{% for k, v in request.GET.items %}{% if k != 'color' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Color Filter">
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'color' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Color Filter">
                 <span>Color: <strong>{{ current_filters.color }}</strong></span>
                 <i class="bi bi-x-circle-fill text-muted"></i>
             </a>
             {% endif %}
+            {% if current_filters.min_price or current_filters.max_price %}
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'min_price' and k != 'max_price' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Price Filter">
+                <span>Price: <strong>₹{{ current_filters.min_price|default:min_catalog_price }} - ₹{{ current_filters.max_price|default:max_catalog_price }}</strong></span>
+                <i class="bi bi-x-circle-fill text-muted"></i>
+            </a>
+            {% endif %}
             {% if current_filters.discount == 'yes' %}
-            <a href="?{% for k, v in request.GET.items %}{% if k != 'discount' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Discount Filter">
+            <a href="?{% for k, v in request.GET.items %}{% if v and k != 'discount' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="badge bg-light text-dark border d-inline-flex align-items-center gap-1.5 text-decoration-none py-1.5 px-2.5 rounded-pill shadow-xs fs-8" title="Remove Discount Filter">
                 <span>Discounted Sarees</span>
                 <i class="bi bi-x-circle-fill text-muted"></i>
             </a>
             {% endif %}
-            <a href="{% url 'shop:catalog' %}" class="fs-8 text-danger fw-semibold text-decoration-none ms-auto px-2 py-1">Clear all</a>
+            <a href="{% if active_category %}{% url 'shop:category_detail' active_category.slug %}{% else %}{% url 'shop:catalog' %}{% endif %}" class="fs-8 text-danger fw-semibold text-decoration-none ms-auto px-2 py-1" id="catalogClearAllBtn">Clear all</a>
         </div>
         {% endif %}
 
@@ -415,10 +421,12 @@
                     No Sarees Found for SKU "{{ current_filters.sku }}"
                 {% elif current_filters.q %}
                     No Sarees Found for "{{ current_filters.q }}"
+                {% elif active_category and has_attribute_filters %}
+                    No Sarees Matching Selected Filters in {{ active_category.name }}
                 {% elif active_category %}
                     No Sarees in {{ active_category.name }} Currently
                 {% else %}
-                    No Sarees Found
+                    No Sarees Found Matching Your Filters
                 {% endif %}
             </h3>
             <p class="text-muted">
@@ -426,16 +434,18 @@
                     We couldn't find any saree matching SKU code "{{ current_filters.sku }}".
                 {% elif current_filters.q %}
                     We couldn't find any saree matching "{{ current_filters.q }}". Try checking for spelling or explore our popular categories below.
+                {% elif active_category and has_attribute_filters %}
+                    No sarees match your selected filters in <strong>{{ active_category.name }}</strong>. Try removing some filters or clearing all filters to view all available sarees in this collection.
                 {% elif active_category %}
                     We are currently weaving and curating authentic handloom sarees for {{ active_category.name }}. Explore other categories or check back soon!
                 {% else %}
-                    Try adjusting your filters or search query.
+                    Try adjusting or clearing your filters to see more sarees.
                 {% endif %}
             </p>
             <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
                 {% if current_filters.q or current_filters.sku or has_filters %}
-                <a href="{% url 'shop:catalog' %}" class="btn btn-outline-secondary rounded-pill px-4">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Clear All Filters
+                <a href="{% if active_category %}{% url 'shop:category_detail' active_category.slug %}{% else %}{% url 'shop:catalog' %}{% endif %}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Clear Filters
                 </a>
                 {% endif %}
                 <a href="{% url 'shop:categories' %}" class="btn btn-primary rounded-pill px-4">
@@ -598,9 +608,9 @@
             });
         }
 
-        // Click on Clear All or Clear SKU filter
+        // Click on Clear All, filter pills, or Clear SKU filter
         document.addEventListener("click", function (e) {
-            const clearLink = e.target.closest("#catalogClearAllBtn, a[title='Remove SKU Filter'], a[title='Clear SKU filter']");
+            const clearLink = e.target.closest("#catalogClearAllBtn, a[title^='Remove '], a[title^='Clear ']");
             if (clearLink) {
                 e.preventDefault();
                 applyCatalogFilters(clearLink.href, true, false);
@@ -652,8 +662,10 @@
 
                     if (minDisplay) minDisplay.textContent = minVal.toLocaleString('en-IN');
                     if (maxDisplay) maxDisplay.textContent = maxVal.toLocaleString('en-IN');
-                    if (minInput) minInput.value = minVal;
-                    if (maxInput) maxInput.value = maxVal;
+                    if (e || (minInput && minInput.value !== "") || (maxInput && maxInput.value !== "")) {
+                        if (minInput) minInput.value = (minVal > minRangeVal) ? minVal : '';
+                        if (maxInput) maxInput.value = (maxVal < maxRangeVal) ? maxVal : '';
+                    }
                 }
 
                 minSlider.addEventListener("input", updatePriceSlider);
@@ -661,9 +673,15 @@
 
                 // When user releases slider thumb, trigger live filter
                 minSlider.addEventListener("change", function () {
+                    let minVal = parseInt(minSlider.value);
+                    const minRangeVal = parseInt(minSlider.min) || 0;
+                    if (minInput) minInput.value = (minVal > minRangeVal) ? minVal : '';
                     applyCatalogFilters(null, true, false);
                 });
                 maxSlider.addEventListener("change", function () {
+                    let maxVal = parseInt(maxSlider.value);
+                    const maxRangeVal = parseInt(maxSlider.max) || 100000;
+                    if (maxInput) maxInput.value = (maxVal < maxRangeVal) ? maxVal : '';
                     applyCatalogFilters(null, true, false);
                 });
 
