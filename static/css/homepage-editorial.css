@@ -2467,4 +2467,83 @@ a.mosaic-sub-card .mosaic-sub-caption p {
     }
 }
 
+/* --------------------------------------------------------------------------
+   14. Natural Homepage SEO Overview Section (Subtle Editorial Aesthetic)
+   -------------------------------------------------------------------------- */
+.rss-seo-content-section {
+    background-color: var(--rs-cream-soft, #F4EFE6);
+    border-top: 1px solid var(--rs-border-subtle, rgba(197, 160, 89, 0.22));
+    padding: 3.5rem 0 3rem 0;
+    position: relative;
+}
+
+.rss-seo-content-section .rss-seo-heading {
+    font-family: var(--rs-font-editorial, 'Playfair Display', serif);
+    font-size: clamp(1.4rem, 2.6vw, 1.95rem);
+    color: var(--rs-wine-primary, #721428);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.75rem;
+}
+
+.rss-seo-content-section .rss-seo-lead {
+    font-family: var(--rs-font-sans, 'Poppins', sans-serif);
+    font-size: 0.98rem;
+    line-height: 1.8;
+    color: var(--rs-text-dark, #1F191A);
+    margin-bottom: 1rem;
+}
+
+.rss-seo-content-section .rss-seo-body {
+    font-family: var(--rs-font-sans, 'Poppins', sans-serif);
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--rs-text-muted, #6B6264);
+    margin-bottom: 1.5rem;
+}
+
+.rss-seo-inline-link {
+    color: var(--rs-wine-primary, #721428);
+    text-decoration: underline;
+    text-decoration-color: rgba(197, 160, 89, 0.45);
+    text-underline-offset: 3px;
+    font-weight: 500;
+    transition: color 0.25s ease, text-decoration-color 0.25s ease;
+}
+
+.rss-seo-inline-link:hover {
+    color: var(--rs-wine-dark, #4A0817);
+    text-decoration-color: var(--rs-wine-primary, #721428);
+}
+
+.rss-seo-badge-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid var(--rs-border-subtle, rgba(197, 160, 89, 0.35));
+    color: var(--rs-wine-primary, #721428);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(42, 4, 13, 0.03);
+    transition: all 0.25s ease;
+}
+
+.rss-seo-badge-link:hover {
+    background: var(--rs-wine-primary, #721428);
+    color: #ffffff !important;
+    border-color: var(--rs-wine-primary, #721428);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(114, 20, 40, 0.18);
+}
+
+@media (max-width: 767.98px) {
+    .rss-seo-content-section {
+        padding: 2.5rem 0 2.25rem 0;
+    }
+}
+
+
 

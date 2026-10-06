@@ -278,6 +278,40 @@ class PageSEOAndStructuredDataTest(TestCase):
         # FAQ not in footer
         self.assertNotIn(reverse('home:faq'), content)
 
+    def test_home_page_additive_seo_content_and_links(self):
+        """
+        Verify the additive SEO content, H2 header, keywords, and descriptive internal links.
+        Ensures existing H1, title, and metadata remain untouched.
+        """
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+
+        # Existing H1 preserved unchanged
+        self.assertIn('<h1 class="visually-hidden">Rangam Saradha Silks - Handcrafted Pure Silk & Traditional Sarees</h1>', content)
+
+        # Existing title and meta description preserved
+        self.assertIn('<title>Rangam Saradha Silks | Pure Silk Sarees, Kanchipuram & Bridal Collections</title>', content)
+        self.assertIn('name="description" content="Rangam Saradha Silks offers handcrafted pure silk sarees, royal Kanchipurams, opulent Banarasis, and traditional bridal collections woven with pure gold zari."', content)
+
+        # Additive SEO H2 header
+        self.assertIn('<h2 class="rss-seo-heading">Sarees Online at Rangam Saradha Silks</h2>', content)
+
+        # Natural SEO content paragraphs
+        self.assertIn('Rangam Saradha Silks is an online saree website offering a curated collection', content)
+        self.assertIn('As a trusted handloom sarees website and premier saree shop online', content)
+        self.assertIn('buying authentic silk sarees online', content)
+        self.assertIn('Kanjivaram sarees', content)
+        self.assertIn('Kanchipattu', content)
+        self.assertIn('bridal sarees', content)
+        self.assertIn('online shopping experience', content)
+
+        # Internal anchor links
+        self.assertIn('Shop Sarees Online', content)
+        self.assertIn('Silk Sarees', content)
+        self.assertIn('Kanjivaram Sarees', content)
+        self.assertIn('Bridal Sarees', content)
+
     def test_categories_page_seo_and_schema(self):
         response = self.client.get(reverse('shop:categories'))
         self.assertEqual(response.status_code, 200)
