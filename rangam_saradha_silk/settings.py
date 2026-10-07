@@ -63,10 +63,6 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.humanize",
 
-    # Cloudinary
-    "cloudinary_storage",
-    "cloudinary",
-
     # Third-party
     "phonenumber_field",
     "rest_framework",
@@ -225,14 +221,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # ============================================================
-# MEDIA / CLOUDINARY
+# MEDIA /  LOCAL VPS STORAGE
 # ============================================================
-
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-}
 
 
 MEDIA_URL = "/media/"
@@ -252,7 +242,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 STORAGES = {
     # User uploaded files
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
 
     # CSS / JS / admin static files
