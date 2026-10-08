@@ -63,10 +63,6 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.humanize",
 
-    # Cloudinary
-    "cloudinary_storage",
-    "cloudinary",
-
     # Third-party
     "phonenumber_field",
     "rest_framework",
@@ -225,19 +221,18 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # ============================================================
-# MEDIA / CLOUDINARY
+# MEDIA FILES (VPS / LOCAL STORAGE)
 # ============================================================
 
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-}
-
-
 MEDIA_URL = "/media/"
-
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Media stored directly on VPS
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": "disabled",
+    "API_KEY": "disabled",
+    "API_SECRET": "disabled",
+}
 
 # Upload limits to comfortably handle batches of high-res saree photography
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50 MB
@@ -250,9 +245,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 # ============================================================
 
 STORAGES = {
-    # User uploaded files
+    # User uploaded files (stored directly on VPS filesystem)
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
 
     # CSS / JS / admin static files

@@ -4,7 +4,6 @@ from django.utils.text import slugify
 import datetime
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
-from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -59,7 +58,7 @@ class Product(models.Model):
     
     # Product Specs
     video_url = models.URLField(max_length=500, blank=True, null=True, help_text="External video URL (YouTube, Vimeo, etc.)")
-    video_file = models.FileField(upload_to='product_videos/', storage=VideoMediaCloudinaryStorage(), max_length=500, blank=True, null=True, help_text="Direct video file upload (MP4, WebM, MOV)")
+    video_file = models.FileField(upload_to='product_videos/', max_length=500, blank=True, null=True, help_text="Direct video file upload (MP4, WebM, MOV)")
     tags = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated tags")
     material = models.CharField(max_length=100, blank=True, null=True)
     color = models.CharField(max_length=100, blank=True, null=True)

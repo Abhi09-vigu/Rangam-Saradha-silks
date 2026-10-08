@@ -90,10 +90,16 @@
                 try {
                     const match = document.cookie.match(/(?:^|; )rss_auth_state=([^;]*)/);
                     if (!match) return;
-                    const cookieAuth = decodeURIComponent(match[1]);
+                    const cookieAuth = decodeURIComponent(match[1]).trim();
                     const domAuth = document.body ? document.body.getAttribute('data-auth-state') : null;
                     if (domAuth !== null && cookieAuth !== '' && cookieAuth !== domAuth) {
-                        window.location.reload();
+                        // Prevent continuous infinite reload loops
+                        if (!sessionStorage.getItem('rss_auth_reloaded')) {
+                            sessionStorage.setItem('rss_auth_reloaded', '1');
+                            window.location.reload();
+                        }
+                    } else {
+                        sessionStorage.removeItem('rss_auth_reloaded');
                     }
                 } catch (e) {}
             }
@@ -102,9 +108,7 @@
             window.addEventListener('pageshow', function (event) {
                 if (event.persisted) {
                     window.location.reload();
-                    return;
                 }
-                checkAuthStateSync();
             });
 
             // Re-sync auth state if user authenticated or changed state in another tab
