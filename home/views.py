@@ -402,7 +402,12 @@ def robots_txt(request):
 @require_POST
 def popup_book_call_api(request):
     """
-    AJAX endpoint to book a saree consultation call directly from the promotional popup.
+    AJAX endpoint to book a saree consultation call directly from the promotional popup
+    or floating book-a-call widget.
+    If the user is not authenticated, validates all details and stores them in
+    request.session['pending_call_booking'], then returns login_required with redirect_url.
+    After logging in, the booking is automatically finalized and the user is taken
+    to the booking confirmation page.
     """
     import json
     import datetime
@@ -410,18 +415,12 @@ def popup_book_call_api(request):
     from decimal import Decimal
     from django.db import transaction
     from django.http import JsonResponse
+    from django.urls import reverse
     from shop.models import CallBooking, CallSlot
     from shop.views import parse_slot_start_time
     from .models import WebsiteSetting
     
     try:
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'login_required': True,
-                'message': 'Please log in to your account to book a video call.'
-            }, status=401)
-
         if request.content_type == 'application/json':
             data = json.loads(request.body.decode('utf-8'))
         else:
@@ -444,6 +443,17 @@ def popup_book_call_api(request):
         if not time_slot:
             return JsonResponse({'success': False, 'message': 'Please choose a preferred time slot.'}, status=400)
 
+        # Normalize phone number
+        clean_phone = phone_number
+        if not clean_phone.startswith('+'):
+            digits = ''.join(c for c in clean_phone if c.isdigit())
+            if len(digits) == 10:
+                clean_phone = '+91' + digits
+            elif len(digits) == 12 and digits.startswith('91'):
+                clean_phone = '+' + digits
+            else:
+                clean_phone = '+91' + digits
+
         # Validate time slot
         valid_slots = [choice[0] for choice in CallBooking.TIME_SLOT_CHOICES]
         if time_slot not in valid_slots:
@@ -464,22 +474,27 @@ def popup_book_call_api(request):
             if slot_start and slot_start <= now_local.time():
                 return JsonResponse({'success': False, 'message': 'This time slot has already passed for today. Please select an upcoming slot.'}, status=400)
 
-        # Duplicate protection (same phone, date, slot within 5 mins)
-        recent_cutoff = timezone.now() - datetime.timedelta(minutes=5)
-        existing_booking = CallBooking.objects.filter(
-            phone_number=phone_number,
+        # Check if owner blocked slot
+        is_blocked = CallSlot.objects.filter(date=booking_date, time_slot=time_slot).filter(
+            Q(blocked_by_owner=True) | Q(status='BLOCKED')
+        ).exists()
+        if is_blocked:
+            return JsonResponse({
+                'success': False,
+                'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} is unavailable. Please choose another slot."
+            }, status=400)
+
+        # Check if already booked
+        is_already_booked = CallBooking.objects.filter(
             booking_date=booking_date,
             time_slot=time_slot,
-            created_at__gte=recent_cutoff
-        ).first()
-
-        if existing_booking:
+            status__in=['CONFIRMED', 'COMPLETED']
+        ).exists()
+        if is_already_booked:
             return JsonResponse({
-                'success': True,
-                'booking_ref': existing_booking.booking_reference,
-                'booking_reference': existing_booking.booking_reference,
-                'message': f"We have already received your booking scheduled for {booking_date} at {time_slot} (Ref: #{existing_booking.booking_reference})."
-            })
+                'success': False,
+                'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} has already been booked. Please choose another time slot."
+            }, status=400)
 
         payment_method = (data.get('payment_method') or 'UPI').strip().upper()
         if payment_method not in ['UPI', 'CARD', 'NETBANKING', 'ONLINE']:
@@ -487,28 +502,39 @@ def popup_book_call_api(request):
 
         settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
         call_booking_fee = getattr(settings_obj, 'call_booking_fee', Decimal('50.00')) or Decimal('50.00')
+
+        # UN-AUTHENTICATED USER: Save in session and redirect to login
+        if not request.user.is_authenticated:
+            request.session['pending_call_booking'] = {
+                'full_name': full_name,
+                'phone_number': clean_phone,
+                'booking_date': booking_date_str,
+                'time_slot': time_slot,
+                'saree_preference': saree_preference,
+                'payment_method': payment_method,
+                'notes': notes,
+                'email': email,
+            }
+            request.session.modified = True
+            login_next_url = reverse('accounts:complete_call_booking')
+            return JsonResponse({
+                'success': False,
+                'login_required': True,
+                'redirect_url': f"{reverse('accounts:login')}?next={login_next_url}",
+                'message': f"Almost there! Please log in to confirm your video call for {booking_date.strftime('%b %d, %Y')} at {time_slot}."
+            })
+
+        # AUTHENTICATED USER: Create booking directly
         txn_ref = f"TXN-CALL-{uuid.uuid4().hex[:8].upper()}"
 
-        # Atomic creation with slot availability verification
         with transaction.atomic():
-            # 1. Check if owner blocked slot
-            is_blocked = CallSlot.objects.filter(date=booking_date, time_slot=time_slot).filter(
-                Q(blocked_by_owner=True) | Q(status='BLOCKED')
-            ).exists()
-            if is_blocked:
-                return JsonResponse({
-                    'success': False,
-                    'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} is unavailable. Please choose another slot."
-                }, status=400)
-
-            # 2. Check if ANY customer has already booked this slot
-            is_already_booked = CallBooking.objects.filter(
+            # Lock slot check
+            is_already_booked_locked = CallBooking.objects.filter(
                 booking_date=booking_date,
                 time_slot=time_slot,
                 status__in=['CONFIRMED', 'COMPLETED']
             ).select_for_update().exists()
-
-            if is_already_booked:
+            if is_already_booked_locked:
                 return JsonResponse({
                     'success': False,
                     'message': f"The time slot '{time_slot}' on {booking_date.strftime('%b %d, %Y')} has already been booked. Please choose another time slot."
@@ -519,8 +545,8 @@ def popup_book_call_api(request):
                 saree_preference=saree_preference or "General Saree Selection Consultation",
                 user=request.user,
                 full_name=full_name,
-                email=request.user.email or email or f"call_{phone_number[-6:]}@rangamsaradhasilk.com",
-                phone_number=phone_number,
+                email=request.user.email or email or f"call_{clean_phone[-6:]}@rangamsaradhasilk.com",
+                phone_number=clean_phone,
                 booking_date=booking_date,
                 time_slot=time_slot,
                 notes=notes,
@@ -545,6 +571,7 @@ def popup_book_call_api(request):
             logger.warning(f"Could not send booking email for popup booking #{booking.booking_reference}: {e}")
 
         formatted_date = booking_date.strftime('%b %d, %Y')
+        confirmation_url = reverse('shop:booking_confirmation', kwargs={'booking_ref': booking.booking_reference})
         return JsonResponse({
             'success': True,
             'booking_ref': booking.booking_reference,
@@ -553,6 +580,7 @@ def popup_book_call_api(request):
             'payment_status': booking.payment_status,
             'payment_method': booking.payment_method,
             'payment_reference': booking.payment_reference,
+            'confirmation_url': confirmation_url,
             'message': f"🎉 Thank you, {full_name}! Your saree selection call is confirmed for {formatted_date} at {time_slot} (Fee: ₹{booking.fee_amount:.0f} Paid)."
         })
     except Exception as e:

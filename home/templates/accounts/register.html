@@ -886,6 +886,16 @@
                         <p class="signup-form-subtitle">Join Rangam Saradha Silks and be a part of our tradition.</p>
                     </div>
 
+                    {% if request.session.pending_call_booking %}
+                    <div class="alert alert-info border-0 rounded-4 p-3 mb-3 d-flex align-items-center gap-3" style="background: rgba(175, 4, 70, 0.08); border-left: 4px solid var(--primary, #AF0446) !important;">
+                        <i class="bi bi-camera-video-fill fs-3" style="color: var(--primary, #AF0446);"></i>
+                        <div>
+                            <strong class="d-block text-dark fs-7">Almost Done! Confirm Video Consultation</strong>
+                            <span class="text-muted fs-8">Create an account to confirm your booking for <strong>{{ request.session.pending_call_booking.booking_date }}</strong> at <strong>{{ request.session.pending_call_booking.time_slot }}</strong>. You will be redirected to your confirmation automatically.</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <form action="{% url 'accounts:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="POST" id="registerForm" class="auth-form">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ next_url|default:'' }}">

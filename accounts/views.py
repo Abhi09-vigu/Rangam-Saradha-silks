@@ -239,6 +239,98 @@ def merge_carts_after_login(request, user, old_session_key=None):
         # Delete guest cart after merge
         guest_cart.delete()
 
+def process_pending_call_booking(request, user):
+    """
+    Checks if there is a pending call booking stored in request.session.
+    If found, atomically creates the CallBooking for the newly authenticated user,
+    updates CallSlot, sends notification emails, clears the session,
+    and returns the confirmation URL.
+    Returns None if no pending booking.
+    """
+    if not request or not hasattr(request, 'session'):
+        return None
+
+    pending = request.session.pop('pending_call_booking', None)
+    if not pending or not isinstance(pending, dict):
+        return None
+
+    import datetime
+    import uuid
+    from decimal import Decimal
+    from django.db import transaction
+    from django.urls import reverse
+    from shop.models import CallBooking, CallSlot
+    from home.models import WebsiteSetting
+    from shop.views import send_booking_notification_email
+
+    full_name = pending.get('full_name') or user.get_full_name() or user.username
+    phone_number = pending.get('phone_number') or getattr(user, 'phone_number', '') or ''
+    booking_date_str = pending.get('booking_date', '')
+    time_slot = pending.get('time_slot', '')
+    saree_preference = pending.get('saree_preference', '') or "General Saree Selection Consultation"
+    payment_method = pending.get('payment_method', 'UPI')
+    notes = pending.get('notes', '')
+
+    if not booking_date_str or not time_slot:
+        return None
+
+    try:
+        booking_date = datetime.datetime.strptime(booking_date_str, '%Y-%m-%d').date()
+    except Exception:
+        return None
+
+    settings_obj = WebsiteSetting.objects.first() or WebsiteSetting()
+    call_booking_fee = getattr(settings_obj, 'call_booking_fee', Decimal('50.00')) or Decimal('50.00')
+    txn_ref = f"TXN-CALL-{uuid.uuid4().hex[:8].upper()}"
+
+    try:
+        with transaction.atomic():
+            booking = CallBooking.objects.create(
+                product=None,
+                saree_preference=saree_preference,
+                user=user,
+                full_name=full_name,
+                email=user.email or f"call_{str(phone_number)[-6:]}@rangamsaradhasilk.com",
+                phone_number=str(phone_number),
+                booking_date=booking_date,
+                time_slot=time_slot,
+                notes=notes,
+                fee_amount=call_booking_fee,
+                payment_status='PAID',
+                payment_method=payment_method,
+                payment_reference=txn_ref,
+                status='CONFIRMED',
+            )
+
+            CallSlot.objects.update_or_create(
+                date=booking_date,
+                time_slot=time_slot,
+                defaults={'status': 'BOOKED'}
+            )
+
+        try:
+            send_booking_notification_email(booking)
+        except Exception as e:
+            logger.warning(f"Error sending booking email for #{booking.booking_reference}: {e}")
+
+        request.session.modified = True
+        formatted_date = booking_date.strftime('%b %d, %Y')
+        messages.success(request, f"🎉 Congratulations {full_name}! Your saree consultation call is confirmed for {formatted_date} at {time_slot}.")
+        return reverse('shop:booking_confirmation', kwargs={'booking_ref': booking.booking_reference})
+    except Exception as e:
+        logger.error(f"Error processing pending call booking: {e}", exc_info=True)
+        return None
+
+@login_required
+def complete_call_booking_view(request):
+    """
+    Dedicated view for users arriving after login to complete their pending call booking.
+    """
+    booking_url = process_pending_call_booking(request, request.user)
+    if booking_url:
+        return redirect(booking_url)
+    return redirect('accounts:profile')
+
 def register_view(request):
     raw_next = request.POST.get('next') or request.GET.get('next')
     safe_next = get_safe_next_url(request, raw_next, default=None)
@@ -264,6 +356,10 @@ def register_view(request):
             merge_carts_after_login(request, user, old_session_key)
             send_registration_welcome_email(user)
             
+            booking_url = process_pending_call_booking(request, user)
+            if booking_url:
+                return redirect(booking_url)
+
             target_url = safe_next or 'home:index'
             messages.success(request, f"Account created successfully! Welcome to Rangam Saradha Silks, {user.username}.")
             return redirect(target_url)
@@ -337,6 +433,10 @@ def verify_otp(request):
                     request.session.pop('otp_verify_attempts', None)
                     request.session.pop('otp_next_url', None)
                     
+                    booking_url = process_pending_call_booking(request, user)
+                    if booking_url:
+                        return redirect(booking_url)
+
                     messages.success(request, f"Welcome back, {user.username}!")
                     
                     target_url = safe_next or 'home:index'
@@ -360,6 +460,11 @@ def verify_otp(request):
                     
                     del request.session['registration_username']
                     request.session.pop('otp_next_url', None)
+
+                    booking_url = process_pending_call_booking(request, user)
+                    if booking_url:
+                        return redirect(booking_url)
+
                     messages.success(request, "Account verified and logged in successfully!")
                     target_url = safe_next or 'home:index'
                     return redirect(target_url)
@@ -463,6 +568,10 @@ def login_view(request):
                     login(request, user)
                     merge_carts_after_login(request, user, old_session_key)
                     
+                    booking_url = process_pending_call_booking(request, user)
+                    if booking_url:
+                        return redirect(booking_url)
+
                     messages.success(request, f"Welcome back, {user.username}!")
                     target_url = safe_next or 'home:index'
                     return redirect(target_url)
@@ -895,8 +1004,11 @@ def google_login_view(request):
         if safe_next == 'home:index':
             safe_next = '/'
 
-        # If user has no phone number, prompt them to complete profile
-        if not user.phone_number:
+        # Direct to pending booking confirmation if available
+        booking_url = process_pending_call_booking(request, user)
+        if booking_url:
+            redirect_url = booking_url
+        elif not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
             if safe_next != '/':
@@ -1024,8 +1136,11 @@ def firebase_login_view(request):
         if safe_next == 'home:index':
             safe_next = '/'
 
-        # If user has no phone number, prompt them to complete profile
-        if not user.phone_number:
+        # Direct to pending booking confirmation if available
+        booking_url = process_pending_call_booking(request, user)
+        if booking_url:
+            redirect_url = booking_url
+        elif not user.phone_number:
             from django.urls import reverse
             redirect_url = reverse('accounts:complete_phone')
             if safe_next != '/':
@@ -1062,6 +1177,9 @@ def complete_phone_view(request):
         next_url = 'home:index'
 
     if request.user.phone_number:
+        booking_url = process_pending_call_booking(request, request.user)
+        if booking_url:
+            return redirect(booking_url)
         return redirect(next_url)
 
     if request.method == 'POST':
@@ -1069,6 +1187,9 @@ def complete_phone_view(request):
         if form.is_valid():
             request.user.phone_number = form.cleaned_data['phone_number']
             request.user.save(update_fields=['phone_number'])
+            booking_url = process_pending_call_booking(request, request.user)
+            if booking_url:
+                return redirect(booking_url)
             messages.success(request, f"Welcome to Rangam Saradha Silks, {request.user.first_name or request.user.username}! Mobile number saved successfully.")
             return redirect(next_url)
     else:

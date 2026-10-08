@@ -29,6 +29,7 @@
                     <div class="card border border-light p-4 bg-light rounded-4 text-start mb-4 shadow-sm">
                         <h5 class="fw-bold text-dark fs-6 mb-3 border-bottom pb-2">Booking Summary</h5>
                         
+                        {% if booking.product %}
                         <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
                             <div class="overflow-hidden shadow-sm flex-shrink-0" style="width: 60px; height: 75px; border-radius: 10px;">
                                 {% if booking.product.images.exists %}
@@ -42,6 +43,17 @@
                                 <span class="fw-bold text-primary fs-7">{{ site_settings.currency|default:"₹" }}{{ booking.product.offer_price|floatformat:2 }}</span>
                             </div>
                         </div>
+                        {% else %}
+                        <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-3 shadow-sm flex-shrink-0" style="width: 58px; height: 58px; background: rgba(175, 4, 70, 0.1); color: var(--primary, #AF0446);">
+                                <i class="bi bi-camera-video-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1 fs-7">Live Video Saree Consultation</h6>
+                                <span class="text-muted fs-8">{{ booking.saree_preference|default:"Personal Saree Selection Session" }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <div class="row g-2 fs-7">
                             <div class="col-sm-6">
@@ -92,7 +104,11 @@
                     </div>
 
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        {% if booking.product %}
                         <a href="{{ booking.product.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill py-2.5 px-4 fs-7 fw-semibold">Back to Product</a>
+                        {% else %}
+                        <a href="{% url 'accounts:profile' %}#call-bookings" class="btn btn-outline-secondary rounded-pill py-2.5 px-4 fs-7 fw-semibold">View in Profile</a>
+                        {% endif %}
                         <a href="{% url 'shop:catalog' %}" class="btn btn-primary rounded-pill py-2.5 px-4 fs-7 fw-semibold">Continue Shopping</a>
                     </div>
                 </div>
