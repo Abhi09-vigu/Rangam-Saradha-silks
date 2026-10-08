@@ -546,12 +546,12 @@ class PopupManagementTests(TestCase):
         self.assertEqual(data['payment_status'], 'PAID')
         self.assertIsNone(booking.product)
 
-        # 2. Duplicate booking within 5 minutes should return friendly message
+        # 2. Duplicate booking for same booked slot should be rejected as already booked
         dup_resp = self.client.post(url, data=post_data)
-        self.assertEqual(dup_resp.status_code, 200)
+        self.assertEqual(dup_resp.status_code, 400)
         dup_data = dup_resp.json()
-        self.assertTrue(dup_data['success'])
-        self.assertIn('already received', dup_data['message'])
+        self.assertFalse(dup_data['success'])
+        self.assertIn('already been booked', dup_data['message'])
 
     def test_book_call_api_invalid_date_or_slot(self):
         from django.utils import timezone

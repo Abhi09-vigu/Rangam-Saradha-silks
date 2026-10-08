@@ -496,27 +496,36 @@
         });
     }
 
-    // Handle tab switching via URL hash (e.g. #orders, #call-bookings, #bookings, #saved-addresses)
-    document.addEventListener('DOMContentLoaded', function() {
+    // Handle tab switching via URL hash or query param (e.g. #call-bookings, ?tab=call-bookings, #orders)
+    function activateProfileTabFromUrl() {
         const hash = window.location.hash;
-        if (hash) {
-            let targetTab = null;
-            if (hash === '#bookings' || hash === '#call-bookings') {
-                targetTab = document.querySelector('#call-bookings-tab');
-            } else if (hash === '#orders' || hash === '#order-history') {
-                targetTab = document.querySelector('#order-history-tab');
-            } else if (hash === '#addresses' || hash === '#saved-addresses') {
-                targetTab = document.querySelector('#saved-addresses-tab');
-            } else if (hash === '#profile' || hash === '#profile-details') {
-                targetTab = document.querySelector('#profile-details-tab');
-            } else {
-                targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
-            }
-            if (targetTab) {
-                const tabTrigger = new bootstrap.Tab(targetTab);
-                tabTrigger.show();
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+
+        let targetTab = null;
+        if (hash === '#bookings' || hash === '#call-bookings' || tabParam === 'call-bookings' || tabParam === 'bookings') {
+            targetTab = document.querySelector('#call-bookings-tab');
+        } else if (hash === '#orders' || hash === '#order-history' || tabParam === 'orders') {
+            targetTab = document.querySelector('#order-history-tab');
+        } else if (hash === '#addresses' || hash === '#saved-addresses' || tabParam === 'addresses') {
+            targetTab = document.querySelector('#saved-addresses-tab');
+        } else if (hash === '#profile' || hash === '#profile-details' || tabParam === 'profile') {
+            targetTab = document.querySelector('#profile-details-tab');
+        } else if (hash) {
+            targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
         }
-    });
+
+        if (targetTab && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+            const tabTrigger = new bootstrap.Tab(targetTab);
+            tabTrigger.show();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', activateProfileTabFromUrl);
+    } else {
+        activateProfileTabFromUrl();
+    }
+    window.addEventListener('hashchange', activateProfileTabFromUrl);
 </script>
 {% endblock %}

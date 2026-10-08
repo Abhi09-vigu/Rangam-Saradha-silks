@@ -82,100 +82,53 @@
                         {% endif %}
 
                     {% elif active_popup.popup_type == 'CALL_BOOKING' %}
-                        <!-- Interactive Book a Call Form (Accessible to all visitors) -->
-                        <div id="rssBookingFormContainer">
-                            <div id="rssBookingAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
-
-                            <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-2 small" style="background: rgba(175, 4, 70, 0.06); border: 1px dashed var(--primary, #AF0446);">
-                                <div><strong class="text-dark">Consultation Fee: ₹50</strong> <span class="text-muted small d-block">100% Adjustable against your saree order</span></div>
-                                <span class="badge bg-primary text-white rounded-pill px-2 py-1">₹50 PAID</span>
-                            </div>
-
-                            <form id="rssPopupCallForm" class="rss-popup-form" novalidate>
-                                {% csrf_token %}
-                                <div class="row g-2">
-                                    <div class="col-12 col-sm-6">
-                                        <label for="rssBookName" class="form-label rss-form-label">Full Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control rss-form-input" id="rssBookName" name="full_name" required placeholder="Enter your full name" value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}">
+                        <!-- Promotional Book a Call Card -->
+                        <div class="rss-popup-call-promo">
+                            <div class="rss-popup-fee-badge-box mb-3">
+                                <div class="d-flex align-items-center justify-content-between p-2.5 px-3 rounded-3" style="background: rgba(175, 4, 70, 0.06); border: 1px dashed var(--primary, #AF0446);">
+                                    <div>
+                                        <strong class="text-dark d-block">Consultation Fee: ₹50</strong>
+                                        <span class="text-muted small">100% Adjustable against your saree order</span>
                                     </div>
-                                    <div class="col-12 col-sm-6">
-                                        <label for="rssBookPhone" class="form-label rss-form-label">Phone / WhatsApp Number <span class="text-danger">*</span></label>
-                                        <input type="tel" class="form-control rss-form-input" id="rssBookPhone" name="phone_number" required placeholder="10-digit mobile number" value="{% if user.is_authenticated %}{{ user.phone_number|default:'' }}{% endif %}">
-                                    </div>
-                                    <div class="col-12 col-sm-6">
-                                        <label for="rssBookDate" class="form-label rss-form-label">Preferred Date <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control rss-form-input" id="rssBookDate" name="booking_date" required>
-                                    </div>
-                                    <div class="col-12 col-sm-6">
-                                        <label for="rssBookSlot" class="form-label rss-form-label">Time Slot <span class="text-danger">*</span></label>
-                                        <select class="form-select rss-form-input" id="rssBookSlot" name="time_slot" required>
-                                            <option value="" disabled selected>Loading available slots...</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="rssBookSaree" class="form-label rss-form-label">Saree or Style of Interest <span class="text-muted small">(Optional)</span></label>
-                                        <input type="text" class="form-control rss-form-input" id="rssBookSaree" name="saree_preference" placeholder="e.g. Bridal Kanchipuram, Pure Zari, Soft Silk">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label rss-form-label d-flex justify-content-between mb-1">
-                                            <span>Payment Method</span>
-                                            <span class="text-success fw-normal small"><i class="bi bi-shield-check"></i> Instant Online</span>
-                                        </label>
-                                        <div class="row g-2">
-                                            <div class="col-6">
-                                                <input type="radio" class="btn-check" name="rss_payment_method" id="rss_pay_upi" value="UPI" checked>
-                                                <label class="btn btn-outline-secondary w-100 py-1.5 px-2 text-start rounded-3 small shadow-none" for="rss_pay_upi">
-                                                    <div class="fw-bold text-dark fs-8"><i class="bi bi-qr-code text-primary me-1"></i>UPI Pay</div>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">GPay / PhonePe</small>
-                                                </label>
-                                            </div>
-                                            <div class="col-6">
-                                                <input type="radio" class="btn-check" name="rss_payment_method" id="rss_pay_card" value="CARD">
-                                                <label class="btn btn-outline-secondary w-100 py-1.5 px-2 text-start rounded-3 small shadow-none" for="rss_pay_card">
-                                                    <div class="fw-bold text-dark fs-8"><i class="bi bi-credit-card text-primary me-1"></i>Card / NetBank</div>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">Debit / Credit</small>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 fs-8">100% Adjustable</span>
                                 </div>
-
-                                <button type="submit" class="rss-popup-cta-btn primary-btn-luxury mt-3 w-100" id="rssSubmitBookingBtn">
-                                    <span class="rss-btn-text">
-                                        <i class="bi bi-lock-fill me-2"></i>Pay ₹50 & Schedule Call
-                                    </span>
-                                    <span class="rss-btn-spinner d-none">
-                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Scheduling...
-                                    </span>
-                                </button>
-
-                                {% if not user.is_authenticated %}
-                                <div class="text-center mt-2">
-                                    <small class="text-muted" style="font-size: 0.74rem;">
-                                        <i class="bi bi-shield-check text-success me-1"></i>Sign in at next step to automatically confirm your slot
-                                    </small>
-                                </div>
-                                {% endif %}
-                            </form>
-                        </div>
-
-                        <!-- Success Screen for Booking -->
-                        <div id="rssBookingSuccessContainer" class="d-none text-center py-3">
-                            <div class="rss-success-icon mb-2">
-                                <i class="bi bi-check-circle-fill text-success" style="font-size: 2.8rem;"></i>
                             </div>
-                            <h4 class="rss-success-title font-heading fw-bold mb-1">Call Scheduled!</h4>
-                            <p class="rss-success-msg text-muted mb-3" id="rssSuccessMsgText">
-                                Thank you! Our saree expert will connect with you via video call.
-                            </p>
-                            <div class="rss-booking-ref-badge p-2 mb-3 bg-light rounded border">
-                                <small class="text-uppercase text-muted d-block" style="letter-spacing: 1px; font-size: 0.75rem;">Booking Reference</small>
-                                <strong class="text-primary-dark" id="rssSuccessRef" style="font-size: 1.1rem; letter-spacing: 1.5px;"></strong>
+
+                            <ul class="rss-popup-perks-list list-unstyled mb-4">
+                                <li class="d-flex align-items-center mb-2.5">
+                                    <span class="rss-perk-icon-wrap me-2.5 text-primary">
+                                        <i class="bi bi-camera-video-fill"></i>
+                                    </span>
+                                    <span class="text-secondary small"><strong>1-on-1 Personalized Video Drape</strong> with our saree experts</span>
+                                </li>
+                                <li class="d-flex align-items-center mb-2.5">
+                                    <span class="rss-perk-icon-wrap me-2.5 text-primary">
+                                        <i class="bi bi-gem"></i>
+                                    </span>
+                                    <span class="text-secondary small"><strong>Exclusive Collection Showcase</strong> tailored to your style & occasion</span>
+                                </li>
+                                <li class="d-flex align-items-center">
+                                    <span class="rss-perk-icon-wrap me-2.5 text-primary">
+                                        <i class="bi bi-calendar2-check-fill"></i>
+                                    </span>
+                                    <span class="text-secondary small"><strong>Convenient Slot</strong> choose your preferred date and time</span>
+                                </li>
+                            </ul>
+
+                            <a href="{% if user.is_authenticated %}{% url 'accounts:profile' %}?tab=call-bookings#call-bookings{% else %}{% url 'accounts:login' %}?next={% url 'accounts:profile' %}%3Ftab%3Dcall-bookings%23call-bookings{% endif %}" 
+                               class="rss-popup-cta-btn primary-btn-luxury w-100 py-3" 
+                               id="rssPopupCtaBtn">
+                                <i class="bi bi-telephone-plus me-2"></i>Book a Call
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+
+                            {% if not user.is_authenticated %}
+                            <div class="text-center mt-2.5">
+                                <small class="text-muted" style="font-size: 0.74rem;">
+                                    <i class="bi bi-shield-check text-success me-1"></i>Sign in to schedule and view your bookings
+                                </small>
                             </div>
-                            <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-4" id="rssCloseAfterSuccessBtn">
-                                Done
-                            </button>
+                            {% endif %}
                         </div>
 
                     {% elif active_popup.popup_type == 'WHATSAPP' %}
@@ -505,28 +458,35 @@
     color: #FFFFFF !important;
 }
 
-/* Booking Form Elements */
-.rss-form-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #333333;
-    margin-bottom: 3px;
+/* Call Booking Promo Elements */
+.rss-popup-call-promo {
+    width: 100%;
 }
 
-.rss-form-input {
-    font-size: 0.86rem;
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: 1px solid #D8D4D0;
-    background: #FFFFFF;
-    color: #333333;
-    transition: border-color 0.2s, box-shadow 0.2s;
+.rss-popup-perks-list {
+    margin: 0;
+    padding: 0;
 }
 
-.rss-form-input:focus {
-    border-color: #AF0446;
-    box-shadow: 0 0 0 3px rgba(175, 4, 70, 0.12);
-    outline: none;
+.rss-popup-perks-list li {
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.rss-perk-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(175, 4, 70, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.fs-8 {
+    font-size: 0.75rem;
 }
 
 .rss-whatsapp-box {
@@ -711,223 +671,6 @@
                 document.body.removeChild(tempInput);
             }
         });
-    }
-
-    // Dynamic slot availability loader
-    async function loadRssAvailableSlots(dateVal) {
-        const slotSelect = document.getElementById('rssBookSlot');
-        if (!slotSelect || !dateVal) return;
-
-        const previousVal = slotSelect.value;
-        slotSelect.innerHTML = '<option value="" disabled selected>Checking slot availability...</option>';
-        slotSelect.disabled = true;
-
-        try {
-            const res = await fetch(`/shop/api/slot-availability/?date=${encodeURIComponent(dateVal)}`);
-            const data = await res.json();
-
-            slotSelect.innerHTML = '<option value="" disabled selected>Select an available slot</option>';
-            slotSelect.disabled = false;
-
-            let hasAvailable = false;
-            let totalOptions = 0;
-            if (data.slots && data.slots.length > 0) {
-                data.slots.forEach(s => {
-                    if (s.status === 'TIME_PASSED') {
-                        return;
-                    }
-                    const opt = document.createElement('option');
-                    opt.value = s.time_slot;
-                    totalOptions++;
-
-                    if (s.status === 'BOOKED' || s.status === 'BLOCKED') {
-                        opt.disabled = true;
-                        opt.textContent = `${s.time_slot} (Blocked)`;
-                        opt.style.color = '#dc3545';
-                        opt.style.backgroundColor = '#f8d7da';
-                        slotSelect.appendChild(opt);
-                    } else if (s.is_selectable) {
-                        hasAvailable = true;
-                        opt.textContent = `${s.time_slot} (Available)`;
-                        if (s.time_slot === previousVal) {
-                            opt.selected = true;
-                        }
-                        slotSelect.appendChild(opt);
-                    }
-                });
-            }
-
-            if (!hasAvailable && totalOptions === 0) {
-                slotSelect.innerHTML = '<option value="" disabled selected>No slots available — select another date</option>';
-            }
-        } catch (err) {
-            console.error('Failed to load slots for popup:', err);
-            slotSelect.disabled = false;
-        }
-    }
-
-    // Handle Book a Call Form (AJAX)
-    const callForm = document.getElementById('rssPopupCallForm');
-    const bookDateInput = document.getElementById('rssBookDate');
-    if (bookDateInput) {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        const todayStr = `${y}-${m}-${d}`;
-        bookDateInput.setAttribute('min', todayStr);
-        if (!bookDateInput.value) {
-            bookDateInput.value = todayStr;
-        }
-        loadRssAvailableSlots(bookDateInput.value);
-
-        bookDateInput.addEventListener('change', function() {
-            loadRssAvailableSlots(this.value);
-        });
-    }
-
-    if (callForm) {
-        const alertBox = document.getElementById('rssBookingAlert');
-        const submitBtn = document.getElementById('rssSubmitBookingBtn');
-        const formContainer = document.getElementById('rssBookingFormContainer');
-        const successContainer = document.getElementById('rssBookingSuccessContainer');
-        const successRef = document.getElementById('rssSuccessRef');
-        const successMsgText = document.getElementById('rssSuccessMsgText');
-        const closeAfterSuccessBtn = document.getElementById('rssCloseAfterSuccessBtn');
-
-        if (closeAfterSuccessBtn) {
-            closeAfterSuccessBtn.addEventListener('click', dismissPopup);
-        }
-
-        callForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Client validation
-            const name = (document.getElementById('rssBookName')?.value || '').trim();
-            const phone = (document.getElementById('rssBookPhone')?.value || '').trim();
-            const date = (document.getElementById('rssBookDate')?.value || '').trim();
-            const slot = (document.getElementById('rssBookSlot')?.value || '').trim();
-            const saree = (document.getElementById('rssBookSaree')?.value || '').trim();
-            const payMethod = callForm.querySelector('input[name="rss_payment_method"]:checked')?.value || 'UPI';
-
-            if (!name) {
-                showAlert('Please enter your full name.', 'danger');
-                return;
-            }
-            if (!phone) {
-                showAlert('Please enter your WhatsApp / phone number.', 'danger');
-                return;
-            }
-            if (!date) {
-                showAlert('Please select your preferred date.', 'danger');
-                return;
-            }
-            if (!slot) {
-                showAlert('Please choose an available time slot.', 'danger');
-                return;
-            }
-
-            let cleanPhone = phone;
-            if (!cleanPhone.startsWith('+')) {
-                const digits = cleanPhone.replace(/\D/g, '');
-                if (digits.length === 10) {
-                    cleanPhone = '+91' + digits;
-                } else if (digits.length === 12 && digits.startsWith('91')) {
-                    cleanPhone = '+' + digits;
-                } else {
-                    cleanPhone = '+91' + digits;
-                }
-            }
-
-            // Button loading state
-            setBtnLoading(true);
-            hideAlert();
-
-            const csrfTokenElement = callForm.querySelector('[name=csrfmiddlewaretoken]');
-            const csrfToken = csrfTokenElement ? csrfTokenElement.value : (typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '');
-
-            fetch("{% url 'home:popup_book_call' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    full_name: name,
-                    phone_number: cleanPhone,
-                    booking_date: date,
-                    time_slot: slot,
-                    saree_preference: saree,
-                    payment_method: payMethod
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                setBtnLoading(false);
-                if (data.success) {
-                    // Success display for authenticated booking
-                    if (formContainer) formContainer.classList.add('d-none');
-                    if (successContainer) {
-                        successContainer.classList.remove('d-none');
-                        if (successRef) successRef.textContent = '#' + (data.booking_reference || data.booking_ref || '');
-                        if (successMsgText && data.message) successMsgText.textContent = data.message;
-                    }
-                    try { sessionStorage.setItem(sessionKey, 'true'); } catch (e) {}
-                } else if (data.login_required) {
-                    // Non-logged-in user submitted: stored in session, now redirect to login to finalize
-                    showAlert(data.message || 'Details saved! Redirecting to sign in to finalize your booking...', 'info');
-                    try {
-                        sessionStorage.setItem('pending_call_booking', JSON.stringify({
-                            full_name: name,
-                            phone_number: cleanPhone,
-                            booking_date: date,
-                            time_slot: slot,
-                            saree_preference: saree,
-                            payment_method: payMethod
-                        }));
-                    } catch (e) {}
-
-                    setTimeout(() => {
-                        window.location.href = data.redirect_url || '/accounts/login/?next=/accounts/complete-call-booking/';
-                    }, 800);
-                } else {
-                    showAlert(data.message || 'Unable to schedule booking. Please choose another slot.', 'danger');
-                }
-            })
-            .catch(err => {
-                setBtnLoading(false);
-                showAlert('An unexpected network error occurred. Please try again.', 'danger');
-                console.error(err);
-            });
-        });
-
-        function showAlert(msg, type) {
-            if (!alertBox) return;
-            alertBox.className = `alert alert-${type} mb-3 py-2 px-3 small`;
-            alertBox.textContent = msg;
-            alertBox.classList.remove('d-none');
-        }
-
-        function hideAlert() {
-            if (!alertBox) return;
-            alertBox.classList.add('d-none');
-            alertBox.textContent = '';
-        }
-
-        function setBtnLoading(isLoading) {
-            if (!submitBtn) return;
-            const textSpan = submitBtn.querySelector('.rss-btn-text');
-            const spinnerSpan = submitBtn.querySelector('.rss-btn-spinner');
-            submitBtn.disabled = isLoading;
-            if (isLoading) {
-                if (textSpan) textSpan.classList.add('d-none');
-                if (spinnerSpan) spinnerSpan.classList.remove('d-none');
-            } else {
-                if (textSpan) textSpan.classList.remove('d-none');
-                if (spinnerSpan) spinnerSpan.classList.add('d-none');
-            }
-        }
     }
 })();
 </script>
