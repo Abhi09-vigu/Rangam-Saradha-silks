@@ -259,7 +259,7 @@ custom_admin_site.register(HeroSlider, HeroSliderAdmin)
 custom_admin_site.register(OfferBanner, OfferBannerAdmin)
 custom_admin_site.register(Testimonial, TestimonialAdmin)
 custom_admin_site.register(CMSPage, CMSPageAdmin)
-custom_admin_site.register(FAQ, FAQAdmin)
+# custom_admin_site.register(FAQ, FAQAdmin)  # Removed from admin menu
 custom_admin_site.register(InstagramPost, InstagramPostAdmin)
 custom_admin_site.register(ContactMessage, ContactMessageAdmin)
 custom_admin_site.register(BudgetRange, BudgetRangeAdmin)

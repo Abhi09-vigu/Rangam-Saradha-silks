@@ -1,0 +1,1200 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Product Price Change | {{ site_title|default:_('Rangam Saradha Silk Sarees Admin') }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'custom_admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'custom_admin:app_list' app_label='shop' %}">Shop</a>
+    &rsaquo; Product Price Change
+</div>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --price-bg-dark: #14080e;
+        --price-panel-bg: #210813;
+        --price-card-bg: #2a0a19;
+        --price-border: #4a152d;
+        --price-accent-gold: #d4af37;
+        --price-accent-gold-hover: #e5c358;
+        --price-accent-magenta: #e91e63;
+        --price-accent-magenta-hover: #c2185b;
+        --price-text-light: #f5ebe6;
+        --price-text-muted: #c2abb5;
+        --price-input-bg: #18060f;
+        --price-input-border: #521832;
+        --price-success: #10b981;
+    }
+
+    body, #content {
+        background-color: var(--price-bg-dark) !important;
+        color: var(--price-text-light) !important;
+    }
+
+    .price-mgr-wrapper {
+        max-width: 1450px;
+        margin: 0 auto;
+        padding: 0.5rem 0 3rem 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Header Banner */
+    .price-header-banner {
+        background: linear-gradient(135deg, #320d1f 0%, #1c0612 100%);
+        border: 1px solid var(--price-border);
+        border-radius: 14px;
+        padding: 1.35rem 1.6rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .price-header-info {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+    .price-header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, var(--price-accent-gold) 0%, #8a5f0b 100%);
+        color: #14080e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        flex-shrink: 0;
+    }
+    .price-header-text h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: var(--price-text-light);
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+    .price-header-text p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.88rem;
+        color: var(--price-text-muted);
+    }
+
+    /* Filter & Search Form */
+    .filter-card {
+        background: var(--price-panel-bg);
+        border: 1px solid var(--price-border);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        flex: 1 1 185px;
+        min-width: 0;
+    }
+    .form-group-custom.grow-2 {
+        flex: 2 1 290px;
+    }
+    .form-label-custom {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--price-accent-gold);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0;
+    }
+
+    /* Input & Select Box Normalization */
+    .input-custom {
+        background-color: var(--price-input-bg) !important;
+        border: 1.5px solid var(--price-input-border) !important;
+        color: var(--price-text-light) !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        line-height: 44px !important;
+        padding: 0 0.95rem !important;
+        border-radius: 9px !important;
+        font-size: 0.92rem !important;
+        font-family: inherit !important;
+        font-weight: 500 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s ease !important;
+        display: block !important;
+    }
+    input[type="text"].input-custom,
+    input[type="number"].input-custom {
+        line-height: normal !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    .input-custom::placeholder {
+        color: #7a5a67 !important;
+        opacity: 1;
+    }
+    .input-custom:focus {
+        border-color: var(--price-accent-gold) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25) !important;
+        background-color: #200612 !important;
+    }
+
+    /* Select Boxes with Gold Arrow & Dark Dropdown */
+    select.input-custom {
+        padding: 0 2.5rem 0 0.95rem !important;
+        line-height: 42px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.85rem center !important;
+        background-size: 14px 14px !important;
+        cursor: pointer !important;
+        color-scheme: dark !important;
+    }
+    select.input-custom option {
+        background-color: #210813 !important;
+        color: #f5ebe6 !important;
+        padding: 10px 14px !important;
+    }
+
+    /* Action Buttons in Search */
+    .btn-search {
+        background: linear-gradient(135deg, var(--price-accent-gold) 0%, #b8860b 100%) !important;
+        color: #14080e !important;
+        border: none !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 0 1.4rem !important;
+        border-radius: 9px !important;
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.45rem !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25) !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+    }
+    .btn-search:hover {
+        background: linear-gradient(135deg, #e5c358 0%, #c4941d 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35) !important;
+    }
+    .btn-clear {
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: var(--price-text-muted) !important;
+        border: 1.5px solid var(--price-border) !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 0 1.1rem !important;
+        border-radius: 9px !important;
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.4rem !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+    }
+    .btn-clear:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: #fff !important;
+        border-color: var(--price-accent-gold) !important;
+    }
+
+    /* Quick Chips */
+    .sku-chips {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.85rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.82rem;
+        color: var(--price-text-muted);
+    }
+    .chip {
+        background: rgba(212, 175, 55, 0.12);
+        color: var(--price-accent-gold);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .chip:hover {
+        background: rgba(212, 175, 55, 0.25);
+        color: #fff;
+    }
+
+    /* Batch Panel (Bulk Price Update Option) */
+    .batch-panel {
+        background: linear-gradient(135deg, #2d0b1a 0%, #1f0713 100%);
+        border: 2px solid var(--price-accent-magenta);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 30px rgba(233, 30, 99, 0.2);
+    }
+    .batch-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(233, 30, 99, 0.25);
+    }
+    .batch-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--price-text-light);
+    }
+    .batch-badge {
+        background: rgba(233, 30, 99, 0.2);
+        color: #ff80ab;
+        border: 1px solid rgba(233, 30, 99, 0.4);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* Responsive 3-Column Inputs for Price Batch */
+    .batch-inputs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    @media (max-width: 900px) {
+        .batch-inputs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .input-with-prefix {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+    .input-prefix {
+        position: absolute;
+        left: 0.95rem;
+        color: var(--price-accent-gold);
+        font-weight: 700;
+        font-size: 0.95rem;
+        pointer-events: none;
+        z-index: 2;
+    }
+    .input-has-prefix {
+        padding-left: 2rem !important;
+    }
+
+    /* Batch Footer & Action Buttons */
+    .batch-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .batch-tip {
+        font-size: 0.82rem;
+        color: var(--price-text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1 1 300px;
+    }
+    .batch-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    .btn-apply-all {
+        background: linear-gradient(135deg, var(--price-accent-magenta) 0%, #ad1457 100%);
+        color: #fff !important;
+        border: none !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 0 1.6rem !important;
+        border-radius: 9px !important;
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        box-shadow: 0 4px 15px rgba(233, 30, 99, 0.35) !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+    }
+    .btn-apply-all:hover {
+        background: linear-gradient(135deg, #f06292 0%, #c2185b 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5) !important;
+    }
+    .btn-apply-selected {
+        background: linear-gradient(135deg, var(--price-accent-gold) 0%, #b8860b 100%);
+        color: #14080e !important;
+        border: none !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        padding: 0 1.4rem !important;
+        border-radius: 9px !important;
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+    }
+    .btn-apply-selected:hover:not(:disabled) {
+        background: linear-gradient(135deg, #e5c358 0%, #c4941d 100%) !important;
+        transform: translateY(-1px);
+    }
+    .btn-apply-selected:disabled {
+        opacity: 0.45 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+    }
+
+    /* Products Table Card */
+    .table-card {
+        background: var(--price-panel-bg);
+        border: 1px solid var(--price-border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    }
+    .table-toolbar {
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        border-bottom: 1px solid var(--price-border);
+        background: rgba(0, 0, 0, 0.15);
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .price-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+    .price-table th {
+        background: #250916;
+        color: var(--price-accent-gold);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.76rem;
+        letter-spacing: 0.06em;
+        padding: 0.95rem 1rem;
+        border-bottom: 2px solid var(--price-border);
+        white-space: nowrap;
+    }
+    .price-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        vertical-align: middle;
+    }
+    .price-table tr:hover {
+        background: rgba(233, 30, 99, 0.04);
+    }
+    .product-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--price-border);
+        background: #18060f;
+    }
+    .product-name-link {
+        color: var(--price-text-light);
+        font-weight: 700;
+        text-decoration: none;
+        display: block;
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: color 0.15s;
+    }
+    .product-name-link:hover {
+        color: var(--price-accent-gold);
+    }
+    .sku-badge {
+        background: #361022;
+        color: var(--price-accent-gold);
+        border: 1px solid #5a1c3b;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .stock-badge-in {
+        color: var(--price-success);
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .stock-badge-out {
+        color: #ef4444;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* Inline Quick Update Inputs */
+    .inline-price-input {
+        background: var(--price-input-bg) !important;
+        border: 1.5px solid var(--price-input-border) !important;
+        color: #fff !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        line-height: 38px !important;
+        padding: 0 0.65rem !important;
+        border-radius: 7px !important;
+        font-size: 0.88rem !important;
+        width: 110px !important;
+        font-weight: 600 !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s ease !important;
+    }
+    .inline-price-input:focus {
+        border-color: var(--price-accent-gold) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25) !important;
+    }
+    .btn-row-save {
+        background: linear-gradient(135deg, var(--price-accent-magenta) 0%, #ad1457 100%);
+        color: #fff !important;
+        border: none !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 0.95rem !important;
+        border-radius: 7px !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.35rem !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+    }
+    .btn-row-save:hover {
+        background: linear-gradient(135deg, #f06292 0%, #c2185b 100%) !important;
+        transform: translateY(-1px);
+    }
+    .btn-row-save.saved-success {
+        background: #10b981 !important;
+        color: #fff !important;
+    }
+
+    /* Toast Notification */
+    .price-toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #2a0a19;
+        border: 1.5px solid var(--price-accent-gold);
+        color: #fff;
+        padding: 0.9rem 1.4rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        z-index: 999999;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+    }
+    .price-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 3.5rem 1.5rem;
+        text-align: center;
+        color: var(--price-text-muted);
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--price-accent-gold);
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    @keyframes spinAnim {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .spin {
+        animation: spinAnim 1s linear infinite;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="price-mgr-wrapper">
+
+    <!-- Header Banner -->
+    <div class="price-header-banner">
+        <div class="price-header-info">
+            <div class="price-header-icon">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+            <div class="price-header-text">
+                <h1>
+                    Product Price Change
+                    <span style="font-size: 0.75rem; font-weight: 700; background: rgba(212, 175, 55, 0.15); color: var(--price-accent-gold); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.2rem 0.65rem; border-radius: 20px;">
+                        SKU Batch Manager
+                    </span>
+                </h1>
+                <p>Search any SKU code (e.g. <strong>RSS-SA</strong>) to update all related product prices simultaneously in one click.</p>
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'custom_admin:shop_product_changelist' %}" class="btn-clear" style="height: 42px; min-height: 42px; padding: 0 1.1rem;">
+                <i class="bi bi-arrow-left"></i> Back to All Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & SKU Search Card -->
+    <div class="filter-card">
+        <form method="GET" action="" class="filter-form" id="searchForm">
+            <div class="form-group-custom grow-2">
+                <label class="form-label-custom" for="skuInput"><i class="bi bi-upc-scan"></i> SKU Code / Search Term</label>
+                <input 
+                    type="text" 
+                    id="skuInput" 
+                    name="sku" 
+                    value="{{ search_term }}" 
+                    placeholder="Type SKU code e.g. RSS-SA or product name..." 
+                    class="input-custom"
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="matchType"><i class="bi bi-funnel-fill"></i> Match Method</label>
+                <select name="match_type" id="matchType" class="input-custom">
+                    <option value="contains" {% if match_type == 'contains' %}selected{% endif %}>Contains / Substring (Default)</option>
+                    <option value="startswith" {% if match_type == 'startswith' %}selected{% endif %}>Starts With Prefix (e.g. RSS-SA*)</option>
+                    <option value="exact" {% if match_type == 'exact' %}selected{% endif %}>Exact SKU Match</option>
+                </select>
+            </div>
+
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="categorySelect"><i class="bi bi-collection-fill"></i> Category</label>
+                <select name="category" id="categorySelect" class="input-custom">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="stockSelect"><i class="bi bi-box-seam-fill"></i> Stock Status</label>
+                <select name="stock_status" id="stockSelect" class="input-custom">
+                    <option value="">All Stock</option>
+                    <option value="in_stock" {% if selected_stock == 'in_stock' %}selected{% endif %}>In Stock (> 0)</option>
+                    <option value="out_of_stock" {% if selected_stock == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                <button type="submit" class="btn-search">
+                    <i class="bi bi-search"></i> Search SKU
+                </button>
+                {% if is_filtered %}
+                <a href="{% url 'custom_admin:shop_productpricechange_changelist' %}" class="btn-clear" title="Reset Filters">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Quick Chips Suggestions -->
+        <div class="sku-chips">
+            <span><i class="bi bi-lightning-charge-fill text-warning"></i> Quick SKU Searches:</span>
+            <a href="?sku=RSS-SA&match_type=contains" class="chip">RSS-SA (Contains)</a>
+            <a href="?sku=RSS-SA&match_type=startswith" class="chip">RSS-SA* (Prefix)</a>
+            <a href="?sku=KJM&match_type=contains" class="chip">KJM</a>
+            <a href="?sku=2345&match_type=contains" class="chip">2345</a>
+        </div>
+    </div>
+
+    <!-- Batch Price Update Card -->
+    {% if products %}
+    <div class="batch-panel">
+        <div class="batch-header">
+            <div class="batch-title">
+                <i class="bi bi-lightning-fill text-warning"></i>
+                <span>Bulk Price Update Option</span>
+                <span class="batch-badge">
+                    <i class="bi bi-check2-circle"></i> {{ total_count }} product{{ total_count|pluralize }} matching
+                    {% if search_term %} "{{ search_term }}"{% endif %}
+                </span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--price-text-muted);">
+                Change price for that SKU across all matching items at a time
+            </div>
+        </div>
+
+        <div class="batch-inputs-grid">
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="batchRegularPrice"><i class="bi bi-currency-rupee"></i> New Regular Price (MRP) *</label>
+                <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        min="1" 
+                        id="batchRegularPrice" 
+                        placeholder="2499.00" 
+                        class="input-custom input-has-prefix"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="batchOfferPrice"><i class="bi bi-tag-fill"></i> New Offer Price (Optional)</label>
+                <div class="input-with-prefix">
+                    <span class="input-prefix">₹</span>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        id="batchOfferPrice" 
+                        placeholder="1999.00" 
+                        class="input-custom input-has-prefix"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group-custom">
+                <label class="form-label-custom" for="batchDiscount"><i class="bi bi-percent"></i> Discount % (Optional)</label>
+                <div class="input-with-prefix">
+                    <span class="input-prefix">%</span>
+                    <input 
+                        type="number" 
+                        step="1" 
+                        min="0" 
+                        max="100" 
+                        id="batchDiscount" 
+                        placeholder="20" 
+                        class="input-custom input-has-prefix"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div class="batch-footer">
+            <div class="batch-tip">
+                <i class="bi bi-info-circle-fill text-warning"></i>
+                <span>Tip: Entering MRP &amp; Offer Price computes Discount %. Entering Discount % computes Offer Price.</span>
+            </div>
+            <div class="batch-actions">
+                <button type="button" id="btnApplySelected" class="btn-apply-selected" disabled onclick="handleApplySelected()">
+                    <i class="bi bi-check-all" style="font-size: 1.1rem;"></i> Update Selected (<span id="selectedCountLabel">0</span>)
+                </button>
+                <button type="button" id="btnApplyAll" class="btn-apply-all" onclick="handleApplyAll()">
+                    <i class="bi bi-lightning-charge-fill"></i> Update All {{ total_count }} Matching Products
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Products Table Card -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <div style="font-weight: 700; display: flex; align-items: center; gap: 0.6rem;">
+                <span>Matching Products</span>
+                <span style="background: rgba(255, 255, 255, 0.08); padding: 0.2rem 0.55rem; border-radius: 12px; font-size: 0.8rem;">
+                    {{ total_count }} item{{ total_count|pluralize }}
+                </span>
+            </div>
+            {% if products %}
+            <div style="font-size: 0.82rem; color: var(--price-text-muted);">
+                <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <input type="checkbox" id="checkAllBottom" onchange="toggleAllCheckboxes(this.checked)"> Select All
+                </label>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if products %}
+        <div class="table-responsive">
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this.checked)">
+                        </th>
+                        <th style="width: 60px;">Image</th>
+                        <th>SKU Code</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Current Price (MRP)</th>
+                        <th>Current Offer</th>
+                        <th>Stock</th>
+                        <th style="min-width: 290px;">Quick Change Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr id="row-product-{{ p.id }}">
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="product-checkbox" value="{{ p.id }}" onchange="updateSelectedState()">
+                        </td>
+                        <td>
+                            {% if p.image_url %}
+                            <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-thumb">
+                            {% else %}
+                            <div class="product-thumb" style="display: flex; align-items: center; justify-content: center; color: var(--price-text-muted); font-size: 1.2rem;">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="sku-badge">{{ p.sku }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ p.admin_change_url }}" target="_blank" class="product-name-link" title="Edit Product in Admin">
+                                {{ p.name }} <i class="bi bi-box-arrow-up-right" style="font-size: 0.72rem;"></i>
+                            </a>
+                        </td>
+                        <td style="color: var(--price-text-muted); font-size: 0.82rem;">
+                            {{ p.categories_str|default:"—" }}
+                        </td>
+                        <td style="font-weight: 700;">
+                            ₹<span id="curr-price-{{ p.id }}">{{ p.price|floatformat:2 }}</span>
+                        </td>
+                        <td style="font-weight: 700; color: #ff80ab;">
+                            ₹<span id="curr-offer-{{ p.id }}">{{ p.offer_price|floatformat:2 }}</span>
+                            {% if p.discount_percentage > 0 %}
+                            <span style="font-size: 0.74rem; background: rgba(233, 30, 99, 0.2); color: #ff80ab; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: 0.3rem;">
+                                -{{ p.discount_percentage }}%
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.stock > 0 %}
+                            <span class="stock-badge-in"><i class="bi bi-check-circle-fill"></i> {{ p.stock }} in stock</span>
+                            {% else %}
+                            <span class="stock-badge-out"><i class="bi bi-x-circle-fill"></i> Out of stock</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        id="inline-price-{{ p.id }}" 
+                                        value="{{ p.price|stringformat:'.2f' }}" 
+                                        class="inline-price-input" 
+                                        placeholder="MRP"
+                                        title="Regular Price (MRP)"
+                                    >
+                                </div>
+                                <div>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        id="inline-offer-{{ p.id }}" 
+                                        value="{{ p.offer_price|stringformat:'.2f' }}" 
+                                        class="inline-price-input" 
+                                        placeholder="Offer"
+                                        title="Offer Price"
+                                    >
+                                </div>
+                                <button type="button" id="btn-save-{{ p.id }}" class="btn-row-save" onclick="handleQuickSaveSingle({{ p.id }})">
+                                    <i class="bi bi-save"></i> Save
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-search"></i>
+            <h3 style="font-weight: 800; color: var(--price-text-light); margin-bottom: 0.5rem;">No products found</h3>
+            <p style="max-width: 480px; margin: 0 auto;">
+                {% if search_term %}
+                No products match the SKU code or query "<strong>{{ search_term }}</strong>". Try searching a different SKU prefix like <strong>RSS-SA</strong> or reset filters.
+                {% else %}
+                No products are currently in your shop. Add products through the catalog or bulk stock import first.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Toast Feedback -->
+<div id="priceToast" class="price-toast">
+    <i class="bi bi-check-circle-fill text-success" style="font-size: 1.3rem;"></i>
+    <span id="toastMessage">Price updated successfully!</span>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('priceToast');
+        const toastMsg = document.getElementById('toastMessage');
+        toastMsg.innerText = message;
+        if (isError) {
+            toast.style.borderColor = '#ef4444';
+            toast.querySelector('i').className = 'bi bi-exclamation-triangle-fill text-danger';
+        } else {
+            toast.style.borderColor = 'var(--price-accent-gold)';
+            toast.querySelector('i').className = 'bi bi-check-circle-fill text-success';
+        }
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+
+    const batchRegular = document.getElementById('batchRegularPrice');
+    const batchOffer = document.getElementById('batchOfferPrice');
+    const batchDisc = document.getElementById('batchDiscount');
+
+    if (batchRegular && batchOffer && batchDisc) {
+        batchRegular.addEventListener('input', function() {
+            recalculateOfferFromDiscount();
+        });
+
+        batchOffer.addEventListener('input', function() {
+            const reg = parseFloat(batchRegular.value);
+            const off = parseFloat(batchOffer.value);
+            if (!isNaN(reg) && reg > 0 && !isNaN(off) && off <= reg) {
+                const disc = Math.round(((reg - off) / reg) * 100);
+                batchDisc.value = disc >= 0 ? disc : 0;
+            }
+        });
+
+        batchDisc.addEventListener('input', function() {
+            recalculateOfferFromDiscount();
+        });
+
+        function recalculateOfferFromDiscount() {
+            const reg = parseFloat(batchRegular.value);
+            const disc = parseFloat(batchDisc.value);
+            if (!isNaN(reg) && reg > 0 && !isNaN(disc) && disc >= 0 && disc <= 100) {
+                const off = reg - (reg * disc / 100);
+                batchOffer.value = off.toFixed(2);
+            }
+        }
+    }
+
+    function toggleAllCheckboxes(checked) {
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        checkboxes.forEach(cb => cb.checked = checked);
+        const checkTop = document.getElementById('checkAll');
+        const checkBottom = document.getElementById('checkAllBottom');
+        if (checkTop) checkTop.checked = checked;
+        if (checkBottom) checkBottom.checked = checked;
+        updateSelectedState();
+    }
+
+    function updateSelectedState() {
+        const checked = document.querySelectorAll('.product-checkbox:checked');
+        const count = checked.length;
+        const btnSelected = document.getElementById('btnApplySelected');
+        const countLabel = document.getElementById('selectedCountLabel');
+        if (countLabel) countLabel.innerText = count;
+        if (btnSelected) {
+            btnSelected.disabled = (count === 0);
+        }
+    }
+
+    async function handleApplyAll() {
+        const regularVal = batchRegular.value.trim();
+        const offerVal = batchOffer.value.trim();
+        const discountVal = batchDisc.value.trim();
+
+        if (!regularVal || parseFloat(regularVal) <= 0) {
+            alert('Please enter a valid New Regular Price (MRP) greater than 0.');
+            batchRegular.focus();
+            return;
+        }
+
+        const totalCount = {{ total_count|default:0 }};
+        const searchTerm = "{{ search_term|escapejs }}";
+        const confirmMsg = searchTerm 
+            ? `Are you sure you want to change the price for ALL ${totalCount} products matching SKU "${searchTerm}" to ₹${parseFloat(regularVal).toFixed(2)}?`
+            : `Are you sure you want to change the price for ALL ${totalCount} products to ₹${parseFloat(regularVal).toFixed(2)}?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        const btn = document.getElementById('btnApplyAll');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Updating All...';
+
+        try {
+            const res = await fetch("{% url 'custom_admin:shop_productpricechange_update_batch' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    update_all_matching: true,
+                    search_term: searchTerm,
+                    match_type: "{{ match_type|escapejs }}",
+                    category: "{{ selected_category|escapejs }}",
+                    price: regularVal,
+                    offer_price: offerVal || null,
+                    discount_percentage: discountVal || null
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1200);
+            } else {
+                alert('Error updating prices: ' + (data.error || 'Unknown error'));
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    async function handleApplySelected() {
+        const checked = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => parseInt(cb.value));
+        if (checked.length === 0) {
+            alert('Please select at least one product using the checkboxes.');
+            return;
+        }
+
+        const regularVal = batchRegular.value.trim();
+        const offerVal = batchOffer.value.trim();
+        const discountVal = batchDisc.value.trim();
+
+        if (!regularVal || parseFloat(regularVal) <= 0) {
+            alert('Please enter a valid New Regular Price (MRP) greater than 0.');
+            batchRegular.focus();
+            return;
+        }
+
+        if (!confirm(`Update prices for ${checked.length} selected product(s) to ₹${parseFloat(regularVal).toFixed(2)}?`)) {
+            return;
+        }
+
+        const btn = document.getElementById('btnApplySelected');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Updating...';
+
+        try {
+            const res = await fetch("{% url 'custom_admin:shop_productpricechange_update_batch' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    update_all_matching: false,
+                    product_ids: checked,
+                    price: regularVal,
+                    offer_price: offerVal || null,
+                    discount_percentage: discountVal || null
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                checked.forEach(id => {
+                    const priceSpan = document.getElementById('curr-price-' + id);
+                    const offerSpan = document.getElementById('curr-offer-' + id);
+                    const inputPrice = document.getElementById('inline-price-' + id);
+                    const inputOffer = document.getElementById('inline-offer-' + id);
+
+                    if (priceSpan) priceSpan.innerText = parseFloat(data.new_price).toFixed(2);
+                    if (offerSpan) offerSpan.innerText = parseFloat(data.new_offer_price).toFixed(2);
+                    if (inputPrice) inputPrice.value = parseFloat(data.new_price).toFixed(2);
+                    if (inputOffer) inputOffer.value = parseFloat(data.new_offer_price).toFixed(2);
+                });
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    async function handleQuickSaveSingle(productId) {
+        const inputPrice = document.getElementById('inline-price-' + productId);
+        const inputOffer = document.getElementById('inline-offer-' + productId);
+        const btnSave = document.getElementById('btn-save-' + productId);
+
+        const newPrice = inputPrice.value.trim();
+        const newOffer = inputOffer.value.trim();
+
+        if (!newPrice || parseFloat(newPrice) <= 0) {
+            alert('Price must be greater than zero.');
+            inputPrice.focus();
+            return;
+        }
+
+        const originalHtml = btnSave.innerHTML;
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<i class="bi bi-arrow-repeat spin"></i>';
+
+        try {
+            const res = await fetch("{% url 'custom_admin:shop_productpricechange_quick_update' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    price: newPrice,
+                    offer_price: newOffer || null
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                const priceSpan = document.getElementById('curr-price-' + productId);
+                const offerSpan = document.getElementById('curr-offer-' + productId);
+                if (priceSpan) priceSpan.innerText = parseFloat(data.price).toFixed(2);
+                if (offerSpan) offerSpan.innerText = parseFloat(data.offer_price).toFixed(2);
+
+                btnSave.classList.add('saved-success');
+                btnSave.innerHTML = '<i class="bi bi-check-lg"></i> Saved!';
+                showToast(data.message);
+
+                setTimeout(() => {
+                    btnSave.classList.remove('saved-success');
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = originalHtml;
+                }, 2000);
+            } else {
+                alert('Error: ' + (data.error || 'Failed to save'));
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalHtml;
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+            btnSave.disabled = false;
+            btnSave.innerHTML = originalHtml;
+        }
+    }
+</script>
+{% endblock %}

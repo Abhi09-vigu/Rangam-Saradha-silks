@@ -762,11 +762,13 @@ class CallBookingAdmin(admin.ModelAdmin):
 
 
 from rangam_saradha_silk.admin import custom_admin_site
-from .models import BulkStockProduct
+from .models import BulkStockProduct, ProductPriceChange
 from .admin_bulk_stock import BulkStockAdmin
+from .admin_price_change import ProductPriceChangeAdmin
 
 custom_admin_site.register(Category, CategoryAdmin)
 custom_admin_site.register(Product, ProductAdmin)
+custom_admin_site.register(ProductPriceChange, ProductPriceChangeAdmin)
 custom_admin_site.register(BulkStockProduct, BulkStockAdmin)
 custom_admin_site.register(Review, ReviewAdmin)
 custom_admin_site.register(Coupon, CouponAdmin)

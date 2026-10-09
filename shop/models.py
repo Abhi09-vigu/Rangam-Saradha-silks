@@ -706,3 +706,10 @@ class BulkStockProductImage(models.Model):
 
 
 
+
+
+class ProductPriceChange(Product):
+    class Meta:
+        proxy = True
+        verbose_name = 'Product Price Change'
+        verbose_name_plural = 'Product Price Change'
